@@ -6,14 +6,6 @@ plebVPNConf="/home/admin/pleb-vpn/pleb-vpn.conf"
 source ${plebVPNConf}
 source /mnt/hdd/raspiblitz.conf
 
-# Cancel check function
-function cancel_check(){
-  if [[ -z "$1" ]]; then
-    echo "Cancelled"
-    /home/admin/00mainMenu.sh
-  fi
-}
-
 # BASIC MENU INFO
 WIDTH=66
 BACKTITLE="Pleb-VPN"
@@ -43,8 +35,6 @@ CHOICE=$(dialog --clear \
                 "${OPTIONS[@]}" \
                 2>&1 >/dev/tty)
 
-cancel_check $CHOICE
-
 case $CHOICE in
   STATUS)
     /home/admin/pleb-vpn/pleb-vpnStatusMenu.sh
@@ -62,8 +52,3 @@ case $CHOICE in
     /home/admin/pleb-vpn/pleb-vpnUpdateMenu.sh
     ;;
 esac
-
-exitCode=$?
-if [ "${exitCode}" = "0" ]; then
-  exit 0
-fi
