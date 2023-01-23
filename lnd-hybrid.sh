@@ -65,7 +65,7 @@ Node ID = ${nodeID}
 ${address0Type} address: ${address0}
 ${address1Type} address: ${address1}
 " 13 100
-    exit 0
+    /home/admin/pleb-vpn/pleb-vpnStatusMenu.sh
   else
     whiptail --title "Core Lightning status" --msgbox "
 Alias = ${nodeName}
@@ -73,7 +73,7 @@ Hybrid Mode = ${lndHybrid}
 Node ID = ${nodeID}
 ${address0Type} address: ${address0}
 " 12 100
-    exit 0
+    /home/admin/pleb-vpn/pleb-vpnStatusMenu.sh
   fi
 }
 

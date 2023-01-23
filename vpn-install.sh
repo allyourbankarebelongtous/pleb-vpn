@@ -48,7 +48,7 @@ Pleb-VPN installed: no
 Pleb-VPN config found: ${isConfig}
 Use menu to install Pleb-VPN.
 " 10 40
-    exit 0
+    /home/admin/pleb-vpn/pleb-vpnStatusMenu.sh
   else
     currentIP=$(curl https://api.ipify.org)
     sleep 5
@@ -104,7 +104,7 @@ Current IP (should match VPN server IP): ${currentIP}
 Firewall configuration OK: ${firewallOK}
 ${message}
 " 16 100
-    exit 0
+    /home/admin/pleb-vpn/pleb-vpnStatusMenu.sh
   fi
 }
 

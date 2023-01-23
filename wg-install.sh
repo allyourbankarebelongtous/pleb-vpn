@@ -77,7 +77,7 @@ WireGuard client 2 (laptop) IP: ${clientIPselect[1]}
 WireGuard client 3 (desktop) IP: ${clientIPselect[2]}
 ${message}
 " 16 85
-    exit 0
+    /home/admin/pleb-vpn/pleb-vpnStatusMenu.sh
   fi
 }
 
