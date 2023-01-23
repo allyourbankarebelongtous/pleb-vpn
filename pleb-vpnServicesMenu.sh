@@ -125,6 +125,6 @@ fi
 
 exitCode=$?
 if [ "${exitCode}" = "0" ]; then
-  /home/admin/pleb-vpn/pleb-vpnServicesMenu.sh
+  exit 0
 fi
 
