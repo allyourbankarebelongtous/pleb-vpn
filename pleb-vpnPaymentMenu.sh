@@ -53,3 +53,8 @@ case $CHOICE in
     /home/admin/pleb-vpn/payments/managepayments.sh deleteall
     ;;
 esac
+
+exitCode=$?
+if [ "${exitCode}" = "0" ]; then
+  exit 0
+fi
