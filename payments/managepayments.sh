@@ -240,13 +240,13 @@ Are you sure you want to delete all payments? This cannot be undone.
     sudo systemctl disable --now payments-yearly-cln.timer > /dev/null 2>&1 &
     sudo systemctl disable --now payments-yearly-lnd.service > /dev/null 2>&1 &
     sudo systemctl disable --now payments-yearly-lnd.timer > /dev/null 2>&1 &
-    sudo rm /etc/systemd/system/payments-*
+    sudo rm /etc/systemd/system/payments-* > /dev/null 2>&1 &
     # fix permissions on new files
     sudo chown -R admin:admin /home/admin/pleb-vpn/payments
     sudo chmod -R 755 /home/admin/pleb-vpn/payments
     sudo chown -R admin:admin /mnt/hdd/app-data/pleb-vpn/payments
     sudo chmod -R 755 /mnt/hdd/app-data/pleb-vpn/payments
-    if [ $? -eq 1 ]; then
+    if [ "$2" = "1" ]; then
       exit 0
     fi
     /home/admin/pleb-vpn/pleb-vpnPaymentMenu.sh
