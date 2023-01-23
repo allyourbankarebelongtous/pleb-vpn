@@ -65,5 +65,5 @@ esac
 
 exitCode=$?
 if [ "${exitCode}" = "0" ]; then
-  /home/admin/pleb-vpn/pleb-vpnMenu.sh
+  /home/admin/00mainMenu.sh
 fi
