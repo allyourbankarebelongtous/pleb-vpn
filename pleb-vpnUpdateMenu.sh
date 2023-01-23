@@ -9,7 +9,7 @@ source ${plebVPNConf}
 function cancel_check(){
   if [[ -z "$1" ]]; then
     echo "Cancelled"
-    exit 0
+    /home/admin/app-data/pleb-vpn/pleb-vpnMenu.sh
   fi
 }
 
@@ -51,11 +51,12 @@ your configurations and certs if you re-install at a later time.
       exit 0
     else
       /home/admin/pleb-vpn/pleb-vpn.install.sh uninstall
+      /home/admin/00mainMenu.sh
     fi
     ;;
 esac
 
 exitCode=$?
 if [ "${exitCode}" = "0" ]; then
-  /home/admin/pleb-vpn/pleb-vpnMenu.sh
+  /home/admin/pleb-vpn/pleb-vpnUpdateMenu.sh
 fi

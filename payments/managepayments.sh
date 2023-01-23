@@ -12,7 +12,6 @@ fi
 
 source /home/admin/pleb-vpn/pleb-vpn.conf
 source /mnt/hdd/raspiblitz.conf
-source /home/admin/pleb-vpn/payments/currentpayments.conf
 
 function dialog_menu()
 {

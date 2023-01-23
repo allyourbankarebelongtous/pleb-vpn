@@ -477,7 +477,7 @@ uninstall() {
   extraLine="/mnt/hdd/app-data/pleb-vpn/pleb-vpn.install.sh"
   lineExists=$(sudo cat /mnt/hdd/app-data/custom-installs.sh | grep -c ${extraLine})
   if ! [ ${lineExists} -eq "0" ]; then
-    sudo sed -i "s:^${extraLine}.*::/g"
+    sudo sed -i "s:^${extraLine}.*::g" /mnt/hdd/app-data/custom-installs.sh
   fi
   # delete files
   sudo rm -rf /mnt/hdd/app-data/pleb-vpn

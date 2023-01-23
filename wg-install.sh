@@ -119,7 +119,7 @@ download all three config files by chosing 'Download'" 12 80
     echo "PRESS ENTER when download is done."
     read key
   fi
-  exit 0
+  /home/admin/app-data/pleb-vpn/pleb-vpnMenu.sh
 }
 
 on() {
