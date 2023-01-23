@@ -152,7 +152,7 @@ on() {
 update() {
   sudo rm -rf /home/admin/pleb-vpn
   cd /home/admin
-  git clone https://github.com/allyourbankarebelongtous/Pleb-VPN.git
+  git clone https://github.com/allyourbankarebelongtous/pleb-vpn.git
   sudo cp -p -r /home/admin/pleb-vpn /mnt/hdd/app-data/
   # fix permissions
   sudo chown -R admin:admin /mnt/hdd/app-data/pleb-vpn
