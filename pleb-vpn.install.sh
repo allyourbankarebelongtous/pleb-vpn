@@ -12,8 +12,6 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   exit 1
 fi
 
-plebVPNConf="/home/admin/pleb-vpn/pleb-vpn.conf"
-
 function setting() # FILE LINENUMBER NAME VALUE
 {
   FILE=$1
@@ -64,6 +62,7 @@ on() {
 # LAN
 # plebVPN" | tee /mnt/hdd/app-data/pleb-vpn/pleb-vpn.conf
   sudo ln -s /mnt/hdd/app-data/pleb-vpn/pleb-vpn.conf /home/admin/pleb-vpn/pleb-vpn.conf
+  plebVPNConf="/home/admin/pleb-vpn/pleb-vpn.conf"
   # get initial values
   source <(/home/admin/_cache.sh get internet_localip)
   source <(/home/admin/config.scripts/network.aliases.sh getvars cl)
@@ -121,8 +120,11 @@ on() {
   sudo chmod -R 755 /mnt/hdd/app-data/pleb-vpn
   sudo chmod -R 755 /home/admin/pleb-vpn
   # make persistant with custom-installs.sh
-  echo "/mnt/hdd/app-data/pleb-vpn/pleb-vpn.install.sh restore
+  isPersistant=$(cat /mnt/hdd/app-data/custom-installs.sh | grep -c /mnt/hdd/app-data/pleb-vpn/pleb-vpn.install.sh)
+  if [ ${isPersistant} -eq 0 ]; then
+    echo "/mnt/hdd/app-data/pleb-vpn/pleb-vpn.install.sh restore
 " | sudo tee -a /mnt/hdd/app-data/custom-installs.sh
+  fi
   # add pleb-vpn to 00mainMenu.sh
   mainMenu="/home/admin/00mainMenu.sh"
   sectionName="# Activated Apps/Services"
@@ -165,6 +167,7 @@ update() {
 }
 
 restore() {
+  plebVPNConf="/home/admin/pleb-vpn/pleb-vpn.conf"
   # fix permissions
   sudo chown -R admin:admin /mnt/hdd/app-data/pleb-vpn
   sudo chmod -R 755 /mnt/hdd/app-data/pleb-vpn

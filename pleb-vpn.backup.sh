@@ -56,6 +56,7 @@ restore() {
   sudo chmod 644 /etc/ufw/sysctl.conf
   sudo chmod 644 /etc/ufw/ufw.conf
   sudo chmod 644 /etc/ufw/applications.d/*
+  sudo chown -R root:root /etc/ufw/
   sudo ufw --force enable
   # restore raspiblitz.conf
   sudo cp -p /mnt/hdd/app-data/pleb-vpn/.backups/raspiblitz.conf /mnt/hdd/
