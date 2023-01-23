@@ -141,7 +141,7 @@ on() {
   Line='        PLEB-VPN)'
   sudo sed -i "${insertLine}i${Line}" ${mainMenu}
   insertLine=$(expr $sectionLine + 3)
-  Line='            /home/admin/pleb-vpn/pleb-vpnMainMenu.sh'
+  Line='            /home/admin/pleb-vpn/pleb-vpnMenu.sh'
   sudo sed -i "${insertLine}i${Line}" ${mainMenu}
   insertLine=$(expr $sectionLine + 4)
   Line='            ;;'
