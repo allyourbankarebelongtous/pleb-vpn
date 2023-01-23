@@ -40,10 +40,10 @@ clear
 echo "dialogcancel(${dialogcancel})"
 if [ ${dialogcancel} -eq 1 ]; then
   echo "user canceled"
-  /home/admin/app-data/pleb-vpn/pleb-vpnMenu.sh
+  /home/admin/pleb-vpn/pleb-vpnMenu.sh
 elif [ ${dialogcancel} -eq 255 ]; then
   echo "ESC pressed"
-  /home/admin/app-data/pleb-vpn/pleb-vpnMenu.sh
+  /home/admin/pleb-vpn/pleb-vpnMenu.sh
 fi
 
 # plebVPN
