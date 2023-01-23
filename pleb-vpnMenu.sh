@@ -10,7 +10,7 @@ source /mnt/hdd/raspiblitz.conf
 function cancel_check(){
   if [[ -z "$1" ]]; then
     echo "Cancelled"
-    exit 0
+    /home/admin/00mainMenu.sh
   fi
 }
 
