@@ -150,8 +150,8 @@ on() {
 }
 
 update() {
-  cd /home/admin/pleb-vpn
-  git pull
+  sudo rm -rf /home/admin/pleb-vpn
+  git clone https://github.com/allyourbankarebelongtous/Pleb-VPN.git
   sudo cp -p -r /home/admin/pleb-vpn /mnt/hdd/app-data/
   # fix permissions
   sudo chown -R admin:admin /mnt/hdd/app-data/pleb-vpn
