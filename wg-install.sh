@@ -77,7 +77,7 @@ WireGuard client 2 (laptop) IP: ${clientIPselect[1]}
 WireGuard client 3 (desktop) IP: ${clientIPselect[2]}
 ${message}
 " 16 85
-    /home/admin/pleb-vpn/pleb-vpnStatusMenu.sh
+    exit 0
   fi
 }
 
@@ -119,7 +119,7 @@ download all three config files by chosing 'Download'" 12 80
     echo "PRESS ENTER when download is done."
     read key
   fi
-  /home/admin/app-data/pleb-vpn/pleb-vpnMenu.sh
+  exit 0
 }
 
 on() {
@@ -295,7 +295,7 @@ ${appstoreLink}\n
   sudo systemctl restart wg-quick@wg0
   # set wireguard on in pleb-vpn.conf
   setting ${plebVPNConf} "2" "wireguard" "on"
-  /home/admin/pleb-vpn/pleb-vpnServicesMenu.sh
+  exit 0
 }
 
 off() {
@@ -315,7 +315,7 @@ off() {
   sudo ufw delete allow out to ${wgLAN}.0/24
   # set wireguard off in pleb-vpn.conf
   setting ${plebVPNConf} "2" "wireguard" "off"
-  /home/admin/pleb-vpn/pleb-vpnServicesMenu.sh
+  exit 0
 }
 
 case "${1}" in
