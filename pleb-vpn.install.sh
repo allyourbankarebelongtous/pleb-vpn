@@ -40,7 +40,7 @@ on() {
   sudo chown -R admin:admin /home/admin/pleb-vpn
   sudo chmod -R 755 /mnt/hdd/app-data/pleb-vpn
   sudo chmod -R 755 /home/admin/pleb-vpn
-  # create pleb-vpn.conf
+  # create and simlink pleb-vpn.conf
   echo "# PlebVPN CONFIG FILE
 
 
@@ -61,6 +61,7 @@ on() {
 # lndConfFile
 # LAN
 # plebVPN" | tee /mnt/hdd/app-data/pleb-vpn/pleb-vpn.conf
+  sudo ln -s /mnt/hdd/app-data/pleb-vpn/pleb-vpn.conf /home/admin/pleb-vpn/pleb-vpn.conf
   # backup critical files and configs
   /home/admin/pleb-vpn/pleb-vpn.backup.sh backup
   # initialize payment files
@@ -105,8 +106,7 @@ on() {
   sudo chown -R admin:admin /home/admin/pleb-vpn
   sudo chmod -R 755 /mnt/hdd/app-data/pleb-vpn
   sudo chmod -R 755 /home/admin/pleb-vpn
-  # simlink and initialize pleb-vpn.conf
-  sudo ln -s /mnt/hdd/app-data/pleb-vpn/pleb-vpn.conf /home/admin/pleb-vpn/pleb-vpn.conf
+  # initialize pleb-vpn.conf
   plebVPNConf="/home/admin/pleb-vpn/pleb-vpn.conf"
   # get initial values
   source <(/home/admin/_cache.sh get internet_localip)
@@ -175,12 +175,12 @@ restore() {
   sudo rm -rf /mnt/hdd/app-data/pleb-vpn/.backups
   # copy files to /home/admin/pleb-vpn
   sudo cp -p -r /mnt/hdd/app-data/pleb-vpn/ /home/admin/
-  # fix permissions
-  sudo chown -R admin:admin /home/admin/pleb-vpn
-  sudo chmod -R 755 /home/admin/pleb-vpn
   # remove and simlink pleb-vpn.conf
   sudo rm /home/admin/pleb-vpn/pleb-vpn.conf
   sudo ln -s /mnt/hdd/app-data/pleb-vpn/pleb-vpn.conf /home/admin/pleb-vpn/pleb-vpn.conf
+  # fix permissions
+  sudo chown -R admin:admin /home/admin/pleb-vpn
+  sudo chmod -R 755 /home/admin/pleb-vpn
   # backup critical files and configs
   /home/admin/pleb-vpn/pleb-vpn.backup.sh backup
   # add pleb-vpn to 00mainMenu.sh
