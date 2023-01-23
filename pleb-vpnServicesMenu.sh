@@ -53,6 +53,7 @@ if [ "${plebVPN}" != "${choice}" ]; then
   echo "PlebVPN Setting changed .."
   anychange=1
   sudo -u admin /home/admin/pleb-vpn/vpn-install.sh ${choice}
+  source ${plebVPNConf}
   if [ "${choice}" =  "on" ]; then
     sudo -u admin /home/admin/pleb-vpn/vpn-install.sh status
   fi
@@ -67,6 +68,7 @@ if [ "${wireguard}" != "${choice}" ]; then
   echo "WireGuard Setting changed .."
   anychange=1
   sudo -u admin /home/admin/pleb-vpn/wg-install.sh ${choice}
+  source ${plebVPNConf}
   if [ "${choice}" =  "on" ]; then
     sudo -u admin /home/admin/pleb-vpn/wg-install.sh status
   fi
@@ -121,10 +123,5 @@ fi
 if [ ${anychange} -eq 0 ]; then
      dialog --msgbox "NOTHING CHANGED!\nUse Spacebar to check/uncheck services." 8 58
      /home/admin/pleb-vpn/pleb-vpnMenu.sh
-fi
-
-exitCode=$?
-if [ "${exitCode}" = "0" ]; then
-  exit 0
 fi
 
