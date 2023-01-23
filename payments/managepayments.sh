@@ -102,13 +102,11 @@ YEARLY PAYMENTS" >>/home/admin/pleb-vpn/payments/displaypayments.tmp
   done
   dialog --title "Current Scheduled Payments" --cr-wrap --textbox /home/admin/pleb-vpn/payments/displaypayments.tmp 40 100
   sudo rm /home/admin/pleb-vpn/payments/displaypayments.tmp
-  /home/admin/pleb-vpn/pleb-vpnPaymentMenu.sh
 fi
 
 # create new payment
 if [ "$1" = "newpayment" ]; then
   sudo /home/admin/pleb-vpn/payments/blitz.recurringpayment.sh
-  /home/admin/pleb-vpn/pleb-vpnPaymentMenu.sh
 fi
 
 # delete single payment
@@ -160,7 +158,6 @@ No payments found to delete.
     fi
     sudo rm /home/admin/pleb-vpn/payments/selectpayments.tmp
   fi
-  /home/admin/pleb-vpn/pleb-vpnPaymentMenu.sh
 fi
 
 # delete all payments and systemd files
@@ -249,9 +246,6 @@ Are you sure you want to delete all payments? This cannot be undone.
     if [ "$2" = "1" ]; then
       exit 0
     fi
-    /home/admin/pleb-vpn/pleb-vpnPaymentMenu.sh
-  else
-    /home/admin/pleb-vpn/pleb-vpnPaymentMenu.sh
   fi
 fi
 
