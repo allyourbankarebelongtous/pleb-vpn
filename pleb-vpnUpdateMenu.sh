@@ -51,6 +51,7 @@ your configurations and certs if you re-install at a later time.
       exit 0
     else
       /home/admin/pleb-vpn/pleb-vpn.install.sh uninstall
+    fi
     ;;
 esac
 
