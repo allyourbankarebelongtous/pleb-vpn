@@ -246,6 +246,9 @@ Are you sure you want to delete all payments? This cannot be undone.
     sudo chmod -R 755 /home/admin/pleb-vpn/payments
     sudo chown -R admin:admin /mnt/hdd/app-data/pleb-vpn/payments
     sudo chmod -R 755 /mnt/hdd/app-data/pleb-vpn/payments
+    if [ $? -eq 1 ]; then
+      exit 0
+    fi
     /home/admin/pleb-vpn/pleb-vpnPaymentMenu.sh
   else
     /home/admin/pleb-vpn/pleb-vpnPaymentMenu.sh
