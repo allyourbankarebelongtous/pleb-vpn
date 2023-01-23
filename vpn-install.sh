@@ -230,7 +230,7 @@ on() {
   sudo ufw --force enable
   setting ${plebVPNConf} "2" "plebVPN" "on"
   echo "OK ... plebvpn installed and configured!"
-  exit 0
+  /home/admin/pleb-vpn/pleb-vpnServicesMenu.sh
 }
 
 off() {
@@ -265,7 +265,7 @@ off() {
   setting ${plebVPNConf} "2" "vpnPort" "''"
   setting ${plebVPNConf} "2" "vpnIP" "''"
   setting ${plebVPNConf} "2" "plebVPN" "off"
-  exit 0
+  /home/admin/pleb-vpn/pleb-vpnServicesMenu.sh
 }
 
 case "${1}" in

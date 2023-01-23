@@ -295,7 +295,7 @@ ${appstoreLink}\n
   sudo systemctl restart wg-quick@wg0
   # set wireguard on in pleb-vpn.conf
   setting ${plebVPNConf} "2" "wireguard" "on"
-  exit 0
+  /home/admin/pleb-vpn/pleb-vpnServicesMenu.sh
 }
 
 off() {
@@ -315,7 +315,7 @@ off() {
   sudo ufw delete allow out to ${wgLAN}.0/24
   # set wireguard off in pleb-vpn.conf
   setting ${plebVPNConf} "2" "wireguard" "off"
-  exit 0
+  /home/admin/pleb-vpn/pleb-vpnServicesMenu.sh
 }
 
 case "${1}" in

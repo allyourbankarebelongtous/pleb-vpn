@@ -181,7 +181,7 @@ on() {
   fi
   # set lnd-hybrid on in pleb-vpn.conf
   setting ${plebVPNConf} "2" "lndHybrid" "on"
-  exit 0
+  /home/admin/pleb-vpn/pleb-vpnServicesMenu.sh
 }
 
 off() {
@@ -238,7 +238,7 @@ off() {
   sudo systemctl restart lnd 
   # set lnd-hybrid off in pleb-vpn.conf
   setting ${plebVPNConf} "2" "lndHybrid" "off"
-  exit 0
+  /home/admin/pleb-vpn/pleb-vpnServicesMenu.sh
 }
 
 case "${1}" in
