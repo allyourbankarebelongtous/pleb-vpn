@@ -65,7 +65,7 @@ Node ID = ${nodeID}
 ${address0Type} address: ${address0}
 ${address1Type} address: ${address1}
 " 13 100
-    /home/admin/pleb-vpn/pleb-vpnStatusMenu.sh
+    exit 0
   else
     whiptail --title "Core Lightning status" --msgbox "
 Alias = ${nodeName}
@@ -73,7 +73,7 @@ Hybrid Mode = ${lndHybrid}
 Node ID = ${nodeID}
 ${address0Type} address: ${address0}
 " 12 100
-    /home/admin/pleb-vpn/pleb-vpnStatusMenu.sh
+    exit 0
   fi
 }
 
@@ -181,7 +181,7 @@ on() {
   fi
   # set lnd-hybrid on in pleb-vpn.conf
   setting ${plebVPNConf} "2" "lndHybrid" "on"
-  /home/admin/pleb-vpn/pleb-vpnServicesMenu.sh
+  exit 0
 }
 
 off() {
@@ -238,7 +238,7 @@ off() {
   sudo systemctl restart lnd 
   # set lnd-hybrid off in pleb-vpn.conf
   setting ${plebVPNConf} "2" "lndHybrid" "off"
-  /home/admin/pleb-vpn/pleb-vpnServicesMenu.sh
+  exit 0
 }
 
 case "${1}" in
