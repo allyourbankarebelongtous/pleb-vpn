@@ -48,7 +48,7 @@ Pleb-VPN installed: no
 Pleb-VPN config found: ${isConfig}
 Use menu to install Pleb-VPN.
 " 10 40
-    /home/admin/pleb-vpn/pleb-vpnStatusMenu.sh
+    exit 0
   else
     currentIP=$(curl https://api.ipify.org)
     sleep 5
@@ -104,7 +104,7 @@ Current IP (should match VPN server IP): ${currentIP}
 Firewall configuration OK: ${firewallOK}
 ${message}
 " 16 100
-    /home/admin/pleb-vpn/pleb-vpnStatusMenu.sh
+    exit 0
   fi
 }
 
@@ -230,7 +230,7 @@ on() {
   sudo ufw --force enable
   setting ${plebVPNConf} "2" "plebVPN" "on"
   echo "OK ... plebvpn installed and configured!"
-  /home/admin/pleb-vpn/pleb-vpnServicesMenu.sh
+  exit 0
 }
 
 off() {
@@ -265,7 +265,7 @@ off() {
   setting ${plebVPNConf} "2" "vpnPort" "''"
   setting ${plebVPNConf} "2" "vpnIP" "''"
   setting ${plebVPNConf} "2" "plebVPN" "off"
-  /home/admin/pleb-vpn/pleb-vpnServicesMenu.sh
+  exit 0
 }
 
 case "${1}" in
