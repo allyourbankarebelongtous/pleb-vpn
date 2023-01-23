@@ -122,6 +122,6 @@ fi
 
 if [ ${anychange} -eq 0 ]; then
      dialog --msgbox "NOTHING CHANGED!\nUse Spacebar to check/uncheck services." 8 58
-     /home/admin/pleb-vpn/pleb-vpnMenu.sh
+     exit 0
 fi
 
