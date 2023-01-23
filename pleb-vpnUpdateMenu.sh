@@ -15,8 +15,8 @@ function cancel_check(){
 
 # BASIC MENU INFO
 WIDTH=66
-BACKTITLE="Payments"
-TITLE="Manage Recurring Payments"
+BACKTITLE="Update/Uninstall"
+TITLE="Update or Uninstall Pleb-VPN"
 MENU="Choose one of the following options:"
 OPTIONS=(UPDATE "Updates Pleb-VPN" \
          UNINSTALL "Completely remove Pleb-VPN")
@@ -58,5 +58,5 @@ esac
 
 exitCode=$?
 if [ "${exitCode}" = "0" ]; then
-  /home/admin/pleb-vpn/pleb-vpnUpdateMenu.sh
+  /home/admin/pleb-vpn/pleb-vpnMenu.sh
 fi
