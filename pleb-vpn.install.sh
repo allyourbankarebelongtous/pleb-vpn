@@ -40,7 +40,7 @@ on() {
   sudo chown -R admin:admin /home/admin/pleb-vpn
   sudo chmod -R 755 /mnt/hdd/app-data/pleb-vpn
   sudo chmod -R 755 /home/admin/pleb-vpn
-  # create, simlink and initialize pleb-vpn.conf
+  # create pleb-vpn.conf
   echo "# PlebVPN CONFIG FILE
 
 
@@ -61,20 +61,6 @@ on() {
 # lndConfFile
 # LAN
 # plebVPN" | tee /mnt/hdd/app-data/pleb-vpn/pleb-vpn.conf
-  sudo ln -s /mnt/hdd/app-data/pleb-vpn/pleb-vpn.conf /home/admin/pleb-vpn/pleb-vpn.conf
-  plebVPNConf="/home/admin/pleb-vpn/pleb-vpn.conf"
-  # get initial values
-  source <(/home/admin/_cache.sh get internet_localip)
-  source <(/home/admin/config.scripts/network.aliases.sh getvars cl)
-  source <(/home/admin/config.scripts/network.aliases.sh getvars lnd)
-  LAN=$(echo "${internet_localip}" | sed 's/^\(.*\)\.\(.*\)\.\(.*\)\.\(.*\)$/\1\.\2\.\3/g')
-  setting ${plebVPNConf} "2" "LndConfFile" "'${LndConfFile}'"
-  setting ${plebVPNConf} "2" "CLNConfFile" "'${CLCONF}'"
-  setting ${plebVPNConf} "2" "LAN" "'${LAN}'"
-  setting ${plebVPNConf} "2" "lndHybrid" "off"
-  setting ${plebVPNConf} "2" "clnHybrid" "off"
-  setting ${plebVPNConf} "2" "wireguard" "off"
-  setting ${plebVPNConf} "2" "plebVPN" "off"
   # backup critical files and configs
   /home/admin/pleb-vpn/pleb-vpn.backup.sh backup
   # initialize payment files
@@ -119,6 +105,21 @@ on() {
   sudo chown -R admin:admin /home/admin/pleb-vpn
   sudo chmod -R 755 /mnt/hdd/app-data/pleb-vpn
   sudo chmod -R 755 /home/admin/pleb-vpn
+  # simlink and initialize pleb-vpn.conf
+  sudo ln -s /mnt/hdd/app-data/pleb-vpn/pleb-vpn.conf /home/admin/pleb-vpn/pleb-vpn.conf
+  plebVPNConf="/home/admin/pleb-vpn/pleb-vpn.conf"
+  # get initial values
+  source <(/home/admin/_cache.sh get internet_localip)
+  source <(/home/admin/config.scripts/network.aliases.sh getvars cl)
+  source <(/home/admin/config.scripts/network.aliases.sh getvars lnd)
+  LAN=$(echo "${internet_localip}" | sed 's/^\(.*\)\.\(.*\)\.\(.*\)\.\(.*\)$/\1\.\2\.\3/g')
+  setting ${plebVPNConf} "2" "LndConfFile" "'${LndConfFile}'"
+  setting ${plebVPNConf} "2" "CLNConfFile" "'${CLCONF}'"
+  setting ${plebVPNConf} "2" "LAN" "'${LAN}'"
+  setting ${plebVPNConf} "2" "lndHybrid" "off"
+  setting ${plebVPNConf} "2" "clnHybrid" "off"
+  setting ${plebVPNConf} "2" "wireguard" "off"
+  setting ${plebVPNConf} "2" "plebVPN" "off"
   # make persistant with custom-installs.sh
   isPersistant=$(cat /mnt/hdd/app-data/custom-installs.sh | grep -c /mnt/hdd/app-data/pleb-vpn/pleb-vpn.install.sh)
   if [ ${isPersistant} -eq 0 ]; then
