@@ -10,7 +10,7 @@ source /mnt/hdd/raspiblitz.conf
 function cancel_check(){
   if [[ -z "$1" ]]; then
     echo "Cancelled"
-    exit 0
+    /home/admin/00mainMenu.sh
   fi
 }
 
@@ -37,7 +37,7 @@ CHOICE=$(dialog --clear \
                 --backtitle "$BACKTITLE" \
                 --title "$TITLE" \
                 --ok-label "Select" \
-                --cancel-label "Pleb-VPN menu" \
+                --cancel-label "Raspiblitz menu" \
                 --menu "$MENU" \
                 $HEIGHT $WIDTH $CHOICE_HEIGHT \
                 "${OPTIONS[@]}" \
