@@ -6,14 +6,6 @@ source /home/admin/raspiblitz.info
 source /mnt/hdd/raspiblitz.conf
 source /home/admin/pleb-vpn/pleb-vpn.conf
 
-# Cancel check function
-function cancel_check(){
-  if [[ -z "$1" ]]; then
-    echo "Cancelled"
-    /home/admin/pleb-vpn/pleb-vpnMenu.sh
-  fi
-}
-
 # BASIC MENU INFO
 WIDTH=66
 BACKTITLE="Payments"
@@ -37,8 +29,6 @@ CHOICE=$(dialog --clear \
                 "${OPTIONS[@]}" \
                 2>&1 >/dev/tty)
 
-cancel_check $CHOICE
-
 case $CHOICE in
   NEW)
     /home/admin/pleb-vpn/payments/managepayments.sh newpayment
@@ -53,8 +43,3 @@ case $CHOICE in
     /home/admin/pleb-vpn/payments/managepayments.sh deleteall
     ;;
 esac
-
-exitCode=$?
-if [ "${exitCode}" = "0" ]; then
-  exit 0
-fi
