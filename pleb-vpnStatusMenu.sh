@@ -10,7 +10,7 @@ source /mnt/hdd/raspiblitz.conf
 function cancel_check(){
   if [[ -z "$1" ]]; then
     echo "Cancelled"
-    /home/admin/pleb-vpn/pleb-vpnMenu.sh
+    exit 0
   fi
 }
 
@@ -64,5 +64,5 @@ esac
 
 exitCode=$?
 if [ "${exitCode}" = "0" ]; then
-  /home/admin/pleb-vpn/pleb-vpnStatusMenu.sh
+  exit 0
 fi
