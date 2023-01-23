@@ -82,6 +82,7 @@ restore() {
     sudo cp -p /mnt/hdd/app-data/pleb-vpn/.backups/config /home/bitcoin/.lightning/
     sudo chown bitcoin:bitcoin /home/bitcoin/.lightning/config
     sudo chmod 644 /home/bitcoin/.lightning/config
+  fi
   exit 0
 }
 

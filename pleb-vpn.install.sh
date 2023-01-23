@@ -139,13 +139,13 @@ on() {
   insertLine=$(expr $sectionLine + 2)
   echo "# insertLine(${insertLine})"
   Line='PLEB-VPN)'
-  sudo sed -i "${insertLine}i'        '${Line}" ${mainMenu}
+  sudo sed -i "${insertLine}i        ${Line}" ${mainMenu}
   insertLine=$(expr $sectionLine + 3)
   Line='/home/admin/pleb-vpn/pleb-vpnMenu.sh'
-  sudo sed -i "${insertLine}i'            '${Line}" ${mainMenu}
+  sudo sed -i "${insertLine}i            ${Line}" ${mainMenu}
   insertLine=$(expr $sectionLine + 4)
   Line=';;'
-  sudo sed -i "${insertLine}i'            '${Line}" ${mainMenu}
+  sudo sed -i "${insertLine}i            ${Line}" ${mainMenu}
   exit 0
 }
 
@@ -195,13 +195,13 @@ restore() {
   insertLine=$(expr $sectionLine + 2)
   echo "# insertLine(${insertLine})"
   Line='PLEB-VPN)'
-  sudo sed -i "${insertLine}i'        '${Line}" ${mainMenu}
+  sudo sed -i "${insertLine}i        ${Line}" ${mainMenu}
   insertLine=$(expr $sectionLine + 3)
   Line='/home/admin/pleb-vpn/pleb-vpnMenu.sh'
-  sudo sed -i "${insertLine}i'            '${Line}" ${mainMenu}
+  sudo sed -i "${insertLine}i            ${Line}" ${mainMenu}
   insertLine=$(expr $sectionLine + 4)
   Line=';;'
-  sudo sed -i "${insertLine}i'            '${Line}" ${mainMenu}
+  sudo sed -i "${insertLine}i            ${Line}" ${mainMenu}
   # step through pleb-vpn.conf and restore services
   source ${plebVPNConf}
   if [ "${plebVPN}" = "on" ]; then
@@ -476,23 +476,23 @@ uninstall() {
   # remove extra line from custom-installs if required
   extraLine="/mnt/hdd/app-data/pleb-vpn/pleb-vpn.install.sh"
   lineExists=$(sudo cat /mnt/hdd/app-data/custom-installs.sh | grep -c ${extraLine})
-  if ! [ ${lineExists} -eq "0" ]; then
+  if ! [ ${lineExists} -eq 0 ]; then
     sudo sed -i "s:^${extraLine}.*::g" /mnt/hdd/app-data/custom-installs.sh
   fi
   # remove extra lines from 00mainMenu.sh if required
   extraLine='OPTIONS+=(PLEB-VPN "Install and manage PLEB-VPN services")'
   lineExists=$(sudo cat /home/admin/00mainMenu.sh | grep -c ${extraLine})
-  if ! [ ${lineExists} -eq "0" ]; then
+  if ! [ ${lineExists} -eq 0 ]; then
     sudo sed -i "s:.*${extraLine}.*::g" /mnt/hdd/app-data/custom-installs.sh
   fi
   extraLine='PLEB-VPN)'
   lineExists=$(sudo cat /home/admin/00mainMenu.sh | grep -c ${extraLine})
-  if ! [ ${lineExists} -eq "0" ]; then
+  if ! [ ${lineExists} -eq 0 ]; then
     sudo sed -i "s:.*${extraLine}.*::g" /mnt/hdd/app-data/custom-installs.sh
   fi
   extraLine='/home/admin/pleb-vpn/pleb-vpnMenu.sh'
   lineExists=$(sudo cat /home/admin/00mainMenu.sh | grep -c ${extraLine})
-  if ! [ ${lineExists} -eq "0" ]; then
+  if ! [ ${lineExists} -eq 0 ]; then
     sectionLine=$(cat ${mainMenu} | grep -n "${extraLine}" | cut -d ":" -f1)
     nextLine=$(expr $sectionLine + 1)
     sudo sed -i "${nextLine}d" /mnt/hdd/app-data/custom-installs.sh

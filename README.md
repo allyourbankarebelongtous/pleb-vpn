@@ -25,6 +25,6 @@ Pleb-VPN.
 1. Exit to command line from the menu (you should be in directory /home/admin).
 2. From /home/admin, clone the repository `git clone https://github.com/allyourbankarebelongtous/pleb-vpn.git`
 3. Fix the permissions, run `sudo chmod -R 755 /home/admin/pleb-vpn`
-4. Run the install script `sudo /home/admin/pleb-vpn/pleb-vpn.install.sh on`
+4. Run the install script `/home/admin/pleb-vpn/pleb-vpn.install.sh on`
 
 Access Pleb-VPN from the menu and try it out!
