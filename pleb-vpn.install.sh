@@ -111,7 +111,7 @@ on() {
   source <(/home/admin/config.scripts/network.aliases.sh getvars cl)
   source <(/home/admin/config.scripts/network.aliases.sh getvars lnd)
   LAN=$(echo "${internet_localip}" | sed 's/^\(.*\)\.\(.*\)\.\(.*\)\.\(.*\)$/\1\.\2\.\3/g')
-  setting ${plebVPNConf} "2" "LndConfFile" "'${LndConfFile}'"
+  setting ${plebVPNConf} "2" "LndConfFile" "'${lndConfFile}'"
   setting ${plebVPNConf} "2" "CLNConfFile" "'${CLCONF}'"
   setting ${plebVPNConf} "2" "LAN" "'${LAN}'"
   setting ${plebVPNConf} "2" "lndHybrid" "off"
