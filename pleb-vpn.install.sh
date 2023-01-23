@@ -23,10 +23,10 @@ function setting() # FILE LINENUMBER NAME VALUE
   echo "# ${NAME} exists->(${settingExists})"
   if [ "${settingExists}" == "0" ]; then
     echo "# adding setting (${NAME})"
-    sudo sed -i "${LINENUMBER}i${NAME}=" ${FILE}
+    sudo sed -i --follow-symlinks "${LINENUMBER}i${NAME}=" ${FILE}
   fi
   echo "# updating setting (${NAME}) with value(${VALUE})"
-  sudo sed -i "s/^${NAME}=.*/${NAME}=${VALUE}/g" ${FILE}
+  sudo sed -i --follow-symlinks "s/^${NAME}=.*/${NAME}=${VALUE}/g" ${FILE}
 }
 
 on() {
@@ -40,7 +40,7 @@ on() {
   sudo chown -R admin:admin /home/admin/pleb-vpn
   sudo chmod -R 755 /mnt/hdd/app-data/pleb-vpn
   sudo chmod -R 755 /home/admin/pleb-vpn
-  # create and simlink pleb-vpn.conf
+  # create and symlink pleb-vpn.conf
   echo "# PlebVPN CONFIG FILE
 
 
@@ -61,7 +61,7 @@ on() {
 # lndConfFile
 # LAN
 # plebVPN" | tee /mnt/hdd/app-data/pleb-vpn/pleb-vpn.conf
-  sudo ln -s /mnt/hdd/app-data/pleb-vpn/pleb-vpn.conf /home/admin/pleb-vpn/pleb-vpn.conf
+  sudo ln -sf /mnt/hdd/app-data/pleb-vpn/pleb-vpn.conf /home/admin/pleb-vpn/pleb-vpn.conf
   # backup critical files and configs
   /home/admin/pleb-vpn/pleb-vpn.backup.sh backup
   # initialize payment files
@@ -99,8 +99,6 @@ on() {
 " > /home/admin/pleb-vpn/payments/yearlyclnpayments.sh
   sudo cp -p /home/admin/pleb-vpn/payments/*lndpayments.sh /mnt/hdd/app-data/pleb-vpn/payments/
   sudo cp -p /home/admin/pleb-vpn/payments/*clnpayments.sh /mnt/hdd/app-data/pleb-vpn/payments/
-  sudo mkdir /mnt/hdd/app-data/pleb-vpn/payments/keysends
-  sudo mkdir /home/admin/pleb-vpn/payments/keysends
   # fix permissions
   sudo chown -R admin:admin /mnt/hdd/app-data/pleb-vpn
   sudo chown -R admin:admin /home/admin/pleb-vpn
@@ -175,7 +173,7 @@ restore() {
   sudo rm -rf /mnt/hdd/app-data/pleb-vpn/.backups
   # copy files to /home/admin/pleb-vpn
   sudo cp -p -r /mnt/hdd/app-data/pleb-vpn/ /home/admin/
-  # remove and simlink pleb-vpn.conf
+  # remove and symlink pleb-vpn.conf
   sudo rm /home/admin/pleb-vpn/pleb-vpn.conf
   sudo ln -s /mnt/hdd/app-data/pleb-vpn/pleb-vpn.conf /home/admin/pleb-vpn/pleb-vpn.conf
   # fix permissions

@@ -10,8 +10,6 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   exit 1
 fi
 
-plebVPNConf="/mnt/hdd/app-data/pleb-vpn/pleb-vpn.conf"
-
 backup() {
   # backs up critical files to /mnt/hdd/app-data/pleb-vpn/.backups
   sudo mkdir /mnt/hdd/app-data/pleb-vpn/.backups
