@@ -65,38 +65,36 @@ on() {
   # backup critical files and configs
   /home/admin/pleb-vpn/pleb-vpn.backup.sh backup
   # initialize payment files
-  echo -n "#!/bin/bash
+  inc=1
+  while [ $inc -le 8 ]
+  do
+    if [ $inc -le 4 ]; then
+      node="lnd"
+    else
+      node="cln"
+    fi
+    if [ $((inc % 4)) -eq 1 ]; then
+      freq="daily"
+      description="at 00:00:00 UTC"
+    fi
+    if [ $((inc % 4)) -eq 2 ]; then
+      freq="weekly"
+      description="Sunday at 00:00:00 UTC"
+    fi
+    if [ $((inc % 4)) -eq 3 ]; then
+      freq="monthly"
+      description="1st of each month at 00:00:00 UTC"
+    fi
+    if [ $((inc % 4)) -eq 0 ]; then
+      freq="yearly"
+      description="1st of each year at 00:00:00 UTC"
+    fi
+    echo -n "#!/bin/bash
 
-# daily payments (at 00:00:00 UTC)
-" > /home/admin/pleb-vpn/payments/dailylndpayments.sh
-  echo -n "#!/bin/bash
-
-# daily payments (at 00:00:00 UTC)
-" > /home/admin/pleb-vpn/payments/weeklylndpayments.sh
-  echo -n "#!/bin/bash
-
-# monthly payments (1st of each month)
-" > /home/admin/pleb-vpn/payments/monthlylndpayments.sh
-  echo -n "#!/bin/bash
-
-# yearly payments (1st of January)
-" > /home/admin/pleb-vpn/payments/yearlylndpayments.sh
-  echo -n "#!/bin/bash
-
-# daily payments (at 00:00:00 UTC)
-" > /home/admin/pleb-vpn/payments/dailyclnpayments.sh
-  echo -n "#!/bin/bash
-
-# weekly payments (Sunday)
-" > /home/admin/pleb-vpn/payments/weeklyclnpayments.sh
-  echo -n "#!/bin/bash
-
-# monthly payments (1st of each month)
-" > /home/admin/pleb-vpn/payments/monthlyclnpayments.sh
-  echo -n "#!/bin/bash
-
-# yearly payments (1st of January)
-" > /home/admin/pleb-vpn/payments/yearlyclnpayments.sh
+# ${freq} payments ($description)
+" > /home/admin/pleb-vpn/payments/${freq}${node}lndpayments.sh
+    ((inc++))
+  done
   sudo cp -p /home/admin/pleb-vpn/payments/*lndpayments.sh /mnt/hdd/app-data/pleb-vpn/payments/
   sudo cp -p /home/admin/pleb-vpn/payments/*clnpayments.sh /mnt/hdd/app-data/pleb-vpn/payments/
   # fix permissions
@@ -219,28 +217,42 @@ restore() {
     /home/admin/pleb-vpn/wg-install.sh on 1
   fi
   # restore payment services
-  dailyLNDPaymentExists=$(cat /home/admin/pleb-vpn/payments/dailylndpayments.sh | grep -c keysend)
-  weeklyLNDPaymentExists=$(cat /home/admin/pleb-vpn/payments/weeklylndpayments.sh | grep -c keysend)
-  monthlyLNDPaymentExists=$(cat /home/admin/pleb-vpn/payments/monthlylndpayments.sh | grep -c keysend)
-  yearlyLNDPaymentExists=$(cat /home/admin/pleb-vpn/payments/yearlylndpayments.sh | grep -c keysend)
-  dailyCLNPaymentExists=$(cat /home/admin/pleb-vpn/payments/dailyclnpayments.sh | grep -c keysend)
-  weeklyCLNPaymentExists=$(cat /home/admin/pleb-vpn/payments/weeklyclnpayments.sh | grep -c keysend)
-  monthlyCLNPaymentExists=$(cat /home/admin/pleb-vpn/payments/monthlyclnpayments.sh | grep -c keysend)
-  yearlyCLNPaymentExists=$(cat /home/admin/pleb-vpn/payments/yearlyclnpayments.sh | grep -c keysend)
-  freq="daily"
-  node="lnd"
-  calendarCode="*-*-*"
-  if ! [ ${dailyLNDPaymentExists} -eq 0 ]; then
-  # create systemd timer and service
-    echo -n "[Unit]
+  inc=1
+  while [ $inc -le 8 ]
+  do
+    if [ $inc -le 4 ]; then
+      node="lnd"
+    else
+      node="cln"
+    fi
+    if [ $((inc % 4)) -eq 1 ]; then
+      freq="daily"
+      calendarCode="*-*-*"
+    fi
+    if [ $((inc % 4)) -eq 2 ]; then
+      freq="weekly"
+      calendarCode="Sun"
+    fi
+    if [ $((inc % 4)) -eq 3 ]; then
+      freq="monthly"
+      calendarCode="*-*-01"
+    fi
+    if [ $((inc % 4)) -eq 0 ]; then
+      freq="yearly"
+      calendarCode="*-01-01"
+    fi
+    paymentExists=$(cat /home/admin/pleb-vpn/payments/${freq}${node}payments.sh | grep -c keysend)
+    if ! [ ${paymentFile} -eq 0 ]; then
+      # create systemd timer and service
+      echo -n "[Unit]
 Description=Execute ${freq} payments
 
 [Service]
 User=bitcoin
 Group=bitcoin
 ExecStart=/bin/bash /home/admin/pleb-vpn/payments/${freq}${node}payments.sh" \
-    > /etc/systemd/system/payments-${freq}-${node}.service
-    echo -n "# this file will run ${freq} to execute any ${freq} recurring payments
+      > /etc/systemd/system/payments-${freq}-${node}.service
+      echo -n "# this file will run ${freq} to execute any ${freq} recurring payments
 [Unit]
 Description=Run recurring payments ${freq}
 
@@ -249,186 +261,12 @@ OnCalendar=${calendarCode}
 
 [Install]
 WantedBy=timers.target" \
-    > /etc/systemd/system/payments-${freq}-${node}.timer
-    sudo systemctl enable payments-${freq}-${node}.timer
-    sudo systemctl start payments-${freq}-${node}.timer
-  fi
-  freq="weekly"
-  calendarCode="Sun"
-  if ! [ ${weeklyLNDPaymentExists} -eq 0 ]; then
-  # create systemd timer and service
-    echo -n "[Unit]
-Description=Execute ${freq} payments
-
-[Service]
-User=bitcoin
-Group=bitcoin
-ExecStart=/bin/bash /home/admin/pleb-vpn/payments/${freq}${node}payments.sh" \
-    > /etc/systemd/system/payments-${freq}-${node}.service
-    echo -n "# this file will run ${freq} to execute any ${freq} recurring payments
-[Unit]
-Description=Run recurring payments ${freq}
-
-[Timer]
-OnCalendar=${calendarCode}
-
-[Install]
-WantedBy=timers.target" \
-    > /etc/systemd/system/payments-${freq}-${node}.timer
-    sudo systemctl enable payments-${freq}-${node}.timer
-    sudo systemctl start payments-${freq}-${node}.timer
-  fi
-  freq="monthly"
-  calendarCode="*-*-01"
-  if ! [ ${monthlyLNDPaymentExists} -eq 0 ]; then
-  # create systemd timer and service
-    echo -n "[Unit]
-Description=Execute ${freq} payments
-
-[Service]
-User=bitcoin
-Group=bitcoin
-ExecStart=/bin/bash /home/admin/pleb-vpn/payments/${freq}${node}payments.sh" \
-    > /etc/systemd/system/payments-${freq}-${node}.service
-    echo -n "# this file will run ${freq} to execute any ${freq} recurring payments
-[Unit]
-Description=Run recurring payments ${freq}
-
-[Timer]
-OnCalendar=${calendarCode}
-
-[Install]
-WantedBy=timers.target" \
-    > /etc/systemd/system/payments-${freq}-${node}.timer
-    sudo systemctl enable payments-${freq}-${node}.timer
-    sudo systemctl start payments-${freq}-${node}.timer
-  fi
-  freq="yearly"
-  calendarCode="*-01-01"
-  if ! [ ${yearlyLNDPaymentExists} -eq 0 ]; then
-  # create systemd timer and service
-    echo -n "[Unit]
-Description=Execute ${freq} payments
-
-[Service]
-User=bitcoin
-Group=bitcoin
-ExecStart=/bin/bash /home/admin/pleb-vpn/payments/${freq}${node}payments.sh" \
-    > /etc/systemd/system/payments-${freq}-${node}.service
-    echo -n "# this file will run ${freq} to execute any ${freq} recurring payments
-[Unit]
-Description=Run recurring payments ${freq}
-
-[Timer]
-OnCalendar=${calendarCode}
-
-[Install]
-WantedBy=timers.target" \
-    > /etc/systemd/system/payments-${freq}-${node}.timer
-    sudo systemctl enable payments-${freq}-${node}.timer
-    sudo systemctl start payments-${freq}-${node}.timer
-  fi
-  freq="daily"
-  node="cln"
-  calendarCode="*-*-*"
-  if ! [ ${dailyCLNPaymentExists} -eq 0 ]; then
-  # create systemd timer and service
-    echo -n "[Unit]
-Description=Execute ${freq} payments
-
-[Service]
-User=bitcoin
-Group=bitcoin
-ExecStart=/bin/bash /home/admin/pleb-vpn/payments/${freq}${node}payments.sh" \
-    > /etc/systemd/system/payments-${freq}-${node}.service
-    echo -n "# this file will run ${freq} to execute any ${freq} recurring payments
-[Unit]
-Description=Run recurring payments ${freq}
-
-[Timer]
-OnCalendar=${calendarCode}
-
-[Install]
-WantedBy=timers.target" \
-    > /etc/systemd/system/payments-${freq}-${node}.timer
-    sudo systemctl enable payments-${freq}-${node}.timer
-    sudo systemctl start payments-${freq}-${node}.timer
-  fi
-  freq="weekly"
-  calendarCode="Sun"
-  if ! [ ${weeklyCLNPaymentExists} -eq 0 ]; then
-  # create systemd timer and service
-    echo -n "[Unit]
-Description=Execute ${freq} payments
-
-[Service]
-User=bitcoin
-Group=bitcoin
-ExecStart=/bin/bash /home/admin/pleb-vpn/payments/${freq}${node}payments.sh" \
-    > /etc/systemd/system/payments-${freq}-${node}.service
-    echo -n "# this file will run ${freq} to execute any ${freq} recurring payments
-[Unit]
-Description=Run recurring payments ${freq}
-
-[Timer]
-OnCalendar=${calendarCode}
-
-[Install]
-WantedBy=timers.target" \
-    > /etc/systemd/system/payments-${freq}-${node}.timer
-    sudo systemctl enable payments-${freq}-${node}.timer
-    sudo systemctl start payments-${freq}-${node}.timer
-  fi
-  freq="monthly"
-  calendarCode="*-*-01"
-  if ! [ ${monthlyCLNPaymentExists} -eq 0 ]; then
-  # create systemd timer and service
-    echo -n "[Unit]
-Description=Execute ${freq} payments
-
-[Service]
-User=bitcoin
-Group=bitcoin
-ExecStart=/bin/bash /home/admin/pleb-vpn/payments/${freq}${node}payments.sh" \
-    > /etc/systemd/system/payments-${freq}-${node}.service
-    echo -n "# this file will run ${freq} to execute any ${freq} recurring payments
-[Unit]
-Description=Run recurring payments ${freq}
-
-[Timer]
-OnCalendar=${calendarCode}
-
-[Install]
-WantedBy=timers.target" \
-    > /etc/systemd/system/payments-${freq}-${node}.timer
-    sudo systemctl enable payments-${freq}-${node}.timer
-    sudo systemctl start payments-${freq}-${node}.timer
-  fi
-  freq="yearly"
-  calendarCode="*-01-01"
-  if ! [ ${yearlyCLNPaymentExists} -eq 0 ]; then
-  # create systemd timer and service
-    echo -n "[Unit]
-Description=Execute ${freq} payments
-
-[Service]
-User=bitcoin
-Group=bitcoin
-ExecStart=/bin/bash /home/admin/pleb-vpn/payments/${freq}${node}payments.sh" \
-    > /etc/systemd/system/payments-${freq}-${node}.service
-    echo -n "# this file will run ${freq} to execute any ${freq} recurring payments
-[Unit]
-Description=Run recurring payments ${freq}
-
-[Timer]
-OnCalendar=${calendarCode}
-
-[Install]
-WantedBy=timers.target" \
-    > /etc/systemd/system/payments-${freq}-${node}.timer
-    sudo systemctl enable payments-${freq}-${node}.timer
-    sudo systemctl start payments-${freq}-${node}.timer
-  fi
+      > /etc/systemd/system/payments-${freq}-${node}.timer
+      sudo systemctl enable payments-${freq}-${node}.timer
+      sudo systemctl start payments-${freq}-${node}.timer
+    fi
+    ((inc++))
+  done
   exit 0
 }
 

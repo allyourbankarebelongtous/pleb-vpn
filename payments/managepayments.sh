@@ -31,133 +31,48 @@ function getpaymentinfo()
   sudo touch /home/admin/pleb-vpn/payments/selectpayments.tmp
   sudo chmod 777 /home/admin/pleb-vpn/payments/selectpayments.tmp
   echo "PAYMENTS=()" >/home/admin/pleb-vpn/payments/selectpayments.tmp
-  dailyLNDPayments=$(cat /home/admin/pleb-vpn/payments/dailylndpayments.sh | grep keysend)
-  weeklyLNDPayments=$(cat /home/admin/pleb-vpn/payments/weeklylndpayments.sh | grep keysend)
-  monthlyLNDPayments=$(cat /home/admin/pleb-vpn/payments/monthlylndpayments.sh | grep keysend)
-  yearlyLNDPayments=$(cat /home/admin/pleb-vpn/payments/yearlylndpayments.sh | grep keysend)
-  dailyCLNPayments=$(cat /home/admin/pleb-vpn/payments/dailyclnpayments.sh | grep keysend)
-  weeklyCLNPayments=$(cat /home/admin/pleb-vpn/payments/weeklyclnpayments.sh | grep keysend)
-  monthlyCLNPayments=$(cat /home/admin/pleb-vpn/payments/monthlyclnpayments.sh | grep keysend)
-  yearlyCLNPayments=$(cat /home/admin/pleb-vpn/payments/yearlyclnpayments.sh | grep keysend)
-  dailyLNDNumPayments=$(echo "${dailyLNDPayments}" | grep -c keysend)
-  weeklyLNDNumPayments=$(echo "${weeklyLNDPayments}" | grep -c keysend)
-  monthlyLNDNumPayments=$(echo "${monthlyLNDPayments}" | grep -c keysend)
-  yearlyLNDNumPayments=$(echo "${yearlyLNDPayments}" | grep -c keysend)
-  dailyCLNNumPayments=$(echo "${dailyCLNPayments}" | grep -c keysend)
-  weeklyCLNNumPayments=$(echo "${weeklyCLNPayments}" | grep -c keysend)
-  monthlyCLNNumPayments=$(echo "${monthlyCLNPayments}" | grep -c keysend)
-  yearlyCLNNumPayments=$(echo "${yearlyCLNPayments}" | grep -c keysend)
   inc=1
-  freq="daily"
-  node="lnd"
-  echo "PAYMENT_ID                                     DESTINATION                                   AMOUNT--DENOMINATION
+  while [ $inc -le 8 ]
+  do
+    if [ $((inc % 2)) -eq 1 ]; then
+      node="lnd"
+    else
+      node="cln"
+    fi
+    if [ $inc -le 2 ]; then
+      freq="daily"
+      FREQ="DAILY"
+    fi
+    if [ $inc -gt 2 ] && [ $inc -le 4 ]; then
+      freq="weekly"
+      FREQ="WEEKLY"
+    fi
+    if [ $inc -gt 4 ] && [ $inc -le 6 ]; then
+      freq="monthly"
+      FREQ="MONTHLY"
+    fi
+    if [ $inc -gt 6 ]; then
+      freq="yearly"
+      FREQ="YEARLY"
+    fi
+    currentPayments=$(cat /home/admin/pleb-vpn/payments/${freq}${node}payments.sh | grep keysend)
+    currentNumPayments=$(cat /home/admin/pleb-vpn/payments/${freq}${node}payments.sh | grep -c keysend)
+    inc1=1
+    if [ $((inc % 2)) -eq 1 ]; then
+      echo "PAYMENT_ID                                     DESTINATION                                   AMOUNT--DENOMINATION
 
-DAILY PAYMENTS" >>/home/admin/pleb-vpn/payments/displaypayments.tmp
-  while [ $inc -le $dailyLNDNumPayments ]
-  do
-    short_node_id=$(cat $(echo "${dailyLNDPayments}" | sed -n "${inc}p") | awk '{print $6}' | cut -c 1-7)
-    value=$(cat $(echo "${dailyLNDPayments}" | sed -n "${inc}p") | awk '{print $4 $3}')
-    paymentInfo=$(cat $(echo "${dailyLNDPayments}" | sed -n "${inc}p") | awk '{print "\t" $6 "\t" $4 $3}')
-    echo "${short_node_id}_${freq}_${node}${paymentInfo}" | tee -a /home/admin/pleb-vpn/payments/displaypayments.tmp
-    echo "PAYMENTS+=(${short_node_id}_${freq}_${node}" | tee -a /home/admin/pleb-vpn/payments/selectpayments.tmp
-    sudo sed -i "s/${short_node_id}_${freq}_${node}.*/${short_node_id}_${freq}_${node} \"send to ${short_node_id} ${value} ${freq} from ${node}\"\)/g" /home/admin/pleb-vpn/payments/selectpayments.tmp
-    ((inc++))
-  done
-  inc=1
-  freq="daily"
-  node="cln"
-  while [ $inc -le $dailyCLNNumPayments ]
-  do
-    short_node_id=$(cat $(echo "${dailyCLNPayments}" | sed -n "${inc}p") | awk '{print $6}' | cut -c 1-7)
-    value=$(cat $(echo "${dailyCLNPayments}" | sed -n "${inc}p") | awk '{print $4 $3}')
-    paymentInfo=$(cat $(echo "${dailyCLNPayments}" | sed -n "${inc}p") | awk '{print "\t" $6 "\t" $4 $3}')
-    echo "${short_node_id}_${freq}_${node}${paymentInfo}" | tee -a /home/admin/pleb-vpn/payments/displaypayments.tmp
-    echo "PAYMENTS+=(${short_node_id}_${freq}_${node}" | tee -a /home/admin/pleb-vpn/payments/selectpayments.tmp
-    sudo sed -i "s/${short_node_id}_${freq}_${node}.*/${short_node_id}_${freq}_${node} \"send to ${short_node_id} ${value} ${freq} from ${node}\"\)/g" /home/admin/pleb-vpn/payments/selectpayments.tmp
-    ((inc++))
-  done
-  inc=1
-  freq="weekly"
-  node="lnd"
-  echo "
-WEEKLY PAYMENTS" >>/home/admin/pleb-vpn/payments/displaypayments.tmp
-  while [ $inc -le $weeklyLNDNumPayments ]
-  do
-    short_node_id=$(cat $(echo "${weeklyLNDPayments}" | sed -n "${inc}p") | awk '{print $6}' | cut -c 1-7)
-    value=$(cat $(echo "${weeklyLNDPayments}" | sed -n "${inc}p") | awk '{print $4 $3}')
-    paymentInfo=$(cat $(echo "${weeklyLNDPayments}" | sed -n "${inc}p") | awk '{print "\t" $6 "\t" $4 $3}')
-    echo "${short_node_id}_${freq}_${node}${paymentInfo}" | tee -a /home/admin/pleb-vpn/payments/displaypayments.tmp
-    echo "PAYMENTS+=(${short_node_id}_${freq}_${node}" | tee -a /home/admin/pleb-vpn/payments/selectpayments.tmp
-    sudo sed -i "s/${short_node_id}_${freq}_${node}.*/${short_node_id}_${freq}_${node} \"send to ${short_node_id} ${value} ${freq} from ${node}\"\)/g" /home/admin/pleb-vpn/payments/selectpayments.tmp
-    ((inc++))
-  done
-  inc=1
-  freq="weekly"
-  node="cln"
-  while [ $inc -le $weeklyCLNNumPayments ]
-  do
-    short_node_id=$(cat $(echo "${weeklyCLNPayments}" | sed -n "${inc}p") | awk '{print $6}' | cut -c 1-7)
-    value=$(cat $(echo "${weeklyCLNPayments}" | sed -n "${inc}p") | awk '{print $4 $3}')
-    paymentInfo=$(cat $(echo "${weeklyCLNPayments}" | sed -n "${inc}p") | awk '{print "\t" $6 "\t" $4 $3}')
-    echo "${short_node_id}_${freq}_${node}${paymentInfo}" | tee -a /home/admin/pleb-vpn/payments/displaypayments.tmp
-    echo "PAYMENTS+=(${short_node_id}_${freq}_${node}" | tee -a /home/admin/pleb-vpn/payments/selectpayments.tmp
-    sudo sed -i "s/${short_node_id}_${freq}_${node}.*/${short_node_id}_${freq}_${node} \"send to ${short_node_id} ${value} ${freq} from ${node}\"\)/g" /home/admin/pleb-vpn/payments/selectpayments.tmp
-    ((inc++))
-  done
-  inc=1
-  freq="monthly"
-  node="lnd"
-  echo "
-MONTHLY PAYMENTS" >>/home/admin/pleb-vpn/payments/displaypayments.tmp
-  while [ $inc -le $monthlyLNDNumPayments ]
-  do
-    short_node_id=$(cat $(echo "${monthlyLNDPayments}" | sed -n "${inc}p") | awk '{print $6}' | cut -c 1-7)
-    value=$(cat $(echo "${monthlyLNDPayments}" | sed -n "${inc}p") | awk '{print $4 $3}')
-    paymentInfo=$(cat $(echo "${monthlyLNDPayments}" | sed -n "${inc}p") | awk '{print "\t" $6 "\t" $4 $3}')
-    echo "${short_node_id}_${freq}_${node}${paymentInfo}" | tee -a /home/admin/pleb-vpn/payments/displaypayments.tmp
-    echo "PAYMENTS+=(${short_node_id}_${freq}_${node}" | tee -a /home/admin/pleb-vpn/payments/selectpayments.tmp
-    sudo sed -i "s/${short_node_id}_${freq}_${node}.*/${short_node_id}_${freq}_${node} \"send to ${short_node_id} ${value} ${freq} from ${node}\"\)/g" /home/admin/pleb-vpn/payments/selectpayments.tmp
-    ((inc++))
-  done
-  inc=1
-  freq="monthly"
-  node="cln"
-  while [ $inc -le $monthlyCLNNumPayments ]
-  do
-    short_node_id=$(cat $(echo "${monthlyCLNPayments}" | sed -n "${inc}p") | awk '{print $6}' | cut -c 1-7)
-    value=$(cat $(echo "${monthlyCLNPayments}" | sed -n "${inc}p") | awk '{print $4 $3}')
-    paymentInfo=$(cat $(echo "${monthlyCLNPayments}" | sed -n "${inc}p") | awk '{print "\t" $6 "\t" $4 $3}')
-    echo "${short_node_id}_${freq}_${node}${paymentInfo}" | tee -a /home/admin/pleb-vpn/payments/displaypayments.tmp
-    echo "PAYMENTS+=(${short_node_id}_${freq}_${node}" | tee -a /home/admin/pleb-vpn/payments/selectpayments.tmp
-    sudo sed -i "s/${short_node_id}_${freq}_${node}.*/${short_node_id}_${freq}_${node} \"send to ${short_node_id} ${value} ${freq} from ${node}\"\)/g" /home/admin/pleb-vpn/payments/selectpayments.tmp
-    ((inc++))
-  done
-  inc=1
-  freq="yearly"
-  node="lnd"
-  echo "
-YEARLY PAYMENTS" >>/home/admin/pleb-vpn/payments/displaypayments.tmp
-  while [ $inc -le $yearlyLNDNumPayments ]
-  do
-    short_node_id=$(cat $(echo "${yearlyLNDPayments}" | sed -n "${inc}p") | awk '{print $6}' | cut -c 1-7)
-    value=$(cat $(echo "${yearlyLNDPayments}" | sed -n "${inc}p") | awk '{print $4 $3}')
-    paymentInfo=$(cat $(echo "${yearlyLNDPayments}" | sed -n "${inc}p") | awk '{print "\t" $6 "\t" $4 $3}')
-    echo "${short_node_id}_${freq}_${node}${paymentInfo}" | tee -a /home/admin/pleb-vpn/payments/displaypayments.tmp
-    echo "PAYMENTS+=(${short_node_id}_${freq}_${node}" | tee -a /home/admin/pleb-vpn/payments/selectpayments.tmp
-    sudo sed -i "s/${short_node_id}_${freq}_${node}.*/${short_node_id}_${freq}_${node} \"send to ${short_node_id} ${value} ${freq} from ${node}\"\)/g" /home/admin/pleb-vpn/payments/selectpayments.tmp
-    ((inc++))
-  done
-  inc=1
-  freq="yearly"
-  node="cln"
-  while [ $inc -le $yearlyCLNNumPayments ]
-  do
-    short_node_id=$(cat $(echo "${yearlyCLNPayments}" | sed -n "${inc}p") | awk '{print $6}' | cut -c 1-7)
-    value=$(cat $(echo "${yearlyCLNPayments}" | sed -n "${inc}p") | awk '{print $4 $3}')
-    paymentInfo=$(cat $(echo "${yearlyCLNPayments}" | sed -n "${inc}p") | awk '{print "\t" $6 "\t" $4 $3}')
-    echo "${short_node_id}_${freq}_${node}${paymentInfo}" | tee -a /home/admin/pleb-vpn/payments/displaypayments.tmp
-    echo "PAYMENTS+=(${short_node_id}_${freq}_${node}" | tee -a /home/admin/pleb-vpn/payments/selectpayments.tmp
-    sudo sed -i "s/${short_node_id}_${freq}_${node}.*/${short_node_id}_${freq}_${node} \"send to ${short_node_id} ${value} ${freq} from ${node}\"\)/g" /home/admin/pleb-vpn/payments/selectpayments.tmp
+${FREQ} PAYMENTS" >>/home/admin/pleb-vpn/payments/displaypayments.tmp
+    fi
+    while [ $inc1 -le $currentNumPayments ]
+    do
+      short_node_id=$(cat $(echo "${currentPayments}" | sed -n "${inc1}p") | awk '{print $6}' | cut -c 1-7)
+      value=$(cat $(echo "${currentPayments}" | sed -n "${inc1}p") | awk '{print $4 $3}')
+      paymentInfo=$(cat $(echo "${currentPayments}" | sed -n "${inc1}p") | awk '{print "\t" $6 "\t" $4 $3}')
+      echo "${short_node_id}_${freq}_${node}${paymentInfo}" | tee -a /home/admin/pleb-vpn/payments/displaypayments.tmp
+      echo "PAYMENTS+=(${short_node_id}_${freq}_${node}" | tee -a /home/admin/pleb-vpn/payments/selectpayments.tmp
+      sudo sed -i "s/${short_node_id}_${freq}_${node}.*/${short_node_id}_${freq}_${node} \"send to ${short_node_id} ${value} ${freq} from ${node}\"\)/g" /home/admin/pleb-vpn/payments/selectpayments.tmp
+      ((inc1++))
+    done
     ((inc++))
   done
 }
