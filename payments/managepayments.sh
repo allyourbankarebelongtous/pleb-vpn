@@ -164,7 +164,7 @@ YEARLY PAYMENTS" >>/home/admin/pleb-vpn/payments/displaypayments.tmp
 # view payments
 if [ "$1" = "status" ]; then
   getpaymentinfo
-  dialog --title "Current Scheduled Payments" --cr-wrap --textbox /home/admin/pleb-vpn/payments/displaypayments.tmp 40 100
+  dialog --title "Current Scheduled Payments" --cr-wrap --textbox /home/admin/pleb-vpn/payments/displaypayments.tmp 35 120
   sudo rm /home/admin/pleb-vpn/payments/displaypayments.tmp
   sudo rm /home/admin/pleb-vpn/payments/selectpayments.tmp
 fi
