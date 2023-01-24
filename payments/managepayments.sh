@@ -31,8 +31,7 @@ function getpaymentinfo()
   sudo touch /home/admin/pleb-vpn/payments/selectpayments.tmp
   sudo chmod 777 /home/admin/pleb-vpn/payments/selectpayments.tmp
   echo "PAYMENTS=()" >/home/admin/pleb-vpn/payments/selectpayments.tmp
-  echo "PAYMENT_ID                                     DESTINATION                                   AMOUNT--DENOMINATION
-" >>/home/admin/pleb-vpn/payments/displaypayments.tmp
+  echo "PAYMENT_ID                                     DESTINATION                                   AMOUNT--DENOMINATION" >>/home/admin/pleb-vpn/payments/displaypayments.tmp
   inc=1
   while [ $inc -le 8 ]
   do
@@ -61,7 +60,8 @@ function getpaymentinfo()
     currentNumPayments=$(cat /home/admin/pleb-vpn/payments/${freq}${node}payments.sh | grep -c keysend)
     inc1=1
     if [ $((inc % 2)) -eq 1 ]; then
-      echo "${FREQ} PAYMENTS" >>/home/admin/pleb-vpn/payments/displaypayments.tmp
+      echo "
+${FREQ} PAYMENTS" >>/home/admin/pleb-vpn/payments/displaypayments.tmp
     fi
     while [ $inc1 -le $currentNumPayments ]
     do
