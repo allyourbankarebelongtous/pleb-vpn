@@ -50,7 +50,7 @@ function getpaymentinfo()
   inc=1
   freq="daily"
   node="lnd"
-  echo "PAYMENT_ID                                       DESTINATION                                     AMOUNT--DENOMINATION
+  echo "PAYMENT_ID                                     DESTINATION                                   AMOUNT--DENOMINATION
 DAILY PAYMENTS" >>/home/admin/pleb-vpn/payments/displaypayments.tmp
   while [ $inc -le $dailyLNDNumPayments ]
   do
