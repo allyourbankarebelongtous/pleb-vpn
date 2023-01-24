@@ -179,10 +179,7 @@ Description=Execute ${freq} payments
 [Service]
 User=bitcoin
 Group=bitcoin
-ExecStart=/bin/bash /home/admin/pleb-vpn/payments/${freq}${node}payments.sh
-
-[Install]
-WantedBy=multi-user.target" \
+ExecStart=/bin/bash /home/admin/pleb-vpn/payments/${freq}${node}payments.sh" \
     > /etc/systemd/system/payments-${freq}-${node}.service
   echo -n "# this file will run ${freq} to execute any ${freq} recurring payments
 [Unit]
@@ -198,7 +195,6 @@ fi
 
 # enable and start service and timer
 sudo systemctl enable payments-${freq}-${node}.timer
-sudo systemctl enable payments-${freq}-${node}.service
 sudo systemctl start payments-${freq}-${node}.timer
 
 
