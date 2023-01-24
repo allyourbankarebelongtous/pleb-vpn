@@ -38,7 +38,6 @@ status() {
 WireGuard installed: no
 Use menu to install wireguard.
 " 10 40
-    exit 0
   else
     checkwgIP=$(ip addr | grep wg0 | grep inet | cut -d " " -f6 | cut -d "/" -f1)
     isConfig=$(sudo ls /etc/wireguard | grep -c wg0.conf)
@@ -77,8 +76,8 @@ WireGuard client 2 (laptop) IP: ${clientIPselect[1]}
 WireGuard client 3 (desktop) IP: ${clientIPselect[2]}
 ${message}
 " 16 85
-    exit 0
   fi
+  exit 0
 }
 
 connect() {
