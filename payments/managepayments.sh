@@ -109,7 +109,7 @@ WEEKLY PAYMENTS" >>/home/admin/pleb-vpn/payments/displaypayments.tmp
   node="lnd"
   echo "
 MONTHLY PAYMENTS" >>/home/admin/pleb-vpn/payments/displaypayments.tmp
-  while [ $inc -le $nonthlyLNDNumPayments ]
+  while [ $inc -le $monthlyLNDNumPayments ]
   do
     short_node_id=$(cat $(echo "${monthlyLNDPayments}" | sed -n "${inc}p") | awk '{print $6}' | cut -c 1-7)
     value=$(cat $(echo "${monthlyLNDPayments}" | sed -n "${inc}p") | awk '{print $4 $3}')
@@ -122,7 +122,7 @@ MONTHLY PAYMENTS" >>/home/admin/pleb-vpn/payments/displaypayments.tmp
   inc=1
   freq="monthly"
   node="cln"
-  while [ $inc -le $nonthlyCLNNumPayments ]
+  while [ $inc -le $monthlyCLNNumPayments ]
   do
     short_node_id=$(cat $(echo "${monthlyCLNPayments}" | sed -n "${inc}p") | awk '{print $6}' | cut -c 1-7)
     value=$(cat $(echo "${monthlyCLNPayments}" | sed -n "${inc}p") | awk '{print $4 $3}')
