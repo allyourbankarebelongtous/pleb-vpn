@@ -229,6 +229,7 @@ restore() {
   yearlyCLNPaymentExists=$(cat /home/admin/pleb-vpn/payments/yearlyclnpayments.sh | grep -c keysend)
   freq="daily"
   node="lnd"
+  calendarCode="*-*-*"
   if ! [ ${dailyLNDPaymentExists} -eq 0 ]; then
   # create systemd timer and service
     echo -n "[Unit]
@@ -253,6 +254,7 @@ WantedBy=timers.target" \
     sudo systemctl start payments-${freq}-${node}.timer
   fi
   freq="weekly"
+  calendarCode="Sun"
   if ! [ ${weeklyLNDPaymentExists} -eq 0 ]; then
   # create systemd timer and service
     echo -n "[Unit]
@@ -277,6 +279,7 @@ WantedBy=timers.target" \
     sudo systemctl start payments-${freq}-${node}.timer
   fi
   freq="monthly"
+  calendarCode="*-*-01"
   if ! [ ${monthlyLNDPaymentExists} -eq 0 ]; then
   # create systemd timer and service
     echo -n "[Unit]
@@ -301,6 +304,7 @@ WantedBy=timers.target" \
     sudo systemctl start payments-${freq}-${node}.timer
   fi
   freq="yearly"
+  calendarCode="*-01-01"
   if ! [ ${yearlyLNDPaymentExists} -eq 0 ]; then
   # create systemd timer and service
     echo -n "[Unit]
@@ -326,6 +330,7 @@ WantedBy=timers.target" \
   fi
   freq="daily"
   node="cln"
+  calendarCode="*-*-*"
   if ! [ ${dailyCLNPaymentExists} -eq 0 ]; then
   # create systemd timer and service
     echo -n "[Unit]
@@ -350,6 +355,7 @@ WantedBy=timers.target" \
     sudo systemctl start payments-${freq}-${node}.timer
   fi
   freq="weekly"
+  calendarCode="Sun"
   if ! [ ${weeklyCLNPaymentExists} -eq 0 ]; then
   # create systemd timer and service
     echo -n "[Unit]
@@ -374,6 +380,7 @@ WantedBy=timers.target" \
     sudo systemctl start payments-${freq}-${node}.timer
   fi
   freq="monthly"
+  calendarCode="*-*-01"
   if ! [ ${monthlyCLNPaymentExists} -eq 0 ]; then
   # create systemd timer and service
     echo -n "[Unit]
@@ -398,6 +405,7 @@ WantedBy=timers.target" \
     sudo systemctl start payments-${freq}-${node}.timer
   fi
   freq="yearly"
+  calendarCode="*-01-01"
   if ! [ ${yearlyCLNPaymentExists} -eq 0 ]; then
   # create systemd timer and service
     echo -n "[Unit]
