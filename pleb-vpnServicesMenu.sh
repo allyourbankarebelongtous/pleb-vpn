@@ -84,14 +84,13 @@ if [ "${clnHybrid}" != "${choice}" ]; then
   anychange=1
   sudo -u admin /home/admin/pleb-vpn/cln-hybrid.sh ${choice}
   source <(/home/admin/_cache.sh get ln_default_locked)
-  if [ "${clEncryptedHSM}" = "on" ]; then
+  if [ "${clEncryptedHSM}" = "off" ]; then
     # wait until wallet unlocked
     echo "waiting for wallet unlock (takes some time)..."
-    sleep 30
+    sleep 40
   else
     /home/admin/config.scripts/cl.hsmtool.sh unlock
-    echo "waiting for wallet unlock (takes some time)..."
-    sleep 50
+    sleep 5
   fi
   sudo -u admin /home/admin/pleb-vpn/cln-hybrid.sh status
 else
