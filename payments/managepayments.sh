@@ -168,11 +168,13 @@ if [ "$1" = "status" ]; then
   dialog --title "Current Scheduled Payments" --cr-wrap --textbox /home/admin/pleb-vpn/payments/displaypayments.tmp 35 120
   sudo rm /home/admin/pleb-vpn/payments/displaypayments.tmp
   sudo rm /home/admin/pleb-vpn/payments/selectpayments.tmp
+  exit 0
 fi
 
 # create new payment
 if [ "$1" = "newpayment" ]; then
   sudo /home/admin/pleb-vpn/payments/blitz.recurringpayment.sh
+  exit 0
 fi
 
 # delete single payment
@@ -209,10 +211,10 @@ No payments found to delete.
     sudo rm /home/admin/pleb-vpn/payments/selectpayments.tmp
     sudo rm /home/admin/pleb-vpn/payments/displaypayments.tmp
   fi
+  exit 0
 fi
 
 # delete all payments and systemd files
-
 if [ "$1" = "deleteall" ]; then
   if ! [ "$2" = "1" ]; then
     whiptail --title "Delete All Payments" --yes-button "Cancel" --no-button "Delete All" --yesno "
@@ -286,9 +288,7 @@ Are you sure you want to delete all payments? This cannot be undone.
     sudo chmod -R 755 /home/admin/pleb-vpn/payments
     sudo chown -R admin:admin /mnt/hdd/app-data/pleb-vpn/payments
     sudo chmod -R 755 /mnt/hdd/app-data/pleb-vpn/payments
-    if [ "$2" = "1" ]; then
-      exit 0
-    fi
   fi
+  exit 0
 fi
 
