@@ -26,8 +26,6 @@ CHOICE=$(dialog --clear \
                 "${OPTIONS[@]}" \
                 2>&1 >/dev/tty)
 
-cancel_check $CHOICE
-
 case $CHOICE in
   UPDATE)
     /home/admin/pleb-vpn/pleb-vpn.install.sh update

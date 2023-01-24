@@ -433,6 +433,7 @@ WantedBy=timers.target" \
 }
 
 uninstall() {
+  plebVPNConf="/home/admin/pleb-vpn/pleb-vpn.conf"
   source ${plebVPNConf}
   # first uninstall services
   if [ "${lndHybrid}" = "on" ]; then
@@ -453,23 +454,23 @@ uninstall() {
   /home/admin/pleb-vpn/pleb-vpn.backup.sh restore
   # remove extra line from custom-installs if required
   extraLine="/mnt/hdd/app-data/pleb-vpn/pleb-vpn.install.sh"
-  lineExists=$(sudo cat /mnt/hdd/app-data/custom-installs.sh | grep -c ${extraLine})
+  lineExists=$(sudo cat /mnt/hdd/app-data/custom-installs.sh | grep -c "${extraLine}")
   if ! [ ${lineExists} -eq 0 ]; then
     sudo sed -i "s:^${extraLine}.*::g" /mnt/hdd/app-data/custom-installs.sh
   fi
   # remove extra lines from 00mainMenu.sh if required
   extraLine='OPTIONS+=(PLEB-VPN "Install and manage PLEB-VPN services")'
-  lineExists=$(sudo cat /home/admin/00mainMenu.sh | grep -c ${extraLine})
+  lineExists=$(sudo cat /home/admin/00mainMenu.sh | grep -c "${extraLine}")
   if ! [ ${lineExists} -eq 0 ]; then
     sudo sed -i "s:.*${extraLine}.*::g" /mnt/hdd/app-data/custom-installs.sh
   fi
   extraLine='PLEB-VPN)'
-  lineExists=$(sudo cat /home/admin/00mainMenu.sh | grep -c ${extraLine})
+  lineExists=$(sudo cat /home/admin/00mainMenu.sh | grep -c "${extraLine}")
   if ! [ ${lineExists} -eq 0 ]; then
     sudo sed -i "s:.*${extraLine}.*::g" /mnt/hdd/app-data/custom-installs.sh
   fi
   extraLine='/home/admin/pleb-vpn/pleb-vpnMenu.sh'
-  lineExists=$(sudo cat /home/admin/00mainMenu.sh | grep -c ${extraLine})
+  lineExists=$(sudo cat /home/admin/00mainMenu.sh | grep -c "${extraLine}")
   if ! [ ${lineExists} -eq 0 ]; then
     sectionLine=$(cat ${mainMenu} | grep -n "${extraLine}" | cut -d ":" -f1)
     nextLine=$(expr $sectionLine + 1)
