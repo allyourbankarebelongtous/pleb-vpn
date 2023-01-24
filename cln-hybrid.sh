@@ -128,9 +128,11 @@ on() {
   " | sudo tee -a ${CLNConfFile}
   fi
   echo "# sectionLine(${sectionLine})"
-  isBindaddr=$(cat ${CLNConfFile} | grep -c "bind-addr=0.0.0.0:${CLNPort}")
+  isBindaddr=$(cat ${CLNConfFile} | grep -c "bind-addr=0.0.0.0:")
   if [ ${isBindaddr} -eq 0 ]; then
     sudo sed -i "${insertLine}ibind-addr=0.0.0.0:${CLNPort}" ${CLNConfFile}
+  else
+    sudo sed -i "s/bind-addr=0\.0\.0\.0:.*/bind-addr=0\.0\.0\.0:${CLNPort}/" ${CLNConfFile}
   fi
   setting ${CLNConfFile} ${insertLine} "announce-addr" "${vpnIP}:${CLNPort}"
   # restart CLN (skip this step on restore)
