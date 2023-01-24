@@ -29,7 +29,7 @@ CHOICE=$(dialog --clear \
                 --backtitle "$BACKTITLE" \
                 --title "$TITLE" \
                 --ok-label "Select" \
-                --cancel-label "Raspiblitz menu" \
+                --cancel-label "Main menu" \
                 --menu "$MENU" \
                 $HEIGHT $WIDTH $CHOICE_HEIGHT \
                 "${OPTIONS[@]}" \
