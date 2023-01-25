@@ -68,12 +68,12 @@ both). Pleb-VPN configures the node such that if the VPS goes offline you will
 not accidentally release your home IP (called a killswitch).
 
 Pleb-VPN also provides easy Raspiblitz menu access to install and configure WireGuard,
-a private VPN service that will run through the VPS encrypted end-to-end from the
+a private VPN service that will run through the VPS, encrypted end-to-end from the
 Raspiblitz to any client connected to the blitz that you configure, giving you 
 a secure, simulated LAN that allows you to securely access all features of your
-Raspiblitz as if you were home, from anywhere in the world. This feature is entirely
-set up locally on the Raspiblitz, so even if you are sharing a VPS with someone you 
-don't know, they'll never get access to your Raspiblitz.
+Raspiblitz as if you were home from anywhere in the world. This feature is entirely
+set up locally on the Raspiblitz, so **even if you are sharing a VPS with someone you 
+don't know, they'll never get access to your Raspiblitz.**
 
 Finally, Pleb-VPN comes with the ability to automatically send recurring payments 
 over lightning via keysend. _(credit to m00ninite's excellent scripts, found here: 
@@ -88,27 +88,30 @@ Good question. It's really not that much different. TunnelSats uses one or more
 shared servers and provides you with a cert to connect to them, only it uses WireGuard
 instead of OpenVPN for the connection. TunnelSats has an advantage in that it
 split-tunnels tor and clearnet, so if the VPN server drops offline you still have
-tor, Pleb-VPN does not. TunnelSats is also available for other node implementations.
-However, Pleb-VPN is cheaper, and encourages Plebs to collaborate to make the lightning
-network more decentralized (less reliance on one or two providers) and more robust
-(more hybrid/clearnet nodes).
+tor, Pleb-VPN does not (it's in the works). TunnelSats is also available for other node implementations 
+easily, like Umbrel or MyNode. However, Pleb-VPN is cheaper, and encourages Plebs to 
+collaborate to make the lightning network more decentralized (less reliance on one or 
+two providers) and more robust (more hybrid/clearnet nodes). Plus, it comes with a private
+VPN already integrated (although, full discosure, TunnelSats with ZeroTier as a private VPN 
+is a very solid setup as well).
 
 **How secure is this**  
 It's as secure as any VPN. The OpenVPN encryption is AES-256-CBC, and WireGuard uses
 Curve25519 point multiplication as its primary method of private key/public key
-encryption. The owner of the VPS (this is true regardless of if you run it yourself
-or if you share) _will_ know your home IP address. They will _NOT_ have access to
-your LAN, your WireGuard virtual LAN, or your Raspiblitz itself. A bonus of sharing
-a VPS is that there is no KYC required...the only knowledge the VPS owner will have
+encryption. The owner of the VPS (this is true regardless of if you run it yourself,
+or if you share, or if you use TunnelSats) _will_ know your home IP address. They will _NOT_ 
+have access to your LAN, your WireGuard virtual LAN, or your Raspiblitz itself. A bonus of 
+sharing a VPS is that there is no KYC required...the only knowledge the VPS owner will have
 that the rest of the world doesn't have is your home IP address.
 
 **Can I use this on an Umbrel/MyNode/Raspibolt/etc implementation?**  
 Sort of. The actual software here on GitHub is only for Raspiblitz, but if you
 can find a guide to install OpenVPN and take your node clearnet on your own nothing
 is stopping you from contacting @allyourbankarebelongtous or anyone else willing to
-share a VPS and paying them a small fee to gain a clearnet IP and a couple of forwarded
+share a VPS and paying them a small monthly fee to gain a clearnet IP and a couple of forwarded
 ports. You will have to figure out how to change the port LND or Core Lightning uses 
-to talk to the outside world with as well. There are numerous guides on how to do this.
+to talk to the outside world and how to implement hybrid mode or clearnet yourself. 
+There are numerous guides on how to do this.
 
 **I want to update my node. What do I need to do?**  
 Update like normal according to Raspiblitz instructions. Pleb-VPN will automatically
