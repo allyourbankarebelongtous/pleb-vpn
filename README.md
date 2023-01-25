@@ -241,7 +241,7 @@ need to enable ssl encryption, but you can anyways if you download the cert and 
 it on your phone. You will need to re-create the cert first to ensure it includes your 
 WireGuard IP). Here's a screenshot of me accessing the blitz api via wireguard on my
 phone using the 10.0.0.0 IP shown above:
-![BlitzAPIWireGuardAccess](pictures/blitzapiwireguardaccess.png)
+![BlitzAPIWireGuardAccess](pictures/blitzapiwireguardaccess1.png)
 
 ### Recurring Payments
 Lastly, let's check out payments. Payments were included in this to encourage VPS 
