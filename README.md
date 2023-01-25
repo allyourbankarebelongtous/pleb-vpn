@@ -267,10 +267,10 @@ each time it sends. The PAYMENTS menu has four sections:
 NEW - lets you create a new recurring payment  
 VIEW - displays all current active payments and their schedule  
 DELETE - allows you to select a payment from among all of them and delete it  
-DELTEALL - deletes all payments  
+DELTE-ALL - deletes all payments  
 
 The process of scheduling a new payment is self-explanatory, but for fun here's what 
-it looks like on a Raspiblitz that has two nodes running.
+it looks like on a Raspiblitz that has two nodes running on it.
 
 After selecting new, the script asks what denomination to use:  
 ![ChooseDenomination](pictures/choosedenomination.png)
@@ -309,16 +309,20 @@ node is down during a payment send time, the node will attempt to send the payme
 10 times, and if it doesn't get a successful return after that, that payment _will NOT
 send again_ until you manually re-enable the payment. To re-enable payments you can
 reboot the Raspiblitz (easiest), or manually start them using systemd commands to 
-restart the timers. To manually send an individual missed payment you can run the keysend 
-scripts that are saved in /home/admin/pleb-vpn/payments/keysends, or to send all payments
+restart the timer, like so:  
+`sudo systemctl restart payments-daily-lnd.timer`  
+This will restart a failed daily payment from an LND node, but will _not_ resend the failed payment.
+You can change daily or lnd to your specific timing and node implementation.
+To manually send an individual missed payment you can run the keysend 
+script that is saved in /home/admin/pleb-vpn/payments/keysends, or to send all payments
 that were scheduled at a certain time you can manually run that service with the following:  
 `sudo systemctl start payments-<frequency>-<lnd or cln>.service`  where `<frequency>` is either
-`daily`, `weekly`, `monthly`, or `yearly`, and  `<lnd or cln>` is either `lnd` if I'm using
-LND or `cln` if I'm using Core Lightning.
+`daily`, `weekly`, `monthly`, or `yearly`, and  `<lnd or cln>` is either `lnd` if you're using
+LND or `cln` if you're using Core Lightning.
 
 For example, to manually at any time send the payments that were scheduled on the 1st of the
-month to come from my lnd node I would run on the command line:  
-`sudo systemctl start payments-monthly-lnd.service`
+month to come from my Core Lightning node I would run on the command line:  
+`sudo systemctl start payments-monthly-cln.service`
 
 ### Updates or Uninstalling
 The last menu, PLEB-VPN, is for updates or uninstalls. Update just pulls the latest changes
