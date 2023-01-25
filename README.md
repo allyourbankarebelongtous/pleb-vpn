@@ -95,7 +95,7 @@ two providers) and more robust (more hybrid/clearnet nodes). Plus, it comes with
 VPN already integrated (although, full discosure, TunnelSats with ZeroTier as a private VPN 
 is a very solid setup as well).
 
-**How secure is this**  
+**How secure is this?**  
 It's as secure as any VPN. The OpenVPN encryption is AES-256-CBC, and WireGuard uses
 Curve25519 point multiplication as its primary method of private key/public key
 encryption. The owner of the VPS (this is true regardless of if you run it yourself,
