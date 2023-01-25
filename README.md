@@ -28,6 +28,11 @@ allyourbankarebelongtous@protonmail.com, agree to a small monthly fee, and obtai
 access to my vps to go clearnet. You would be paying for vps access/use, not for
 Pleb-VPN.
 
+If there are any other plebs who want to share their VPS for a small fee, feel free
+to advertize and direct interested parties here for the easy-to-implement Raspiblitz
+hybrid option! This will work with any public VPN that uses openvpn for its connection
+and allows port forwarding.
+
 **You can also set up your VPS to share with others as a VPN if you like to help
 increase the availability of clearnet/hybrid nodes on the lightning network!**
 
@@ -101,10 +106,12 @@ The menu has an option to update the scripts by pulling them from here.
 
 ## Install instructions:  
 1. Exit to command line from the menu (you should be in directory /home/admin).  
-2. From /home/admin, clone the repository:  
+2. From /home/admin, clone the repository by copying and pasting the following command:  
    `git clone https://github.com/allyourbankarebelongtous/pleb-vpn.git`  
-3. Fix the permissions, run `sudo chmod -R 755 /home/admin/pleb-vpn`  
-4. Run the install script `/home/admin/pleb-vpn/pleb-vpn.install.sh on`  
+3. Fix the permissions, copy, paste into the command line, and run:  
+   `sudo chmod -R 755 /home/admin/pleb-vpn`  
+4. Run the install script by copying and pasting:  
+   `/home/admin/pleb-vpn/pleb-vpn.install.sh on`  
 
 Access Pleb-VPN from the menu and try it out!
 
@@ -154,7 +161,7 @@ Now that your VPN connection to the VPS is up, the SERVICES menu shows more opti
 
 From here, it should show the option to enable hybrid mode on whichever node implementation
 is active on your node. If the service detects that both are installed, it will display
-both. Lets activate hybrid mode for LND.
+both. Lets activate hybrid mode for LND (the steps are identical for Core Lightning).
 
 The first thing the script will do is ask for a port to use. This is because to share
 a server, the nodes have to use different ports. If you got your plebvpn.conf from
@@ -188,7 +195,12 @@ as well. Enter it here. _Do not use the same port as your node!_
 After that's done, the script will instruct you to download the wireguard client app
 from the google or apple app store. With that app, scan the QR code that will display
 on the screen. This will give your phone the private key it needs to securely connect
-with your node (these keys are generated locally and never leave your node).
+with your node (these keys are generated locally and never leave your node). Once
+install is finished, the script will present you with the status of your connection,
+which will look like this:
+![WireGuardStatus](pictures/wireguardstatus.png)
+In this example I chose 10.0.0.0, so that's the IP i'd use to connect to my apps on
+the Raspiblitz.
 
 You can also obtain the wireguard client conf files from the WIREGUARD-CONNECT menu
 within the main Pleb-VPN menu. You will get three files, one (mobile.conf) is also
@@ -205,7 +217,9 @@ To configure Zeus to connect over WireGuard, uncheck tor and enter your wireguar
 place of the tor address (because the connection is secured by WireGuard there is no
 need to enable ssl encryption, but you can anyways if you download the cert and install
 it on your phone. You will need to re-create the cert first to ensure it includes your 
-WireGuard IP).
+WireGuard IP). Here's a screenshot of me accessing the blitz api via wireguard on my
+phone using the 10.0.0.0 IP shown above:
+![BlitzAPIWireGuardAccess](pictures/blitzapiwireguardaccess.png)
 
 Lastly, let's check out payments. Payments were included in this to encourage VPS 
 operators to open their servers to other clients, and to make paying for VPS 
@@ -248,7 +262,7 @@ MONTHLY - Every 1st day of the month at 00:00:00 UTC
 YEARLY - Every 1st day of the year at 00:00:00 UTC  
 
 Use VIEW to view your currently scheduled payments. Here's an example of me paying myself
-a bunch of times for testing purposes:  
+a bunch of times for testing purposes from both LND and Core Lightning:  
 ![ViewPayments](pictures/veiwpayments.png)
 
 Use DELETE to get rid of a payment. Here's what that looks like:  
