@@ -316,8 +316,8 @@ uninstall() {
     sudo sed -i "s:.*${extraLine}.*::g" /mnt/hdd/app-data/custom-installs.sh
   fi
   # delete files
-  sudo rm -rf /mnt/hdd/app-data/pleb-vpn
   sudo rm -rf /home/admin/pleb-vpn
+  sudo rm -rf /mnt/hdd/app-data/pleb-vpn.conf
   exit 0
 }
 

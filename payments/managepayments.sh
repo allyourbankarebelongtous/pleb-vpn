@@ -1,4 +1,4 @@
-#!/bin/bash
+ #!/bin/bash
 
 # pleb-vpn script for managing payments
 # managepayments.sh deleteall will recreate subscription lists

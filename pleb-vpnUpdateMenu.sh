@@ -35,8 +35,12 @@ case $CHOICE in
 Are you sure you want to completely remove Pleb-VPN and 
 associated services from your system?
 This cannot be undone, and you would have to redo all of 
-your configurations and certs if you re-install at a later time.
-      " 12 70
+your configurations if you re-install at a later time.
+Your vpn config file, plebvpn.conf, and the wireguard configuration 
+files (if installed) will be saved in /mnt/hdd/app-data/pleb-vpn/
+and you will be asked if you wish to reuse them or use different
+ones should you re-install.
+      " 16 75
     if [ $? -eq 1 ]; then
       /home/admin/pleb-vpn/pleb-vpn.install.sh uninstall
       exit 0
