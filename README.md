@@ -301,7 +301,7 @@ a bunch of times for testing purposes from both LND and Core Lightning:
 Use DELETE to get rid of a payment. Here's what that looks like:  
 ![DeletePayment](pictures/deletepayment.png)
 
-Use DELETEALL to delete all payments.  
+Use DELETE-ALL to delete all payments.  
 
 Payments that are scheduled will remain through Raspiblitz updates. The payments are
 enabled using systemd timers that activate the service that sends the payments. If your
