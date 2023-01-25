@@ -3,36 +3,36 @@
 ![Pleb-VPN](pictures/raspilogo_tile_400px.png)
 
 # Pleb-VPN  
-_Easy VPS sharing for cheaper hybrid solution for plebs...built for Raspiblitz._
+_Easy VPS sharing for cheaper hybrid solution for Plebs...built for Raspiblitz._
 
 `Version 0.9.0rc1 including LND hybrid, CLN hybrid, WireGuard, and recurring payments`
 
 **Pleb-VPN is a Raspiblitz tool set that allows you to easily take your node
 from a tor-only node to a hybrid solution with a public Virtual Private Server
  - either yours or someone elses! It also includes a number of tools to facilitate 
-this, including an easy-to-install implementation of wireguard for private, secure 
+this, including an easy-to-install implementation of WireGuard for private, secure 
 VPN access to your node anywhere, anytime, and the ability to automatically send 
 recurring payments over lightning via keysend.**
 
 Pleb-VPN was born out of the realization that tor was always going to be
-insufficient for routing nodes, and that most plebs either won't afford
+insufficient for routing nodes, and that most Plebs either won't afford
 or can't set up (or both) a VPS with a VPN and enable hybrid mode on their
 node. Enter Pleb-VPN! This enables easy VPS sharing and lowers the cost of
-going clearnet for plebs.
+going clearnet for Plebs.
 
 Pleb-VPN is a free open-source Raspiblitz integration of OpenVPN and WireGuard, 
 and includes scripts to configure either LND or Core Lightning (or both!) for 
 hybrid mode. You may use this in conjunction with your own VPS set up as an 
-openVPN server, or you may contact me on TG @allyourbankarebelongtous or via email: 
+OpenVPN server, or you may contact me on TG @allyourbankarebelongtous or via email: 
 allyourbankarebelongtous@protonmail.com, agree to a small monthly fee (I don't know 
 how much it will cost me to expand yet or how big the demand is so accurate 
 pricing is difficult to predict), and obtain access to my VPS to go clearnet. 
 You would be paying for VPS access/use, not for Pleb-VPN.
 
-If there are any other plebs who want to share their VPS for a small fee, feel free
+If there are any other Plebs who want to share their VPS for a small fee, feel free
 to advertize and direct interested parties here for the easy-to-implement Raspiblitz
 hybrid option! This will work with any public VPN (in the sense that the IP of the VPS 
-is for public access) that uses openVPN for its connection and allows port forwarding.
+is for public access) that uses OpenVPN for its connection and allows port forwarding.
 
 **You can also set up your VPS to share with others as a VPN if you like to help
 increase the availability of clearnet/hybrid nodes on the lightning network!**
@@ -89,7 +89,7 @@ shared servers and provides you with a cert to connect to them, only it uses Wir
 instead of OpenVPN for the connection. TunnelSats has an advantage in that it
 split-tunnels tor and clearnet, so if the VPN server drops offline you still have
 tor, Pleb-VPN does not. TunnelSats is also available for other node implementations.
-However, Pleb-VPN is cheaper, and encourages plebs to collaborate to make the lightning
+However, Pleb-VPN is cheaper, and encourages Plebs to collaborate to make the lightning
 network more decentralized (less reliance on one or two providers) and more robust
 (more hybrid/clearnet nodes).
 
@@ -120,7 +120,7 @@ Yes. The menu provides an option to completely uninstall and restore the origina
 node configuration at any time.
 
 **What if Pleb-VPN scripts are updated? How do I update mine?**  
-The menu has an option to update the scripts by pulling them from GitHub, it takes about 
+The menu has an option to update the scripts by pulling them from GitHub. It takes about 
 a half a second and keeps all of your settings.
 
 ## Install Instructions:  
@@ -156,9 +156,9 @@ Looking at the SERVICES menu, you will only see one option initially:
 Initially the only thing you can activate is Pleb-VPN, which is the OpenVPN connection
 to the VPS that gives you a public IP different than your home IP. Activating the other
 services without this will only dox your home IP (WireGuard wouldn't, but unless you
-have a static home IP, which is unlikely, you'd have to constantly re-configure Wireguard).
+have a static home IP, which is unlikely, you'd have to constantly re-configure WireGuard).
 
-After activating Pleb-VPN, you are asked to send the openVPN config file (called plebVPN.conf)
+After activating Pleb-VPN, you are asked to send the OpenVPN config file (called plebvpn.conf)
 to the node using scp. The node gives you the command to run. If you already have uploaded
 it and are just re-enabling Pleb-VPN, it will find the old .conf file and ask if you
 want to keep it or upload a new one.  
@@ -171,10 +171,10 @@ status screen:
 Once your VPN is connected it will automatically restart every time the Raspiblitz
 starts up. If for some reason you want to manually disconnect without uninstalling,
 you can use the command line:  
-Stop (service will still start on boot): `sudo systemctl stop openVPN@plebVPN`  
-Disable (service will not start on boot): `sudo systemctl disable openVPN@plebVPN`  
-Enable (autostart on boot): `sudo systemctl enable openVPN@plebVPN`  
-Start (start now): `sudo systemctl start openVPN@plebVPN`  
+Stop (service will still start on boot): `sudo systemctl stop openvpn@plebvpn`  
+Disable (service will not start on boot): `sudo systemctl disable openvpn@plebvpn`  
+Enable (autostart on boot): `sudo systemctl enable openvpn@plebvpn`  
+Start (start now): `sudo systemctl start openvpn@plebvpn`  
 
 ### Go Hybrid
 Now that your VPN connection to the VPS is up, the SERVICES menu shows more options:  
@@ -182,10 +182,10 @@ Now that your VPN connection to the VPS is up, the SERVICES menu shows more opti
 
 From here, it should show the option to enable hybrid mode on whichever node implementation
 is active on your node. If the service detects that both are installed, it will display
-both. Lets activate hybrid mode for LND (the steps are identical for Core Lightning).
+both, as shown here. Lets activate hybrid mode for LND (the steps are identical for Core Lightning).
 
 The first thing the script will do is ask for a port to use. This is because to share
-a server, the nodes have to use different ports. If you got your plebVPN.conf from
+a server, the nodes have to use different ports. If you got your plebvpn.conf from
 another pleb, you should also get a port to use for your node. This is where you enter
 the port:  
 ![LNDHybridport](pictures/lndhybridport.png)
@@ -194,10 +194,10 @@ If you've already entered a port, the script will use the port already entered (
 re-enabling hybrid after turning it off). The process is the same for Core Lightning.  
 _If you use both node implementations side by side, they MUST use different ports!_
 
-After restarting LND (or Core Lightning), the script displays the status which should
-now show your new clearnet address and port. If you have channels connected, this
-data should reflect on lightning explorers such as amboss.space within an hour (takes
-time for the gossip data to propogate).  
+After it finishes the configuration and the wallet is unlocked, the script displays the 
+status which should now show your new clearnet address and port. If you have channels 
+connected, this data should reflect on lightning explorers such as amboss.space within 
+an hour (takes time for the gossip data to propogate).  
 ![LNDHybridStatus](pictures/lndhybridstatus.png)
 
 BOOM! You now have a hybrid node with a VPS!
@@ -212,34 +212,34 @@ be added).
 
 Next the script will ask you for a port, just like the hybrid mode script. 
 Your VPS provider (or yourself, if you run your own server) can give you this port 
-as well. Enter it here. _Do not use the same port as your node!_
+as well. Enter it here. _Do not use the same port as your node!_  
 
-After that's done, the script will instruct you to download the wireguard client app
+After that's done, the script will instruct you to download the WireGuard client app
 from the google or apple app store. With that app, scan the QR code that will display
 on the screen. This will give your phone the private key it needs to securely connect
-with your node (these keys are generated locally and never leave your node). Once
-install is finished, the script will present you with the status of your connection,
-which will look like this:
+with your node (these keys are generated locally and never leave your node until you 
+download them via the WIREGUARD-CONNECT menu option). Once install is finished, the 
+script will present you with the status of your connection, which will look like this:
 ![WireGuardStatus](pictures/wireguardstatus.png)
-In this example I chose 10.0.0.0, so that's the IP i'd use to connect to my apps on
+In this example I chose 10.0.0.0, so that's the IP I will use to connect to my apps on
 the Raspiblitz.
 
-You can also obtain the wireguard client conf files from the WIREGUARD-CONNECT menu
+You can also obtain the WireGuard client conf files from the WIREGUARD-CONNECT menu
 within the main Pleb-VPN menu. You will get three files, one (mobile.conf) is also
 displayed as a QR code, but the other two (laptop.conf and desktop.conf) are only
 available via scp download through the WIREGUARD-CONNECT menu. To configure more than
-three clients will require you to manually edit the wireguard configuration. There
+three clients will require you to manually edit the WireGuard configuration. There
 are several tutorials out there on how to do this.
 
 Once you have WireGuard configured, you can turn it on on your phone and connect to
 any service on your node securely by using the WireGuard IP you selected. For example,
 to connect to thunderhub, have the WireGuard client activated on your phone and 
 enter ip.ip.ip.ip:3010 on your phone's browser. To access the blitz api, enter ip.ip.ip.ip.
-To configure Zeus to connect over WireGuard, uncheck tor and enter your wireguard ip in
-place of the tor address (because the connection is secured by WireGuard there is no
+To configure Zeus to connect over WireGuard, uncheck tor and enter your WireGuard ip in
+place of the tor address. _(Note: Because the connection is secured by WireGuard there is no
 need to enable ssl encryption, but you can anyways if you download the cert and install
 it on your phone. You will need to re-create the cert first to ensure it includes your 
-WireGuard IP). Here's a screenshot of me accessing the blitz api via wireguard on my
+WireGuard IP)._ Here's a screenshot of me accessing the blitz api via WireGuard on my
 phone using the 10.0.0.0 IP shown above:  
 ![BlitzAPIWireGuardAccess](pictures/blitzapiwireguardaccess.png)
 
@@ -252,8 +252,8 @@ services easier for Plebs. Here is the PAYMENTS menu:
 
 Here you can schedule recurring keysends using either LND or Core Lightning as your 
 node. The service lets you decide which one to use if you have both installed. It also
-lets you schedule the payment in sats or usd, and does the usd-sat conversion in real-
-time each time it sends. The PAYMENTS menu has four sections:  
+lets you schedule the payment in sats or USD, and does the USD-sat conversion in real-time 
+each time it sends. The PAYMENTS menu has four sections:  
 NEW - lets you create a new recurring payment  
 VIEW - displays all current active payments and their schedule  
 DELETE - allows you to select a payment from among all of them and delete it  
@@ -268,7 +268,7 @@ After selecting new, the script asks what denomination to use:
 Then the script asks how much you want each payment to be:  
 ![EnterAmount](pictures/enteramount.png)
 
-Then which node you want to use (only asks if you have both installed and enabled):  
+Then which node you want to use (only asks if you have both LND and Core Lightning installed and enabled):  
 ![WhichNodeToUse](pictures/whichnodetouse.png)
 
 Then asks for the pubkey of the receiver:  
@@ -301,19 +301,20 @@ send again_ until you manually re-enable the payment. To re-enable payments you 
 reboot the Raspiblitz (easiest), or manually start them using systemd commands to 
 restart the timers. To manually send an individual missed payment you can run the keysend 
 scripts that are saved in /home/admin/pleb-vpn/payments/keysends, or to send all payments
-that were scheduled at a certain time you can manually run that service with the following:
-`sudo systemctl start payments-<frequency>-<lnd or cln>.service` where <frequency> is either
-`daily`, `weekly`, `monthly`, or `yearly`, and <lnd or cln> is either `lnd` if I'm using
+that were scheduled at a certain time you can manually run that service with the following:  
+`sudo systemctl start payments-<frequency>-<lnd or cln>.service`  where `<frequency>` is either
+`daily`, `weekly`, `monthly`, or `yearly`, and  `<lnd or cln>` is either `lnd` if I'm using
 LND or `cln` if I'm using Core Lightning.
 
 For example, to manually at any time send the payments that were scheduled on the 1st of the
-month to come from my lnd node I would run: `sudo systemctl start payments-monthly-lnd.service`
+month to come from my lnd node I would run on the command line:  
+`sudo systemctl start payments-monthly-lnd.service`
 
 ### Updates or Uninstalling
 The last menu, PLEB-VPN, is for updates or uninstalls. Update just pulls the latest changes
 to the scripts from github (for bug fixes or new features). Uninstall will uninstall EVERYTHING
 you have and restore your node to its original configuration. It will NOT delete your
-plebVPN.conf file and your WireGuard config files, they will be left on the hard drive.
+plebvpn.conf file and your WireGuard config files, they will be left on the hard drive.
 To remove them, you can delete /mnt/hdd/app-data/pleb-vpn and all of its contents.
 
 Feel free to contact me on Telegram @allyourbankarebelongtous or via email at:  
