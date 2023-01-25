@@ -67,7 +67,7 @@ and then configure hybrid mode on or off for either LND or Core Lightning (or
 both). Pleb-VPN configures the node such that if the VPS goes offline you will
 not accidentally release your home IP (called a killswitch).
 
-Pleb-VPN also provides ease Raspiblitz menu access to install and configure WireGuard,
+Pleb-VPN also provides easy Raspiblitz menu access to install and configure WireGuard,
 a private VPN service that will run through the VPS encrypted end-to-end from the
 Raspiblitz to any client connected to the blitz that you configure, giving you 
 a secure, simulated LAN that allows you to securely access all features of your
