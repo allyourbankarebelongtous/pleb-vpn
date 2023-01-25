@@ -115,8 +115,8 @@ Select "PLEB-VPN" to enter the Pleb-VPN Main Menu:
 ![Pleb-VPNMenu](pictures/pleb-vpnmenu.png)
 
 Here there are five options available, although you will initially only see four.
-These options are:
-STATUS - Get the current status of installed services
+These options are:\n
+STATUS - Get the current status of installed services\n
 SERVICES - Install and configure VPNs and hybrid mode
 PAYMENTS - Manage, add, or remove recurring payments
 WIREGUARD-CONNECT - Get WireGuard config files for clients (only available when WireGuard installed)
