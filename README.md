@@ -236,10 +236,17 @@ any service on your node securely by using the WireGuard IP you selected. For ex
 to connect to thunderhub, have the WireGuard client activated on your phone and 
 enter ip.ip.ip.ip:3010 on your phone's browser. To access the blitz api, enter ip.ip.ip.ip.
 To configure Zeus to connect over WireGuard, uncheck tor and enter your WireGuard ip in
-place of the tor address. _(Note: Because the connection is secured by WireGuard there is no
-need to enable ssl encryption, but you can anyways if you download the cert and install
-it on your phone. You will need to re-create the cert first to ensure it includes your 
-WireGuard IP)._ Here's a screenshot of me accessing the blitz api via WireGuard on my
+place of the tor address.  
+
+_Note: Because the connection is secured by WireGuard there is no need to enable ssl encryption, 
+but you can anyways if you download the cert and install it on your phone. You will need to 
+re-create the cert first to ensure it includes your WireGuard IP. This can be done by either 
+using the Raspiblitz Menu, going to CONNECT and then RESET, which will also reset your 
+macaroons (you will have to reconnect any mobile wallets or other apps which use macaroons), 
+or by deleting /mnt/hdd/lnd/tls.cert and /mnt/hdd/lnd/tls.key, restarting lnd, and 
+restarting nginx._   
+
+Here's a screenshot of me accessing the blitz api via WireGuard on my
 phone using the 10.0.0.0 IP shown above:  
 ![BlitzAPIWireGuardAccess](pictures/blitzapiwireguardaccess.png)
 
