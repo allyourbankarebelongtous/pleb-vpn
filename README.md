@@ -234,12 +234,12 @@ available via scp download through the WIREGUARD-CONNECT menu. To configure more
 three clients will require you to manually edit the WireGuard configuration. There
 are several tutorials out there on how to do this.
 
-Once you have WireGuard configured, you can turn it on on your phone and connect to
-any service on your node securely by using the WireGuard IP you selected. For example,
-to connect to thunderhub, have the WireGuard client activated on your phone and 
-enter ip.ip.ip.ip:3010 on your phone's browser. To access the blitz api, enter ip.ip.ip.ip.
-To configure Zeus to connect over WireGuard, uncheck tor and enter your WireGuard ip in
-place of the tor address.  
+Once you have WireGuard configured, you can turn it on on your phone and/or laptop/desktop, 
+and connect to any service on your node securely by using the WireGuard IP you selected. For 
+example, to connect to ThunderHub, have the WireGuard client activated on your phone and 
+enter ip.ip.ip.ip:3010 on your phone's browser, where ip.ip.ip.ip is the WireGuard IP that
+you selected. To access the blitz api, enter ip.ip.ip.ip. To configure Zeus to connect over 
+WireGuard, uncheck tor and enter your WireGuard ip in place of the tor address.  
 
 _Note: Because the connection is secured by WireGuard there is no need to enable ssl encryption, 
 but you can anyways if you download the cert and install it on your phone. You will need to 
@@ -261,21 +261,21 @@ services easier for Plebs. Here is the PAYMENTS menu:
 
 
 Here you can schedule recurring keysends using either LND or Core Lightning as your 
-node. The service lets you decide which one to use if you have both installed. It also
-lets you schedule the payment in sats or USD, and does the USD-sat conversion in real-time 
-each time it sends. The PAYMENTS menu has four sections:  
+node. The service lets you decide which node implementation to use if you have both installed. 
+It also lets you schedule the payment in sats or USD, and does the USD-sat conversion in 
+real-time each time it sends. The PAYMENTS menu has four sections:  
 NEW - lets you create a new recurring payment  
 VIEW - displays all current active payments and their schedule  
 DELETE - allows you to select a payment from among all of them and delete it  
 DELTE-ALL - deletes all payments  
 
 The process of scheduling a new payment is self-explanatory, but for fun here's what 
-it looks like on a Raspiblitz that has two nodes running on it.
+it looks like on a Raspiblitz that has both LND and Core Lightning running on it.
 
-After selecting new, the script asks what denomination to use:  
+After selecting NEW, the script asks what denomination to use:  
 ![ChooseDenomination](pictures/choosedenomination.png)
 
-Then the script asks how much you want each payment to be:  
+Then the script asks how much you want each payment to be. Here's a USD example:  
 ![EnterAmount](pictures/enteramount.png)
 
 Then which node you want to use (only asks if you have both LND and Core Lightning installed and enabled):  
@@ -311,14 +311,22 @@ send again_ until you manually re-enable the payment. To re-enable payments you 
 reboot the Raspiblitz (easiest), or manually start them using systemd commands to 
 restart the timer, like so:  
 `sudo systemctl restart payments-daily-lnd.timer`  
+`daily` can be substituded for any timeframe from `daily`, `weekly`, `monthly`, or `yearly`,
+and `lnd` can be `lnd` or `cln` depending on your node implementation. 
 This will restart a failed daily payment from an LND node, but will _not_ resend the failed payment.
 You can change daily or lnd to your specific timing and node implementation.
+
 To manually send an individual missed payment you can run the keysend 
-script that is saved in /home/admin/pleb-vpn/payments/keysends, or to send all payments
-that were scheduled at a certain time you can manually run that service with the following:  
+script that is saved in /home/admin/pleb-vpn/payments/keysends, for example:  
+`sudo -u bitcoin /home/admin/pleb-vpn/payments/keysends/_035fed4_monthly_cln_keysend.sh`  
+sends the monthly payment of 100 sats from my Core Lightning node each time I run that command. 
+(Command needs to be run as user bitcoin or it will fail for Core Lightning nodes). 
+
+For payments that were scheduled at a certain time you can manually run that service with the following:  
 `sudo systemctl start payments-<frequency>-<lnd or cln>.service`  where `<frequency>` is either
 `daily`, `weekly`, `monthly`, or `yearly`, and  `<lnd or cln>` is either `lnd` if you're using
-LND or `cln` if you're using Core Lightning.
+LND or `cln` if you're using Core Lightning. This will send all `<frequency>` payments from 
+any `<lnd or cln>` node.
 
 For example, to manually at any time send the payments that were scheduled on the 1st of the
 month to come from my Core Lightning node I would run on the command line:  
