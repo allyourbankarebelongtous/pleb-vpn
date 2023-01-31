@@ -66,6 +66,7 @@ Use menu to install Pleb-VPN.
     VPNclearnetIP=$(curl https://api.ipify.org)
     sleep 5
     systemctl stop openvpn@plebvpn
+    sleep 5
     noVPNclearnetIP=$(curl https://api.ipify.org)
     sleep 5
     if [ "${noVPNclearnetIP}" = "" ]; then
@@ -84,6 +85,7 @@ Use menu to install Pleb-VPN.
     fi
     systemctl start openvpn@plebvpn
     echo "checking vpn IP"
+    sleep 5
     currentIP=$(curl https://api.ipify.org)
     sleep 5
     if ! [ "${currentIP}" = "${vpnIP}" ]; then
