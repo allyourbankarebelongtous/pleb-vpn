@@ -198,7 +198,7 @@ modprobe cls_cgroup
 if [ ! -d /sys/fs/cgroup/net_cls ]; then
   mkdir /sys/fs/cgroup/net_cls
 fi
-mount -t cgroup -o net_cls /sys/fs/cgroup/net_cls
+mount -t cgroup -o net_cls novpn /sys/fs/cgroup/net_cls
 cgcreate -t debian-tor:novpn -a debian-tor:novpn -d 775 -f 664 -s 664 -g net_cls:novpn
 echo 0x00110011 > /sys/fs/cgroup/net_cls/novpn/net_cls.classid
 
