@@ -256,17 +256,6 @@ cgclassify -g net_cls:novpn $tor_pid
   
   # create pleb-vpn-tor-split-tunnel.service
   echo "Create tor-split-tunnel.service systemd service..."
-######### This service is for a timer to activate
-#  echo "[Unit]
-#Description=Adding tor process to cgroup novpn
-#[Service]
-#Type=oneshot
-#ExecStart=/bin/bash /home/admin/pleb-vpn/split-tunnel/tor-split-tunnel.sh
-#[Install]
-#Wants=tor@default.service
-#After=tor@default.service
-#" | tee /etc/systemd/system/pleb-vpn-tor-split-tunnel.service
-########## This service is for stand-alone
   echo "[Unit]
 Description=Adding tor process to cgroup novpn
 Requires=tor@default.service
@@ -277,11 +266,17 @@ ExecStart=/bin/bash /home/admin/pleb-vpn/split-tunnel/tor-split-tunnel.sh
 [Install]
 WantedBy=multi-user.target
 " | tee /etc/systemd/system/pleb-vpn-tor-split-tunnel.service
-  # fix blitzapi.service to start after pleb-vpn-tor-split-tunnel.service
-##### might not need...test (only if timer not needed)
-
   # create pleb-vpn-tor-split-tunnel.timer
-##### might not need...test
+  echo "Create tor-split-tunnel.timer systemd service..."
+  echo "[Unit]
+Description=1 min timer to add tor process to cgroup novpn
+[Timer]
+OnBootSec=10
+OnUnitActiveSec=10
+Persistent=true
+[Install]
+WantedBy=timers.target
+" | tee /etc/systemd/system/pleb-vpn-tor-split-tunnel.timer
 
   # nftables-config.sh
   echo "Creating nftables-config.sh in pleb-vpn/split-tunnel..."
@@ -353,12 +348,14 @@ WantedBy=multi-user.target
   systemctl enable pleb-vpn-create-cgroup.service
   systemctl enable pleb-vpn-tor-split-tunnel.service
   systemctl enable pleb-vpn-nftables-config.service
+  systemctl enable pleb-vpn-tor-split-tunnel.timer
   echo "restart tor to pick up new split-tunnel configuration..."
   systemctl stop tor@default.service
   systemctl start pleb-vpn-create-cgroup.service
   systemctl start tor@default.service
   systemctl start pleb-vpn-tor-split-tunnel.service
   systemctl start pleb-vpn-nftables-config.service
+  systemctl start pleb-vpn-tor-split-tunnel.timer
 
   # check configuration
   echo "OK...tor is configured. Wait 2 minutes for tor to start..."
@@ -422,12 +419,15 @@ off() {
   systemctl stop pleb-vpn-create-cgroup.service
   systemctl stop pleb-vpn-tor-split-tunnel.service
   systemctl stop pleb-vpn-nftables-config.service
+  systemctl stop pleb-vpn-tor-split-tunnel.timer
   systemctl disable pleb-vpn-create-cgroup.service
   systemctl disable pleb-vpn-tor-split-tunnel.service
   systemctl disable pleb-vpn-nftables-config.service
+  systemctl disable pleb-vpn-tor-split-tunnel.timer
   rm /etc/systemd/system/pleb-vpn-create-cgroup.service
   rm /etc/systemd/system/pleb-vpn-tor-split-tunnel.service
   rm /etc/systemd/system/pleb-vpn-nftables-config.service
+  rm /etc/systemd/system/pleb-vpn-tor-split-tunnel.timer
 
   # fix tor dependency
   echo "remove tor dependency"
