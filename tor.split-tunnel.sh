@@ -386,7 +386,7 @@ WantedBy=multi-user.target
     torIP=$(torify curl http://api.ipify.org)
     echo "tor IP = (${torIP})...should not be blank, should not be your home IP, and should not be your VPN IP."
     if [ ! "${torIP}" = "" ]; then
-      inc=10
+      inc=11
     else
       ((inc++))
     fi
@@ -507,7 +507,7 @@ off() {
     torIP=$(torify curl http://api.ipify.org)
     echo "tor IP = (${torIP})...should be blank."
     if [ "${torIP}" = "" ]; then
-      inc=10
+      inc=11
     else
       ((inc++))
     fi
