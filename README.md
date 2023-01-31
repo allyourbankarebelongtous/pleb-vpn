@@ -48,7 +48,7 @@ increase the availability of clearnet/hybrid nodes on the lightning network!**
     - [Connect the VPN](#connect-the-vpn)
     - [Go Hybrid](#go-hybrid)
     - [Installing WireGuard](#installing-wireguard)
-    - [Split-Tunneling tor] (#split-tunneling-tor)
+    - [Split Tunneling tor] (#split-tunneling-tor)
     - [Recurring Payments](#recurring-payments)
     - [Updates or Uninstalling](#updates-or-uninstalling)
 
