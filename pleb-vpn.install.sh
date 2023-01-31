@@ -112,6 +112,7 @@ on() {
   setting ${plebVPNConf} "2" "LndConfFile" "'${lndConfFile}'"
   setting ${plebVPNConf} "2" "CLNConfFile" "'${CLCONF}'"
   setting ${plebVPNConf} "2" "LAN" "'${LAN}'"
+  setting ${plebVPNConf} "2" "torSplitTunnel" "off"
   setting ${plebVPNConf} "2" "lndHybrid" "off"
   setting ${plebVPNConf} "2" "clnHybrid" "off"
   setting ${plebVPNConf} "2" "wireguard" "off"
@@ -152,6 +153,10 @@ update() {
   sudo rm -rf /home/admin/pleb-vpn
   cd /home/admin
   git clone https://github.com/allyourbankarebelongtous/pleb-vpn.git
+#  these commands are for checking out a specific branch for testing
+#  cd /home/admin/pleb-vpn
+#  git checkout -b v0.9.1-tor-split-tunnel
+#  git pull origin v0.9.1-tor-split-tunnel 
   sudo cp -p -r /home/admin/pleb-vpn /mnt/hdd/app-data/
   # fix permissions
   sudo chown -R admin:admin /mnt/hdd/app-data/pleb-vpn
@@ -216,6 +221,9 @@ restore() {
   if [ "${wireguard}" = "on" ]; then
     /home/admin/pleb-vpn/wg-install.sh on 1
   fi
+  if [ "${torSplitTunnel}" = "on" ]; then
+    sudo /home/admin/pleb-vpn/tor.split-tunnel.sh on
+  fi
   # restore payment services
   inc=1
   while [ $inc -le 8 ]
@@ -274,6 +282,9 @@ uninstall() {
   plebVPNConf="/home/admin/pleb-vpn/pleb-vpn.conf"
   source ${plebVPNConf}
   # first uninstall services
+  if [ "${torSplitTunnel}" = "on" ]; then
+    sudo /home/admin/pleb-vpn/tor.split-tunnel.sh off
+  fi
   if [ "${lndHybrid}" = "on" ]; then
     /home/admin/pleb-vpn/lnd-hybrid.sh off
   fi

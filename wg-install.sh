@@ -32,7 +32,7 @@ function setting() # FILE LINENUMBER NAME VALUE
 
 status() {
   source ${plebVPNConf}
-  message=""
+  message="Wireguard installed, configured, and operating as expected"
   if [ "${wireguard}" = "off" ]; then
     whiptail --title "WireGuard status" --msgbox "
 WireGuard installed: no
