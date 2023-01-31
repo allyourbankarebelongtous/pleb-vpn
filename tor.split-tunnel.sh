@@ -333,6 +333,7 @@ Description=Configure nftables for split-tunnel process
 Type=oneshot
 ExecStart=/bin/bash /home/admin/pleb-vpn/split-tunnel/nftables-config.sh
 [Install]
+Wantedby=multi-user.target
 Wants=pleb-vpn-tor-split-tunnel.service.service
 After=pleb-vpn-tor-split-tunnel.service.service
 " | tee /etc/systemd/system/pleb-vpn-tor-split-tunnel.service
