@@ -63,10 +63,13 @@ Use menu to install Pleb-VPN.
     exit 0
   else
     message="Tor Split-Tunnel service is working normally"
+    echo "Checking connection over clearnet with VPN on..."
     VPNclearnetIP=$(curl https://api.ipify.org)
     sleep 5
+    echo "Stopping VPN"
     systemctl stop openvpn@plebvpn
     sleep 5
+    echo "Checking connection over clearnet with VPN off (should fail)" 
     noVPNclearnetIP=$(curl https://api.ipify.org)
     sleep 5
     if [ "${noVPNclearnetIP}" = "" ]; then
@@ -75,6 +78,7 @@ Use menu to install Pleb-VPN.
       firewallOK="no"
       message="error...firewall not configured. Clearnet accessible when VPN is off. Uninstall and re-install pleb-vpn"
     fi
+    echo "Checking connection over tor with VPN off..."
     noVPNtorIP=$(torify curl http://api.ipify.org)
     sleep 5
     if [ ! "${noVPNtorIP}" = "" ]; then
@@ -83,9 +87,10 @@ Use menu to install Pleb-VPN.
       message="error...tor split-tunnel unsuccessful. Uninstall and re-install split-tunnel"
       torSplitTunnelOK="no"
     fi
+    echo "Restarting VPN"
     systemctl start openvpn@plebvpn
-    echo "checking vpn IP"
     sleep 5
+    echo "Checking connection over clearnet with VPN on..."
     currentIP=$(curl https://api.ipify.org)
     sleep 5
     if ! [ "${currentIP}" = "${vpnIP}" ]; then
