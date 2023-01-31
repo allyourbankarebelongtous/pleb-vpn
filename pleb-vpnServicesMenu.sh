@@ -19,6 +19,7 @@ OPTIONS+=(vpn 'Pleb-VPN OpenVPN Connection' ${plebVPN})
 # if plebVPN = on then show other services
 if [ "${plebVPN}" = "on" ]; then
   OPTIONS+=(wg 'WireGuard personal VPN' ${wireguard})
+  OPTIONS+=(tnl 'Tor Split-Tunnel from Pleb-VPN' ${tor-split-tunnel})
   # if CLN is on in raspiblitz.conf
   if [ "${lightning}" == "cl" ] || [ "${cl}" == "on" ]; then
     OPTIONS+=(cln 'Core Lightning Hybrid Mode' ${clnHybrid})
@@ -117,6 +118,21 @@ if [ "${lndHybrid}" != "${choice}" ]; then
   sudo -u admin /home/admin/pleb-vpn/lnd-hybrid.sh status
 else
   echo "LND Hybrid unchanged."
+fi
+
+# Tor split-tunnel
+choice="off"; check=$(echo "${CHOICES}" | grep -c "tnl")
+if [ ${check} -eq 1 ]; then choice="on"; fi
+if [ "${tor-split-tunnel}" != "${choice}" ]; then
+  echo "Tor Split-Tunnel Setting changed .."
+  anychange=1
+  sudo /home/admin/pleb-vpn/tor.split-tunnel.sh ${choice}
+  source ${plebVPNConf}
+  if [ "${choice}" =  "on" ]; then
+    sudo /home/admin/pleb-vpn/tor.split-tunnel.sh status
+  fi
+else
+  echo "Tor Split-Tunnel unchanged."
 fi
 
 if [ ${anychange} -eq 0 ]; then

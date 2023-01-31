@@ -36,7 +36,7 @@ status() {
   source ${plebVPNConf}
 
   isConfig=$(ls /mnt/hdd/app-data/pleb-vpn/openvpn/ | grep -c plebvpn.conf)
-  message=""
+  message="Pleb-VPN is installed, configured, and operating as expected"
   if [ ${isConfig} -eq 0 ]; then
     isConfig="no"
   else
