@@ -336,7 +336,7 @@ ExecStart=/bin/bash /home/admin/pleb-vpn/split-tunnel/nftables-config.sh
 Wantedby=multi-user.target
 Wants=pleb-vpn-tor-split-tunnel.service.service
 After=pleb-vpn-tor-split-tunnel.service.service
-" | tee /etc/systemd/system/pleb-vpn-tor-split-tunnel.service
+" | tee /etc/systemd/system/nftables-config.service
 
   # enable and start all services
   echo "enabling services..."
