@@ -379,7 +379,7 @@ WantedBy=multi-user.target
     systemctl start openvpn@plebvpn
     exit 1
   fi
-  echo "checking tor..."
+  echo "checking tor (takes some time, likely multiple tries)..."
   inc=1
   while [ $inc -le 10 ]
   do
@@ -500,7 +500,7 @@ off() {
     systemctl start openvpn@plebvpn
     exit 1
   fi
-  echo "checking tor..."
+  echo "checking tor (takes some time)..."
   inc=1
   while [ $inc -le 10 ]
   do
