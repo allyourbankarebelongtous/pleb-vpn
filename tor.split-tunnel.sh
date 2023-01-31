@@ -77,7 +77,7 @@ Use menu to install Pleb-VPN.
     fi
     noVPNtorIP=$(torify curl http://api.ipify.org)
     sleep 5
-    if [ ! "${torIP}" = "" ]; then
+    if [ ! "${noVPNtorIP}" = "" ]; then
       torSplitTunnelOK="yes"
     else 
       message="error...tor split-tunnel unsuccessful. Uninstall and re-install split-tunnel"
