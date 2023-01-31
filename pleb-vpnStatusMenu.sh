@@ -23,6 +23,7 @@ fi
 if [ "${lightning}" == "lnd" ] || [ "${lnd}" == "on" ]; then
   OPTIONS+=(LND-HYBRID "See LND Hybrid status and connection strings")
 fi
+OPTIONS+=(TOR-SPLIT-TUNNEL "Check Tor Split-Tunnel status")
 
 # display menu
 CHOICE_HEIGHT=$(("${#OPTIONS[@]}/2+1"))
@@ -49,5 +50,8 @@ case $CHOICE in
     ;;
   LND-HYBRID)
     /home/admin/pleb-vpn/lnd-hybrid.sh status
+    ;;
+  TOR-SPLIT-TUNNEL)
+    sudo /home/admin/pleb-vpn/tor.split-tunnel.sh status
     ;;
 esac

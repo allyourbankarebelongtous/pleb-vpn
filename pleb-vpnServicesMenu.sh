@@ -120,7 +120,7 @@ else
   echo "LND Hybrid unchanged."
 fi
 
-# Tor split-tunnel
+# Tor Split-Tunnel
 choice="off"; check=$(echo "${CHOICES}" | grep -c "tnl")
 if [ ${check} -eq 1 ]; then choice="on"; fi
 if [ "${tor-split-tunnel}" != "${choice}" ]; then

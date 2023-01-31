@@ -501,4 +501,5 @@ off() {
 case "${1}" in
   on) on ;;
   off) off ;;
+  status) status ;;
 esac
