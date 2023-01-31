@@ -5,7 +5,7 @@
 # Pleb-VPN  
 _Easy VPS sharing for cheaper hybrid solution for Plebs...built for Raspiblitz._
 
-`Version 0.9.0rc1 including LND hybrid, CLN hybrid, WireGuard, and recurring payments`
+`Version 0.9.1 including LND hybrid, CLN hybrid, WireGuard, tor split-tunneling, and recurring payments`
 
 **Pleb-VPN is a Raspiblitz tool set that allows you to easily take your node
 from a tor-only node to a hybrid solution with a public Virtual Private Server, _either yours 
