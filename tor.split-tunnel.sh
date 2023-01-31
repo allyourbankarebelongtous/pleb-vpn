@@ -267,7 +267,7 @@ After=tor@default.service
 Type=oneshot
 ExecStart=/bin/bash /home/admin/pleb-vpn/split-tunnel/tor-split-tunnel.sh
 [Install]
-Wantedby=multi-user.target
+WantedBy=multi-user.target
 " | tee /etc/systemd/system/pleb-vpn-tor-split-tunnel.service
   # fix blitzapi.service to start after pleb-vpn-tor-split-tunnel.service
 ##### might not need...test (only if timer not needed)
@@ -335,7 +335,7 @@ After=pleb-vpn-tor-split-tunnel.service.service
 Type=oneshot
 ExecStart=/bin/bash /home/admin/pleb-vpn/split-tunnel/nftables-config.sh
 [Install]
-Wantedby=multi-user.target
+WantedBy=multi-user.target
 " | tee /etc/systemd/system/pleb-vpn-nftables-config.service
 
   # enable and start all services
@@ -461,8 +461,8 @@ off() {
   systemctl start tor@default.service
 
   # check configuration
-  echo "OK...tor is configured to run over the vpn. Wait 1 minute for tor to start..."
-  sleep 60
+  echo "OK...tor is configured to run over the vpn. Wait 2 minutes for tor to start..."
+  sleep 120
   echo "checking configuration"
   echo "stop vpn"
   systemctl stop openvpn@plebvpn
