@@ -374,6 +374,7 @@ After=pleb-vpn-tor-split-tunnel.service.service
     echo "tor split-tunnel successful"
   else 
     echo "error...tor split-tunnel unsuccessful. Uninstall and re-install split-tunnel"
+    systemctl start openvpn@plebvpn
     exit 1
   fi
   sleep 2
