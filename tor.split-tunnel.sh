@@ -55,7 +55,7 @@ status() {
   source ${plebVPNConf}
 
   echo "checking configuration"
-  if [ "${tor-split-tunnel}" = "off" ]; then
+  if [ ! "${torSplitTunnel}" = "on" ]; then
     whiptail --title "Tor Split-Tunnel status" --msgbox "
 Tor Split-Tunnel service is off by config.
 Use menu to install Pleb-VPN.
