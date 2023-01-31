@@ -125,7 +125,7 @@ echo "Checking and installing requirements..."
   checkcgroup=$(cgcreate -h 2>/dev/null | grep -c "Usage")
   if [ $checkcgroup -eq 0 ]; then
     echo "Installing cgroup-tools..."
-    if apt install -y cgroup-tools >/dev/null; then
+    if apt-get install -y cgroup-tools >/dev/null; then
       echo "> cgroup-tools installed"
       echo
     else
@@ -142,7 +142,7 @@ echo "Checking and installing requirements..."
   checknft=$(nft -v 2>/dev/null | grep -c "nftables")
   if [ $checknft -eq 0 ]; then
     echo "Installing nftables..."
-    if apt install -y nftables >/dev/null; then
+    if apt-get install -y nftables >/dev/null; then
       echo "> nftables installed"
       echo
     else
@@ -363,7 +363,7 @@ WantedBy=multi-user.target
   # check configuration
   echo "OK...tor is configured. Wait 2 minutes for tor to start..."
   sleep 60
-  echo "wait 1 minutes for tor to start..."
+  echo "wait 1 minute for tor to start..."
   sleep 60
   echo "checking configuration"
   echo "stop vpn"
@@ -483,7 +483,7 @@ off() {
   # check configuration
   echo "OK...tor is configured to run over the VPN. Wait 2 minutes for tor to start..."
   sleep 60
-  echo "wait 1 minutes for tor to start..."
+  echo "wait 1 minute for tor to start..."
   sleep 60
   echo "checking configuration"
   echo "stop VPN"
