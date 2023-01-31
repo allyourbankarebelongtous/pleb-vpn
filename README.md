@@ -257,7 +257,7 @@ Here's a screenshot of me accessing the blitz api via WireGuard on my
 phone using the 10.0.0.0 IP shown above:  
 ![BlitzAPIWireGuardAccess](pictures/blitzapiwireguardaccess.png)
 
-### Split-Tunneling Tor
+### Split Tunneling Tor
 Split-tunneling is a feature that configures traffic from tor to bypass the VPN while still
 forcing everything else through the VPN. The killswitch remains enforced on your firewall,
 so if the VPN drops, no clearnet traffic will go out of your node to avoid accidentally doxing 
