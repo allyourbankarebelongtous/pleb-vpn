@@ -201,7 +201,6 @@ if [ ! -d /sys/fs/cgroup/net_cls ]; then
   cgcreate -t debian-tor:novpn -a debian-tor:novpn -d 775 -f 664 -s 664 -g net_cls:novpn
 fi
 echo 0x00110011 > /sys/fs/cgroup/net_cls/novpn/net_cls.classid
-chmod 666 /sys/fs/cgroup/net_cls/novpn/tasks
 
 ' | tee /home/admin/pleb-vpn/split-tunnel/create-cgroup.sh
   chmod 755 -R /home/admin/pleb-vpn/split-tunnel
@@ -248,17 +247,28 @@ cgclassify -g net_cls:novpn $tor_pid
   /home/admin/pleb-vpn/split-tunnel/tor-split-tunnel.sh
   
   # create pleb-vpn-tor-split-tunnel.service
-  echo "Create tor-split-tunnel.service systemd service..."
+#  echo "Create tor-split-tunnel.service systemd service..."
+######### This service is for a timer to activate
+#  echo "[Unit]
+#Description=Adding tor process to cgroup novpn
+#[Service]
+#Type=oneshot
+#ExecStart=/bin/bash /home/admin/pleb-vpn/split-tunnel/tor-split-tunnel.sh
+#[Install]
+#Wants=tor@default.service
+#After=tor@default.service
+#" | tee /etc/systemd/system/pleb-vpn-tor-split-tunnel.service
+########## This service is for stand-alone
   echo "[Unit]
 Description=Adding tor process to cgroup novpn
 [Service]
 Type=oneshot
 ExecStart=/bin/bash /home/admin/pleb-vpn/split-tunnel/tor-split-tunnel.sh
 [Install]
+Wantedby=multi-user.target
 Wants=tor@default.service
 After=tor@default.service
 " | tee /etc/systemd/system/pleb-vpn-tor-split-tunnel.service
-
   # fix blitzapi.service to start after pleb-vpn-tor-split-tunnel.service
 ##### might not need...test (only if timer not needed)
 
