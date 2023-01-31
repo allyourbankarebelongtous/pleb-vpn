@@ -197,9 +197,9 @@ echo "Checking and installing requirements..."
 modprobe cls_cgroup
 if [ ! -d /sys/fs/cgroup/net_cls ]; then
   mkdir /sys/fs/cgroup/net_cls
-  mount -t cgroup -o net_cls /sys/fs/cgroup/net_cls
-  cgcreate -t debian-tor:novpn -a debian-tor:novpn -d 775 -f 664 -s 664 -g net_cls:novpn
 fi
+mount -t cgroup -o net_cls /sys/fs/cgroup/net_cls
+cgcreate -t debian-tor:novpn -a debian-tor:novpn -d 775 -f 664 -s 664 -g net_cls:novpn
 echo 0x00110011 > /sys/fs/cgroup/net_cls/novpn/net_cls.classid
 
 ' | tee /home/admin/pleb-vpn/split-tunnel/create-cgroup.sh
@@ -261,13 +261,13 @@ cgclassify -g net_cls:novpn $tor_pid
 ########## This service is for stand-alone
   echo "[Unit]
 Description=Adding tor process to cgroup novpn
+Wants=tor@default.service
+After=tor@default.service
 [Service]
 Type=oneshot
 ExecStart=/bin/bash /home/admin/pleb-vpn/split-tunnel/tor-split-tunnel.sh
 [Install]
 Wantedby=multi-user.target
-Wants=tor@default.service
-After=tor@default.service
 " | tee /etc/systemd/system/pleb-vpn-tor-split-tunnel.service
   # fix blitzapi.service to start after pleb-vpn-tor-split-tunnel.service
 ##### might not need...test (only if timer not needed)
@@ -329,13 +329,13 @@ ip rule add fwmark 11 table novpn
   # create nftables-config.service
   echo "[Unit]
 Description=Configure nftables for split-tunnel process
+Wants=pleb-vpn-tor-split-tunnel.service.service
+After=pleb-vpn-tor-split-tunnel.service.service
 [Service]
 Type=oneshot
 ExecStart=/bin/bash /home/admin/pleb-vpn/split-tunnel/nftables-config.sh
 [Install]
 Wantedby=multi-user.target
-Wants=pleb-vpn-tor-split-tunnel.service.service
-After=pleb-vpn-tor-split-tunnel.service.service
 " | tee /etc/systemd/system/pleb-vpn-nftables-config.service
 
   # enable and start all services
