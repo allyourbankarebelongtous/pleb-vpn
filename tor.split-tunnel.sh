@@ -188,6 +188,9 @@ echo "Checking and installing requirements..."
     ip rou del from all table novpn default via ${GATEWAY}
   done
 
+  # create group novpn
+  sudo groupadd novpn
+
   # create routing table
   if [ ! -d /etc/iproute2/rt_tables.d ]; then
     mkdir /etc/iproute2/rt_tables.d/
@@ -475,6 +478,9 @@ off() {
   # remove split-tunnel scripts
   echo "removing split-tunnel scripts"
   rm -rf /home/admin/pleb-vpn/split-tunnel
+
+  # remove group novpn
+  sudo groupdel novpn
 
   # restart tor
   echo "starting tor..."
