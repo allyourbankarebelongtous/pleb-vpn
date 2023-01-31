@@ -269,7 +269,7 @@ cgclassify -g net_cls:novpn $tor_pid
 ########## This service is for stand-alone
   echo "[Unit]
 Description=Adding tor process to cgroup novpn
-Wants=tor@default.service
+Requires=tor@default.service
 After=tor@default.service
 [Service]
 Type=oneshot
@@ -338,7 +338,7 @@ ip rule add fwmark 11 table novpn
   echo "Create nftables-config systemd service..."
   echo "[Unit]
 Description=Configure nftables for split-tunnel process
-Wants=pleb-vpn-tor-split-tunnel.service.service
+Requires=pleb-vpn-tor-split-tunnel.service.service
 After=pleb-vpn-tor-split-tunnel.service.service
 [Service]
 Type=oneshot
