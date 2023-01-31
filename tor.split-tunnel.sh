@@ -352,8 +352,8 @@ WantedBy=multi-user.target
   systemctl start pleb-vpn-nftables-config.service
 
   # check configuration
-  echo "OK...tor is configured. Wait 1 minute for tor to start..."
-  sleep 60
+  echo "OK...tor is configured. Wait 5 minutes for tor to start..."
+  sleep 300
   echo "checking configuration"
   echo "stop vpn"
   systemctl stop openvpn@plebvpn
@@ -461,8 +461,8 @@ off() {
   systemctl start tor@default.service
 
   # check configuration
-  echo "OK...tor is configured to run over the vpn. Wait 2 minutes for tor to start..."
-  sleep 120
+  echo "OK...tor is configured to run over the vpn. Wait 5 minutes for tor to start..."
+  sleep 300
   echo "checking configuration"
   echo "stop vpn"
   systemctl stop openvpn@plebvpn
