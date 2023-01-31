@@ -393,7 +393,7 @@ WantedBy=multi-user.target
   echo "current IP = (${currentIP})...should be ${vpnIP}"
   echo "tor split-tunneling enabled!"
   sleep 2
-  setting ${plebVPNConf} "2" "tor-split-tunnel" "on"
+  setting ${plebVPNConf} "2" "torSplitTunnel" "on"
   exit 0
 }
 
@@ -501,7 +501,7 @@ off() {
   echo "current IP = (${currentIP})...should be ${vpnIP}"
   echo "tor split-tunneling is disabled and removed"
   sleep 2
-  setting ${plebVPNConf} "2" "tor-split-tunnel" "off"
+  setting ${plebVPNConf} "2" "torSplitTunnel" "off"
   exit 0
 }
 

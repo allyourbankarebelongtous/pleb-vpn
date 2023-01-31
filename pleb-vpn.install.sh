@@ -112,7 +112,7 @@ on() {
   setting ${plebVPNConf} "2" "LndConfFile" "'${lndConfFile}'"
   setting ${plebVPNConf} "2" "CLNConfFile" "'${CLCONF}'"
   setting ${plebVPNConf} "2" "LAN" "'${LAN}'"
-  setting ${plebVPNConf} "2" "tor-split-tunnel" "off"
+  setting ${plebVPNConf} "2" "torSplitTunnel" "off"
   setting ${plebVPNConf} "2" "lndHybrid" "off"
   setting ${plebVPNConf} "2" "clnHybrid" "off"
   setting ${plebVPNConf} "2" "wireguard" "off"
@@ -220,7 +220,7 @@ restore() {
   if [ "${wireguard}" = "on" ]; then
     /home/admin/pleb-vpn/wg-install.sh on 1
   fi
-  if [ "${tor-split-tunnel}" = "on" ]; then
+  if [ "${torSplitTunnel}" = "on" ]; then
     sudo /home/admin/pleb-vpn/tor.split-tunnel.sh on
   fi
   # restore payment services
@@ -281,7 +281,7 @@ uninstall() {
   plebVPNConf="/home/admin/pleb-vpn/pleb-vpn.conf"
   source ${plebVPNConf}
   # first uninstall services
-  if [ "${tor-split-tunnel}" = "on" ]; then
+  if [ "${torSplitTunnel}" = "on" ]; then
     sudo /home/admin/pleb-vpn/tor.split-tunnel.sh off
   fi
   if [ "${lndHybrid}" = "on" ]; then
