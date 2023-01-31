@@ -11,6 +11,7 @@ if [ ${#plebVPN} -eq 0 ]; then plebVPN="off"; fi
 if [ ${#wireguard} -eq 0 ]; then wireguard="off"; fi
 if [ ${#clnHybrid} -eq 0 ]; then clnHybrid="off"; fi
 if [ ${#lndHybrid} -eq 0 ]; then lndHybrid="off"; fi
+if [ ${#tor-split-tunnel} -eq 0 ]; then tor-split-tunnel="off"; fi
 
 OPTIONS=()
 
