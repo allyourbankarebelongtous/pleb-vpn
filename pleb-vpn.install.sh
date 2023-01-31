@@ -153,7 +153,8 @@ update() {
   sudo rm -rf /home/admin/pleb-vpn
   cd /home/admin
   git clone https://github.com/allyourbankarebelongtous/pleb-vpn.git
-  git checkout v0.9.1-tor-split-tunnel
+  git checkout -b v0.9.1-tor-split-tunnel
+  git pull origin v0.9.1-tor-split-tunnel
   sudo cp -p -r /home/admin/pleb-vpn /mnt/hdd/app-data/
   # fix permissions
   sudo chown -R admin:admin /mnt/hdd/app-data/pleb-vpn
