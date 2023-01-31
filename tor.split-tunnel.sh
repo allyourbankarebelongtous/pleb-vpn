@@ -398,6 +398,7 @@ Try checking the status using STATUS menu later. If unable to connect, uninstall
   sleep 2
   echo "restarting vpn"
   systemctl start openvpn@plebvpn
+  sleep 2
   echo "checking vpn IP"
   currentIP=$(curl https://api.ipify.org)
   echo "current IP = (${currentIP})...should be ${vpnIP}"
