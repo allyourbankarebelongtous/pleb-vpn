@@ -338,8 +338,8 @@ ip rule add fwmark 11 table novpn
   echo "Create nftables-config systemd service..."
   echo "[Unit]
 Description=Configure nftables for split-tunnel process
-Requires=pleb-vpn-tor-split-tunnel.service.service
-After=pleb-vpn-tor-split-tunnel.service.service
+Requires=pleb-vpn-tor-split-tunnel.service
+After=pleb-vpn-tor-split-tunnel.service
 [Service]
 Type=oneshot
 ExecStart=/bin/bash /home/admin/pleb-vpn/split-tunnel/nftables-config.sh
