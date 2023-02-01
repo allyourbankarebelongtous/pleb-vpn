@@ -204,7 +204,7 @@ _If you use both node implementations side by side, they MUST use different port
 After it finishes the configuration and the wallet is unlocked, the script displays the 
 status which should now show your new clearnet address and port. If you have channels 
 connected, this data should reflect on lightning explorers such as amboss.space within 
-an hour (takes time for the gossip data to propogate).  
+an hour (takes time for the gossip data to propagate).  
 ![LNDHybridStatus](pictures/lndhybridstatus.png)
 
 BOOM! You now have a hybrid node with a VPS!
