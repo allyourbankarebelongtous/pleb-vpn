@@ -406,7 +406,6 @@ WantedBy=multi-user.target
   else 
     echo "error...unable to connect over tor when VPN is down. It's possible that it needs more time to establish a connection. 
 Try checking the status using STATUS menu later. If unable to connect, uninstall and re-install Tor Split-Tunnel."
-    systemctl start openvpn@plebvpn
   fi
   sleep 2
   echo "restarting vpn"
@@ -518,17 +517,8 @@ off() {
     systemctl start openvpn@plebvpn
     exit 1
   fi
-  inc=1
-  while [ $inc -le 10 ]
-  do
-    torIP=$(torify curl http://api.ipify.org)
-    echo "tor IP = (${torIP})...should be blank."
-    if [ "${torIP}" = "" ]; then
-      inc=11
-    else
-      ((inc++))
-    fi
-  done
+  torIP=$(torify curl http://api.ipify.org)
+  echo "tor IP = (${torIP})...should be blank."
   if [ "${torIP}" = "" ]; then
     echo "tor configuration successful"
   else 
@@ -543,6 +533,26 @@ off() {
   echo "checking VPN IP"
   currentIP=$(curl https://api.ipify.org)
   echo "current IP = (${currentIP})...should be ${vpnIP}"
+  echo "Checking connection over tor with VPN on (takes some time, likely multiple tries)..."
+  echo "Will attempt a connection up to 10 times before giving up..."
+  inc=1
+  while [ $inc -le 10 ]
+  do
+    echo "attempt number ${inc}"
+    torIP=$(torify curl http://api.ipify.org)
+    echo "tor IP = (${torIP})...should not be blank, should not be your home IP, and should not be your VPN IP."
+    if [ ! "${torIP}" = "" ]; then
+      inc=11
+    else
+      ((inc++))
+    fi
+  done
+  if [ ! "${torIP}" = "" ]; then
+    echo "tor configuration successful"
+  else 
+    echo "error...unable to connect over tor when VPN is up. It's possible that it needs more time to establish a connection. 
+Try checking the status of tor later. If unable to connect, uninstall and re-install all of pleb-vpn."
+  fi
   echo "tor split-tunneling is disabled and removed"
   sleep 2
   setting ${plebVPNConf} "2" "torSplitTunnel" "off"
