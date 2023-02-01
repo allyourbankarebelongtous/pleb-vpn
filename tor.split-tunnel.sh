@@ -30,8 +30,9 @@ function setting() # FILE LINENUMBER NAME VALUE
 
 status() {
   source ${plebVPNConf}
-
-  whiptail --title "Tor Split-Tunnel status check" --msgbox "If you interrupt this test (Ctrl + C) then you should make sure your VPN is active with 
+  local skipWhiptail="${1}"
+  if [ ! "${skipWhiptail}" = "1" ]; then
+    whiptail --title "Tor Split-Tunnel status check" --msgbox "If you interrupt this test (Ctrl + C) then you should make sure your VPN is active with 
 'sudo systemctl start openvpn@plebvpn' before resuming operations. This test will temporarily 
 deactivate the VPN to see if tor can connect without the VPN operational. 
 
@@ -40,6 +41,7 @@ This test can take some time.
 A failure of this test does not necessarily indicate that split-tunneling is not active, 
 it could be that tor is down or having issues.
 " 15 100
+  fi
   echo "NOTE: If you interrupt this test (Ctrl + C) then you should make sure your VPN is active with 
 'sudo systemctl start openvpn@plebvpn' before resuming operations. This test will temporarily 
 deactivate the VPN to see if tor can connect without the VPN operational. This test can take some time. 
@@ -78,7 +80,7 @@ Use menu to install Pleb-VPN.
       noVPNtorIP=$(torify curl http://api.ipify.org)
       echo "tor IP = (${noVPNtorIP})...should not be blank, should not be your home IP, and should not be your VPN IP."
       if [ ! "${noVPNtorIP}" = "" ]; then
-        inc=6
+        inc=11
       else
         ((inc++))
       fi
@@ -550,5 +552,5 @@ off() {
 case "${1}" in
   on) on ;;
   off) off ;;
-  status) status ;;
+  status) status "${2}" ;;
 esac

@@ -130,7 +130,7 @@ if [ "${torSplitTunnel}" != "${choice}" ]; then
   sudo /home/admin/pleb-vpn/tor.split-tunnel.sh ${choice}
   source ${plebVPNConf}
   if [ "${choice}" =  "on" ]; then
-    sudo /home/admin/pleb-vpn/tor.split-tunnel.sh status
+    sudo /home/admin/pleb-vpn/tor.split-tunnel.sh status 1
   fi
 else
   echo "Tor Split-Tunnel unchanged."
