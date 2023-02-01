@@ -92,7 +92,7 @@ shared servers and provides you with a cert to connect to them, only it uses Wir
 instead of OpenVPN for the connection. TunnelSats configures split-tunneling such that
 the node's clearnet traffic is the ONLY thing going through the VPN, whereas Pleb-VPN 
 by default sends ALL TRAFFIC through the VPN, and gives you the option to configure 
-split-tunneling so that tor is the ONLY thing allowed to bypass the VPN. This allows 
+split-tunneling so that tor is the only thing ALLOWED TO BYPASS the VPN. This allows 
 Pleb-VPN to run WireGuard over the VPN and allows you to run multiple nodes from one instance. 
 TunnelSats is also available for other node implementations easily, like Umbrel or MyNode. 
 However, Pleb-VPN is cheaper, and encourages Plebs to collaborate to make the lightning network 
