@@ -363,6 +363,9 @@ WantedBy=multi-user.target
   systemctl start pleb-vpn-nftables-config.service
   systemctl start pleb-vpn-tor-split-tunnel.timer
 
+  # copy service config files to /mnt/hdd to preserve through updates
+  cp -p -r /home/admin/pleb-vpn/split-tunnel /mnt/hdd/app-data/pleb-vpn/
+
   # check configuration
   echo "OK...tor is configured. Wait 2 minutes for tor to start..."
   sleep 60
@@ -483,6 +486,7 @@ off() {
   # remove split-tunnel scripts
   echo "removing split-tunnel scripts"
   rm -rf /home/admin/pleb-vpn/split-tunnel
+  rm -rf /mnt/hdd/app-data/pleb-vpn/split-tunnel
 
   # remove group novpn
   sudo groupdel novpn

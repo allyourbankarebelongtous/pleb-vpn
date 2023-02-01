@@ -163,6 +163,9 @@ update() {
   sudo chown -R admin:admin /home/admin/pleb-vpn
   sudo chmod -R 755 /mnt/hdd/app-data/pleb-vpn
   sudo chmod -R 755 /home/admin/pleb-vpn
+  if [ -d /mnt/hdd/app-data/pleb-vpn/split-tunnel/ ]; then
+    sudo cp -p -r /mnt/hdd/app-data/pleb-vpn/split-tunnel /home/admin/pleb-vpn/
+  fi
   sudo cp -p -r /mnt/hdd/app-data/pleb-vpn/payments /home/admin/pleb-vpn/
   sudo ln -s /mnt/hdd/app-data/pleb-vpn/pleb-vpn.conf /home/admin/pleb-vpn/pleb-vpn.conf
   exit 0
