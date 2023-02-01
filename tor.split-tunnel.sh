@@ -31,6 +31,17 @@ function setting() # FILE LINENUMBER NAME VALUE
 status() {
   source ${plebVPNConf}
 
+  whiptail --title "Tor Split-Tunnel status check" --msgbox "If you interrupt this test (Ctrl + C) then you should make sure your VPN is active with 
+'sudo systemctl start openvpn@plebvpn' before resuming operations. This test will temporarily 
+deactivate the VPN to see if tor can connect without the VPN operational. This test can take some time. 
+A failure of this test does not necessarily indicate that split-tunneling is not active, it could be 
+that tor is down or having issues.
+" 12 80
+  echo "NOTE: If you interrupt this test (Ctrl + C) then you should make sure your VPN is active with 
+'sudo systemctl start openvpn@plebvpn' before resuming operations. This test will temporarily 
+deactivate the VPN to see if tor can connect without the VPN operational. This test can take some time. 
+A failure of this test does not necessarily indicate that split-tunneling is not active, it could be 
+that tor is down or having issues."
   echo "checking configuration"
   if [ ! "${torSplitTunnel}" = "on" ]; then
     whiptail --title "Tor Split-Tunnel status" --msgbox "
@@ -56,9 +67,11 @@ Use menu to install Pleb-VPN.
       message="error...firewall not configured. Clearnet accessible when VPN is off. Uninstall and re-install pleb-vpn"
     fi
     echo "Checking connection over tor with VPN off (takes some time, likely multiple tries)..."
+    echo "Will attempt a connection up to 5 times before giving up..."
     inc=1
     while [ $inc -le 5 ]
     do
+      echo "attempt number ${inc}"
       noVPNtorIP=$(torify curl http://api.ipify.org)
       echo "tor IP = (${noVPNtorIP})...should not be blank, should not be your home IP, and should not be your VPN IP."
       if [ ! "${noVPNtorIP}" = "" ]; then
@@ -366,10 +379,12 @@ WantedBy=multi-user.target
     systemctl start openvpn@plebvpn
     exit 1
   fi
-  echo "checking tor (takes some time, likely multiple tries)..."
+  echo "Checking connection over tor with VPN off (takes some time, likely multiple tries)..."
+  echo "Will attempt a connection up to 10 times before giving up..."
   inc=1
   while [ $inc -le 10 ]
   do
+    echo "attempt number ${inc}"
     torIP=$(torify curl http://api.ipify.org)
     echo "tor IP = (${torIP})...should not be blank, should not be your home IP, and should not be your VPN IP."
     if [ ! "${torIP}" = "" ]; then
@@ -494,7 +509,6 @@ off() {
     systemctl start openvpn@plebvpn
     exit 1
   fi
-  echo "checking tor (takes some time)..."
   inc=1
   while [ $inc -le 10 ]
   do
