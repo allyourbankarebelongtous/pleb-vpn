@@ -103,7 +103,7 @@ Try checking the status using STATUS menu later. If unable to connect, uninstall
     whiptail --title "Tor Split-Tunnel status" --msgbox "
 Split-Tunnel activated: yes
 VPN operating: ${vpnWorking}
-Tor able to connect when firewall down: ${torSplitTunnelOK}
+Tor able to connect through firewall when VPN is down: ${torSplitTunnelOK}
 VPN server IP: ${vpnIP}
 VPN server port: ${vpnPort}
 Current IP (should match VPN server IP): ${currentIP}
