@@ -280,11 +280,11 @@ using the new routing. After this is complete, you should get a status screen th
 
 The way it checks the split-tunneling is as follows:  
 - check current IP (should be VPN IP) by running `curl https://api.ipify.org`  
-- disable the VPN `sudo systemctl stop openvpn@plebvpn`
+- disable the VPN `sudo systemctl stop openvpn@plebvpn`  
 - check if clearnet is accessible (shouldn't be) `curl https://api.ipify.org`  
-- check if tor is accessible (should be) `torify curl http://api.ipify.org`
-- restart Pleb-VPN `sudo systemctl start openvpn@plebvpn`
-- check clearnet IP (should be VPN IP) `curl https://api.ipify.org`
+- check if tor is accessible (should be) `torify curl http://api.ipify.org`  
+- restart Pleb-VPN `sudo systemctl start openvpn@plebvpn`  
+- check clearnet IP (should be VPN IP) `curl https://api.ipify.org`  
 _Note: if you run a status check of tor-split-tunneling immediately after boot or after restarting
 tor it will likely fail to connect over tor. It takes about a minute for the controller to identify 
 that tor is running and add it to the novpn cgroup, and then tor has to re-establish a circuit. If this 
