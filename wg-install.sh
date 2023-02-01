@@ -30,6 +30,21 @@ function setting() # FILE LINENUMBER NAME VALUE
   sudo sed -i --follow-symlinks "s/^${NAME}=.*/${NAME}=${VALUE}/g" ${FILE}
 }
 
+function validWgIP() {
+  local ip=$1
+  local stat=1
+  if [[ $ip =~ ^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$ ]]; then
+    OIFS=$IFS
+    IFS='.'
+    ip=($ip)
+    IFS=$OIFS
+    [[ ${ip[0]} -eq 10 && ${ip[1]} -le 255 &&
+      ${ip[2]} -le 255 && ${ip[3]} -le 252 ]]
+    stat=$?
+  fi
+  return $stat
+}
+
 status() {
   source ${plebVPNConf}
   message="Wireguard installed, configured, and operating as expected"
@@ -174,6 +189,13 @@ on() {
     sudo chmod 777 /var/cache/raspiblitz/.tmp
     whiptail --title "Wireguard LAN address" --inputbox "Enter your desired wireguard LAN IP, chosing from 10.0.0.0 to 10.255.255.252" 11 80 2>/var/cache/raspiblitz/.tmp
     wgIP=$(cat /var/cache/raspiblitz/.tmp)
+    validWgIP ${wgIP}
+    while [ ! ${?} -eq 0 ]
+    do
+      whiptail --title "Wireguard LAN address" --inputbox "ERROR: ${wgIP} is an invalid IP address. Enter your desired wireguard LAN IP, chosing from 10.0.0.0 to 10.255.255.252" 11 80 2>/var/cache/raspiblitz/.tmp
+      wgIP=$(cat /var/cache/raspiblitz/.tmp)
+      validWgIP ${wgIP}
+    done
     whiptail --title "Wireguard port" --inputbox "Enter the wireguard port assigned to you in your subscription. If you don't have one, contact @allyourbankarebelongtous on Telegram to obtain one." 11 80 2>/var/cache/raspiblitz/.tmp
     wgPort=$(cat /var/cache/raspiblitz/.tmp)
     # add wireguard LAN to pleb-vpn.conf 

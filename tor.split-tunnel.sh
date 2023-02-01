@@ -1,29 +1,6 @@
 #!/bin/bash
 
 # script to enable split-tunneling of tor on or off for pleb-vpn
-### done - adds a create-cgroup.sh file in /home/admin/pleb-vpn/split-tunnel/ which
-#   creates a cgroup net_cls for marking traffic
-### done - adds a systemd service, pleb-vpn-create-cgroup.service which creates the group
-#   on system boot
-### done - makes the service a requirement for tor to start
-# - decide to use tasks or cgclassify - creates tor-split-tunnel.sh in /home/admin/pleb-vpn/split-tunnel/ which
-#   adds the tor pid to the created cgroup (why create-cgroup must be on for tor 
-#   to start)
-### done - creates a systemd service and timer, pleb-vpn-tor-split-tunnel.service and
-# - maybe   pleb-vpn-tor-split-tunnel.timer to start/restart if required tor-split-tunnel.sh
-### can also restart on tor restart   (timer is required because if tor restarts it will change pid)
-### checks for and adds if required /etc/iproute2/rt_tables.d/novpn-route.conf
-### done - adds a nftables-config.sh file to /home/admin/pleb-vpn/split-tunnel/ that
-#   checks for and adds the required nftables rules to mark traffic from the cgroup
-#   and allow the marked traffic through the firewall without allowing anything else
-#   through
-### done - creates a systemd service, pleb-vpn-nftables-config.service, that runs on 
-#   boot after pleb-vpn-create-cgroup.service to automatically update firewall rules
-#   edits /lib/systemd/system/tor@.service and /lib/systemd/system/tor.service to
-#   ensure they start in the cgroup.
-# For off, script undoes all of the above actions
-# script also ensures config is persistent across updates (pleb-vpn.conf and vpn-install.sh changes required
-# script is available via SERVICES menu after pleb-vpn is on (requires editing pleb-vpnServicesMenu.sh)
 
 # command info
 if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
@@ -78,8 +55,18 @@ Use menu to install Pleb-VPN.
       firewallOK="no"
       message="error...firewall not configured. Clearnet accessible when VPN is off. Uninstall and re-install pleb-vpn"
     fi
-    echo "Checking connection over tor with VPN off..."
-    noVPNtorIP=$(torify curl http://api.ipify.org)
+    echo "Checking connection over tor with VPN off (takes some time, likely multiple tries)..."
+    inc=1
+    while [ $inc -le 5 ]
+    do
+      noVPNtorIP=$(torify curl http://api.ipify.org)
+      echo "tor IP = (${noVPNtorIP})...should not be blank, should not be your home IP, and should not be your VPN IP."
+      if [ ! "${noVPNtorIP}" = "" ]; then
+        inc=6
+      else
+        ((inc++))
+      fi
+    done
     sleep 5
     if [ ! "${noVPNtorIP}" = "" ]; then
       torSplitTunnelOK="yes"
