@@ -36,7 +36,7 @@ status() {
 deactivate the VPN to see if tor can connect without the VPN operational. This test can take some time. 
 A failure of this test does not necessarily indicate that split-tunneling is not active, it could be 
 that tor is down or having issues.
-" 12 80
+" 12 100
   echo "NOTE: If you interrupt this test (Ctrl + C) then you should make sure your VPN is active with 
 'sudo systemctl start openvpn@plebvpn' before resuming operations. This test will temporarily 
 deactivate the VPN to see if tor can connect without the VPN operational. This test can take some time. 
