@@ -551,6 +551,7 @@ off() {
   sleep 2
   echo "restarting vpn"
   systemctl start openvpn@plebvpn
+  systemctl restart tor@default.service
   sleep 2
   echo "checking VPN IP"
   currentIP=$(curl https://api.ipify.org)
