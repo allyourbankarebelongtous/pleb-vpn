@@ -189,7 +189,7 @@ echo "Checking and installing requirements..."
   do
     ruleNumber=$(nft list chain ip filter ufw-user-output | grep -c "meta cgroup 1114129 counter")
     ip_filter_output_handle=$(echo "${ip_filter_output_handles}" | sed -n ${ruleNumber}p)
-    nft delete rule ip filter ufw-user-input handle ${ip_filter_output_handle}
+    nft delete rule ip filter ufw-user-output handle ${ip_filter_output_handle}
   done
   while [ $(ip rule | grep -c "fwmark 0xb lookup novpn") -gt 0 ]
   do
@@ -327,7 +327,7 @@ while [ $(nft list chain ip filter ufw-user-output | grep -c "meta cgroup 111412
 do
   ruleNumber=$(nft list chain ip filter ufw-user-output | grep -c "meta cgroup 1114129 counter")
   ip_filter_output_handle=$(echo "${ip_filter_output_handles}" | sed -n ${ruleNumber}p)
-  nft delete rule ip filter ufw-user-input handle ${ip_filter_output_handle}
+  nft delete rule ip filter ufw-user-output handle ${ip_filter_output_handle}
 done
 while [ $(ip rule | grep -c "fwmark 0xb lookup novpn") -gt 0 ]
 do
@@ -492,7 +492,7 @@ off() {
   do
     ruleNumber=$(nft list chain ip filter ufw-user-output | grep -c "meta cgroup 1114129 counter")
     ip_filter_output_handle=$(echo "${ip_filter_output_handles}" | sed -n ${ruleNumber}p)
-    nft delete rule ip filter ufw-user-input handle ${ip_filter_output_handle}
+    nft delete rule ip filter ufw-user-output handle ${ip_filter_output_handle}
   done
   while [ $(ip rule | grep -c "fwmark 0xb lookup novpn") -gt 0 ]
   do
