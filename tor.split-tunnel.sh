@@ -71,7 +71,7 @@ Use menu to install Pleb-VPN.
       firewallOK="no"
       message="error...firewall not configured. Clearnet accessible when VPN is off. Uninstall and re-install pleb-vpn"
     fi
-    echo "Checking connection over tor with VPN off (takes some time, likely multiple tries)..."
+    echo "Checking connection over tor with VPN off (can take some time, possibly multiple tries)..."
     echo "Will attempt a connection up to 5 times before giving up..."
     inc=1
     while [ $inc -le 5 ]
@@ -580,8 +580,9 @@ off() {
     echo "tor configuration successful"
   else 
     echo "error...unable to connect over tor when VPN is up. It's possible that it needs more time to establish a connection. 
-Try checking the status of tor later. If unable to connect, uninstall and re-install all of pleb-vpn."
+Try checking the status of tor later. If still unable to connect over tor, try rebooting the node."
   fi
+  sleep 5
   echo "tor split-tunneling is disabled and removed"
   sleep 2
   setting ${plebVPNConf} "2" "torSplitTunnel" "off"
