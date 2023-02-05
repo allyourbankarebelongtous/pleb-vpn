@@ -120,7 +120,8 @@ on() {
   # make persistant with custom-installs.sh
   isPersistant=$(cat /mnt/hdd/app-data/custom-installs.sh | grep -c /mnt/hdd/app-data/pleb-vpn/pleb-vpn.install.sh)
   if [ ${isPersistant} -eq 0 ]; then
-    echo "/mnt/hdd/app-data/pleb-vpn/pleb-vpn.install.sh restore
+    echo "# pleb-vpn restore
+/mnt/hdd/app-data/pleb-vpn/pleb-vpn.install.sh restore
 " | sudo tee -a /mnt/hdd/app-data/custom-installs.sh
   fi
   # add pleb-vpn to 00mainMenu.sh
