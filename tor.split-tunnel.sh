@@ -432,6 +432,12 @@ Try checking the status using STATUS menu later. If unable to connect, uninstall
   echo "tor split-tunneling enabled!"
   sleep 2
   setting ${plebVPNConf} "2" "torSplitTunnel" "on"
+  if [ ! $(ls /etc/systemd/system | grep -c lnd.service) -eq 0 ]; then
+    systemctl restart lnd
+  fi
+  if [ ! $(ls /etc/systemd/system | grep -c lightningd.service) -eq 0 ]; then
+    systemctl restart lightningd
+  fi
   exit 0
 }
 
