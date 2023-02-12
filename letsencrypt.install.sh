@@ -41,7 +41,7 @@ on() {
       whiptail --title "Use Existing DNS Authentication?" \
       --yes-button "Use Existing" \
       --no-button "Create New" \
-      --yesno "There's an existing DNS authenticaton found from a previous install of letsencrypt for ${service}. Do you wish to reuse it or to start fresh?" 10 80
+      --yesno "There's an existing DNS authenticaton found from a previous install of letsencrypt. Do you wish to reuse it or to start fresh?" 10 80
       if [ $? -eq 1 ]; then
         keepExisting="0"
       else
@@ -272,6 +272,10 @@ ssl_certificate_key /mnt/hdd/app-data/pleb-vpn/letsencrypt/tls.key;
 
     # reload nginx
     sudo nginx -t
+    if [ ! $? -eq 0 ]; then
+      echo "ERROR: nginx config error. Uninstall letsencrypt service to restore nginx config"
+      exit 1
+    fi
     sudo systemctl reload nginx
 
     # save acme authenticaton
@@ -356,10 +360,6 @@ Is the information correct?
       fi
     fi
 
-    # move acme-dns-auth.py and acmedns.json
-    sudo cp -p /mnt/hdd/app-data/encrypt/acme-dns-auth.py /etc/letsencrypt/
-    sudo cp -p /mnt/hdd/app-data/encrypt/acmedns.json /etc/letsencrypt/
-
     # get certs
     if [ ! "${letsencryptDomain2}" = "" ]; then
       sudo certbot certonly --noninteractive --agree-tos --manual --manual-auth-hook /etc/letsencrypt/acme-dns-auth.py --preferred-challenges dns --register-unsafely-without-email -d ${letsencryptDomain1} -d ${letsencryptDomain2}
@@ -393,6 +393,10 @@ ssl_certificate_key /mnt/hdd/app-data/pleb-vpn/letsencrypt/tls.key;
 
     # reload nginx
     sudo nginx -t
+    if [ ! $? -eq 0 ]; then
+      echo "ERROR: nginx config error. Uninstall letsencrypt service to restore nginx config"
+      exit 1
+    fi
     sudo systemctl reload nginx
 
   fi
@@ -422,6 +426,10 @@ off() {
 
   # reload nginx
   sudo nginx -t
+  if [ ! $? -eq 0 ]; then
+    echo "ERROR: nginx config error"
+    exit 1
+  fi
   sudo systemctl reload nginx
 
   # update pleb-vpn.conf
