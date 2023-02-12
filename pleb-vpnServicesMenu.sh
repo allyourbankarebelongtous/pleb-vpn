@@ -12,6 +12,7 @@ if [ ${#wireguard} -eq 0 ]; then wireguard="off"; fi
 if [ ${#clnHybrid} -eq 0 ]; then clnHybrid="off"; fi
 if [ ${#lndHybrid} -eq 0 ]; then lndHybrid="off"; fi
 if [ ${#torSplitTunnel} -eq 0 ]; then torSplitTunnel="off"; fi
+if [ ${#letsencrypt} -eq 0 ]; then letsencrypt="off"; fi
 
 OPTIONS=()
 
@@ -28,6 +29,10 @@ if [ "${plebVPN}" = "on" ]; then
   # if LND is on in raspiblitz.conf
   if [ "${lightning}" == "lnd" ] || [ "${lnd}" == "on" ]; then
     OPTIONS+=(lnd 'LND Hybrid Mode' ${lndHybrid})
+  fi
+  # if BTCPayServer or LNBits is on in raspiblitz.conf
+  if [ "${BTCPayServer}" == "on" ] || [ "${LNBits}" == "on" ]; then
+    OPTIONS+=(ssl 'LetsEncrypt for BTCPay and/or LNBits' ${letsencrypt})
   fi
 fi
 CHOICES=$(dialog --title ' Activate Pleb-VPN Services ' \
@@ -134,6 +139,18 @@ if [ "${torSplitTunnel}" != "${choice}" ]; then
   fi
 else
   echo "Tor Split-Tunnel unchanged."
+fi
+
+# LetsEncrypt
+choice="off"; check=$(echo "${CHOICES}" | grep -c "ssl")
+if [ ${check} -eq 1 ]; then choice="on"; fi
+if [ "${letsencrypt}" != "${choice}" ]; then
+  echo "LetsEncrypt Setting changed .."
+  anychange=1
+  sudo /home/admin/pleb-vpn/letsencrypt.install.sh ${choice}
+  source ${plebVPNConf}
+else
+  echo "LetsEncrypt unchanged."
 fi
 
 if [ ${anychange} -eq 0 ]; then

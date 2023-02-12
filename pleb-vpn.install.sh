@@ -112,6 +112,11 @@ on() {
   setting ${plebVPNConf} "2" "LndConfFile" "'${lndConfFile}'"
   setting ${plebVPNConf} "2" "CLNConfFile" "'${CLCONF}'"
   setting ${plebVPNConf} "2" "LAN" "'${LAN}'"
+  setting ${plebVPNConf} "2" "letsencryptDomain2" ""
+  setting ${plebVPNConf} "2" "letsencryptDomain1" ""
+  setting ${plebVPNConf} "2" "letsencryptLNBits" "off"
+  setting ${plebVPNConf} "2" "letsencryptBTCPay" "off"
+  setting ${plebVPNConf} "2" "letsencrypt" "off"
   setting ${plebVPNConf} "2" "torSplitTunnel" "off"
   setting ${plebVPNConf} "2" "lndHybrid" "off"
   setting ${plebVPNConf} "2" "clnHybrid" "off"
@@ -228,6 +233,9 @@ restore() {
   if [ "${torSplitTunnel}" = "on" ]; then
     sudo /home/admin/pleb-vpn/tor.split-tunnel.sh on
   fi
+  if [ "${letsencrypt}" = "on" ]; then
+    sudo /home/admin/pleb-vpn/letsencrypt.install.sh on 1
+  fi
   # restore payment services
   inc=1
   while [ $inc -le 8 ]
@@ -286,6 +294,9 @@ uninstall() {
   plebVPNConf="/home/admin/pleb-vpn/pleb-vpn.conf"
   source ${plebVPNConf}
   # first uninstall services
+  if [ "${letsencrypt}" = "on" ]; then
+    sudo /home/admin/pleb-vpn/letsencrypt.install.sh off
+  fi
   if [ "${torSplitTunnel}" = "on" ]; then
     sudo /home/admin/pleb-vpn/tor.split-tunnel.sh off 1
   fi
@@ -303,9 +314,12 @@ uninstall() {
   fi
   # delete all payments
   /home/admin/pleb-vpn/payments/managepayments.sh deleteall 1
-  # restore backups
-  /home/admin/pleb-vpn/pleb-vpn.backup.sh restore
   # remove extra line from custom-installs if required
+  extraLine="# pleb-vpn restore"
+  lineExists=$(sudo cat /mnt/hdd/app-data/custom-installs.sh | grep -c "${extraLine}")
+  if ! [ ${lineExists} -eq 0 ]; then
+    sudo sed -i "s:^${extraLine}.*::g" /mnt/hdd/app-data/custom-installs.sh
+  fi
   extraLine="/mnt/hdd/app-data/pleb-vpn/pleb-vpn.install.sh"
   lineExists=$(sudo cat /mnt/hdd/app-data/custom-installs.sh | grep -c "${extraLine}")
   if ! [ ${lineExists} -eq 0 ]; then
