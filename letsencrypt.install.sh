@@ -280,6 +280,10 @@ ssl_certificate_key /mnt/hdd/app-data/pleb-vpn/letsencrypt/tls.key;
   else
     # use existing DNS authenticaton
 
+    # copy acme-dns-auth.py 
+    sudo cp /mnt/hdd/app-data/pleb-vpn/letsencrypt/acme-dns-auth.py /etc/letsencrypt/
+    sudo chmod 777 /etc/letsencrypt/acme-dns-auth.py
+
     # check for domain name(s) in pleb-vpn.conf and if not present, get them from acmedns.json
     if [ "${letsencryptDomain1}" = "" ]; then
       domains=$(sudo cat /mnt/hdd/app-data/pleb-vpn/letsencrypt/acmedns.json | jq . | grep ": {" | cut -d ":" -f1)
