@@ -39,8 +39,8 @@ on() {
     isExisting=$(ls /mnt/hdd/app-data/pleb-vpn/letsencrypt | grep -c acmedns.json)
     if [ ! ${isExisting} -eq 0 ]; then
       whiptail --title "Use Existing DNS Authentication?" \
-      --yes-button "Use Existing Authentication" \
-      --no-button "Create New Authentication" \
+      --yes-button "Use Existing" \
+      --no-button "Create New" \
       --yesno "There's an existing DNS authenticaton found from a previous install of letsencrypt for ${service}. Do you wish to reuse it or to start fresh?" 10 80
       if [ $? -eq 1 ]; then
         keepExisting="0"
@@ -280,12 +280,14 @@ ssl_certificate_key /mnt/hdd/app-data/pleb-vpn/letsencrypt/tls.key;
   else
     # use existing DNS authenticaton
 
-    # check for domain name(s) in pleb-vpn.conf
+    # check for domain name(s) in pleb-vpn.conf and if not present, get them from acmedns.json
     if [ "${letsencryptDomain1}" = "" ]; then
-######### TODO: see if domain names can be found in acmedns.json
-      echo "ERROR: letsencrypt found an existing DNS Authentication but does not have a domain
-name located in pleb-vpn.conf. Redo letsencrypt and choose new DNS Authentication to continue."
-      exit 1
+      domains=$(sudo cat /mnt/hdd/app-data/pleb-vpn/letsencrypt/acmedns.json | jq . | grep ": {" | cut -d ":" -f1)
+      domainCount=$(sudo cat /mnt/hdd/app-data/pleb-vpn/letsencrypt/acmedns.json | jq . | grep -c ": {")
+      letsencryptDomain1=$(echo "${domains}" | sed -n "1p" | sed 's/ //g' | sed 's/\"//g')
+      if [ ${domainCount} -gt 1 ]; then
+        letsencryptDomain2=$(echo "${domains}" | sed -n "2p" | sed 's/ //g' | sed 's/\"//g')
+      fi
     fi
     if [ ! "${isRestore}" = "1" ]; then
 
