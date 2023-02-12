@@ -234,7 +234,7 @@ restore() {
     sudo /home/admin/pleb-vpn/tor.split-tunnel.sh on
   fi
   if [ "${letsencrypt}" = "on" ]; then
-    sudo /home/admin/pleb-vpn/letsencrypt.install.sh on 1
+    sudo /home/admin/pleb-vpn/letsencrypt.install.sh on 1 1
   fi
   # restore payment services
   inc=1

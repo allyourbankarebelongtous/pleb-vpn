@@ -32,6 +32,7 @@ on() {
   source ${plebVPNConf}
   source /mnt/hdd/raspiblitz.conf
   local keepExisting="${1}"
+  local isRestore="${2}"
   sudo apt install -y certbot
   if [ ! "${keepExisting}" = "1" ]; then
     # check for existing challenge
@@ -72,11 +73,15 @@ on() {
     fi
 
     # get service(s) to enable letsencrypt for
-    letsencryptBTCPay="off"
-    letsencryptLNBits="off"
+    if [ ${#letsencryptBTCPay} -eq 0 ]; then letsencryptBTCPay="off"; fi
+    if [ ${#letsencryptLNBits} -eq 0 ]; then letsencryptLNBits="off"; fi
     OPTIONS=()
-    OPTIONS+=(b 'BTCPayServer' ${letsencryptBTCPay})
-    OPTIONS+=(l 'LNBits' ${letsencryptLNBits})
+    if [ "${BTCPayServer}" = "on" ]; then
+      OPTIONS+=(b 'BTCPayServer' ${letsencryptBTCPay})
+    fi
+    if [ "${BTCPayServer}" = "on" ]; then
+      OPTIONS+=(l 'LNBits' ${letsencryptLNBits})
+    fi
     CHOICES=$(dialog --title ' Select service(s) to secure ' \
               --checklist ' use spacebar to activate/de-activate ' \
               10 45 10  "${OPTIONS[@]}" 2>&1 >/dev/tty)
@@ -97,14 +102,12 @@ on() {
     # BTCPayServer
     check=$(echo "${CHOICES}" | grep -c "b")
     if [ ${check} -eq 1 ]; then
-############ CHECK IF BTCPAY IS INSTALLED
       letsencryptBTCPay="on"
     fi
 
     # LNBits
     check=$(echo "${CHOICES}" | grep -c "l")
     if [ ${check} -eq 1 ]; then
-############ CHECK IF LNBITS IS INSTALLED
       letsencryptLNBits="on";
     fi
 
@@ -113,6 +116,42 @@ on() {
     sudo chmod 777 /var/cache/raspiblitz/.tmp
     whiptail --title "Enter Domain" --inputbox "Enter the first domain name that you wish to secure (example: btcpay.mydomain.com)" 11 80 2>/var/cache/raspiblitz/.tmp
     letsencryptDomain1=$(cat /var/cache/raspiblitz/.tmp)
+    # check first domain name
+    if [ "${letsencryptDomain1}" = "" ]; then
+      whiptail --title "Invalid Domain" --inputbox "Domain cannot be blank. 
+Re-Enter the first domain name that you wish to secure (example: btcpay.mydomain.com)" 12 80 2>/var/cache/raspiblitz/.tmp
+      letsencryptDomain1=$(cat /var/cache/raspiblitz/.tmp)
+      if [ "${letsencryptDomain1}" = "" ]; then
+        echo "ERROR: Invalid domain. Domain cannot be blank. Please try again later"
+        echo "LetsEncrypt install canceled"
+        exit 1
+      fi
+    fi
+    domain1host=$(host ${letsencryptDomain1} | grep -v IPv6 | cut -d " " -f4)
+    if [ ! "${domain1host}" = "${vpnIP}" ]; then
+      whiptail --title "Invalid Domain" 
+      --yes-button "Check Again"
+      --no-button "Re-Enter Domain"
+      --yesno "
+ERROR: ${letsencryptDomain1} resolves to host IP of '${domain1host}'. Are you sure you entered it correctly?
+Have you added '${vpnIP}' to the A record to point the domain at your VPS? If you entered your 
+domain name incorrectly chose <Re-Enter Domain> below. If you fixed your A record and want to check 
+the host of ${letsencryptDomain1} again, chose <Check Again> below.
+" 20 100
+      if [ $? -eq 1 ]; then
+        whiptail --title "Enter Domain" --inputbox "Enter the first domain name that you wish to secure (example: btcpay.mydomain.com)" 11 80 2>/var/cache/raspiblitz/.tmp
+        letsencryptDomain1=$(cat /var/cache/raspiblitz/.tmp)
+        domain1host=$(host ${letsencryptDomain1} | grep -v IPv6 | cut -d " " -f4)
+      else
+        echo "LetsEncrypt install canceled"
+        exit 1
+      fi
+      if [ ! "${domain1host}" = "${vpnIP}" ]; then
+        echo "ERROR: ${letsencryptDomain1} points to ${domain1host}, should point to ${vpnIP}."
+        echo "LetsEncrypt install canceled"
+        exit 1
+      fi
+    fi
     whiptail --title "Use a second domain?" \
     --yes-button "Yes" \
     --no-button "No" \
@@ -125,6 +164,75 @@ Do you wish to encrypt a second domain?
     else
       letsencryptDomain2=""
     fi
+    # check second domain name
+    if [ ! "${letsencryptDomain2}" = "" ]; then
+      domain2host=$(host ${letsencryptDomain2} | grep -v IPv6 | cut -d " " -f4)
+      if [ ! "${domain2host}" = "${vpnIP}" ]; then
+        whiptail --title "Invalid Domain" 
+        --yes-button "Check Again"
+        --no-button "Re-Enter Domain"
+        --yesno "
+ERROR: ${letsencryptDomain2} resolves to host IP of '${domain2host}'. Are you sure you entered it correctly?
+Have you added '${vpnIP}' to the A record to point the domain at your VPS? If you entered your 
+domain name incorrectly chose <Re-Enter Domain> below. If you fixed your A record and want to check 
+the host of ${letsencryptDomain1} again, chose <Check Again> below.
+" 20 100
+        if [ $? -eq 1 ]; then
+          whiptail --title "Enter Domain" --inputbox "Enter the second domain name that you wish to secure (example: btcpay.mydomain.com)" 11 80 2>/var/cache/raspiblitz/.tmp
+          letsencryptDomain1=$(cat /var/cache/raspiblitz/.tmp)
+          domain1host=$(host ${letsencryptDomain1} | grep -v IPv6 | cut -d " " -f4)
+        else
+          echo "LetsEncrypt install canceled"
+          exit 1
+        fi
+        if [ ! "${domain2host}" = "${vpnIP}" ]; then
+          echo "ERROR: ${letsencryptDomain2} points to ${domain2host}, should point to ${vpnIP}."
+          echo "LetsEncrypt install canceled"
+          exit 1
+        fi
+      fi
+    fi
+
+    # get service(s) to enable letsencrypt for
+    if [ ${#letsencryptBTCPay} -eq 0 ]; then letsencryptBTCPay="off"; fi
+    if [ ${#letsencryptLNBits} -eq 0 ]; then letsencryptLNBits="off"; fi
+    OPTIONS=()
+    if [ "${BTCPayServer}" = "on" ]; then
+      OPTIONS+=(b 'BTCPayServer' ${letsencryptBTCPay})
+    fi
+    if [ "${BTCPayServer}" = "on" ]; then
+      OPTIONS+=(l 'LNBits' ${letsencryptLNBits})
+    fi
+    CHOICES=$(dialog --title ' Select service(s) to secure ' \
+              --checklist ' use spacebar to activate/de-activate ' \
+              10 45 10  "${OPTIONS[@]}" 2>&1 >/dev/tty)
+    dialogcancel=$?
+    echo "done dialog"
+    clear
+
+    # check if user canceled dialog
+    echo "dialogcancel(${dialogcancel})"
+    if [ ${dialogcancel} -eq 1 ]; then
+      echo "user canceled"
+      exit 0
+    elif [ ${dialogcancel} -eq 255 ]; then
+      echo "ESC pressed"
+      exit 0
+    fi
+
+    # BTCPayServer
+    check=$(echo "${CHOICES}" | grep -c "b")
+    if [ ${check} -eq 1 ]; then
+      letsencryptBTCPay="on"
+    fi
+
+    # LNBits
+    check=$(echo "${CHOICES}" | grep -c "l")
+    if [ ${check} -eq 1 ]; then
+      letsencryptLNBits="on";
+    fi
+
+    # install certs
     whiptail --title "LetsEncrypt new cert" --msgbox "
 CertBot is about to install your LetsEncrypt cert. After the install, the CertBot will
 instruct you to add the required DNS CNAME record to the DNS configuration for your domain(s).
@@ -183,15 +291,79 @@ ssl_certificate_key /mnt/hdd/app-data/pleb-vpn/letsencrypt/tls.key;
     sudo nginx -t
     sudo systemctl reload nginx
 
-    # update pleb-vpn.conf
-    if [ ! "${letsencryptDomain2}" = "" ]; then
-      setting ${plebVPNConf} "2" "letsencryptDomain2" "'${letsencryptDomain2}'"
-    fi
-    setting ${plebVPNConf} "2" "letsencryptDomain1" "'${letsencryptDomain1}'"
-    setting ${plebVPNConf} "2" "letsencryptBTCPay" "${letsencryptBTCPay}"
-    setting ${plebVPNConf} "2" "letsencryptLNBits" "${letsencryptLNBits}"
-    setting ${plebVPNConf} "2" "letsencrypt" "on"
+    # save acme authenticaton
+    sudo cp -p /etc/letsencrypt/acmedns.json /mnt/hdd/app-data/pleb-vpn/letsencrypt/
+
   else
+    # use existing DNS authenticaton
+
+    # check for domain name(s) in pleb-vpn.conf
+    if [ "${letsencryptDomain1}" = "" ]; then
+      echo "ERROR: letsencrypt found an existing DNS Authentication but does not have a domain
+name located in pleb-vpn.conf. Redo letsencrypt and choose new DNS Authentication to continue."
+      exit 1
+    fi
+    if [ ! "${isRestore}" = "1" ]; then
+
+      # get service(s) to enable letsencrypt for
+      if [ ${#letsencryptBTCPay} -eq 0 ]; then letsencryptBTCPay="off"; fi
+      if [ ${#letsencryptLNBits} -eq 0 ]; then letsencryptLNBits="off"; fi
+      OPTIONS=()
+      if [ "${BTCPayServer}" = "on" ]; then
+        OPTIONS+=(b 'BTCPayServer' ${letsencryptBTCPay})
+      fi
+      if [ "${BTCPayServer}" = "on" ]; then
+        OPTIONS+=(l 'LNBits' ${letsencryptLNBits})
+      fi
+      CHOICES=$(dialog --title ' Select service(s) to secure ' \
+                --checklist ' use spacebar to activate/de-activate ' \
+                10 45 10  "${OPTIONS[@]}" 2>&1 >/dev/tty)
+      dialogcancel=$?
+      echo "done dialog"
+      clear
+
+      # check if user canceled dialog
+      echo "dialogcancel(${dialogcancel})"
+      if [ ${dialogcancel} -eq 1 ]; then
+        echo "user canceled"
+        exit 0
+      elif [ ${dialogcancel} -eq 255 ]; then
+        echo "ESC pressed"
+        exit 0
+      fi
+
+      # BTCPayServer
+      check=$(echo "${CHOICES}" | grep -c "b")
+      if [ ${check} -eq 1 ]; then
+        letsencryptBTCPay="on"
+      fi
+
+      # LNBits
+      check=$(echo "${CHOICES}" | grep -c "l")
+      if [ ${check} -eq 1 ]; then
+        letsencryptLNBits="on";
+      fi
+
+      whiptail --title "LetsEncrypt re-create cert" 
+      --yes-button "Yes" \
+      --no-button "No" \
+      --yesno "
+CertBot is about to re-install your LetsEncrypt cert using the following information:
+
+Domain 1: ${letsencryptDomain1}
+Domain 2: ${letsencryptDomain2}
+BTCPayServer LetsEncrypt: ${letsencryptBTCPay}
+LNBits LetsEncrypt: ${letsencryptLNBits}
+
+If the above information is incorrect, re-run this script and create a new DNS Authentication.
+
+Is the information correct?
+" 19 100
+      if [ ! $? -eq 1 ]; then
+        echo "user canceled"
+        exit 0
+      fi
+    fi
 
     # move acme-dns-auth.py and acmedns.json
     sudo cp -p /mnt/hdd/app-data/encrypt/acme-dns-auth.py /etc/letsencrypt/
@@ -230,7 +402,16 @@ ssl_certificate_key /mnt/hdd/app-data/pleb-vpn/letsencrypt/tls.key;
     # reload nginx
     sudo nginx -t
     sudo systemctl reload nginx
+
   fi
+  # update pleb-vpn.conf
+  if [ ! "${letsencryptDomain2}" = "" ]; then
+    setting ${plebVPNConf} "2" "letsencryptDomain2" "'${letsencryptDomain2}'"
+  fi
+  setting ${plebVPNConf} "2" "letsencryptDomain1" "'${letsencryptDomain1}'"
+  setting ${plebVPNConf} "2" "letsencryptBTCPay" "${letsencryptBTCPay}"
+  setting ${plebVPNConf} "2" "letsencryptLNBits" "${letsencryptLNBits}"
+  setting ${plebVPNConf} "2" "letsencrypt" "on"
   exit 0
 }
 
@@ -261,6 +442,6 @@ off() {
 }
 
 case "${1}" in
-  on) on "${2}" ;;
+  on) on "${2}" "${3}";;
   off) off ;;
 esac
