@@ -54,6 +54,27 @@ on() {
   if [ "${keepExisting}" = "0" ]; then
     # new certs with new dns challenge
 
+    # display instructions and confirm ready to install
+    whiptail --title "LetsEncrypt Install Instructions" \
+    --yes-button "Continue" \
+    --no-button "Cancel" \
+    --yesno "
+This will install a LetsEncrypt cert on your raspiblitz which will allow ssl https
+connections over clearnet for BTCPayServer and/or LNBits. 
+
+Before running this script, make sure you:
+1) Have a domain name for each service you are attempting to secure
+2) Have forwarded port 443 from your VPS (or had your VPS provider do it)
+3) Have updated the A record of each domain to ${vpnIP}
+4) Are ready to update the CNAME record for each domain when instructed
+
+Are you ready to continue?
+" 20 100
+    if [ $? -eq 1 ]; then
+      echo "user canceled"
+      exit 0
+    fi
+
     # set up acme dns challenge
     sudo mkdir /mnt/hdd/app-data/pleb-vpn/letsencrypt
     sudo wget https://github.com/joohoi/acme-dns-certbot-joohoi/raw/master/acme-dns-auth.py
@@ -129,9 +150,9 @@ Re-Enter the first domain name that you wish to secure (example: btcpay.mydomain
     fi
     domain1host=$(host ${letsencryptDomain1} | grep -v IPv6 | cut -d " " -f4)
     if [ ! "${domain1host}" = "${vpnIP}" ]; then
-      whiptail --title "Invalid Domain" 
-      --yes-button "Check Again"
-      --no-button "Re-Enter Domain"
+      whiptail --title "Invalid Domain" \
+      --yes-button "Check Again" \
+      --no-button "Re-Enter Domain" \
       --yesno "
 ERROR: ${letsencryptDomain1} resolves to host IP of '${domain1host}'. Are you sure you entered it correctly?
 Have you added '${vpnIP}' to the A record to point the domain at your VPS? If you entered your 
@@ -168,9 +189,9 @@ Do you wish to encrypt a second domain?
     if [ ! "${letsencryptDomain2}" = "" ]; then
       domain2host=$(host ${letsencryptDomain2} | grep -v IPv6 | cut -d " " -f4)
       if [ ! "${domain2host}" = "${vpnIP}" ]; then
-        whiptail --title "Invalid Domain" 
-        --yes-button "Check Again"
-        --no-button "Re-Enter Domain"
+        whiptail --title "Invalid Domain" \
+        --yes-button "Check Again" \
+        --no-button "Re-Enter Domain" \
         --yesno "
 ERROR: ${letsencryptDomain2} resolves to host IP of '${domain2host}'. Are you sure you entered it correctly?
 Have you added '${vpnIP}' to the A record to point the domain at your VPS? If you entered your 
@@ -306,7 +327,7 @@ name located in pleb-vpn.conf. Redo letsencrypt and choose new DNS Authenticatio
         letsencryptLNBits="on";
       fi
 
-      whiptail --title "LetsEncrypt re-create cert" 
+      whiptail --title "LetsEncrypt re-create cert" \
       --yes-button "Yes" \
       --no-button "No" \
       --yesno "
