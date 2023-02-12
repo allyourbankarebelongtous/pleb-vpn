@@ -148,7 +148,6 @@ if [ "${letsencrypt}" != "${choice}" ]; then
   echo "LetsEncrypt Setting changed .."
   anychange=1
   sudo /home/admin/pleb-vpn/letsencrypt.install.sh ${choice}
-  source ${plebVPNConf}
 else
   echo "LetsEncrypt unchanged."
 fi

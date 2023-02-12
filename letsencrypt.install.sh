@@ -47,6 +47,9 @@ on() {
         keepExisting="1"
       fi
     fi
+    else
+      keepExisting="0"
+    fi
   fi
   if [ "${keepExisting}" = "0" ]; then
     # new certs with new dns challenge
