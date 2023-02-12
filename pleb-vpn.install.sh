@@ -155,9 +155,9 @@ update() {
   cd /home/admin
   git clone https://github.com/allyourbankarebelongtous/pleb-vpn.git
 #  these commands are for checking out a specific branch for testing
-#  cd /home/admin/pleb-vpn
-#  git checkout -b v0.9.1-tor-split-tunnel
-#  git pull origin v0.9.1-tor-split-tunnel 
+  cd /home/admin/pleb-vpn
+  git checkout -b letsencrypt
+  git pull origin letsencrypt
   sudo cp -p -r /home/admin/pleb-vpn /mnt/hdd/app-data/
   # fix permissions
   sudo chown -R admin:admin /mnt/hdd/app-data/pleb-vpn
@@ -287,7 +287,7 @@ uninstall() {
   source ${plebVPNConf}
   # first uninstall services
   if [ "${torSplitTunnel}" = "on" ]; then
-    sudo /home/admin/pleb-vpn/tor.split-tunnel.sh off
+    sudo /home/admin/pleb-vpn/tor.split-tunnel.sh off 1
   fi
   if [ "${lndHybrid}" = "on" ]; then
     /home/admin/pleb-vpn/lnd-hybrid.sh off
