@@ -249,8 +249,9 @@ Contact allyourbankarebelongtous with any questions or issues.
     fi
 
     # link certs to /mnt/hdd/app-data/pleb-vpn/letsencrypt
-    sudo ln -s /etc/letsencrypt/live/${letsencryptDomain1}/fullchain.pem /mnt/hdd/app-data/pleb-vpn/letsencrypt/tls.cert
-    sudo ln -s /etc/letsencrypt/live/${letsencryptDomain1}/privkey.pem /mnt/hdd/app-data/pleb-vpn/letsencrypt/tls.key
+    sudo chmod -R 755 /etc/letsencrypt
+    sudo ln -s /etc/letsencrypt/live/"${letsencryptDomain1}"/fullchain.pem /mnt/hdd/app-data/pleb-vpn/letsencrypt/tls.cert
+    sudo ln -s /etc/letsencrypt/live/"${letsencryptDomain1}"/privkey.pem /mnt/hdd/app-data/pleb-vpn/letsencrypt/tls.key
 
     # create letsencrypt ssl snippet
 echo "# ssl-certificate-app-data-letsencrypt.conf
@@ -360,10 +361,11 @@ Is the information correct?
     fi
 
     # link certs to /mnt/hdd/app-data/pleb-vpn/letsencrypt
+    sudo chmod -R 755 /etc/letsencrypt
     sudo rm /mnt/hdd/app-data/pleb-vpn/letsencrypt/tls.cert &> /dev/null
     sudo rm /mnt/hdd/app-data/pleb-vpn/letsencrypt/tls.key &> /dev/null
-    sudo ln -s /etc/letsencrypt/live/${letsencryptDomain1}/fullchain.pem /mnt/hdd/app-data/pleb-vpn/letsencrypt/tls.cert
-    sudo ln -s /etc/letsencrypt/live/${letsencryptDomain1}/privkey.pem /mnt/hdd/app-data/pleb-vpn/letsencrypt/tls.key
+    sudo ln -s /etc/letsencrypt/live/"${letsencryptDomain1}"/fullchain.pem /mnt/hdd/app-data/pleb-vpn/letsencrypt/tls.cert
+    sudo ln -s /etc/letsencrypt/live/"${letsencryptDomain1}"/privkey.pem /mnt/hdd/app-data/pleb-vpn/letsencrypt/tls.key
 
     # create letsencrypt ssl snippet
 echo "# ssl-certificate-app-data-letsencrypt.conf

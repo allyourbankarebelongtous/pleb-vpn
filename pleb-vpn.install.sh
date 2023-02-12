@@ -57,6 +57,11 @@ on() {
 # wireguard
 # clnHybrid
 # lndHybrid
+# letsencrypt
+# letsencryptBTCPay
+# letsencryptLNBits
+# letsencryptDomain1
+# letsencryptDomain2
 # CLNConfFile
 # lndConfFile
 # LAN
