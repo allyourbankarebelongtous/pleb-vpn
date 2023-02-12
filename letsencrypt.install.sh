@@ -46,7 +46,6 @@ on() {
       else
         keepExisting="1"
       fi
-    fi
     else
       keepExisting="0"
     fi
