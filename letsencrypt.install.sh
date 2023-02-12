@@ -80,7 +80,7 @@ Are you ready to continue?
     sudo wget https://github.com/joohoi/acme-dns-certbot-joohoi/raw/master/acme-dns-auth.py
     sudo mv acme-dns-auth.py /mnt/hdd/app-data/pleb-vpn/letsencrypt
     sudo cp /mnt/hdd/app-data/pleb-vpn/letsencrypt/acme-dns-auth.py /etc/letsencrypt/
-    sudo chmod 777 /etc/letsencrypt/acme-dns-auth.py
+    sudo chmod 755 /etc/letsencrypt/acme-dns-auth.py
 
     # clean up failed/old installs
     if [ $(ls /etc/letsencrypt | grep -c acmedns.json) -gt 0 ]; then
@@ -280,9 +280,10 @@ ssl_certificate_key /mnt/hdd/app-data/pleb-vpn/letsencrypt/tls.key;
   else
     # use existing DNS authenticaton
 
-    # copy acme-dns-auth.py 
+    # copy acme-dns-auth.py and acmedns.json
     sudo cp /mnt/hdd/app-data/pleb-vpn/letsencrypt/acme-dns-auth.py /etc/letsencrypt/
-    sudo chmod 777 /etc/letsencrypt/acme-dns-auth.py
+    sudo cp /mnt/hdd/app-data/pleb-vpn/letsencrypt/acmedns.json /etc/letsencrypt/
+    sudo chmod -R 755 /etc/letsencrypt
 
     # check for domain name(s) in pleb-vpn.conf and if not present, get them from acmedns.json
     if [ "${letsencryptDomain1}" = "" ]; then
