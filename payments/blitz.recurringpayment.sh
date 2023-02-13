@@ -147,6 +147,25 @@ esac
 
 cancel_check $freq
 
+# Ask if user wants to include a message, and if so, what message (only available for lnd).
+message=""
+if [ "${node}" = "lnd" ]; then
+  whiptail --title "Include Message?" \
+  --yes-button "Yes" \
+  --no-button "No" \
+  --yesno "
+  You may include a message with your keysend. This helps the recipient know
+  who sent the payment. If you use this with @allyourbankarebelongtous VPS
+  service, please include your TG handle or protonmail email for accounting.
+  " $HEIGHT $WIDTH
+  if [ $? -eq 0 ]; then
+    sudo touch /var/cache/raspiblitz/.tmp
+    sudo chmod 777 /var/cache/raspiblitz/.tmp
+    whiptail --title "Enter Message" --inputbox "Enter the message you wish to send with each payment" $HEIGHT $WIDTH 2>/var/cache/raspiblitz/.tmp
+    message=$(cat /var/cache/raspiblitz/.tmp)
+  fi
+fi
+ 
 # Generate a keysend script
 short_node_id=$(echo $NODE_ID | cut -c 1-7)
 script_name="/home/admin/pleb-vpn/payments/keysends/_${short_node_id}_${freq}_${node}_keysend.sh"
@@ -156,6 +175,11 @@ echo -n "/usr/bin/python /home/admin/pleb-vpn/payments/_recurringpayment_${node}
       "--$denomination $AMOUNT " \
       "--node_id $NODE_ID " \
       > $script_name
+# add message if present
+if [ ! "${message}" = "" ]; then
+  echo "--message ${message}
+" | tee -a $script_name
+fi
 chmod +x $script_name
 sudo cp -p $script_name $script_backup_name
 

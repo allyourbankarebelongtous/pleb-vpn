@@ -31,13 +31,16 @@ def get_price_at(timestamp="now"):
 def send_to_node(node, sats, message):
     sats = str(int(sats))
     logging.info("Sending {0} sats to {1}".format(sats, node))
-    cmd = ['lncli', 'sendpayment', '--dest='+node, '--amt='+sats, "--keysend"]
+    cmd = ['lncli', 'sendpayment', '--dest='+node, '--amt='+sats]
 
     # Add keysend message, if available
     if message is not None:
         logging.warning("Keysend message not yet supported")
-        # cmd.append("-n")
-        # cmd.append(message)
+        cmd.append("--data")
+        cmd.append("34349334="+message.encode("utf-8").hex())
+
+    # Add keysend argument
+    cmd.append("--keysend")
 
     p = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     if p.returncode == 0:
