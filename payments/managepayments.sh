@@ -31,7 +31,7 @@ function getpaymentinfo()
   sudo touch /home/admin/pleb-vpn/payments/selectpayments.tmp
   sudo chmod 777 /home/admin/pleb-vpn/payments/selectpayments.tmp
   echo "PAYMENTS=()" >/home/admin/pleb-vpn/payments/selectpayments.tmp
-  echo "PAYMENT_ID                                     DESTINATION                                   AMOUNT--DENOMINATION" >>/home/admin/pleb-vpn/payments/displaypayments.tmp
+  echo "PAYMENT_ID        DESTINATION        AMOUNT--DENOMINATION        MESSSAGE" >>/home/admin/pleb-vpn/payments/displaypayments.tmp
   inc=1
   while [ $inc -le 8 ]
   do
@@ -67,8 +67,9 @@ ${FREQ} PAYMENTS" >>/home/admin/pleb-vpn/payments/displaypayments.tmp
     do
       short_node_id=$(cat $(echo "${currentPayments}" | sed -n "${inc1}p") | awk '{print $6}' | cut -c 1-7)
       value=$(cat $(echo "${currentPayments}" | sed -n "${inc1}p") | awk '{print $4 $3}')
-      paymentInfo=$(cat $(echo "${currentPayments}" | sed -n "${inc1}p") | awk '{print "\t" $6 "\t" $4 $3}')
-      echo "${short_node_id}_${freq}_${node}${paymentInfo}" | tee -a /home/admin/pleb-vpn/payments/displaypayments.tmp
+      paymentInfo=$(cat $(echo "${currentPayments}" | sed -n "${inc1}p") | awk '{print "\t" $4 $3 "\t"}')
+      message=$(cat /home/admin/pleb-vpn/payments/keysends/_${short_node_id}_${freq}_${node}_keysend.sh | sed 's/.*message//' | sed 's/ //' | sed 's/\"//g')
+      echo "${short_node_id}_${freq}_${node}     $short_node_id${paymentInfo}${message}" | tee -a /home/admin/pleb-vpn/payments/displaypayments.tmp
       echo "PAYMENTS+=(${short_node_id}_${freq}_${node}" | tee -a /home/admin/pleb-vpn/payments/selectpayments.tmp
       sudo sed -i "s/${short_node_id}_${freq}_${node}.*/${short_node_id}_${freq}_${node} \"send to ${short_node_id} ${value} ${freq} from ${node}\"\)/g" /home/admin/pleb-vpn/payments/selectpayments.tmp
       ((inc1++))

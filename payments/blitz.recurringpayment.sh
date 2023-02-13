@@ -157,11 +157,11 @@ if [ "${node}" = "lnd" ]; then
   You may include a message with your keysend. This helps the recipient know
   who sent the payment. If you use this with @allyourbankarebelongtous VPS
   service, please include your TG handle or protonmail email for accounting.
-  " $HEIGHT $WIDTH
+  " 20 80
   if [ $? -eq 0 ]; then
     sudo touch /var/cache/raspiblitz/.tmp
     sudo chmod 777 /var/cache/raspiblitz/.tmp
-    whiptail --title "Enter Message" --inputbox "Enter the message you wish to send with each payment" $HEIGHT $WIDTH 2>/var/cache/raspiblitz/.tmp
+    whiptail --title "Enter Message" --inputbox "Enter the message you wish to send with each payment" 12 100 2>/var/cache/raspiblitz/.tmp
     message=$(cat /var/cache/raspiblitz/.tmp)
   fi
 fi
