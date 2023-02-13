@@ -157,7 +157,7 @@ if [ "${node}" = "lnd" ]; then
   You may include a message with your keysend. This helps the recipient know
   who sent the payment. If you use this with @allyourbankarebelongtous VPS
   service, please include your TG handle or protonmail email for accounting.
-  " 20 80
+  " 12 85
   if [ $? -eq 0 ]; then
     sudo touch /var/cache/raspiblitz/.tmp
     sudo chmod 777 /var/cache/raspiblitz/.tmp

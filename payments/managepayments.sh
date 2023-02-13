@@ -66,10 +66,11 @@ ${FREQ} PAYMENTS" >>/home/admin/pleb-vpn/payments/displaypayments.tmp
     while [ $inc1 -le $currentNumPayments ]
     do
       short_node_id=$(cat $(echo "${currentPayments}" | sed -n "${inc1}p") | awk '{print $6}' | cut -c 1-7)
+      node_id=$(cat $(echo "${currentPayments}" | sed -n "${inc1}p") | awk '{print $6}' | cut -c 1-20)
       value=$(cat $(echo "${currentPayments}" | sed -n "${inc1}p") | awk '{print $4 $3}')
       paymentInfo=$(cat $(echo "${currentPayments}" | sed -n "${inc1}p") | awk '{print "\t" $4 $3 "\t"}')
       message=$(cat /home/admin/pleb-vpn/payments/keysends/_${short_node_id}_${freq}_${node}_keysend.sh | sed 's/.*message//' | sed 's/ //' | sed 's/\"//g')
-      echo "${short_node_id}_${freq}_${node}     $short_node_id${paymentInfo}${message}" | tee -a /home/admin/pleb-vpn/payments/displaypayments.tmp
+      echo "${short_node_id}_${freq}_${node}  $node_id${paymentInfo}${message}" | tee -a /home/admin/pleb-vpn/payments/displaypayments.tmp
       echo "PAYMENTS+=(${short_node_id}_${freq}_${node}" | tee -a /home/admin/pleb-vpn/payments/selectpayments.tmp
       sudo sed -i "s/${short_node_id}_${freq}_${node}.*/${short_node_id}_${freq}_${node} \"send to ${short_node_id} ${value} ${freq} from ${node}\"\)/g" /home/admin/pleb-vpn/payments/selectpayments.tmp
       ((inc1++))
@@ -81,7 +82,7 @@ ${FREQ} PAYMENTS" >>/home/admin/pleb-vpn/payments/displaypayments.tmp
 # view payments
 if [ "$1" = "status" ]; then
   getpaymentinfo
-  dialog --title "Current Scheduled Payments" --cr-wrap --textbox /home/admin/pleb-vpn/payments/displaypayments.tmp 35 120
+  dialog --title "Current Scheduled Payments" --cr-wrap --textbox /home/admin/pleb-vpn/payments/displaypayments.tmp 35 140
   sudo rm /home/admin/pleb-vpn/payments/displaypayments.tmp
   sudo rm /home/admin/pleb-vpn/payments/selectpayments.tmp
   exit 0
