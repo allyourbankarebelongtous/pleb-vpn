@@ -177,7 +177,7 @@ echo -n "/usr/bin/python /home/admin/pleb-vpn/payments/_recurringpayment_${node}
       > $script_name
 # add message if present
 if [ ! "${message}" = "" ]; then
-  echo "--message ${message}
+  echo "--message \"${message}\"
 " | tee -a $script_name
 fi
 chmod +x $script_name
