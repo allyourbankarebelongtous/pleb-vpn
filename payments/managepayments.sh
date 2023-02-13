@@ -69,7 +69,7 @@ ${FREQ} PAYMENTS" >>/home/admin/pleb-vpn/payments/displaypayments.tmp
       node_id=$(cat $(echo "${currentPayments}" | sed -n "${inc1}p") | awk '{print $6}' | cut -c 1-20)
       value=$(cat $(echo "${currentPayments}" | sed -n "${inc1}p") | awk '{print $4 $3}')
       if [ $(cat $(echo "${currentPayments}" | sed -n "${inc1}p") | grep -c message) -gt 0 ]; then
-        message=$(cat $(echo "${currentPayments}" | sed -n "${inc1}p") | sed 's/.*message//' | sed 's/ //' | sed 's/\"//g')
+        message=$(cat $(echo "${currentPayments}" | sed -n "${inc1}p") | sed 's/.*--message//' | sed 's/ //' | sed 's/\"//g')
       else
         message=""
       fi
