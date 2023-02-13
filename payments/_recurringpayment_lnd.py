@@ -35,7 +35,6 @@ def send_to_node(node, sats, message):
 
     # Add keysend message, if available
     if message is not None:
-        logging.warning("Keysend message not yet supported")
         cmd.append("--data")
         cmd.append("34349334="+message.encode("utf-8").hex())
 
