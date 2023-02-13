@@ -68,7 +68,11 @@ ${FREQ} PAYMENTS" >>/home/admin/pleb-vpn/payments/displaypayments.tmp
       short_node_id=$(cat $(echo "${currentPayments}" | sed -n "${inc1}p") | awk '{print $6}' | cut -c 1-7)
       node_id=$(cat $(echo "${currentPayments}" | sed -n "${inc1}p") | awk '{print $6}' | cut -c 1-20)
       value=$(cat $(echo "${currentPayments}" | sed -n "${inc1}p") | awk '{print $4 $3}')
-      message=$(cat $(echo "${currentPayments}" | sed -n "${inc1}p") | sed 's/.*message//' | sed 's/ //' | sed 's/\"//g')
+      if [ $(cat $(echo "${currentPayments}" | sed -n "${inc1}p") | grep -c message) -gt 0 ]; then
+        message=$(cat $(echo "${currentPayments}" | sed -n "${inc1}p") | sed 's/.*message//' | sed 's/ //' | sed 's/\"//g')
+      else
+        message=""
+      fi
       echo -e "${short_node_id}_${freq}_${node} \t$node_id \t${value} \t${message}" >>/home/admin/pleb-vpn/payments/displaypayments.tmp
       echo "PAYMENTS+=(${short_node_id}_${freq}_${node}" >>/home/admin/pleb-vpn/payments/selectpayments.tmp
       sudo sed -i "s/${short_node_id}_${freq}_${node}.*/${short_node_id}_${freq}_${node} \"send to ${short_node_id} ${value} ${freq} from ${node}\"\)/g" /home/admin/pleb-vpn/payments/selectpayments.tmp
