@@ -213,7 +213,7 @@ the port:
 
 If you've already entered a port, the script will use the port already entered (i.e., for
 re-enabling hybrid after turning it off). The process is the same for Core Lightning.  
-_If you use both node implementations side by side, they MUST use different ports!_
+_Note: If you use both node implementations side by side, they MUST use different ports!_
 
 After it finishes the configuration and the wallet is unlocked, the script displays the 
 status which should now show your new clearnet address and port. If you have channels 
@@ -232,21 +232,22 @@ If you have a VPS that is capable of forwarding port 443 to your raspiblitz, you
 domain to your VPS IP and forward it to BTCPay or LNBits, allowing you to accept payments from 
 customers on BTCPay and/or allow others to access your LNBits instance. It takes a bit more 
 work to enable both on your own VPS, but it's doable. If you subscribe to @allyourbankarebelongtous, 
-for a small extra fee per service I will forward you port 443 to either or both of your services.
+for an extra $1.00 US per month per service I will forward you port 443 to each service.
 
 Once you have a domain that can reach your LNBits or BTCPayServer from the public internet over 
 port 443 through your VPS, it's time to get some SSL certs! This is where this service comes in 
-handy. This script configures LetsEncrypt on your Raspiblitz for either BTCPay, LNBits, or both using 
+handy. This script configures LetsEncrypt on your Raspiblitz for either BTCPay, LNBits, or both, using 
 CNAME authentication over your domain, so it works with any domain you have that allows you to enter 
 a CNAME record. If you're not sure you can enter a CNAME record, contact your DNS provider to ask. 
 
-Step 1 is to get your domain pointed to your VPS. 
-Step 2 is to forward the port (or contact your VPS provider to get them to forward the port) 
-Step 3 is to ensure that you know how to update the CNAME record of you domain
+Step 1 is to get your domain pointed to your VPS.  
+Step 2 is to forward the port (or contact your VPS provider to get them to forward the port)  
+Step 3 is to ensure that you know how to update the CNAME record of your domain  
 
 Once all of these are accomplished, go ahead and run this script. When you first run the script, 
 it will display these instructions. Here's what it looks like:
 ![letsencryptinstructions](pictures/letsencryptinstructions.png)
+_Note: The IP the script tells you to set the A record to will be your VPS's IP_
 
 You can tell you are ready to run the script if each domain you have (one for BTCPay and/or one 
 for LNBits) can access your instance and the only issue you have is it's warning you that your 
@@ -258,8 +259,8 @@ through the install. Then the script has to gather some more information.
 Next you will be asked which service you want to install. The script will only display services you 
 have already installed on your node. If you intend to install LetsEncrypt for both BTCPayServer 
 and LNBits, it is recommended that you do so at the same time, as you will only get one cert, so 
-if you add another service at a different time you will have to update both CNAME records. Here's 
-what it looks like if you have both BTCPayServer and LNBits installed on your node: 
+if you add another service at a different time you will have to re-do the cert and update both 
+CNAME records. Here's what it looks like if you have both BTCPayServer and LNBits installed on your node: 
 ![letsencryptselectservices](pictures/letsencryptselectservices.png)
 
 Once you have selected the service(s) that will be encrypted, the script asks for one (or both) 
@@ -271,7 +272,7 @@ domain name if you selected both BTCPayServer and LNBits. Here's domain entry No
 ![letsencryptdomain2](pictures/letsencryptdomain2.png)
 
 After this, the script displays instructions on entering the CNAME record. It looks like this: 
-![letsencryptinstructions](pictures/letsencryptinstructions.png)
+![Certbot_instructions](pictures/Certbot_instructions.png)
 
 Then Certbot starts to run and will ask you if you agree to the terms:
 ![Certbot_terms](pictures/Certbot_terms.png)
@@ -285,6 +286,12 @@ to demonstrate that I own those domains. Here's what my DNS service looks like a
 (this is using name.com, which has good prices and a good reputation):
 ![CNAME_Entry](pictures/CNAME_Entry.png)
 
+You can see that I have updated my CNAME host name for btcpay.allyourbank.ink to 
+"_acme-challenge.btcpay.allyourbank.ink" and my ANSWER for CNAME as 
+"293917e1-b8a6-4792-8a9f-935c260eaa64.auth.acme-dns.io" as instructed by the script.  
+
+I did the same for my second domain, "lnbits.allyourbank.ink".
+
 After you update your CNAME record(s), wait a bit for the update to propagate (a minute is more 
 than enough usually), and then hit enter. The script should finish installing the certs and you should 
 be good to go!
@@ -294,7 +301,7 @@ Here's my BTCPayServer and LNBits from the example above showing a secure connec
 ![lnbitsssl](pictures/lnbitsssl.png)
 
 _Note: If you have already installed LetsEncrypt previously and are re-enabling it after turning it off, 
-the script will detect a previous configuration and ask you if you want to keep it. Only select "Use Existing"  
+the script will detect a previous configuration and ask you if you want to keep it. Only select "Use Existing" 
 if you haven't changed anything about the domains, including the CNAME record you established when first 
 enabling LetsEncrypt._
 
@@ -423,7 +430,8 @@ subscriptions) that tells the sender who is sending and why. This will work with
 node implementations. If you wish to include a message, select "yes": 
 ![keysendmessage](pictures/keysendmessage.png)
 
-Here, enter your message:
+Here, enter your message (for @allyourbankarebelongtous subscriptions, include your email address or telegram 
+handle):
 ![enterkeysendmessage](pictures/enterkeysendmessage.png)
 
 That's it. The payment is scheduled! The script will NOT send the payment right away,
