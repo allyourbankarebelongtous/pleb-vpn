@@ -147,23 +147,21 @@ esac
 
 cancel_check $freq
 
-# Ask if user wants to include a message, and if so, what message (only available for lnd).
+# Ask if user wants to include a message, and if so, what message.
 message=""
-if [ "${node}" = "lnd" ]; then
-  whiptail --title "Include Message?" \
-  --yes-button "Yes" \
-  --no-button "No" \
-  --yesno "
-  You may include a message with your keysend. This helps the recipient know
-  who sent the payment. If you use this with @allyourbankarebelongtous VPS
-  service, please include your TG handle or protonmail email for accounting.
-  " 12 85
-  if [ $? -eq 0 ]; then
-    sudo touch /var/cache/raspiblitz/.tmp
-    sudo chmod 777 /var/cache/raspiblitz/.tmp
-    whiptail --title "Enter Message" --inputbox "Enter the message you wish to send with each payment" 12 100 2>/var/cache/raspiblitz/.tmp
-    message=$(cat /var/cache/raspiblitz/.tmp)
-  fi
+whiptail --title "Include Message?" \
+--yes-button "Yes" \
+--no-button "No" \
+--yesno "
+You may include a message with your keysend. This helps the recipient know
+who sent the payment. If you use this with @allyourbankarebelongtous VPS
+service, please include your TG handle or protonmail email for accounting.
+" 12 85
+if [ $? -eq 0 ]; then
+  sudo touch /var/cache/raspiblitz/.tmp
+  sudo chmod 777 /var/cache/raspiblitz/.tmp
+  whiptail --title "Enter Message" --inputbox "Enter the message you wish to send with each payment" 12 100 2>/var/cache/raspiblitz/.tmp
+  message=$(cat /var/cache/raspiblitz/.tmp)
 fi
  
 # Generate a keysend script

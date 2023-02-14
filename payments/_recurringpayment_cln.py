@@ -65,9 +65,12 @@ def send_to_node(node, sats, message):
 
     # Add keysend message, if available
     if message is not None:
-        logging.warning("Keysend message not yet supported")
-        # cmd.append("-n")
-        # cmd.append(message)
+        cmd.append("null")
+        cmd.append("null")
+        cmd.append("null")
+        cmd.append("null")
+        cmd.append("null")
+        cmd.append("'{\"34349334\": "+message.encode("utf-8").hex()+"\"}'")
 
     p = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
     if p.returncode == 0:
