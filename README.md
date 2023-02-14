@@ -29,8 +29,8 @@ with your own VPS set up as an OpenVPN server, or you may contact me on TG @ally
 or via email: allyourbankarebelongtous@protonmail.com, agree to a $2.00 US per month fee for the 
 basic service (includes two ports, one for hybrid mode and one for wireguard), and 
 obtain access to my VPS to go clearnet. You would be paying for VPS access/use, not for Pleb-VPN.
-_Note: To gain access to port 443 for SSL is a bit more expensive for me, so it is an additional 
-$1.00 US per month for each port 443 forward from @allyourbankarebelongtous)._
+_Note: If you want BTCPayServer and/or LNBits available to the public, it is a bit more expensive 
+for me, so it is an additional $1.00 US per month for each port 443 forward from @allyourbankarebelongtous)._
 
 If there are any other Plebs who want to share their VPS for a small fee, feel free
 to advertize and direct interested parties here for the easy-to-implement Raspiblitz
