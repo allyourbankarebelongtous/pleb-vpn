@@ -173,13 +173,7 @@ the host of ${letsencryptDomain1} again, chose <Check Again> below.
         exit 1
       fi
     fi
-    whiptail --title "Use a second domain?" \
-    --yes-button "Yes" \
-    --no-button "No" \
-    --yesno "
-Do you wish to encrypt a second domain?
-(you must have a second domain if you selected both BTCPayServer and LNBits)" 10 80
-    if [ $? -eq 0 ]; then
+    if [ "${letsencryptBTCPay}" = "on" ] && [ "${letsencryptLNBits}" = "on" ]; then
       whiptail --title "Enter Domain" --inputbox "Enter the second domain name that you wish to secure (example: lnbits.mydomain.com)" 11 80 2>/var/cache/raspiblitz/.tmp
       letsencryptDomain2=$(cat /var/cache/raspiblitz/.tmp)
     else

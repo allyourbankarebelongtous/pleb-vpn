@@ -5,14 +5,15 @@
 # Pleb-VPN  
 _Easy VPS sharing for cheaper hybrid solution for Plebs...built for Raspiblitz._
 
-`Version 0.9.1 including LND hybrid, CLN hybrid, WireGuard, tor split-tunneling, and recurring payments`
+`Version 1.0 including LND hybrid, CLN hybrid, WireGuard, tor split-tunneling, btcpay/lnbits letsencrypt, and recurring payments with keysend messages`
 
 **Pleb-VPN is a Raspiblitz tool set that allows you to easily take your node
 from a tor-only node to a hybrid solution with a public Virtual Private Server, _either yours 
 or someone elses!_ It also includes a number of tools to facilitate this, including an 
 easy-to-install implementation of WireGuard for private, secure VPN access to your node 
-anywhere, anytime, and the ability to automatically send recurring payments over lightning 
-via keysend.**
+anywhere, anytime, the ability to take BTCPayServer and/or LNBits public, and the ability to 
+automatically send recurring payments over lightning via keysend and include a message in the 
+payment. Pleb-VPN works with both LND and Core Lightning node implementations.**
 
 Pleb-VPN was born out of the realization that tor was always going to be
 insufficient for routing nodes, and that most Plebs either won't afford
@@ -22,12 +23,14 @@ going clearnet for Plebs.
 
 Pleb-VPN is a free open-source Raspiblitz integration of OpenVPN and WireGuard, 
 and includes scripts to configure either LND or Core Lightning (or both!) for 
-hybrid mode. You may use this in conjunction with your own VPS set up as an 
-OpenVPN server, or you may contact me on TG @allyourbankarebelongtous or via email: 
-allyourbankarebelongtous@protonmail.com, agree to a small monthly fee (I don't know 
-how much it will cost me to expand yet or how big the demand is so accurate 
-pricing is difficult to predict), and obtain access to my VPS to go clearnet. 
-You would be paying for VPS access/use, not for Pleb-VPN.
+hybrid mode. It also includes the abiliy to take BTCPayServer and/or LNBits public using 
+LetsEncrypt for any DNS provider that allows a CNAME record. You may use this in conjunction 
+with your own VPS set up as an OpenVPN server, or you may contact me on TG @allyourbankarebelongtous 
+or via email: allyourbankarebelongtous@protonmail.com, agree to a $2.00 US per month fee for the 
+basic service (includes two ports, one for hybrid mode and one for wireguard), and 
+obtain access to my VPS to go clearnet. You would be paying for VPS access/use, not for Pleb-VPN.
+_Note: To gain access to port 443 for SSL is a bit more expensive for me, so it is an additional 
+$1.00 US per month for each port 443 forward from @allyourbankarebelongtous)._
 
 If there are any other Plebs who want to share their VPS for a small fee, feel free
 to advertize and direct interested parties here for the easy-to-implement Raspiblitz
@@ -47,6 +50,7 @@ increase the availability of clearnet/hybrid nodes on the lightning network!**
   - [Getting started](#getting-started)
     - [Connect the VPN](#connect-the-vpn)
     - [Go Hybrid](#go-hybrid)
+    - [LetsEncrypt for BTCPay and/or LNBits](#letsencrypt-for-btcpay-and-lnbits)
     - [Installing WireGuard](#installing-wireguard)
     - [Split-Tunneling tor](#split-tunneling-tor)
     - [Recurring Payments](#recurring-payments)
@@ -94,6 +98,10 @@ the node's clearnet traffic is the ONLY thing going through the VPN, whereas Ple
 by default sends ALL TRAFFIC through the VPN, and gives you the option to configure 
 split-tunneling so that tor is the only thing ALLOWED TO BYPASS the VPN. This allows 
 Pleb-VPN to run WireGuard over the VPN and allows you to run multiple nodes from one instance. 
+Pleb-VPN's other advantage is the ability to take BTCPayServer and/or LNBits public, allowing you 
+to grant easy, secure access to your LNBits implementation or to easily provide payment services 
+through BTCPayServer to the outside world. TunnelSats cannot do this.
+
 TunnelSats is also available for other node implementations easily, like Umbrel or MyNode. 
 However, Pleb-VPN is cheaper, and encourages Plebs to collaborate to make the lightning network 
 more decentralized (less reliance on one or two providers) and more robust (more 
@@ -106,10 +114,11 @@ encryption. The owner of the VPS (this is true regardless of if you run it yours
 or if you share, or if you use TunnelSats) _will_ know your home IP address. They will _NOT_ 
 have access to your LAN, your WireGuard virtual LAN, or your Raspiblitz itself. A bonus of 
 sharing a VPS is that there is no KYC required...the only knowledge the VPS owner will have
-that the rest of the world doesn't have is your home IP address.
+that the rest of the world doesn't have is your home IP address. _This is true whether you rent 
+your own VPS, use TunnelSats, or use Pleb-VPN with @allyourbankarebelongtous!_
 
 **Can I use this on an Umbrel/MyNode/Raspibolt/etc implementation?**  
-Sort of. The actual software here on GitHub is only for Raspiblitz, but if you
+Sort of. The actual software here on GitHub is only for Raspiblitz (for now), but if you
 can find a guide to install OpenVPN and take your node clearnet on your own nothing
 is stopping you from contacting @allyourbankarebelongtous or anyone else willing to
 share a VPS and paying them a small monthly fee to gain a clearnet IP and a couple of forwarded
@@ -120,7 +129,7 @@ There are numerous guides on how to do this.
 **I want to update my node. What do I need to do?**  
 Update like normal according to Raspiblitz instructions. Pleb-VPN will automatically
 reinstall and reconfigure to match what you had before, including any recurring 
-payments scheduled.
+payments scheduled or LetsEncrypt certs for BTCPay or LNBits.
 
 **Can I remove Pleb-VPN?**  
 Yes. The menu provides an option to completely uninstall and restore the original
@@ -208,6 +217,84 @@ an hour (takes time for the gossip data to propagate).
 ![LNDHybridStatus](pictures/lndhybridstatus.png)
 
 BOOM! You now have a hybrid node with a VPS!
+
+### LetsEncrypt for BTCPay and LNBits
+The LetsEncrypt service will show under the SERVICES Pleb-VPN menu only if it detects that either 
+BTCPayServer or LNBits is installed. Here's what it looks like:
+![letsencryptservice](pictures/letsencryptservice.png)
+
+If you have a VPS that is capable of forwarding port 443 to your raspiblitz, you can point a 
+domain to your VPS IP and forward it to BTCPay or LNBits, allowing you to accept payments from 
+customers on BTCPay and/or allow others to access your LNBits instance. It takes a bit more 
+work to enable both on your own VPS, but it's doable. If you subscribe to @allyourbankarebelongtous, 
+for a small extra fee per service I will forward you port 443 to either or both of your services.
+
+Once you have a domain that can reach your LNBits or BTCPayServer from the public internet over 
+port 443 through your VPS, it's time to get some SSL certs! This is where this service comes in 
+handy. This script configures LetsEncrypt on your Raspiblitz for either BTCPay, LNBits, or both using 
+CNAME authentication over your domain, so it works with any domain you have that allows you to enter 
+a CNAME record. If you're not sure you can enter a CNAME record, contact your DNS provider to ask. 
+
+Step 1 is to get your domain pointed to your VPS. 
+Step 2 is to forward the port (or contact your VPS provider to get them to forward the port) 
+Step 3 is to ensure that you know how to update the CNAME record of you domain
+
+Once all of these are accomplished, go ahead and run this script. When you first run the script, 
+it will display these instructions. Here's what it looks like:
+![letsencryptinstructions](pictures/letsencryptinstructions.png)
+
+You can tell you are ready to run the script if each domain you have (one for BTCPay and/or one 
+for LNBits) can access your instance and the only issue you have is it's warning you that your 
+connection is not trusted. You must also be ready to update the CNAME record of each domain.
+
+After you acknowledge the instructions, the script will install Certbot, which will guide you 
+through the install. Then the script has to gather some more information.
+
+Next you will be asked which service you want to install. The script will only display services you 
+have already installed on your node. If you intend to install LetsEncrypt for both BTCPayServer 
+and LNBits, it is recommended that you do so at the same time, as you will only get one cert, so 
+if you add another service at a different time you will have to update both CNAME records. Here's 
+what it looks like if you have both BTCPayServer and LNBits installed on your node: 
+![letsencryptselectservices](pictures/letsencryptselectservices.png)
+
+Once you have selected the service(s) that will be encrypted, the script asks for one (or both) 
+domain names. In this case, I have selected both. Here's domain entry No. 1:
+![letsencryptdomain1](pictures/letsencryptdomain1.png)
+
+If you selected both services, you'll need two separate domain names. The script will ask for a second 
+domain name if you selected both BTCPayServer and LNBits. Here's domain entry No. 2:
+![letsencryptdomain2](pictures/letsencryptdomain2.png)
+
+After this, the script displays instructions on entering the CNAME record. It looks like this: 
+![letsencryptinstructions](pictures/letsencryptinstructions.png)
+
+Then Certbot starts to run and will ask you if you agree to the terms:
+![Certbot_terms](pictures/Certbot_terms.png)
+
+Once you agree, it will finish and display this screen:
+![CNAME_Challenges](pictures/CNAME_Challenges.png)
+
+**IMPORTANT! You must update your CNAME records before pressing enter!**  
+Here I have to enter my CNAME records for both btcpay.allyourbank.ink and lnbits.allyourbank.ink 
+to demonstrate that I own those domains. Here's what my DNS service looks like after the update 
+(this is using name.com, which has good prices and a good reputation):
+![CNAME_Entry](pictures/CNAME_Entry.png)
+
+After you update your CNAME record(s), wait a bit for the update to propagate (a minute is more 
+than enough usually), and then hit enter. The script should finish installing the certs and you should 
+be good to go!
+
+Here's my BTCPayServer and LNBits from the example above showing a secure connection:
+![btcpayssl](pictures/btcpayssl.png)
+![lnbitsssl](pictures/lnbitsssl.png)
+
+_Note: If you have already installed LetsEncrypt previously and are re-enabling it after turning it off, 
+the script will detect a previous configuration and ask you if you want to keep it. Only select "Use Existing"  
+if you haven't changed anything about the domains, including the CNAME record you established when first 
+enabling LetsEncrypt._
+
+Certbot will auto-update the certs when necessary, and Pleb-VPN should preserve the certs through 
+Raspiblitz updates or sd card reflashes.
 
 ### Installing WireGuard
 Let's install WireGuard next. Using the services menu, toggle WireGuard on.
@@ -325,6 +412,15 @@ Then asks for the pubkey of the receiver:
 Then how often to send:  
 ![HowOften](pictures/howoften.png)
 
+Then you are asked if you want to include a message. Keysends are anonymous, in that the receiver 
+has no way of knowing who the sender is. You can include a message (required for @allyourbankarebelongtous 
+subscriptions) that tells the sender who is sending and why. This will work with both LND and Core Lightning 
+node implementations. If you wish to include a message, select "yes": 
+![keysendmessage](pictures/keysendmessage.png)
+
+Here, enter your message:
+![enterkeysendmessage](pictures/enterkeysendmessage.png)
+
 That's it. The payment is scheduled! The script will NOT send the payment right away,
 it will wait until 00:00:00 UTC, and only send on the following schedule:  
 DAILY - Every day at 00:00:00 UTC  
@@ -333,7 +429,7 @@ MONTHLY - Every 1st day of the month at 00:00:00 UTC
 YEARLY - Every 1st day of the year at 00:00:00 UTC  
 
 Use VIEW to view your currently scheduled payments. Here's an example of me paying myself
-a bunch of times for testing purposes from both LND and Core Lightning:  
+a bunch of times for testing purposes from both LND and Core Lightning with test messages:  
 ![ViewPayments](pictures/veiwpayments.png)
 
 Use DELETE to get rid of a payment. Here's what that looks like:  
