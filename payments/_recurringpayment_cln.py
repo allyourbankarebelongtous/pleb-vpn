@@ -61,16 +61,14 @@ def get_price_at(timestamp="now"):
 def send_to_node(node, sats, message):
     sats = str(int(sats))
     logging.info("Sending {0} sats to {1}".format(sats, node))
-    cmd = ['lightning-cli keysend ' + node + ' ' + sats+'000'] # convert to msats for cln
+
+    # Create command if no keysend message
+    if message is None:
+        cmd = ['lightning-cli keysend '+node+' '+sats+'000'] # convert to msats for cln
 
     # Add keysend message, if available
     if message is not None:
-        cmd.append("null")
-        cmd.append("null")
-        cmd.append("null")
-        cmd.append("null")
-        cmd.append("null")
-        cmd.append("'{\"34349334\": "+message.encode("utf-8").hex()+"\"}'")
+        cmd = ['lightning-cli keysend '+node+' '+sats+'000'+' null null null null null '+'\'{"34349334": '+message.encode("utf-8").hex()+'"}\'']
 
     p = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
     if p.returncode == 0:
