@@ -62,13 +62,11 @@ def send_to_node(node, sats, message):
     sats = str(int(sats))
     logging.info("Sending {0} sats to {1}".format(sats, node))
 
-    # Create command if no keysend message
-    if message is None:
-        cmd = ['lightning-cli keysend '+node+' '+sats+'000'] # convert to msats for cln
-
-    # Add keysend message, if available
+    # Create command with or without message
     if message is not None:
         cmd = ['lightning-cli keysend '+node+' '+sats+'000'+' null null null null null'+''' '{"34349334": '''+message.encode("utf-8").hex()+'''"}' ''']
+    else:
+        cmd = ['lightning-cli keysend '+node+' '+sats+'000'] # convert to msats for cln
 
     p = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
     if p.returncode == 0:
