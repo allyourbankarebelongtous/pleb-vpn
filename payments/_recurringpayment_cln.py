@@ -8,36 +8,6 @@ import sys
 from time import sleep
 
 # get an instance of the logger object this module will use
-logging.basicConfig(level=logging.DEBUG, format="%(asctime)-15s %(levelname)-8s")
-
-
-def get_price_at(timestamp="now"):
-    requests_session = requests.Session()
-
-    currency = "usd"
-    if timestamp == "now":
-        price = requests_session.get(
-            "https://www.bitstamp.net/api/v2/ticker/btc{}".format(currency)
-        ).json()["last"]
-    else:
-        price = requests_session.get(
-            "https://www.bitstamp.net/api/v2/ohlc/btc{}/?limit=1&step=86400&start={}".format(
-                currency, timestamp
-            )
-        ).json()["data"]["ohlc"][0]["close"]
-    return price
-
-
-#!/usr/bin/python
-import requests
-import logging
-import logging.handlers
-import subprocess
-import argparse
-import sys
-from time import sleep
-
-# get an instance of the logger object this module will use
 logging.basicConfig(level=logging.DEBUG, format="%(asctime)-15s %(levelname)-8s %(message)s")
 
 
@@ -64,7 +34,7 @@ def send_to_node(node, sats, message):
 
     # Create command with or without message
     if message is not None:
-        cmd = ['lightning-cli keysend '+node+' '+sats+'000'+' null null null null null'+''' '{"34349334": '''+message.encode("utf-8").hex()+'''"}' ''']
+        cmd = ['lightning-cli keysend '+node+' '+sats+'000'+' null null null null null '+'\'{"34349334": '+message.encode("utf-8").hex()+'"}\']
     else:
         cmd = ['lightning-cli keysend '+node+' '+sats+'000'] # convert to msats for cln
 
