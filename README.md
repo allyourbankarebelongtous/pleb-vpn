@@ -27,8 +27,13 @@ hybrid mode. It also includes the abiliy to take BTCPayServer and/or LNBits publ
 LetsEncrypt for any DNS provider that allows a CNAME record. You may use this in conjunction 
 with your own VPS set up as an OpenVPN server, or you may contact me on TG @allyourbankarebelongtous 
 or via email: allyourbankarebelongtous@protonmail.com, agree to a $2.00 US per month fee for the 
-basic service (includes two ports, one for hybrid mode and one for wireguard), and 
-obtain access to my VPS to go clearnet. You would be paying for VPS access/use, not for Pleb-VPN.
+basic service, paid via the included automatic keysends with a message stating your node's email address 
+or your telegram handle, and obtain access to my VPS to go clearnet. 
+(the basic service includes two ports, one for hybrid mode and one for wireguard. 
+Additional ports are $0.50 US per month) You would be paying for VPS access/use, not for Pleb-VPN software, 
+which is free. If you don't want to pay or are uncomfortable with sharing, feel free to use this with your 
+own VPS. The cheapest I've found that works costs $5.00 US per month, and you'll have to configure 
+it yourself.  
 _Note: If you want BTCPayServer and/or LNBits available to the public, it is a bit more expensive 
 for me, so it is an additional $1.00 US per month for each port 443 forward from @allyourbankarebelongtous)._
 
