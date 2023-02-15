@@ -30,7 +30,7 @@ with your own VPS set up as an OpenVPN server, or you may subscribe to @allyourb
 and use our VPS setups for the cheapest price and great service! Details below.
 
 If there are any other Plebs who want to share their VPS for a small fee, feel free
-to advertize and direct interested parties here for the easy-to-implement Raspiblitz
+to advertise and direct interested parties here for the easy-to-implement Raspiblitz
 hybrid option! This will work with any public VPN (in the sense that the IP of the VPS 
 is for public access) that uses OpenVPN for its connection and allows port forwarding.
 
