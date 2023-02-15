@@ -36,8 +36,8 @@ def send_to_node(node, sats, message):
     # Create command with or without message
     if message is not None:
         hexmessage = message.encode("utf-8").hex()
-        tlvmessage = {"34349334": hexmessage}
-        jsonmessage = json.dumps(tlvmessage)
+        tlvmessage = '"34349334": "'+hexmessage+'"'
+        jsonmessage = "'{"+tlvmessage+"}'"
         cmd = [f'lightning-cli keysend {node} {sats}000 null null null null null {jsonmessage}'] # convert to msats for cln
     else:
         cmd = [f'lightning-cli keysend {node} {sats}000'] # convert to msats for cln
