@@ -26,17 +26,8 @@ Pleb-VPN is a free open-source Raspiblitz integration of OpenVPN and WireGuard,
 and includes scripts to configure either LND or Core Lightning (or both!) for 
 hybrid mode. It also includes the abiliy to take BTCPayServer and/or LNBits public using 
 LetsEncrypt for any DNS provider that allows a CNAME record. You may use this in conjunction 
-with your own VPS set up as an OpenVPN server, or you may contact me on TG @allyourbankarebelongtous 
-or via email: allyourbankarebelongtous@protonmail.com, agree to a $2.00 US per month fee for the 
-basic service, paid via the included automatic keysends with a message stating your node's email address 
-or your telegram handle, and obtain access to my VPS to go clearnet. 
-The basic service includes two ports, one for hybrid mode and one for wireguard. 
-Additional ports are $0.50 US per month. You would be paying for VPS access/use, not for Pleb-VPN software, 
-which is free. If you don't want to pay or are uncomfortable with sharing, feel free to use this with your 
-own VPS. The cheapest I've found that works costs $5.00 US per month, and you'll have to configure 
-it yourself.  
-_Note: If you want BTCPayServer and/or LNBits available to the public, it is a bit more expensive 
-for me, so it is an additional $1.00 US per month for each port 443 forward from @allyourbankarebelongtous)._
+with your own VPS set up as an OpenVPN server, or you may subscribe to @allyourbankarebelongtous 
+and use our VPS setups for the cheapest price and great service! Details below.
 
 If there are any other Plebs who want to share their VPS for a small fee, feel free
 to advertize and direct interested parties here for the easy-to-implement Raspiblitz
@@ -52,6 +43,7 @@ increase the availability of clearnet/hybrid nodes on the lightning network!**
 
   - [How it works](#how-it-works)
   - [FAQ](#faq)
+  - [Subscription info](#subscription-info)
   - [Install instructions](#install-instructions)
   - [Getting started](#getting-started)
     - [Connect the VPN](#connect-the-vpn)
@@ -167,6 +159,33 @@ node configuration at any time.
 The menu has an option to update the scripts by pulling them from GitHub. It takes about 
 a half a second and keeps all of your settings.
 
+## Subscription Info
+To subscribe to @allyourbankarebelongtous's VPS services, contact me on TG @allyourbankarebelongtous 
+or via email: allyourbankarebelongtous@protonmail.com. The basic service is $2.00 US per month, sent 
+via the included recurring payments (see walkthrough below) with a message that includes your TG handle 
+or your node's email address. (If your node doesn't have an email address, I recommend protonmail 
+because it's free, secure, and anonymous). 
+
+The first month is FREE! Try it for a month and if you decide it isn't worth it or to get your own VPS, good 
+for you! The first payment is due the 1st day of the month following receiving the connection key (called plebvpn.conf, 
+see walkthrough below). To get the most of your FREE month, sign up in the first part of the month (easier 
+for accounting purposes).
+
+The basic service includes two ports which can be used for any two of the following: LND Hybrid, Core 
+Lightning Hybrid, and/or Wireguard private LAN service. An additional port for all three costs an 
+additional $0.50 US per month.
+
+For port 443 forwards to your node for BTCPayServer and/or LNBits public SSL access, the cost is a bit higher as those 
+ports are in high demand and the process is a bit more involved. It is an additional $1.00 US per month 
+for each port 443 instance forwarded to your node ($1.00 each for BTCPay and LNBits).
+
+The payment is due on the first of the month. I don't care how it is paid (keysend or any other method), 
+only that I need to know who it's from. So please include your TG handle or email address in the message 
+(see walkthrough of recurring payments below). 
+
+If you miss a payment, I will ping you and give you seven days to pay. If you do not pay by the 7th day 
+of the month, your access to the VPS will be regretfully shut off. 
+
 ## Install Instructions:  
 1. Exit to command line from the menu (you should be in directory /home/admin).  
 2. From /home/admin, clone the repository by copying and pasting the following command:  
@@ -248,8 +267,7 @@ BOOM! You now have a hybrid node with a VPS!
 
 ### LetsEncrypt for BTCPay and LNBits
 The LetsEncrypt service will show under the SERVICES Pleb-VPN menu only if it detects that either 
-BTCPayServer or LNBits is installed. Here's what it looks like:
-![letsencryptservice](pictures/letsencryptservice.png)
+BTCPayServer or LNBits is installed. 
 
 If you have a VPS that is capable of forwarding port 443 to your raspiblitz, you can point a 
 domain to your VPS IP and forward it to BTCPay or LNBits, allowing you to accept payments from 
@@ -263,9 +281,11 @@ handy. This script configures LetsEncrypt on your Raspiblitz for either BTCPay, 
 CNAME authentication over your domain, so it works with any domain you have that allows you to enter 
 a CNAME record. If you're not sure you can enter a CNAME record, contact your DNS provider to ask. 
 
-Step 1 is to get your domain pointed to your VPS.  
-Step 2 is to forward the port (or contact your VPS provider to get them to forward the port)  
-Step 3 is to ensure that you know how to update the CNAME record of your domain  
+Step 1: Have a domain name for each service you intend to secure (one for BTCPayServer and another for LNBits).  
+Step 2: Have forwarded port 443 from your VPS (or contact your VPS provider to get them to forward the port).  
+  _Note: If you want to enable both services from the same VPS, you'll need a reverse proxy on the VPS to decide which service receives traffic._  
+Step 3: Have updated the A record of each domain to point to your VPS IP.  
+Step 4: Ensure that you know how to and are ready to update the CNAME record of your domain.   
 
 Once all of these are accomplished, go ahead and run this script. When you first run the script, 
 it will display these instructions. Here's what it looks like:
@@ -368,12 +388,7 @@ you selected. To access the blitz api, enter ip.ip.ip.ip. To configure Zeus to c
 WireGuard, uncheck tor and enter your WireGuard ip in place of the tor address.  
 
 _Note: Because the connection is secured by WireGuard there is no need to enable ssl encryption, 
-but you can anyways if you download the cert and install it on your phone. You will need to 
-re-create the cert first to ensure it includes your WireGuard IP. This can be done by either 
-using the Raspiblitz Menu, going to CONNECT and then RESET, which will also reset your 
-macaroons (you will have to reconnect any mobile wallets or other apps which use macaroons), 
-or by deleting /mnt/hdd/lnd/tls.cert and /mnt/hdd/lnd/tls.key, restarting lnd, and 
-restarting nginx._   
+but you can anyways if you download the cert and install it on your phone._   
 
 Here's a screenshot of me accessing the blitz api via WireGuard on my
 phone using the 10.0.0.0 IP shown above:  
@@ -489,7 +504,7 @@ You can change daily or lnd to your specific timing and node implementation.
 To manually send an individual missed payment you can run the keysend 
 script that is saved in /home/admin/pleb-vpn/payments/keysends, for example:  
 `sudo -u bitcoin /home/admin/pleb-vpn/payments/keysends/_035fed4_monthly_cln_keysend.sh`  
-sends the monthly payment of 100 sats from my Core Lightning node each time I run that command. 
+sends the monthly payment of 0.50 USD from my Core Lightning node each time I run that command. 
 (Command needs to be run as user bitcoin or it will fail for Core Lightning nodes). 
 
 For payments that were scheduled at a certain time you can manually run that service with the following:  
