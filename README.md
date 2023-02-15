@@ -17,7 +17,7 @@ automatically send recurring payments over lightning via keysend and include a m
 payment. Pleb-VPN works with both LND and Core Lightning node implementations.**
 
 Pleb-VPN was born out of the realization that tor was always going to be
-insufficient for routing nodes, and that most Plebs either won't afford
+insufficient for routing nodes, and that most plebs either won't afford
 or can't set up (or both) a VPS with a VPN and enable hybrid mode on their
 node. Enter Pleb-VPN! This enables easy VPS sharing and lowers the cost of
 going clearnet for Plebs.
