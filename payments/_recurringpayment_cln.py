@@ -5,6 +5,7 @@ import logging.handlers
 import subprocess
 import argparse
 import sys
+import json
 from time import sleep
 
 # get an instance of the logger object this module will use
@@ -35,11 +36,11 @@ def send_to_node(node, sats, message):
     # Create command with or without message
     if message is not None:
         hexmessage = message.encode("utf-8").hex()
-        tlvmessage = '"34349334": "'+hexmessage+'"'
-        jsonmessage = "'{"+tlvmessage+"}'"
-        cmd = ['lightning-cli keysend '+node+' '+sats+'000'+' null null null null null '+jsonmessage]
+        tlvmessage = {"34349334": hexmessage}
+        jsonmessage = json.dumps(tlvmessage)
+        cmd = [f'lightning-cli keysend {node} {sats}000 null null null null null {jsonmessage}'] # convert to msats for cln
     else:
-        cmd = ['lightning-cli keysend '+node+' '+sats+'000'] # convert to msats for cln
+        cmd = [f'lightning-cli keysend {node} {sats}000'] # convert to msats for cln
 
     p = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
     if p.returncode == 0:

@@ -5,7 +5,8 @@
 # Pleb-VPN  
 _Easy VPS sharing for cheaper hybrid solution for Plebs...built for Raspiblitz._
 
-`Version 1.0 including LND hybrid, CLN hybrid, WireGuard, tor split-tunneling, btcpay/lnbits letsencrypt, and recurring payments with keysend messages`
+`Version 1.0 including LND/CLN hybrid, WireGuard private VPN, tor split-tunneling, 
+BTCPayServer/LNBits LetsEncrypt, and recurring payments with keysend messages`
 
 **Pleb-VPN is a Raspiblitz tool set that allows you to easily take your node
 from a tor-only node to a hybrid solution with a public Virtual Private Server, _either yours 
@@ -87,6 +88,12 @@ Raspiblitz as if you were home from anywhere in the world. This feature is entir
 set up locally on the Raspiblitz, so **even if you are sharing a VPS with someone you 
 don't know, they'll never get access to your Raspiblitz.**
 
+Also, Pleb-VPN provides a script to easily enable LetsEncrypt for BTCPayServer and/or 
+LNBits using your VPS and any domain name that allows CNAME record entry (most DNS providers). 
+This has an advantage over the regular Raspiblitz LetsEncrypt, which only supports token 
+authentication through DuckDNS. Your LetsEncrypt certs are generated locally and the 
+key will never leave your node, ensuring your traffic through the VPS is encrypted. 
+
 Finally, Pleb-VPN comes with the ability to automatically send recurring payments 
 over lightning via keysend. _(credit to m00ninite's excellent scripts, found here: 
 https://github.com/rootzoll/raspiblitz/pull/2404)._
@@ -95,11 +102,22 @@ https://github.com/rootzoll/raspiblitz/pull/2404)._
 card for Raspiblitz updates.**
 
 ## FAQ  
+**How much does it cost?**
+Pleb-VPN is free. What you will need to pay for is a server (in this guide referred to as a 
+VPS-Virtual Private Server), to tunnel your traffic to and fro so your home IP isn't released. 
+The server is what costs money. You can rent your own VPS and manage the server yourself, 
+it isn't that difficult and there are lots of guides to refer to. However, you'll end up 
+spending at least $5.00 US per month. You can subscribe to TunnelSats and get hybrid mode, 
+but you will spend $3.00 US per month, and you will only get hybrid (no private VPN), and 
+only on one node. OR you can share a VPS with a pleb and split the cost, or share with three 
+and lower the cost further! Another alternative is to subscribe to mine, the details are below 
+but the basic service is $2.00 US per month. 
+
 **How is this different than TunnelSats?**  
 Good question. It's really not that much different. TunnelSats uses one or more
 shared servers and provides you with a cert to connect to them, only it uses WireGuard
 instead of OpenVPN for the connection. TunnelSats configures split-tunneling such that
-the node's clearnet traffic is the ONLY thing going through the VPN, whereas Pleb-VPN 
+the node's clearnet lightning traffic is the ONLY thing going through the VPN, whereas Pleb-VPN 
 by default sends ALL TRAFFIC through the VPN, and gives you the option to configure 
 split-tunneling so that tor is the only thing ALLOWED TO BYPASS the VPN. This allows 
 Pleb-VPN to run WireGuard over the VPN and allows you to run multiple nodes from one instance. 
@@ -112,6 +130,10 @@ However, Pleb-VPN is cheaper, and encourages Plebs to collaborate to make the li
 more decentralized (less reliance on one or two providers) and more robust (more 
 hybrid/clearnet nodes). Plus, it comes with a private VPN already integrated in WireGuard.
 
+Finally, for an extra $1.00 US per month (for each service you want) I will forward port 443 
+so you can easily take your BTCPayServer public as well as getting a hybrid node with a private 
+VPN for $3.00 US per month. Details are found in the subscription section.
+
 **How secure is this?**  
 It's as secure as any VPN. The OpenVPN encryption is AES-256-CBC, and WireGuard uses
 Curve25519 point multiplication as its primary method of private key/public key
@@ -120,7 +142,8 @@ or if you share, or if you use TunnelSats) _will_ know your home IP address. The
 have access to your LAN, your WireGuard virtual LAN, or your Raspiblitz itself. A bonus of 
 sharing a VPS is that there is no KYC required...the only knowledge the VPS owner will have
 that the rest of the world doesn't have is your home IP address. _This is true whether you rent 
-your own VPS, use TunnelSats, or use Pleb-VPN with @allyourbankarebelongtous!_
+your own VPS, use TunnelSats, or use Pleb-VPN with @allyourbankarebelongtous or share with 
+another pleb!_
 
 **Can I use this on an Umbrel/MyNode/Raspibolt/etc implementation?**  
 Sort of. The actual software here on GitHub is only for Raspiblitz (for now), but if you
