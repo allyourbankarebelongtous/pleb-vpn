@@ -78,10 +78,29 @@ on() {
   fi
 
   # get CLN port
-  sudo touch /var/cache/raspiblitz/.tmp
-  sudo chmod 777 /var/cache/raspiblitz/.tmp
-  if [ -z "${CLNPort}" ]; then
-    whiptail --title "Core Lightning Clearnet Port" --inputbox "Enter the clearnet port assigned to your Core Lightning node (example: 9740)" 11 70 2>/var/cache/raspiblitz/.tmp
+  if [ ! -z "${CLNPort}" ]; then
+    # skip if restoring
+    local isRestore = "${1}"
+    if [ ! "${isRestore}" = "1" ]; then
+      whiptail --title "Use Existing Port?" \
+      --yes-button "Use Existing" \
+      --no-button "Enter New Port" \
+      --yesno "There is an existing port from a previous install. Do you want to re-use ${CLNPort} or enter a new one?" 10 80
+      if [ $? -eq 1 ]; then
+        keepport="0"
+      else
+        keepport="1"
+      fi
+    else
+      keepport="1"
+    fi
+  else
+    keepport="0"
+  fi
+  if [ "${keepport}" = "0" ]; then
+    sudo touch /var/cache/raspiblitz/.tmp
+    sudo chmod 777 /var/cache/raspiblitz/.tmp
+    whiptail --title "Core Lightning Clearnet Port" --inputbox "Enter the clearnet port assigned to your Core Lightning node. If you don't have one, forward one from your VPS or contact your VPS provider to obtain one. (example: 9740)" 12 80 2>/var/cache/raspiblitz/.tmp
     CLNPort=$(cat /var/cache/raspiblitz/.tmp)
     # add CLN port to pleb-vpn.conf 
     setting ${plebVPNConf} "2" "CLNPort" "'${CLNPort}'"
