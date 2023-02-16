@@ -78,7 +78,7 @@ on() {
   fi
 
   # get CLN port
-  if [ ! -z "${CLNPort}" ]; then
+  if [ ! "${CLNPort}" = ""]; then
     # skip if restoring
     local isRestore = "${1}"
     if [ ! "${isRestore}" = "1" ]; then

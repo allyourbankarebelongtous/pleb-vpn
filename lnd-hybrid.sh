@@ -93,7 +93,7 @@ on() {
     exit 1
   fi
   # get LND port
-  if [ ! -z "${lnPort}" ]; then
+  if [ ! "${lnPort}" = "" ]; then
     # skip if restoring
     local isRestore = "${1}"
     if [ ! "${isRestore}" = "1" ]; then
