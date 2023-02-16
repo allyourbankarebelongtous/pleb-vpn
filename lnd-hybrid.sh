@@ -93,13 +93,28 @@ on() {
     exit 1
   fi
   # get LND port
-  sudo touch /var/cache/raspiblitz/.tmp
-  sudo chmod 777 /var/cache/raspiblitz/.tmp
-  if [ -z "${lnPort}" ]; then
-    whiptail --title "LND Clearnet Port" --inputbox "Enter the clearnet port assigned to your LND node (example: 9740)" 11 70 2>/var/cache/raspiblitz/.tmp
+  if [ ! -z "${lnPort}" ]; then
+    whiptail --title "Use Existing Port?" \
+    --yes-button "Use Existing" \
+    --no-button "Enter New Port" \
+    --yesno "There is an existing port from a previous install. Do you want to re-use ${lnPort} or enter a new one?" 10 80
+    if [ $? -eq 1 ]; then
+      keepport="0"
+    else
+      keepport="1"
+    fi
+  else
+    keepport="0"
+  fi
+  if [ "${keepport}" = "0" ]; then
+    sudo touch /var/cache/raspiblitz/.tmp
+    sudo chmod 777 /var/cache/raspiblitz/.tmp
+    whiptail --title "LND Clearnet Port" --inputbox "Enter the port that is forwarded to your node from the VPS for hybrid mode. If you don't have one, forward one from your VPS or contact your VPS provider to obtain one. (example: 9740)" 12 80 2>/var/cache/raspiblitz/.tmp
     lnPort=$(cat /var/cache/raspiblitz/.tmp)
+    # add LND port to pleb-vpn.conf 
     setting ${plebVPNConf} "2" "lnPort" "'${lnPort}'"
   fi
+
   # configure firewall
   if ! [ "${lnPort}" = "9735" ]; then
     sudo ufw allow ${lnPort} comment "LND Port"
@@ -178,6 +193,8 @@ on() {
   local norestart="${1}"
   if ! [ "${norestart}" = "1" ]; then
     sudo systemctl restart lnd 
+    # restart nginx
+    sudo systemctl restart nginx
   fi
   # set lnd-hybrid on in pleb-vpn.conf
   setting ${plebVPNConf} "2" "lndHybrid" "on"

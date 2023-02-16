@@ -139,6 +139,7 @@ download all three config files by chosing 'Download'" 12 80
 on() {
   # install and configure wireguard
   source ${plebVPNConf}
+  source /mnt/hdd/raspiblitz.conf
 
   # check if plebvpn is on
   if ! [ "${plebVPN}" = "on" ]; then
@@ -196,7 +197,7 @@ on() {
       wgIP=$(cat /var/cache/raspiblitz/.tmp)
       validWgIP ${wgIP}
     done
-    whiptail --title "Wireguard port" --inputbox "Enter the wireguard port assigned to you in your subscription. If you don't have one, contact @allyourbankarebelongtous on Telegram to obtain one." 11 80 2>/var/cache/raspiblitz/.tmp
+    whiptail --title "Wireguard port" --inputbox "Enter the port that is forwarded to you from the VPS for wireguard. If you don't have one, forward one from your VPS or contact your VPS provider to obtain one." 12 80 2>/var/cache/raspiblitz/.tmp
     wgPort=$(cat /var/cache/raspiblitz/.tmp)
     # add wireguard LAN to pleb-vpn.conf 
     setting ${plebVPNConf} "2" "wgPort" "'${wgPort}'"
@@ -314,6 +315,43 @@ ${appstoreLink}\n
   echo "Ok, wireguard installed and configured. Wait 10 seconds before enable..."
   sleep 10
   sudo systemctl restart wg-quick@wg0
+  # add tlsextraip to lnd.conf and recreate tls.cert (if lnd installed)
+  if [ "${lnd}" = "on" ]; then
+    source <(/home/admin/config.scripts/network.aliases.sh getvars lnd)
+    sectionName="Application Options"
+    echo "# [${sectionName}] config ..."
+    sectionLine=$(cat ${lndConfFile} | grep -n "^\[${sectionName}\]" | cut -d ":" -f1)
+    echo "# sectionLine(${sectionLine})"
+    insertLine=$(expr $sectionLine + 1)
+    echo "# insertLine(${insertLine})"
+    fileLines=$(wc -l ${lndConfFile} | cut -d " " -f1)
+    echo "# fileLines(${fileLines})"
+    if [ ${fileLines} -lt ${insertLine} ]; then
+      echo "# adding new line for inserts"
+      echo "
+    " | tee -a ${lndConfFile}
+    fi
+    echo "# sectionLine(${sectionLine})"
+    setting ${lndConfFile} ${insertLine} "tlsextraip" "${wgIP}"
+    # remove old tls.cert and tls.key
+    sudo rm /mnt/hdd/lnd/*.old
+    sudo mv /mnt/hdd/lnd/tls.cert /mnt/hdd/lnd/tls.cert.old
+    sudo mv /mnt/hdd/lnd/tls.key /mnt/hdd/lnd/tls.key.old
+    # restart lnd
+    sudo systemctl restart lnd
+    if [ "${autoUnlock}" = "on" ]; then
+      # wait until wallet unlocked
+      echo "waiting for wallet unlock (takes some time)..."
+      sleep 30
+    else
+      # prompt user to unlock wallet
+      /home/admin/config.scripts/lnd.unlock.sh
+      echo "waiting for wallet unlock (takes some time)..."
+      sleep 50
+    fi
+    # restart nginx
+    sudo systemctl restart nginx
+  fi
   # set wireguard on in pleb-vpn.conf
   setting ${plebVPNConf} "2" "wireguard" "on"
   exit 0
