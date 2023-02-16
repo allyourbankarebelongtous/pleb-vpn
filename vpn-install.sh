@@ -114,6 +114,7 @@ on() {
 
   # check for openvpn.conf file
   local keepconfig="${1}"
+  local isRestore="${1}"
   isconfig=$(sudo ls /mnt/hdd/app-data/pleb-vpn/openvpn/ | grep -c plebvpn.conf)
   if ! [ ${isconfig} -eq 0 ]; then
     if [ -z "${keepconfig}" ]; then
@@ -228,6 +229,34 @@ on() {
   sudo ufw allow in on tun0 from any to any
   # enable firewall
   sudo ufw --force enable
+  # check firewall
+  # skip test if restore
+  if [ ! "${isRestore}" = "1" ]; then
+    echo "checking configuration"
+    echo "stop vpn"
+    sudo systemctl stop openvpn@plebvpn
+    echo "vpn stopped"
+    echo "checking firewall"
+    currentIP=$(curl https://api.ipify.org)
+    echo "current IP = (${currentIP})...should be blank"
+    if [ "${currentIP}" = "" ]; then
+      echo "firewall config ok"
+    else 
+      echo "error...firewall not configured. Clearnet accessible when VPN is off. Uninstall and re-install pleb-vpn"
+      sudo systemctl start openvpn@plebvpn
+      exit 1
+    fi
+    echo "start vpn"
+    sudo systemctl start openvpn@plebvpn
+    sleep 10
+    if ! [ "${currentIP}" = "${vpnIP}" ]; then
+      echo "error: vpn not working"
+      echo "your current IP is not your vpn IP"
+      exit 1
+    else
+      echo "OK ... your vpn is now active"
+    fi 
+  fi
   setting ${plebVPNConf} "2" "plebVPN" "on"
   echo "OK ... plebvpn installed and configured!"
   exit 0
