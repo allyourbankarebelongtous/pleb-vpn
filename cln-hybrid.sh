@@ -65,6 +65,7 @@ on() {
   # enable hybrid mode
   source ${plebVPNConf}
   source /mnt/hdd/raspiblitz.conf
+  local isRestore = "${1}"
 
   # check if plebvpn is on
   if ! [ "${plebVPN}" = "on" ]; then
@@ -80,7 +81,6 @@ on() {
   # get CLN port
   if [ ! "${CLNPort}" = ""]; then
     # skip if restoring
-    local isRestore = "${1}"
     if [ ! "${isRestore}" = "1" ]; then
       whiptail --title "Use Existing Port?" \
       --yes-button "Use Existing" \
@@ -202,7 +202,7 @@ off() {
 
 case "${1}" in
   status) status ;;
-  on) on "${2}";;
+  on) on "${2}" ;;
   off) off ;;
   *) echo "err=Unknown action: ${1}" ; exit 1 ;;
 esac
