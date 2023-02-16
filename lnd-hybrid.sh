@@ -94,12 +94,18 @@ on() {
   fi
   # get LND port
   if [ ! -z "${lnPort}" ]; then
-    whiptail --title "Use Existing Port?" \
-    --yes-button "Use Existing" \
-    --no-button "Enter New Port" \
-    --yesno "There is an existing port from a previous install. Do you want to re-use ${lnPort} or enter a new one?" 10 80
-    if [ $? -eq 1 ]; then
-      keepport="0"
+    # skip if restoring
+    local isRestore = "${1}"
+    if [ ! "${isRestore}" = "1" ]; then
+      whiptail --title "Use Existing Port?" \
+      --yes-button "Use Existing" \
+      --no-button "Enter New Port" \
+      --yesno "There is an existing port from a previous install. Do you want to re-use ${lnPort} or enter a new one?" 10 80
+      if [ $? -eq 1 ]; then
+        keepport="0"
+      else
+        keepport="1"
+      fi
     else
       keepport="1"
     fi
