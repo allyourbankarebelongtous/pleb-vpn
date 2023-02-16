@@ -81,7 +81,7 @@ on() {
   # enable hybrid mode 
   source ${plebVPNConf}
   source /mnt/hdd/raspiblitz.conf
-  local isRestore = "${1}"
+  local isRestore="${1}"
 
   # check if plebvpn is on
   if ! [ "${plebVPN}" = "on" ]; then
