@@ -170,6 +170,7 @@ the host of ${letsencryptDomain1} again, chose <Check Again> below.
       if [ ! "${domain1host}" = "${vpnIP}" ]; then
         echo "ERROR: ${letsencryptDomain1} points to ${domain1host}, should point to ${vpnIP}."
         echo "LetsEncrypt install canceled"
+        sleep 10
         exit 1
       fi
     fi
@@ -191,7 +192,7 @@ ERROR: ${letsencryptDomain2} resolves to host IP of '${domain2host}'. Are you su
 Have you added '${vpnIP}' to the A record to point the domain at your VPS? If you entered your 
 domain name incorrectly chose <Re-Enter Domain> below. If you fixed your A record and want to check 
 the host of ${letsencryptDomain1} again, chose <Check Again> below.
-" 20 100
+" 20 120
         if [ $? -eq 0 ]; then
           whiptail --title "Enter Domain" --inputbox "Enter the second domain name that you wish to secure (example: btcpay.mydomain.com)" 11 80 2>/var/cache/raspiblitz/.tmp
           letsencryptDomain1=$(cat /var/cache/raspiblitz/.tmp)
@@ -203,6 +204,7 @@ the host of ${letsencryptDomain1} again, chose <Check Again> below.
         if [ ! "${domain2host}" = "${vpnIP}" ]; then
           echo "ERROR: ${letsencryptDomain2} points to ${domain2host}, should point to ${vpnIP}."
           echo "LetsEncrypt install canceled"
+          sleep 10
           exit 1
         fi
       fi

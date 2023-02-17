@@ -27,7 +27,7 @@ and includes scripts to configure either LND or Core Lightning (or both!) for
 hybrid mode. It also includes the abiliy to take BTCPayServer and/or LNBits public using 
 LetsEncrypt for any DNS provider that allows a CNAME record. You may use this in conjunction 
 with your own VPS set up as an OpenVPN server, or you may subscribe to @allyourbankarebelongtous 
-and use our VPS setups for the cheapest price and great service! Details below.
+and use our VPS setups for the cheapest price, easiest setup, and great service! Details below.
 
 If there are any other Plebs who want to share their VPS for a small fee, feel free
 to advertise and direct interested parties here for the easy-to-implement Raspiblitz
@@ -72,7 +72,7 @@ not accidentally release your home IP (called a killswitch). Pleb-VPN also allow
 as of version 0.9.1 for you to optionally split-tunnel tor off of the VPN. See FAQ 
 and Split-Tunneling Tor below for more details.
 
-Pleb-VPN also provides easy Raspiblitz menu access to install and configure WireGuard,
+Pleb-VPN also includes easy Raspiblitz menu access to install and configure WireGuard,
 a private VPN service that will run through the VPS, encrypted end-to-end from the
 Raspiblitz to any client connected to the blitz that you configure, giving you 
 a secure, simulated LAN that allows you to securely access all features of your
@@ -80,7 +80,7 @@ Raspiblitz as if you were home from anywhere in the world. This feature is entir
 set up locally on the Raspiblitz, so **even if you are sharing a VPS with someone you 
 don't know, they'll never get access to your Raspiblitz.**
 
-Also, Pleb-VPN provides a script to easily enable LetsEncrypt for BTCPayServer and/or 
+Additionally, Pleb-VPN provides a script to easily enable LetsEncrypt for BTCPayServer and/or 
 LNBits using your VPS and any domain name that allows CNAME record entry (most DNS providers). 
 This has an advantage over the regular Raspiblitz LetsEncrypt, which only supports token 
 authentication through DuckDNS. Your LetsEncrypt certs are generated locally and the 
@@ -97,13 +97,13 @@ card for Raspiblitz updates.**
 **How much does it cost?**
 Pleb-VPN is free. What you will need to pay for is a server (in this guide referred to as a 
 VPS-Virtual Private Server), to tunnel your traffic to and fro so your home IP isn't released. 
-The server is what costs money. You can rent your own VPS and manage the server yourself, 
+The server is what costs money. You can rent your own VPS and manage the server yourself; 
 it isn't that difficult and there are lots of guides to refer to. However, you'll end up 
 spending at least $5.00 US per month. You can subscribe to TunnelSats and get hybrid mode, 
 but you will spend $3.00 US per month, and you will only get hybrid (no private VPN), and 
-only on one node. OR you can share a VPS with a pleb and split the cost, or share with three 
+only on one node implementation. OR you can share a VPS with a pleb and split the cost, or share with three 
 and lower the cost further! Another alternative is to subscribe to mine, the details are below 
-but the basic service is $2.00 US per month. 
+and the basic service is $2.00 US per month. 
 
 **How is this different than TunnelSats?**  
 Good question. It's really not that much different. TunnelSats uses one or more
@@ -123,8 +123,9 @@ more decentralized (less reliance on one or two providers) and more robust (more
 hybrid/clearnet nodes). Plus, it comes with a private VPN already integrated in WireGuard.
 
 Finally, for an extra $1.00 US per month (for each service you want) I will forward port 443 
-so you can easily take your BTCPayServer public as well as getting a hybrid node with a private 
-VPN for $3.00 US per month. Details are found in the subscription section.
+so you can easily take your BTCPayServer or LNBits public. So for $3.00 US per month you get 
+a hybrid node, Wireguard private LAN, and BTCPay or LNBits public IP with SSL encryption. 
+Details are found in the subscription section.
 
 **How secure is this?**  
 It's as secure as any VPN. The OpenVPN encryption is AES-256-CBC, and WireGuard uses
@@ -142,8 +143,10 @@ Sort of. The actual software here on GitHub is only for Raspiblitz (for now), bu
 can find a guide to install OpenVPN and take your node clearnet on your own nothing
 is stopping you from contacting @allyourbankarebelongtous or anyone else willing to
 share a VPS and paying them a small monthly fee to gain a clearnet IP and a couple of forwarded
-ports. You will have to figure out how to change the port LND or Core Lightning uses 
-to talk to the outside world and how to implement hybrid mode or clearnet yourself. 
+ports. You will have to figure out how to:  
+1) Install and configure openvpn.  
+2) Change the port LND or Core Lightning uses and how to implement hybrid mode.  
+3) Manually configure any other service that you want (wireguard, LetsEncryt, etc).  
 There are numerous guides on how to do this.
 
 **I want to update my node. What do I need to do?**  
@@ -157,17 +160,17 @@ node configuration at any time.
 
 **What if Pleb-VPN scripts are updated? How do I update mine?**  
 The menu has an option to update the scripts by pulling them from GitHub. It takes about 
-a half a second and keeps all of your settings.
+a half a second and keeps all of your settings. See the walkthrough below for details.
 
 ## Subscription Info
 To subscribe to @allyourbankarebelongtous's VPS services, contact me on TG @allyourbankarebelongtous 
 or via email: allyourbankarebelongtous@protonmail.com. The basic service is $2.00 US per month, sent 
-via the included recurring payments (see walkthrough below) with a message that includes your TG handle 
-or your node's email address. (If your node doesn't have an email address, I recommend protonmail 
-because it's free, secure, and anonymous). 
+via the included recurring payments (see walkthrough below) or some other method with a message that 
+includes your TG handle or your node's email address. (If your node doesn't have an email address, 
+I recommend protonmail because it's free, secure, and anonymous).
 
 The first month is FREE! Try it for a month and if you decide it isn't worth it or to get your own VPS, good 
-for you! The first payment is due the 1st day of the month following receiving the connection key (called plebvpn.conf, 
+for you! The first payment is due the 1st day of the month after receiving the connection file (called plebvpn.conf, 
 see walkthrough below). To get the most of your FREE month, sign up in the first part of the month (easier 
 for accounting purposes).
 

@@ -334,20 +334,20 @@ uninstall() {
   extraLine='OPTIONS+=(PLEB-VPN "Install and manage PLEB-VPN services")'
   lineExists=$(sudo cat /home/admin/00mainMenu.sh | grep -c "${extraLine}")
   if ! [ ${lineExists} -eq 0 ]; then
-    sudo sed -i "s:.*${extraLine}.*::g" /mnt/hdd/app-data/custom-installs.sh
+    sudo sed -i "s:.*${extraLine}.*::g" /home/admin/00mainMenu.sh
   fi
   extraLine='PLEB-VPN)'
   lineExists=$(sudo cat /home/admin/00mainMenu.sh | grep -c "${extraLine}")
   if ! [ ${lineExists} -eq 0 ]; then
-    sudo sed -i "s:.*${extraLine}.*::g" /mnt/hdd/app-data/custom-installs.sh
+    sudo sed -i "s:.*${extraLine}.*::g" /home/admin/00mainMenu.sh
   fi
   extraLine='/home/admin/pleb-vpn/pleb-vpnMenu.sh'
   lineExists=$(sudo cat /home/admin/00mainMenu.sh | grep -c "${extraLine}")
   if ! [ ${lineExists} -eq 0 ]; then
-    sectionLine=$(cat ${mainMenu} | grep -n "${extraLine}" | cut -d ":" -f1)
+    sectionLine=$(sudo cat /home/admin/00mainMenu.sh | grep -n "${extraLine}" | cut -d ":" -f1)
     nextLine=$(expr $sectionLine + 1)
-    sudo sed -i "${nextLine}d" /mnt/hdd/app-data/custom-installs.sh
-    sudo sed -i "s:.*${extraLine}.*::g" /mnt/hdd/app-data/custom-installs.sh
+    sudo sed -i "${nextLine}d" /home/admin/00mainMenu.sh
+    sudo sed -i "s:.*${extraLine}.*::g" /home/admin/00mainMenu.sh
   fi
   # delete files
   sudo rm -rf /home/admin/pleb-vpn
