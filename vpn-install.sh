@@ -249,6 +249,7 @@ on() {
     echo "start vpn"
     sudo systemctl start openvpn@plebvpn
     sleep 10
+    currentIP=$(curl https://api.ipify.org)
     if ! [ "${currentIP}" = "${vpnIP}" ]; then
       echo "error: vpn not working"
       echo "your current IP is not your vpn IP"
