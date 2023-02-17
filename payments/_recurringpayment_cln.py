@@ -5,36 +5,7 @@ import logging.handlers
 import subprocess
 import argparse
 import sys
-from time import sleep
-
-# get an instance of the logger object this module will use
-logging.basicConfig(level=logging.DEBUG, format="%(asctime)-15s %(levelname)-8s")
-
-
-def get_price_at(timestamp="now"):
-    requests_session = requests.Session()
-
-    currency = "usd"
-    if timestamp == "now":
-        price = requests_session.get(
-            "https://www.bitstamp.net/api/v2/ticker/btc{}".format(currency)
-        ).json()["last"]
-    else:
-        price = requests_session.get(
-            "https://www.bitstamp.net/api/v2/ohlc/btc{}/?limit=1&step=86400&start={}".format(
-                currency, timestamp
-            )
-        ).json()["data"]["ohlc"][0]["close"]
-    return price
-
-
-#!/usr/bin/python
-import requests
-import logging
-import logging.handlers
-import subprocess
-import argparse
-import sys
+import json
 from time import sleep
 
 # get an instance of the logger object this module will use
@@ -61,13 +32,15 @@ def get_price_at(timestamp="now"):
 def send_to_node(node, sats, message):
     sats = str(int(sats))
     logging.info("Sending {0} sats to {1}".format(sats, node))
-    cmd = ['lightning-cli keysend ' + node + ' ' + sats+'000'] # convert to msats for cln
 
-    # Add keysend message, if available
+    # Create command with or without message
     if message is not None:
-        logging.warning("Keysend message not yet supported")
-        # cmd.append("-n")
-        # cmd.append(message)
+        hexmessage = message.encode("utf-8").hex()
+        tlvmessage = '"34349334": "'+hexmessage+'"'
+        jsonmessage = "'{"+tlvmessage+"}'"
+        cmd = [f'lightning-cli keysend {node} {sats}000 null null null null null {jsonmessage}'] # convert to msats for cln
+    else:
+        cmd = [f'lightning-cli keysend {node} {sats}000'] # convert to msats for cln
 
     p = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
     if p.returncode == 0:

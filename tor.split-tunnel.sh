@@ -444,6 +444,7 @@ Try checking the status using STATUS menu later. If unable to connect, uninstall
 off() {
   # remove tor split-tunneling process
   source ${plebVPNConf}
+  local skipTest="${1}"
 
   # remove services
   echo "stop and remove systemd services"
@@ -526,71 +527,73 @@ off() {
   systemctl start tor@default.service
 
   # check configuration
-  echo "OK...tor is configured to run over the VPN. Wait 2 minutes for tor to start..."
-  sleep 60
-  echo "wait 1 minute for tor to start..."
-  sleep 60
-  echo "checking configuration"
-  echo "stop VPN"
-  systemctl stop openvpn@plebvpn
-  sleep 5
-  echo "VPN stopped"
-  echo "checking firewall"
-  currentIP=$(curl https://api.ipify.org)
-  echo "current IP = (${currentIP})...should be blank"
-  if [ "${currentIP}" = "" ]; then
-    echo "firewall config ok"
-  else 
-    echo "error...firewall not configured. Clearnet accessible when VPN is off. Uninstall and re-install all of pleb-vpn."
-    systemctl start openvpn@plebvpn
-    exit 1
-  fi
-  torIP=$(torify curl http://api.ipify.org)
-  echo "tor IP = (${torIP})...should be blank."
-  if [ "${torIP}" = "" ]; then
-    echo "tor configuration successful"
-  else 
-    echo "error...tor configuration unsuccessful. Uninstall all of Pleb-VPN to restore configuration."
-    systemctl start openvpn@plebvpn
-    exit 1
-  fi
-  sleep 2
-  echo "restarting vpn"
-  systemctl start openvpn@plebvpn
-  systemctl restart tor@default.service
-  sleep 2
-  echo "checking VPN IP"
-  currentIP=$(curl https://api.ipify.org)
-  echo "current IP = (${currentIP})...should be ${vpnIP}"
-  echo "Checking connection over tor with VPN on (takes some time, likely multiple tries)..."
-  echo "Will attempt a connection up to 10 times before giving up..."
-  inc=1
-  while [ $inc -le 10 ]
-  do
-    echo "attempt number ${inc}"
-    torIP=$(torify curl http://api.ipify.org)
-    echo "tor IP = (${torIP})...should not be blank, should not be your home IP, and should not be your VPN IP."
-    if [ ! "${torIP}" = "" ]; then
-      inc=11
-    else
-      ((inc++))
+  if [ ! "${skipTest}" = "1" ]; then
+    echo "OK...tor is configured to run over the VPN. Wait 2 minutes for tor to start..."
+    sleep 60
+    echo "wait 1 minute for tor to start..."
+    sleep 60
+    echo "checking configuration"
+    echo "stop VPN"
+    systemctl stop openvpn@plebvpn
+    sleep 5
+    echo "VPN stopped"
+    echo "checking firewall"
+    currentIP=$(curl https://api.ipify.org)
+    echo "current IP = (${currentIP})...should be blank"
+    if [ "${currentIP}" = "" ]; then
+      echo "firewall config ok"
+    else 
+      echo "error...firewall not configured. Clearnet accessible when VPN is off. Uninstall and re-install all of pleb-vpn."
+      systemctl start openvpn@plebvpn
+      exit 1
     fi
-  done
-  if [ ! "${torIP}" = "" ]; then
-    echo "tor configuration successful"
-  else 
-    echo "error...unable to connect over tor when VPN is up. It's possible that it needs more time to establish a connection. 
-Try checking the status of tor later. If still unable to connect over tor, try rebooting the node."
+    torIP=$(torify curl http://api.ipify.org)
+    echo "tor IP = (${torIP})...should be blank."
+    if [ "${torIP}" = "" ]; then
+      echo "tor configuration successful"
+    else 
+      echo "error...tor configuration unsuccessful. Uninstall all of Pleb-VPN to restore configuration."
+      systemctl start openvpn@plebvpn
+      exit 1
+    fi
+    sleep 2
+    echo "restarting vpn"
+    systemctl start openvpn@plebvpn
+    systemctl restart tor@default.service
+    sleep 2
+    echo "checking VPN IP"
+    currentIP=$(curl https://api.ipify.org)
+    echo "current IP = (${currentIP})...should be ${vpnIP}"
+    echo "Checking connection over tor with VPN on (takes some time, likely multiple tries)..."
+    echo "Will attempt a connection up to 10 times before giving up..."
+    inc=1
+    while [ $inc -le 10 ]
+    do
+      echo "attempt number ${inc}"
+      torIP=$(torify curl http://api.ipify.org)
+      echo "tor IP = (${torIP})...should not be blank, should not be your home IP, and should not be your VPN IP."
+      if [ ! "${torIP}" = "" ]; then
+        inc=11
+      else
+        ((inc++))
+      fi
+    done
+    if [ ! "${torIP}" = "" ]; then
+      echo "tor configuration successful"
+    else 
+      echo "error...unable to connect over tor when VPN is up. It's possible that it needs more time to establish a connection. 
+  Try checking the status of tor later. If still unable to connect over tor, try rebooting the node."
+    fi
+    sleep 5
+    echo "tor split-tunneling is disabled and removed"
+    sleep 2
   fi
-  sleep 5
-  echo "tor split-tunneling is disabled and removed"
-  sleep 2
   setting ${plebVPNConf} "2" "torSplitTunnel" "off"
   exit 0
 }
 
 case "${1}" in
   on) on ;;
-  off) off ;;
+  off) off "${2}" ;;
   status) status "${2}" ;;
 esac

@@ -57,6 +57,11 @@ on() {
 # wireguard
 # clnHybrid
 # lndHybrid
+# letsencrypt
+# letsencryptBTCPay
+# letsencryptLNBits
+# letsencryptDomain1
+# letsencryptDomain2
 # CLNConfFile
 # lndConfFile
 # LAN
@@ -112,6 +117,11 @@ on() {
   setting ${plebVPNConf} "2" "LndConfFile" "'${lndConfFile}'"
   setting ${plebVPNConf} "2" "CLNConfFile" "'${CLCONF}'"
   setting ${plebVPNConf} "2" "LAN" "'${LAN}'"
+  setting ${plebVPNConf} "2" "letsencryptDomain2" ""
+  setting ${plebVPNConf} "2" "letsencryptDomain1" ""
+  setting ${plebVPNConf} "2" "letsencryptLNBits" "off"
+  setting ${plebVPNConf} "2" "letsencryptBTCPay" "off"
+  setting ${plebVPNConf} "2" "letsencrypt" "off"
   setting ${plebVPNConf} "2" "torSplitTunnel" "off"
   setting ${plebVPNConf} "2" "lndHybrid" "off"
   setting ${plebVPNConf} "2" "clnHybrid" "off"
@@ -155,9 +165,9 @@ update() {
   cd /home/admin
   git clone https://github.com/allyourbankarebelongtous/pleb-vpn.git
 #  these commands are for checking out a specific branch for testing
-#  cd /home/admin/pleb-vpn
-#  git checkout -b v0.9.1-tor-split-tunnel
-#  git pull origin v0.9.1-tor-split-tunnel 
+  cd /home/admin/pleb-vpn
+  git checkout -b letsencrypt
+  git pull origin letsencrypt
   sudo cp -p -r /home/admin/pleb-vpn /mnt/hdd/app-data/
   # fix permissions
   sudo chown -R admin:admin /mnt/hdd/app-data/pleb-vpn
@@ -228,6 +238,9 @@ restore() {
   if [ "${torSplitTunnel}" = "on" ]; then
     sudo /home/admin/pleb-vpn/tor.split-tunnel.sh on
   fi
+  if [ "${letsencrypt}" = "on" ]; then
+    sudo /home/admin/pleb-vpn/letsencrypt.install.sh on 1 1
+  fi
   # restore payment services
   inc=1
   while [ $inc -le 8 ]
@@ -286,8 +299,11 @@ uninstall() {
   plebVPNConf="/home/admin/pleb-vpn/pleb-vpn.conf"
   source ${plebVPNConf}
   # first uninstall services
+  if [ "${letsencrypt}" = "on" ]; then
+    sudo /home/admin/pleb-vpn/letsencrypt.install.sh off
+  fi
   if [ "${torSplitTunnel}" = "on" ]; then
-    sudo /home/admin/pleb-vpn/tor.split-tunnel.sh off
+    sudo /home/admin/pleb-vpn/tor.split-tunnel.sh off 1
   fi
   if [ "${lndHybrid}" = "on" ]; then
     /home/admin/pleb-vpn/lnd-hybrid.sh off
@@ -303,9 +319,12 @@ uninstall() {
   fi
   # delete all payments
   /home/admin/pleb-vpn/payments/managepayments.sh deleteall 1
-  # restore backups
-  /home/admin/pleb-vpn/pleb-vpn.backup.sh restore
   # remove extra line from custom-installs if required
+  extraLine="# pleb-vpn restore"
+  lineExists=$(sudo cat /mnt/hdd/app-data/custom-installs.sh | grep -c "${extraLine}")
+  if ! [ ${lineExists} -eq 0 ]; then
+    sudo sed -i "s:^${extraLine}.*::g" /mnt/hdd/app-data/custom-installs.sh
+  fi
   extraLine="/mnt/hdd/app-data/pleb-vpn/pleb-vpn.install.sh"
   lineExists=$(sudo cat /mnt/hdd/app-data/custom-installs.sh | grep -c "${extraLine}")
   if ! [ ${lineExists} -eq 0 ]; then
@@ -315,20 +334,20 @@ uninstall() {
   extraLine='OPTIONS+=(PLEB-VPN "Install and manage PLEB-VPN services")'
   lineExists=$(sudo cat /home/admin/00mainMenu.sh | grep -c "${extraLine}")
   if ! [ ${lineExists} -eq 0 ]; then
-    sudo sed -i "s:.*${extraLine}.*::g" /mnt/hdd/app-data/custom-installs.sh
+    sudo sed -i "s:.*${extraLine}.*::g" /home/admin/00mainMenu.sh
   fi
   extraLine='PLEB-VPN)'
   lineExists=$(sudo cat /home/admin/00mainMenu.sh | grep -c "${extraLine}")
   if ! [ ${lineExists} -eq 0 ]; then
-    sudo sed -i "s:.*${extraLine}.*::g" /mnt/hdd/app-data/custom-installs.sh
+    sudo sed -i "s:.*${extraLine}.*::g" /home/admin/00mainMenu.sh
   fi
   extraLine='/home/admin/pleb-vpn/pleb-vpnMenu.sh'
   lineExists=$(sudo cat /home/admin/00mainMenu.sh | grep -c "${extraLine}")
   if ! [ ${lineExists} -eq 0 ]; then
-    sectionLine=$(cat ${mainMenu} | grep -n "${extraLine}" | cut -d ":" -f1)
+    sectionLine=$(sudo cat /home/admin/00mainMenu.sh | grep -n "${extraLine}" | cut -d ":" -f1)
     nextLine=$(expr $sectionLine + 1)
-    sudo sed -i "${nextLine}d" /mnt/hdd/app-data/custom-installs.sh
-    sudo sed -i "s:.*${extraLine}.*::g" /mnt/hdd/app-data/custom-installs.sh
+    sudo sed -i "${nextLine}d" /home/admin/00mainMenu.sh
+    sudo sed -i "s:.*${extraLine}.*::g" /home/admin/00mainMenu.sh
   fi
   # delete files
   sudo rm -rf /home/admin/pleb-vpn
