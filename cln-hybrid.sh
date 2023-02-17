@@ -79,7 +79,7 @@ on() {
   fi
 
   # get CLN port
-  if [ ! "${CLNPort}" = ""]; then
+  if [ ! -z "${CLNPort}" ]; then
     # skip if restoring
     if [ ! "${isRestore}" = "1" ]; then
       whiptail --title "Use Existing Port?" \

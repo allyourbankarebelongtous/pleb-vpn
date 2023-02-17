@@ -94,7 +94,7 @@ on() {
     exit 1
   fi 
   # get LND port
-  if [ ! "${lnPort}" = "" ]; then
+  if [ ! -z "${lnPort}" ]; then
     # skip if restoring
     if [ ! "${isRestore}" = "1" ]; then
       whiptail --title "Use Existing Port?" \
