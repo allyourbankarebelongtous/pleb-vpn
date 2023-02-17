@@ -165,9 +165,9 @@ update() {
   cd /home/admin
   git clone https://github.com/allyourbankarebelongtous/pleb-vpn.git
 #  these commands are for checking out a specific branch for testing
-  cd /home/admin/pleb-vpn
-  git checkout -b letsencrypt
-  git pull origin letsencrypt
+#  cd /home/admin/pleb-vpn
+#  git checkout -b letsencrypt
+#  git pull origin letsencrypt
   sudo cp -p -r /home/admin/pleb-vpn /mnt/hdd/app-data/
   # fix permissions
   sudo chown -R admin:admin /mnt/hdd/app-data/pleb-vpn
