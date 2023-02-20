@@ -161,24 +161,36 @@ on() {
 }
 
 update() {
-  sudo rm -rf /home/admin/pleb-vpn
-  cd /home/admin
-  git clone https://github.com/allyourbankarebelongtous/pleb-vpn.git
-#  these commands are for checking out a specific branch for testing
-#  cd /home/admin/pleb-vpn
-#  git checkout -b letsencrypt
-#  git pull origin letsencrypt
-  sudo cp -p -r /home/admin/pleb-vpn /mnt/hdd/app-data/
-  # fix permissions
-  sudo chown -R admin:admin /mnt/hdd/app-data/pleb-vpn
-  sudo chown -R admin:admin /home/admin/pleb-vpn
-  sudo chmod -R 755 /mnt/hdd/app-data/pleb-vpn
-  sudo chmod -R 755 /home/admin/pleb-vpn
-  if [ -d /mnt/hdd/app-data/pleb-vpn/split-tunnel/ ]; then
-    sudo cp -p -r /mnt/hdd/app-data/pleb-vpn/split-tunnel /home/admin/pleb-vpn/
+  # git clone to temp directory
+  sudo mkdir /home/admin/pleb-vpn-tmp
+  cd /home/admin/pleb-vpn-tmp
+  sudo git clone https://github.com/allyourbankarebelongtous/pleb-vpn.git
+  # these commands are for checking out a specific branch for testing
+  #cd /home/admin/pleb-vpn-tmp/pleb-vpn
+  #sudo git checkout -b letsencrypt
+  #sudo git pull origin letsencrypt
+  # check if successful
+  isSuccess=$(ls /home/admin/pleb-vpn-tmp/ | grep -c pleb-vpn)
+  if [ ${isSuccess} -eq 0 ]; then
+    echo "error: git clone failed. Check internet connection and try again."
+    exit 1
+  else
+    sudo rm -rf /home/admin/pleb-vpn
+    sudo cp -p -r /home/admin/pleb-vpn-tmp/pleb-vpn /home/admin/
+    sudo cp -p -r /home/admin/pleb-vpn /mnt/hdd/app-data/
+    # fix permissions
+    sudo chown -R admin:admin /mnt/hdd/app-data/pleb-vpn
+    sudo chown -R admin:admin /home/admin/pleb-vpn
+    sudo chmod -R 755 /mnt/hdd/app-data/pleb-vpn
+    sudo chmod -R 755 /home/admin/pleb-vpn
+    if [ -d /mnt/hdd/app-data/pleb-vpn/split-tunnel/ ]; then
+      sudo cp -p -r /mnt/hdd/app-data/pleb-vpn/split-tunnel /home/admin/pleb-vpn/
+    fi
+    sudo cp -p -r /mnt/hdd/app-data/pleb-vpn/payments /home/admin/pleb-vpn/
+    sudo ln -s /mnt/hdd/app-data/pleb-vpn/pleb-vpn.conf /home/admin/pleb-vpn/pleb-vpn.conf
+    cd /home/admin
+    sudo rm -rf /home/admin/pleb-vpn-tmp
   fi
-  sudo cp -p -r /mnt/hdd/app-data/pleb-vpn/payments /home/admin/pleb-vpn/
-  sudo ln -s /mnt/hdd/app-data/pleb-vpn/pleb-vpn.conf /home/admin/pleb-vpn/pleb-vpn.conf
   exit 0
 }
 
