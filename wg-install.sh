@@ -31,16 +31,21 @@ function setting() # FILE LINENUMBER NAME VALUE
 }
 
 function validWgIP() {
+  source <(/home/admin/_cache.sh get internet_localip)
+  currentLAN=$(echo "${internet_localip}" | sed 's/^\(.*\)\.\(.*\)\.\(.*\)\.\(.*\)$/\1\.\2\.\3/g')
   local ip=$1
+  currentWGLAN=$(echo "${ip}" | sed 's/^\(.*\)\.\(.*\)\.\(.*\)\.\(.*\)$/\1\.\2\.\3/g')
   local stat=1
-  if [[ $ip =~ ^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$ ]]; then
-    OIFS=$IFS
-    IFS='.'
-    ip=($ip)
-    IFS=$OIFS
-    [[ ${ip[0]} -eq 10 && ${ip[1]} -le 255 &&
-      ${ip[2]} -le 255 && ${ip[3]} -le 252 ]]
-    stat=$?
+  if [ ! "${currentLAN}" = "${currentWGLAN}" ]; then
+    if [[ $ip =~ ^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$ ]]; then
+      OIFS=$IFS
+      IFS='.'
+      ip=($ip)
+      IFS=$OIFS
+      [[ ${ip[0]} -eq 10 && ${ip[1]} -le 255 &&
+        ${ip[2]} -le 255 && ${ip[3]} -le 252 ]]
+      stat=$?
+    fi
   fi
   return $stat
 }
@@ -188,12 +193,12 @@ on() {
     client3PublicKey=$(sudo cat /etc/wireguard/client3_public_key)
     sudo touch /var/cache/raspiblitz/.tmp
     sudo chmod 777 /var/cache/raspiblitz/.tmp
-    whiptail --title "Wireguard LAN address" --inputbox "Enter your desired wireguard LAN IP, chosing from 10.0.0.0 to 10.255.255.252" 11 80 2>/var/cache/raspiblitz/.tmp
+    whiptail --title "Wireguard LAN address" --inputbox "Enter your desired wireguard LAN IP, chosing from 10.0.0.0 to 10.255.255.252. Do not use the same IP as your LAN." 11 83 2>/var/cache/raspiblitz/.tmp
     wgIP=$(cat /var/cache/raspiblitz/.tmp)
     validWgIP ${wgIP}
     while [ ! ${?} -eq 0 ]
     do
-      whiptail --title "Wireguard LAN address" --inputbox "ERROR: ${wgIP} is an invalid IP address. Enter your desired wireguard LAN IP, chosing from 10.0.0.0 to 10.255.255.252" 11 80 2>/var/cache/raspiblitz/.tmp
+      whiptail --title "Wireguard LAN address" --inputbox "ERROR: ${wgIP} is an invalid IP address. Enter your desired wireguard LAN IP, chosing from 10.0.0.0 to 10.255.255.252. Do not use the same IP as your LAN." 11 83 2>/var/cache/raspiblitz/.tmp
       wgIP=$(cat /var/cache/raspiblitz/.tmp)
       validWgIP ${wgIP}
     done
