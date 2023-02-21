@@ -145,7 +145,7 @@ share a VPS and paying them a small monthly fee to gain a clearnet IP and a coup
 ports. You will have to figure out how to:  
 1) Install and configure openvpn.  
 2) Change the port LND or Core Lightning uses and how to implement hybrid mode.  
-3) Manually configure any other service that you want (wireguard, LetsEncryt, etc).  
+3) Manually configure any other service that you want (wireguard, LetsEncrypt, etc).  
 There are numerous guides on how to do this.
 
 **I want to update my node. What do I need to do?**  
