@@ -99,10 +99,10 @@ VPS-Virtual Private Server), to tunnel your traffic to and fro so your home IP i
 The server is what costs money. You can rent your own VPS and manage the server yourself; 
 it isn't that difficult and there are lots of guides to refer to. However, you'll end up 
 spending at least $5.00 US per month. You can subscribe to TunnelSats and get hybrid mode, 
-but you will spend $3.00 US per month, and you will only get hybrid (no private VPN), and 
-only on one node implementation. OR you can share a VPS with a pleb and split the cost, or share with three 
-and lower the cost further! Another alternative is to subscribe to mine, the details are below 
-and the basic service is $2.00 US per month. 
+but you will spend $3.00 US per month, and you will only get hybrid (no private VPN), no 
+BTCPayServer or LNBits public ssl secured domain). OR you can share a VPS with a pleb and split 
+the cost, or share with three and lower the cost further! Another alternative is to subscribe to 
+mine, the details are below and the basic service is $2.00 US per month. 
 
 **How is this different than TunnelSats?**  
 Good question. It's really not that much different. TunnelSats uses one or more
