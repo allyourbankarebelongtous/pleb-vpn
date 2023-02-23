@@ -193,6 +193,8 @@ update() {
     isUpdateScript=$(ls /home/admin/pleb-vpn-tmp/pleb-vpn | grep -c updates.sh)
     if [ ${isUpdateScript} -eq 1 ]; then
       sudo /home/admin/pleb-vpn-tmp/updates.sh
+      sudo rm /home/admin/pleb-vpn/updates.sh
+      sudo rm /mnt/hdd/app-data/pleb-vpn/updates.sh
     fi
     sudo rm -rf /home/admin/pleb-vpn-tmp
   fi
