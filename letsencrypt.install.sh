@@ -403,7 +403,7 @@ ssl_certificate_key /mnt/hdd/app-data/pleb-vpn/letsencrypt/tls.key;
   setting ${plebVPNConf} "2" "letsencryptDomain1" "'${letsencryptDomain1}'"
   setting ${plebVPNConf} "2" "letsencryptBTCPay" "${letsencryptBTCPay}"
   setting ${plebVPNConf} "2" "letsencryptLNBits" "${letsencryptLNBits}"
-  setting ${plebVPNConf} "2" "letsencrypt" "on"
+  setting ${plebVPNConf} "2" "letsencrypt_ssl" "on"
   exit 0
 }
 
@@ -433,7 +433,7 @@ off() {
   setting ${plebVPNConf} "2" "letsencryptDomain1" ""
   setting ${plebVPNConf} "2" "letsencryptBTCPay" "off"
   setting ${plebVPNConf} "2" "letsencryptLNBits" "off"
-  setting ${plebVPNConf} "2" "letsencrypt" "off"
+  setting ${plebVPNConf} "2" "letsencrypt_ssl" "off"
   exit 0
 }
 
