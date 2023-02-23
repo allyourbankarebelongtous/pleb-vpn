@@ -189,6 +189,11 @@ update() {
     sudo cp -p -r /mnt/hdd/app-data/pleb-vpn/payments /home/admin/pleb-vpn/
     sudo ln -s /mnt/hdd/app-data/pleb-vpn/pleb-vpn.conf /home/admin/pleb-vpn/pleb-vpn.conf
     cd /home/admin
+    # check for updates.sh and if exists, run
+    isUpdateScript=$(ls /home/admin/pleb-vpn-tmp/pleb-vpn | grep -c updates.sh)
+    if [ ${isUpdateScript} -eq 1 ]; then
+      sudo /home/admin/pleb-vpn-tmp/updates.sh
+    fi
     sudo rm -rf /home/admin/pleb-vpn-tmp
   fi
   exit 0
