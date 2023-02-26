@@ -12,6 +12,8 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   exit 1
 fi
 
+ver="1.0beta"
+
 function setting() # FILE LINENUMBER NAME VALUE
 {
   FILE=$1
@@ -68,6 +70,7 @@ on() {
 # letsencryptLNBits
 # letsencryptDomain1
 # letsencryptDomain2
+# version
 # CLNConfFile
 # lndConfFile
 # LAN
@@ -123,6 +126,7 @@ on() {
   setting ${plebVPNConf} "2" "LndConfFile" "'${lndConfFile}'"
   setting ${plebVPNConf} "2" "CLNConfFile" "'${CLCONF}'"
   setting ${plebVPNConf} "2" "LAN" "'${LAN}'"
+  setting ${plebVPNConf} "2" "version" "'${ver}'"
   setting ${plebVPNConf} "2" "letsencryptDomain2" ""
   setting ${plebVPNConf} "2" "letsencryptDomain1" ""
   setting ${plebVPNConf} "2" "letsencryptLNBits" "off"
@@ -205,6 +209,8 @@ update() {
     fi
     sudo rm -rf /home/admin/pleb-vpn-tmp
   fi
+  echo "Update successful! You now have Pleb-VPN version ${version}. Press ENTER to continue"
+  read -p
   exit 0
 }
 
