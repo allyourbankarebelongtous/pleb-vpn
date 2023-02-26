@@ -209,7 +209,8 @@ update() {
     fi
     sudo rm -rf /home/admin/pleb-vpn-tmp
   fi
-  echo "Update successful! You now have Pleb-VPN version ${ver}. Press ENTER to continue"
+  echo "Update successful! You now have Pleb-VPN version ${ver}." 
+  echo "Press ENTER to continue"
   read key </dev/tty
   exit 0
 }
