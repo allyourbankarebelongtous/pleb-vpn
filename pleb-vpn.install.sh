@@ -172,9 +172,9 @@ update() {
   cd /home/admin/pleb-vpn-tmp
   sudo git clone https://github.com/allyourbankarebelongtous/pleb-vpn.git
   # these commands are for checking out a specific branch for testing
-  cd /home/admin/pleb-vpn-tmp/pleb-vpn
-  sudo git checkout -b fix-letsencrypt-when-updating-btcpay-or-lnbits
-  sudo git pull origin fix-letsencrypt-when-updating-btcpay-or-lnbits
+  #cd /home/admin/pleb-vpn-tmp/pleb-vpn
+  #sudo git checkout -b fix-letsencrypt-when-updating-btcpay-or-lnbits
+  #sudo git pull origin fix-letsencrypt-when-updating-btcpay-or-lnbits
   # check if successful
   isSuccess=$(ls /home/admin/pleb-vpn-tmp/ | grep -c pleb-vpn)
   if [ ${isSuccess} -eq 0 ]; then
@@ -196,8 +196,8 @@ update() {
     sudo cp -p -r /mnt/hdd/app-data/pleb-vpn/payments /home/admin/pleb-vpn/
     sudo ln -s /mnt/hdd/app-data/pleb-vpn/pleb-vpn.conf /home/admin/pleb-vpn/pleb-vpn.conf
     cd /home/admin
-    # check for updates.sh and if exists, run
-    isUpdateScript=$(ls /home/admin/pleb-vpn-tmp/pleb-vpn | grep -c updates.sh)
+    # check for updates.sh and if exists, run it, then delete it
+    isUpdateScript=$(ls /home/admin/pleb-vpn | grep -c updates.sh)
     if [ ${isUpdateScript} -eq 1 ]; then
       sudo /home/admin/pleb-vpn/updates.sh
       sudo rm /home/admin/pleb-vpn/updates.sh
