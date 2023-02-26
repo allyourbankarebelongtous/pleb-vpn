@@ -19,3 +19,12 @@ if [ ! "${sectionLine}" = "" ]; then
   line="# letsencrypt_ssl"
   sudo sed -i "${insertLine}i${line}" ${plebVPNConf}
 fi
+
+# fix nginx assets to reflect status of letsencrypt
+source /mnt/hdd/app-data/pleb-vpn/pleb-vpn.conf
+if [ "${letsencryptBTCPay}" = "on" ]; then
+  sudo sed -i 's/ssl-certificate-app-data.conf/ssl-certificate-app-data-letsencrypt.conf/' /home/admin/assets/nginx/sites-available/btcpay_ssl.conf
+fi
+if [ "${letsencryptLNBits}" = "on" ]; then
+  sudo sed -i 's/ssl-certificate-app-data.conf/ssl-certificate-app-data-letsencrypt.conf/' /home/admin/assets/nginx/sites-available/lnbits_ssl.conf
+fi
