@@ -267,12 +267,12 @@ off() {
   # remove and uninstall openvpn
   source ${plebVPNConf}
 
-  # first ensure that no nodes are operating on clearnet and wireguard is uninstalled
-  if [ "${lndHybrid}" = "on" ] || [ "${clnHybrid}" = "on" ] || [ "${wireguard}" = "on" ]; then
+  # first ensure that no nodes are operating on clearnet and wireguard and letsencrypt are uninstalled
+  if [ "${lndHybrid}" = "on" ] || [ "${clnHybrid}" = "on" ] || [ "${wireguard}" = "on" ] || [ "${letsencrypt_ssl}" = "on" ]; then
     echo "# WARNING #"
     echo "you must first disable hybrid mode on your node(s) before removing openvpn"
     echo "otherwise your home IP will be visible"
-    echo "you must also disable wireguard, as it will not function without a static ip"
+    echo "you must also disable wireguard and letsencrypt, as they will not function without a static ip"
     exit 1
   fi
   # uninstall openvpn

@@ -12,7 +12,7 @@ if [ ${#wireguard} -eq 0 ]; then wireguard="off"; fi
 if [ ${#clnHybrid} -eq 0 ]; then clnHybrid="off"; fi
 if [ ${#lndHybrid} -eq 0 ]; then lndHybrid="off"; fi
 if [ ${#torSplitTunnel} -eq 0 ]; then torSplitTunnel="off"; fi
-if [ ${#letsencrypt} -eq 0 ]; then letsencrypt="off"; fi
+if [ ${#letsencrypt_ssl} -eq 0 ]; then letsencrypt_ssl="off"; fi
 
 OPTIONS=()
 
@@ -32,7 +32,7 @@ if [ "${plebVPN}" = "on" ]; then
   fi
   # if BTCPayServer or LNBits is on in raspiblitz.conf
   if [ "${BTCPayServer}" == "on" ] || [ "${LNBits}" == "on" ]; then
-    OPTIONS+=(ssl 'LetsEncrypt for BTCPay and/or LNBits' ${letsencrypt})
+    OPTIONS+=(ssl 'LetsEncrypt for BTCPay and/or LNBits' ${letsencrypt_ssl})
   fi
 fi
 CHOICES=$(dialog --title ' Activate Pleb-VPN Services ' \
@@ -144,7 +144,7 @@ fi
 # LetsEncrypt
 choice="off"; check=$(echo "${CHOICES}" | grep -c "ssl")
 if [ ${check} -eq 1 ]; then choice="on"; fi
-if [ "${letsencrypt}" != "${choice}" ]; then
+if [ "${letsencrypt_ssl}" != "${choice}" ]; then
   echo "LetsEncrypt Setting changed .."
   anychange=1
   sudo /home/admin/pleb-vpn/letsencrypt.install.sh ${choice}

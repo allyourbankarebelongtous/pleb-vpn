@@ -380,11 +380,13 @@ ssl_certificate_key /mnt/hdd/app-data/pleb-vpn/letsencrypt/tls.key;
     # fix btcpay_ssl.conf
     if [ "${letsencryptBTCPay}" = "on" ]; then
       sudo sed -i 's/ssl-certificate-app-data.conf/ssl-certificate-app-data-letsencrypt.conf/' /etc/nginx/sites-available/btcpay_ssl.conf
+      sudo sed -i 's/ssl-certificate-app-data.conf/ssl-certificate-app-data-letsencrypt.conf/' /home/admin/assets/nginx/sites-available/btcpay_ssl.conf
     fi
 
     # fix lnbits_ssl.conf
     if [ "${letsencryptLNBits}" = "on" ]; then
       sudo sed -i 's/ssl-certificate-app-data.conf/ssl-certificate-app-data-letsencrypt.conf/' /etc/nginx/sites-available/lnbits_ssl.conf
+      sudo sed -i 's/ssl-certificate-app-data.conf/ssl-certificate-app-data-letsencrypt.conf/' /home/admin/assets/nginx/sites-available/lnbits_ssl.conf
     fi
 
     # reload nginx
@@ -403,7 +405,7 @@ ssl_certificate_key /mnt/hdd/app-data/pleb-vpn/letsencrypt/tls.key;
   setting ${plebVPNConf} "2" "letsencryptDomain1" "'${letsencryptDomain1}'"
   setting ${plebVPNConf} "2" "letsencryptBTCPay" "${letsencryptBTCPay}"
   setting ${plebVPNConf} "2" "letsencryptLNBits" "${letsencryptLNBits}"
-  setting ${plebVPNConf} "2" "letsencrypt" "on"
+  setting ${plebVPNConf} "2" "letsencrypt_ssl" "on"
   exit 0
 }
 
@@ -415,9 +417,11 @@ off() {
   sudo rm /etc/nginx/snippets/ssl-certificate-app-data-letsencrypt.conf
   if [ "${letsencryptBTCPay}" = "on" ]; then
     sudo sed -i 's/ssl-certificate-app-data-letsencrypt.conf/ssl-certificate-app-data.conf/' /etc/nginx/sites-available/btcpay_ssl.conf
+    sudo sed -i 's/ssl-certificate-app-data-letsencrypt.conf/ssl-certificate-app-data.conf/' /home/admin/assets/nginx/sites-available/btcpay_ssl.conf
   fi
   if [ "${letsencryptLNBits}" = "on" ]; then
     sudo sed -i 's/ssl-certificate-app-data-letsencrypt.conf/ssl-certificate-app-data.conf/' /etc/nginx/sites-available/lnbits_ssl.conf
+    sudo sed -i 's/ssl-certificate-app-data-letsencrypt.conf/ssl-certificate-app-data.conf/' /home/admin/assets/nginx/sites-available/lnbits_ssl.conf
   fi
 
   # reload nginx
@@ -433,7 +437,7 @@ off() {
   setting ${plebVPNConf} "2" "letsencryptDomain1" ""
   setting ${plebVPNConf} "2" "letsencryptBTCPay" "off"
   setting ${plebVPNConf} "2" "letsencryptLNBits" "off"
-  setting ${plebVPNConf} "2" "letsencrypt" "off"
+  setting ${plebVPNConf} "2" "letsencrypt_ssl" "off"
   exit 0
 }
 

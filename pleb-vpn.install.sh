@@ -32,6 +32,12 @@ function setting() # FILE LINENUMBER NAME VALUE
 on() {
   # only for new install
 
+  # check for, and if present, remove updates.sh
+  isUpdateScript=$(ls /home/admin/pleb-vpn | grep -c updates.sh)
+  if [ ${isUpdateScript} -eq 1 ]; then
+    # only used for updates, not new installs, so remove
+    sudo rm /home/admin/pleb-vpn/updates.sh
+  fi
   # move the files to /mnt/hdd/app-data/pleb-vpn
   sudo mkdir /home/admin/pleb-vpn/payments/keysends
   sudo cp -p -r /home/admin/pleb-vpn /mnt/hdd/app-data/
@@ -57,7 +63,7 @@ on() {
 # wireguard
 # clnHybrid
 # lndHybrid
-# letsencrypt
+# letsencrypt_ssl
 # letsencryptBTCPay
 # letsencryptLNBits
 # letsencryptDomain1
@@ -121,7 +127,7 @@ on() {
   setting ${plebVPNConf} "2" "letsencryptDomain1" ""
   setting ${plebVPNConf} "2" "letsencryptLNBits" "off"
   setting ${plebVPNConf} "2" "letsencryptBTCPay" "off"
-  setting ${plebVPNConf} "2" "letsencrypt" "off"
+  setting ${plebVPNConf} "2" "letsencrypt_ssl" "off"
   setting ${plebVPNConf} "2" "torSplitTunnel" "off"
   setting ${plebVPNConf} "2" "lndHybrid" "off"
   setting ${plebVPNConf} "2" "clnHybrid" "off"
@@ -167,12 +173,13 @@ update() {
   sudo git clone https://github.com/allyourbankarebelongtous/pleb-vpn.git
   # these commands are for checking out a specific branch for testing
   #cd /home/admin/pleb-vpn-tmp/pleb-vpn
-  #sudo git checkout -b letsencrypt
-  #sudo git pull origin letsencrypt
+  #sudo git checkout -b fix-letsencrypt-when-updating-btcpay-or-lnbits
+  #sudo git pull origin fix-letsencrypt-when-updating-btcpay-or-lnbits
   # check if successful
   isSuccess=$(ls /home/admin/pleb-vpn-tmp/ | grep -c pleb-vpn)
   if [ ${isSuccess} -eq 0 ]; then
     echo "error: git clone failed. Check internet connection and try again."
+    sudo rm -rf /home/admin/pleb-vpn-tmp
     exit 1
   else
     sudo rm -rf /home/admin/pleb-vpn
@@ -189,8 +196,8 @@ update() {
     sudo cp -p -r /mnt/hdd/app-data/pleb-vpn/payments /home/admin/pleb-vpn/
     sudo ln -s /mnt/hdd/app-data/pleb-vpn/pleb-vpn.conf /home/admin/pleb-vpn/pleb-vpn.conf
     cd /home/admin
-    # check for updates.sh and if exists, run
-    isUpdateScript=$(ls /home/admin/pleb-vpn-tmp/pleb-vpn | grep -c updates.sh)
+    # check for updates.sh and if exists, run it, then delete it
+    isUpdateScript=$(ls /home/admin/pleb-vpn | grep -c updates.sh)
     if [ ${isUpdateScript} -eq 1 ]; then
       sudo /home/admin/pleb-vpn/updates.sh
       sudo rm /home/admin/pleb-vpn/updates.sh
@@ -257,7 +264,7 @@ restore() {
   if [ "${torSplitTunnel}" = "on" ]; then
     sudo /home/admin/pleb-vpn/tor.split-tunnel.sh on
   fi
-  if [ "${letsencrypt}" = "on" ]; then
+  if [ "${letsencrypt_ssl}" = "on" ]; then
     sudo /home/admin/pleb-vpn/letsencrypt.install.sh on 1 1
   fi
   # restore payment services
@@ -318,7 +325,7 @@ uninstall() {
   plebVPNConf="/home/admin/pleb-vpn/pleb-vpn.conf"
   source ${plebVPNConf}
   # first uninstall services
-  if [ "${letsencrypt}" = "on" ]; then
+  if [ "${letsencrypt_ssl}" = "on" ]; then
     sudo /home/admin/pleb-vpn/letsencrypt.install.sh off
   fi
   if [ "${torSplitTunnel}" = "on" ]; then
