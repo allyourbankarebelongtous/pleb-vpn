@@ -88,5 +88,5 @@ if [ ${infoBlitzUpdated} -eq 0 ]; then
   fi
 ' | sudo tee -a /home/admin/pleb-vpn/update.tmp
   ed -s ${infoBlitz} <<< "${insertLine}r /home/admin/pleb-vpn/update.tmp"$'\nw'
-  sudo rm /home/admin/pleb-vpn/update.tmp
+  #sudo rm /home/admin/pleb-vpn/update.tmp
 fi
