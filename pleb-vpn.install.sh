@@ -178,9 +178,9 @@ on() {
   if [ "${plebVPN}" = "on" ]; then' | sudo tee /home/admin/pleb-vpn/update.tmp
   echo "    currentIP=$(host myip.opendns.com resolver1.opendns.com| awk '/has / {print $4}') &> /dev/null" | sudo tee -a /home/admin/pleb-vpn/update.tmp
   echo '    if [ "${currentIP}" = "${vpnIP}" ]; then
-      plebVPNstatus="${color_green}OK"
+      plebVPNstatus="${color_green}OK${color_gray}"
     else
-      plebVPNstatus="${color_red}Down"
+      plebVPNstatus="${color_red}Down${color_gray}"
     fi
       plebVPNline="Pleb-VPN IP ${vpnIP} Status ${plebVPNstatus}"
     printf "${plebVPNline}"
