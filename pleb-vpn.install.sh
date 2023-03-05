@@ -187,7 +187,7 @@ on() {
     printf "${plebVPNline}"
   fi
 ' | sudo tee /home/admin/pleb-vpn/update.tmp
-  sudo sed -i "${insertLine}i /home/admin/pleb-vpn/update.tmp" ${infoBlitz}
+  sudo sed -i '${insertLine}i /home/admin/pleb-vpn/update.tmp' ${infoBlitz}
   sudo rm /home/admin/pleb-vpn/update.tmp
 
   exit 0
