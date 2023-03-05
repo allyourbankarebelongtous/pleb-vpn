@@ -137,13 +137,17 @@ on() {
   setting ${plebVPNConf} "2" "clnHybrid" "off"
   setting ${plebVPNConf} "2" "wireguard" "off"
   setting ${plebVPNConf} "2" "plebVPN" "off"
+
   # make persistant with custom-installs.sh
   isPersistant=$(cat /mnt/hdd/app-data/custom-installs.sh | grep -c /mnt/hdd/app-data/pleb-vpn/pleb-vpn.install.sh)
   if [ ${isPersistant} -eq 0 ]; then
     echo "# pleb-vpn restore
 /mnt/hdd/app-data/pleb-vpn/pleb-vpn.install.sh restore
+# get latest pleb-vpn update
+/mnt/hdd/app-data/pleb-vpn/pleb-vpn.install.sh update
 " | sudo tee -a /mnt/hdd/app-data/custom-installs.sh
   fi
+
   # add pleb-vpn to 00mainMenu.sh
   mainMenu="/home/admin/00mainMenu.sh"
   sectionName="# Activated Apps/Services"
