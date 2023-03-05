@@ -167,6 +167,54 @@ on() {
   insertLine=$(expr $sectionLine + 4)
   Line=';;'
   sudo sed -i "${insertLine}i            ${Line}" ${mainMenu}
+
+  # add pleb-vpn to 00infoBlitz.sh for status check
+  infoBlitz="/home/admin/00infoBlitz.sh"
+  sectionName='    echo "${appInfoLine}"'
+  sectionLine=$(cat ${infoBlitz} | grep -n "^${sectionName}" | cut -d ":" -f1)
+  insertLine=$(expr $sectionLine + 2)
+  Line=''
+  sudo sed -i "${insertLine}i${Line}" ${infoBlitz}
+  insertLine=$(expr $sectionLine + 3)
+  Line='  # Pleb-VPN info'
+  sudo sed -i "${insertLine}i${Line}" ${infoBlitz}
+  insertLine=$(expr $sectionLine + 4)
+  Line='  source /home/admin/pleb-vpn/pleb-vpn.conf'
+  sudo sed -i "${insertLine}i${Line}" ${infoBlitz}
+  insertLine=$(expr $sectionLine + 5)
+  Line='  if [ "${plebVPN}" = "on" ]; then'
+  sudo sed -i "${insertLine}i${Line}" ${infoBlitz}
+  insertLine=$(expr $sectionLine + 6)
+  Line="    currentIP=$(host myip.opendns.com resolver1.opendns.com| awk '/has / {print $4}') &> /dev/null"
+  sudo sed -i "${insertLine}i${Line}" ${infoBlitz}
+  insertLine=$(expr $sectionLine + 7)
+  Line='    if [ "${currentIP}" = "${vpnIP}" ]; then'
+  sudo sed -i "${insertLine}i${Line}" ${infoBlitz}
+  insertLine=$(expr $sectionLine + 8)
+  Line='      plebVPNstatus="${color_green}OK"'
+  sudo sed -i "${insertLine}i${Line}" ${infoBlitz}
+  insertLine=$(expr $sectionLine + 9)
+  Line='    else'
+  sudo sed -i "${insertLine}i${Line}" ${infoBlitz}
+  insertLine=$(expr $sectionLine + 10)
+  Line='      plebVPNstatus="${color_red}Down"'
+  sudo sed -i "${insertLine}i${Line}" ${infoBlitz}
+  insertLine=$(expr $sectionLine + 11)
+  Line='    fi'
+  sudo sed -i "${insertLine}i${Line}" ${infoBlitz}
+  insertLine=$(expr $sectionLine + 12)
+  Line='      plebVPNline="Pleb-VPN IP ${vpnIP} Status ${plebVPNstatus}"'
+  sudo sed -i "${insertLine}i${Line}" ${infoBlitz}
+  insertLine=$(expr $sectionLine + 13)
+  Line='    printf "${plebVPNline}"'
+  sudo sed -i "${insertLine}i${Line}" ${infoBlitz}
+  insertLine=$(expr $sectionLine + 14)
+  Line='  fi'
+  sudo sed -i "${insertLine}i${Line}" ${infoBlitz}
+  insertLine=$(expr $sectionLine + 15)
+  Line=''
+  sudo sed -i "${insertLine}i${Line}" ${infoBlitz}
+
   exit 0
 }
 
@@ -176,9 +224,9 @@ update() {
   cd /home/admin/pleb-vpn-tmp
   sudo git clone https://github.com/allyourbankarebelongtous/pleb-vpn.git
   # these commands are for checking out a specific branch for testing
-  #cd /home/admin/pleb-vpn-tmp/pleb-vpn
-  #sudo git checkout -b fix-letsencrypt-when-updating-btcpay-or-lnbits
-  #sudo git pull origin fix-letsencrypt-when-updating-btcpay-or-lnbits
+  cd /home/admin/pleb-vpn-tmp/pleb-vpn
+  sudo git checkout -b check-for-port-duplicates
+  sudo git pull origin check-for-port-duplicates
   # check if successful
   isSuccess=$(ls /home/admin/pleb-vpn-tmp/ | grep -c pleb-vpn)
   if [ ${isSuccess} -eq 0 ]; then

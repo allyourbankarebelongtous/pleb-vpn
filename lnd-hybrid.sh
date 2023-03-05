@@ -117,6 +117,15 @@ on() {
     sudo chmod 777 /var/cache/raspiblitz/.tmp
     whiptail --title "LND Clearnet Port" --inputbox "Enter the port that is forwarded to your node from the VPS for hybrid mode. If you don't have one, forward one from your VPS or contact your VPS provider to obtain one. (example: 9740)" 12 80 2>/var/cache/raspiblitz/.tmp
     lnPort=$(cat /var/cache/raspiblitz/.tmp)
+    # check to make sure port isn't already used by CLN or WireGuard
+    if [ "${lnPort}" = "${CLNPort}" ] || [ "${lnPort}" = "${wgPort}" ]; then
+      whiptail --title "LND Clearnet Port" --inputbox "ERROR: You must not use the same port as a previous service. Enter a different port than ${lnPort}." 12 80 2>/var/cache/raspiblitz/.tmp
+      lnPort=$(cat /var/cache/raspiblitz/.tmp)
+      if [ "${lnPort}" = "${CLNPort}" ] || [ "${lnPort}" = "${wgPort}" ]; then
+        echo "error: port must be different than other services"
+        exit 1
+      fi
+    fi
     # add LND port to pleb-vpn.conf 
     setting ${plebVPNConf} "2" "lnPort" "'${lnPort}'"
   fi

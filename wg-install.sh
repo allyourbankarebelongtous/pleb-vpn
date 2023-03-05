@@ -174,7 +174,7 @@ on() {
   sudo apt-key adv --keyserver   keyserver.ubuntu.com --recv-keys 04EE7237B7D453EC
   sudo apt-key adv --keyserver   keyserver.ubuntu.com --recv-keys 648ACFD622F3D138
   sudo sh -c 'printf "Package: *\nPin: release a=unstable\nPin-Priority: 90\n" > /etc/apt/preferences.d/limit-unstable'
-  sudo apt-get update
+  sudo apt-get update &> /dev/null
   sudo apt install -y wireguard
   if [ "${keepconfig}" = "0" ]; then
     # configure wireguard keys
@@ -204,6 +204,15 @@ on() {
     done
     whiptail --title "Wireguard port" --inputbox "Enter the port that is forwarded to you from the VPS for wireguard. If you don't have one, forward one from your VPS or contact your VPS provider to obtain one." 12 80 2>/var/cache/raspiblitz/.tmp
     wgPort=$(cat /var/cache/raspiblitz/.tmp)
+    # check to make sure port isn't already used by LND or CLN
+    if [ "${wgPort}" = "${lnPort}" ] || [ "${wgPort}" = "${CLNPort}" ]; then
+      whiptail --title "Wireguard port" --inputbox "ERROR: You must not use the same port as a previous service. Enter a different port than ${wgPort}." 12 80 2>/var/cache/raspiblitz/.tmp
+      wgPort=$(cat /var/cache/raspiblitz/.tmp)
+      if [ "${wgPort}" = "${lnPort}" ] || [ "${wgPort}" = "${CLNPort}" ]; then
+        echo "error: port must be different than other services"
+        exit 1
+      fi
+    fi
     # add wireguard LAN to pleb-vpn.conf 
     setting ${plebVPNConf} "2" "wgPort" "'${wgPort}'"
     wgLAN=$(echo "${wgIP}" | sed 's/^\(.*\)\.\(.*\)\.\(.*\)\.\(.*\)$/\1\.\2\.\3/')
