@@ -93,9 +93,10 @@ if [ "${clnHybrid}" != "${choice}" ]; then
   source <(/home/admin/_cache.sh get ln_default_locked)
   if [ "${clEncryptedHSM}" = "off" ]; then
     # wait until wallet unlocked
-    echo "waiting for wallet unlock (takes some time)..."
-    sleep 40
+    echo "waiting for Core Lightning to start (takes some time)..."
+    sleep 60
   else
+    echo "waiting for wallet unlock (takes some time)..."
     /home/admin/config.scripts/cl.hsmtool.sh unlock
     sleep 5
   fi
@@ -119,7 +120,7 @@ if [ "${lndHybrid}" != "${choice}" ]; then
     # prompt user to unlock wallet
     /home/admin/config.scripts/lnd.unlock.sh
     echo "waiting for wallet unlock (takes some time)..."
-    sleep 50
+    sleep 5
   fi
   sudo -u admin /home/admin/pleb-vpn/lnd-hybrid.sh status
 else

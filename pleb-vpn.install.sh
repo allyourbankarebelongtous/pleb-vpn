@@ -137,13 +137,17 @@ on() {
   setting ${plebVPNConf} "2" "clnHybrid" "off"
   setting ${plebVPNConf} "2" "wireguard" "off"
   setting ${plebVPNConf} "2" "plebVPN" "off"
+
   # make persistant with custom-installs.sh
   isPersistant=$(cat /mnt/hdd/app-data/custom-installs.sh | grep -c /mnt/hdd/app-data/pleb-vpn/pleb-vpn.install.sh)
   if [ ${isPersistant} -eq 0 ]; then
     echo "# pleb-vpn restore
 /mnt/hdd/app-data/pleb-vpn/pleb-vpn.install.sh restore
+# get latest pleb-vpn update
+/mnt/hdd/app-data/pleb-vpn/pleb-vpn.install.sh update
 " | sudo tee -a /mnt/hdd/app-data/custom-installs.sh
   fi
+
   # add pleb-vpn to 00mainMenu.sh
   mainMenu="/home/admin/00mainMenu.sh"
   sectionName="# Activated Apps/Services"
@@ -167,6 +171,28 @@ on() {
   insertLine=$(expr $sectionLine + 4)
   Line=';;'
   sudo sed -i "${insertLine}i            ${Line}" ${mainMenu}
+
+  # add pleb-vpn to 00infoBlitz.sh for status check
+  infoBlitz="/home/admin/00infoBlitz.sh"
+  sectionName='    echo "${appInfoLine}"'
+  sectionLine=$(cat ${infoBlitz} | grep -n "^${sectionName}" | cut -d ":" -f1)
+  insertLine=$(expr $sectionLine + 2)
+  echo '  # Pleb-VPN info
+  source /home/admin/pleb-vpn/pleb-vpn.conf
+  if [ "${plebVPN}" = "on" ]; then' | sudo tee /home/admin/pleb-vpn/update.tmp
+  echo -e "    currentIP=\$(host myip.opendns.com resolver1.opendns.com 2>/dev/null | awk '/has / {print \$4}') >/dev/null 2>&1" | sudo tee -a /home/admin/pleb-vpn/update.tmp
+  echo '    if [ "${currentIP}" = "${vpnIP}" ]; then
+      plebVPNstatus="${color_green}OK${color_gray}."
+    else
+      plebVPNstatus="${color_red}Down${color_gray}."
+    fi
+      plebVPNline="Pleb-VPN IP ${vpnIP} Status ${plebVPNstatus}"
+    echo -e "${plebVPNline}"
+  fi
+' | sudo tee -a /home/admin/pleb-vpn/update.tmp
+  ed -s ${infoBlitz} <<< "${insertLine}r /home/admin/pleb-vpn/update.tmp"$'\nw'
+  sudo rm /home/admin/pleb-vpn/update.tmp
+
   exit 0
 }
 
@@ -177,8 +203,8 @@ update() {
   sudo git clone https://github.com/allyourbankarebelongtous/pleb-vpn.git
   # these commands are for checking out a specific branch for testing
   #cd /home/admin/pleb-vpn-tmp/pleb-vpn
-  #sudo git checkout -b fix-letsencrypt-when-updating-btcpay-or-lnbits
-  #sudo git pull origin fix-letsencrypt-when-updating-btcpay-or-lnbits
+  #sudo git checkout -b check-for-port-duplicates
+  #sudo git pull origin check-for-port-duplicates
   # check if successful
   isSuccess=$(ls /home/admin/pleb-vpn-tmp/ | grep -c pleb-vpn)
   if [ ${isSuccess} -eq 0 ]; then

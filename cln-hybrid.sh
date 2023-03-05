@@ -102,6 +102,15 @@ on() {
     sudo chmod 777 /var/cache/raspiblitz/.tmp
     whiptail --title "Core Lightning Clearnet Port" --inputbox "Enter the clearnet port assigned to your Core Lightning node. If you don't have one, forward one from your VPS or contact your VPS provider to obtain one. (example: 9740)" 12 80 2>/var/cache/raspiblitz/.tmp
     CLNPort=$(cat /var/cache/raspiblitz/.tmp)
+    # check to make sure port isn't already used by LND or WireGuard
+    if [ "${CLNPort}" = "${lnPort}" ] || [ "${CLNPort}" = "${wgPort}" ]; then
+      whiptail --title "Core Lightning Clearnet Port" --inputbox "ERROR: You must not use the same port as a previous service. Enter a different port than ${CLNPort}." 12 80 2>/var/cache/raspiblitz/.tmp
+      CLNPort=$(cat /var/cache/raspiblitz/.tmp)
+      if [ "${CLNPort}" = "${lnPort}" ] || [ "${CLNPort}" = "${wgPort}" ]; then
+        echo "error: port must be different than other services"
+        exit 1
+      fi
+    fi
     # add CLN port to pleb-vpn.conf 
     setting ${plebVPNConf} "2" "CLNPort" "'${CLNPort}'"
   fi
