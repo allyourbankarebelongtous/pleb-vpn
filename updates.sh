@@ -74,42 +74,20 @@ if [ ${infoBlitzUpdated} -eq 0 ]; then
   sectionName='    echo "${appInfoLine}"'
   sectionLine=$(cat ${infoBlitz} | grep -n "^${sectionName}" | cut -d ":" -f1)
   insertLine=$(expr $sectionLine + 2)
-  Line=''
-  sudo sed -i "${insertLine}i${Line}" ${infoBlitz}
-  insertLine=$(expr $sectionLine + 3)
-  Line='  # Pleb-VPN info'
-  sudo sed -i "${insertLine}i${Line}" ${infoBlitz}
-  insertLine=$(expr $sectionLine + 4)
-  Line='  source /home/admin/pleb-vpn/pleb-vpn.conf'
-  sudo sed -i "${insertLine}i${Line}" ${infoBlitz}
-  insertLine=$(expr $sectionLine + 5)
-  Line='  if [ "${plebVPN}" = "on" ]; then'
-  sudo sed -i "${insertLine}i${Line}" ${infoBlitz}
-  insertLine=$(expr $sectionLine + 6)
-  Line="    currentIP=$(host myip.opendns.com resolver1.opendns.com| awk '/has / {print $4}') &> /dev/null"
-  sudo sed -i "${insertLine}i${Line}" ${infoBlitz}
-  insertLine=$(expr $sectionLine + 7)
-  Line='    if [ "${currentIP}" = "${vpnIP}" ]; then'
-  sudo sed -i "${insertLine}i${Line}" ${infoBlitz}
-  insertLine=$(expr $sectionLine + 8)
-  Line='      plebVPNstatus="${color_green}OK"'
-  sudo sed -i "${insertLine}i${Line}" ${infoBlitz}
-  insertLine=$(expr $sectionLine + 9)
-  Line='    else'
-  sudo sed -i "${insertLine}i${Line}" ${infoBlitz}
-  insertLine=$(expr $sectionLine + 10)
-  Line='      plebVPNstatus="${color_red}Down"'
-  sudo sed -i "${insertLine}i${Line}" ${infoBlitz}
-  insertLine=$(expr $sectionLine + 11)
-  Line='    fi'
-  sudo sed -i "${insertLine}i${Line}" ${infoBlitz}
-  insertLine=$(expr $sectionLine + 12)
-  Line='      plebVPNline="Pleb-VPN IP ${vpnIP} Status ${plebVPNstatus}"'
-  sudo sed -i "${insertLine}i${Line}" ${infoBlitz}
-  insertLine=$(expr $sectionLine + 13)
-  Line='    printf "${plebVPNline}"'
-  sudo sed -i "${insertLine}i${Line}" ${infoBlitz}
-  insertLine=$(expr $sectionLine + 14)
-  Line='  fi'
-  sudo sed -i "${insertLine}i${Line}" ${infoBlitz}
+  echo '
+  # Pleb-VPN info
+  source /home/admin/pleb-vpn/pleb-vpn.conf
+  if [ "${plebVPN}" = "on" ]; then
+    currentIP=$(host myip.opendns.com resolver1.opendns.com| awk "/has / {print $4}") &> /dev/null
+    if [ "${currentIP}" = "${vpnIP}" ]; then
+      plebVPNstatus="${color_green}OK"
+    else
+      plebVPNstatus="${color_red}Down"
+    fi
+      plebVPNline="Pleb-VPN IP ${vpnIP} Status ${plebVPNstatus}"
+    printf "${plebVPNline}"
+  fi
+' | sudo tee /home/admin/pleb-vpn/update.tmp
+  sudo sed -i "${insertLine}i /home/admin/pleb-vpn/update.tmp" ${infoBlitz}
+  sudo rm /home/admin/pleb-vpn/update.tmp
 fi
