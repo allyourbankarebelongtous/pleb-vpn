@@ -202,9 +202,9 @@ update() {
   cd /home/admin/pleb-vpn-tmp
   sudo git clone https://github.com/allyourbankarebelongtous/pleb-vpn.git
   # these commands are for checking out a specific branch for testing
-  cd /home/admin/pleb-vpn-tmp/pleb-vpn
-  sudo git checkout -b check-for-port-duplicates
-  sudo git pull origin check-for-port-duplicates
+  #cd /home/admin/pleb-vpn-tmp/pleb-vpn
+  #sudo git checkout -b check-for-port-duplicates
+  #sudo git pull origin check-for-port-duplicates
   # check if successful
   isSuccess=$(ls /home/admin/pleb-vpn-tmp/ | grep -c pleb-vpn)
   if [ ${isSuccess} -eq 0 ]; then
