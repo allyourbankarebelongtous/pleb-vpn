@@ -393,6 +393,7 @@ uninstall() {
   if ! [ ${lineExists} -eq 0 ]; then
     sudo sed -i "s:^${extraLine}.*::g" /mnt/hdd/app-data/custom-installs.sh
   fi
+
   # remove extra lines from 00mainMenu.sh if required
   extraLine='OPTIONS+=(PLEB-VPN "Install and manage PLEB-VPN services")'
   lineExists=$(sudo cat /home/admin/00mainMenu.sh | grep -c "${extraLine}")
@@ -412,6 +413,20 @@ uninstall() {
     sudo sed -i "${nextLine}d" /home/admin/00mainMenu.sh
     sudo sed -i "s:.*${extraLine}.*::g" /home/admin/00mainMenu.sh
   fi
+
+  # remove extra lines from 00infoBlitz.sh if required
+  extraLine='  # Pleb-VPN info'
+  lineExists=$(sudo cat /home/admin/00infoBlitz.sh | grep -c "${extraLine}")
+  if ! [ ${lineExists} -eq 0 ]; then
+    sectionLine=$(sudo cat /home/admin/00infoBlitz.sh | grep -n "${extraLine}" | cut -d ":" -f1)
+    inc=1
+    while [ $inc -le 13 ]
+    do
+      sudo sed -i "${sectionLine}d" /home/admin/00infoBlitz.sh
+      ((inc++))
+    done
+  fi
+
   # delete files
   sudo rm -rf /home/admin/pleb-vpn
   sudo rm -rf /mnt/hdd/app-data/pleb-vpn.conf
