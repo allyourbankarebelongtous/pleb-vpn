@@ -182,14 +182,18 @@ on() {
   if [ "${plebVPN}" = "on" ]; then' | sudo tee /home/admin/pleb-vpn/update.tmp
   echo -e "    currentIP=\$(host myip.opendns.com resolver1.opendns.com 2>/dev/null | awk '/has / {print \$4}') >/dev/null 2>&1" | sudo tee -a /home/admin/pleb-vpn/update.tmp
   echo '    if [ "${currentIP}" = "${vpnIP}" ]; then
-      plebVPNstatus="${color_green}OK${color_gray}."
+      plebVPNstatus="${color_green}OK${color_gray}"
     else
-      plebVPNstatus="${color_red}Down${color_gray}."
+      plebVPNstatus="${color_red}Down${color_gray}"
     fi
       plebVPNline="Pleb-VPN IP ${vpnIP} Status ${plebVPNstatus}"
     echo -e "${plebVPNline}"
   fi
 ' | sudo tee -a /home/admin/pleb-vpn/update.tmp
+  edIsInstalled=$(ed --version 2>/dev/null | grep -c "GNU ed")
+  if [ ${edIsInstalled} -eq 0 ]; then
+    sudo apt install -y ed
+  fi
   ed -s ${infoBlitz} <<< "${insertLine}r /home/admin/pleb-vpn/update.tmp"$'\nw'
   sudo rm /home/admin/pleb-vpn/update.tmp
 
