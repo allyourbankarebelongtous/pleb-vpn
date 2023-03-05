@@ -97,3 +97,4 @@ if [ ${custominstallUpdate} -eq 0 ]; then
   echo "# get latest pleb-vpn update
 /mnt/hdd/app-data/pleb-vpn/pleb-vpn.install.sh update
 " | sudo tee -a /mnt/hdd/app-data/custom-installs.sh
+fi
