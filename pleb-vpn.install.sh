@@ -173,8 +173,7 @@ on() {
   sectionName='    echo "${appInfoLine}"'
   sectionLine=$(cat ${infoBlitz} | grep -n "^${sectionName}" | cut -d ":" -f1)
   insertLine=$(expr $sectionLine + 2)
-  echo '
-  # Pleb-VPN info
+  echo '  # Pleb-VPN info
   source /home/admin/pleb-vpn/pleb-vpn.conf
   if [ "${plebVPN}" = "on" ]; then
     currentIP=$(host myip.opendns.com resolver1.opendns.com| awk "/has / {print $4}") &> /dev/null
@@ -187,7 +186,7 @@ on() {
     printf "${plebVPNline}"
   fi
 ' | sudo tee /home/admin/pleb-vpn/update.tmp
-  sudo sed -i '${insertLine}i /home/admin/pleb-vpn/update.tmp' ${infoBlitz}
+  ed -s ${infoBlitz} <<< "${insertLine}r /home/admin/pleb-vpn/update.tmp"$'\nw'
   sudo rm /home/admin/pleb-vpn/update.tmp
 
   exit 0
