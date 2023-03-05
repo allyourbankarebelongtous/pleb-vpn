@@ -76,9 +76,9 @@ if [ ${infoBlitzUpdated} -eq 0 ]; then
   insertLine=$(expr $sectionLine + 2)
   echo '  # Pleb-VPN info
   source /home/admin/pleb-vpn/pleb-vpn.conf
-  if [ "${plebVPN}" = "on" ]; then
-    currentIP=$(host myip.opendns.com resolver1.opendns.com| awk "/has / {print $4}") &> /dev/null
-    if [ "${currentIP}" = "${vpnIP}" ]; then
+  if [ "${plebVPN}" = "on" ]; then' | sudo tee /home/admin/pleb-vpn/update.tmp
+  echo "    currentIP=$(host myip.opendns.com resolver1.opendns.com| awk '/has / {print $4}') &> /dev/null" | sudo tee -a /home/admin/pleb-vpn/update.tmp
+  echo '    if [ "${currentIP}" = "${vpnIP}" ]; then
       plebVPNstatus="${color_green}OK"
     else
       plebVPNstatus="${color_red}Down"
@@ -86,7 +86,7 @@ if [ ${infoBlitzUpdated} -eq 0 ]; then
       plebVPNline="Pleb-VPN IP ${vpnIP} Status ${plebVPNstatus}"
     printf "${plebVPNline}"
   fi
-' | sudo tee /home/admin/pleb-vpn/update.tmp
+' | sudo tee -a /home/admin/pleb-vpn/update.tmp
   ed -s ${infoBlitz} <<< "${insertLine}r /home/admin/pleb-vpn/update.tmp"$'\nw'
   sudo rm /home/admin/pleb-vpn/update.tmp
 fi
