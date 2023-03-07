@@ -330,41 +330,43 @@ ${appstoreLink}\n
   sleep 10
   sudo systemctl restart wg-quick@wg0
   # add tlsextraip to lnd.conf and recreate tls.cert (if lnd installed)
-  if [ "${lnd}" = "on" ]; then
-    source <(/home/admin/config.scripts/network.aliases.sh getvars lnd)
-    sectionName="Application Options"
-    echo "# [${sectionName}] config ..."
-    sectionLine=$(cat ${lndConfFile} | grep -n "^\[${sectionName}\]" | cut -d ":" -f1)
-    echo "# sectionLine(${sectionLine})"
-    insertLine=$(expr $sectionLine + 1)
-    echo "# insertLine(${insertLine})"
-    fileLines=$(wc -l ${lndConfFile} | cut -d " " -f1)
-    echo "# fileLines(${fileLines})"
-    if [ ${fileLines} -lt ${insertLine} ]; then
-      echo "# adding new line for inserts"
-      echo "
-    " | tee -a ${lndConfFile}
+  if [ "${keepconfig}" = "0" ]; then
+    if [ "${lnd}" = "on" ]; then
+      source <(/home/admin/config.scripts/network.aliases.sh getvars lnd)
+      sectionName="Application Options"
+      echo "# [${sectionName}] config ..."
+      sectionLine=$(cat ${lndConfFile} | grep -n "^\[${sectionName}\]" | cut -d ":" -f1)
+      echo "# sectionLine(${sectionLine})"
+      insertLine=$(expr $sectionLine + 1)
+      echo "# insertLine(${insertLine})"
+      fileLines=$(wc -l ${lndConfFile} | cut -d " " -f1)
+      echo "# fileLines(${fileLines})"
+      if [ ${fileLines} -lt ${insertLine} ]; then
+        echo "# adding new line for inserts"
+        echo "
+      " | tee -a ${lndConfFile}
+      fi
+      echo "# sectionLine(${sectionLine})"
+      setting ${lndConfFile} ${insertLine} "tlsextraip" "${wgIP}"
+      # remove old tls.cert and tls.key
+      sudo rm /mnt/hdd/lnd/*.old
+      sudo mv /mnt/hdd/lnd/tls.cert /mnt/hdd/lnd/tls.cert.old
+      sudo mv /mnt/hdd/lnd/tls.key /mnt/hdd/lnd/tls.key.old
+      # restart lnd
+      sudo systemctl restart lnd
+      if [ "${autoUnlock}" = "on" ]; then
+        # wait until wallet unlocked
+        echo "waiting for wallet unlock (takes some time)..."
+        sleep 30
+      else
+        # prompt user to unlock wallet
+        /home/admin/config.scripts/lnd.unlock.sh
+        echo "waiting for wallet unlock (takes some time)..."
+        sleep 50
+      fi
+      # restart nginx
+      sudo systemctl restart nginx
     fi
-    echo "# sectionLine(${sectionLine})"
-    setting ${lndConfFile} ${insertLine} "tlsextraip" "${wgIP}"
-    # remove old tls.cert and tls.key
-    sudo rm /mnt/hdd/lnd/*.old
-    sudo mv /mnt/hdd/lnd/tls.cert /mnt/hdd/lnd/tls.cert.old
-    sudo mv /mnt/hdd/lnd/tls.key /mnt/hdd/lnd/tls.key.old
-    # restart lnd
-    sudo systemctl restart lnd
-    if [ "${autoUnlock}" = "on" ]; then
-      # wait until wallet unlocked
-      echo "waiting for wallet unlock (takes some time)..."
-      sleep 30
-    else
-      # prompt user to unlock wallet
-      /home/admin/config.scripts/lnd.unlock.sh
-      echo "waiting for wallet unlock (takes some time)..."
-      sleep 50
-    fi
-    # restart nginx
-    sudo systemctl restart nginx
   fi
   # set wireguard on in pleb-vpn.conf
   setting ${plebVPNConf} "2" "wireguard" "on"
