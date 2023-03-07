@@ -141,7 +141,8 @@ on() {
   # make persistant with custom-installs.sh
   isPersistant=$(cat /mnt/hdd/app-data/custom-installs.sh | grep -c /mnt/hdd/app-data/pleb-vpn/pleb-vpn.install.sh)
   if [ ${isPersistant} -eq 0 ]; then
-    echo "# pleb-vpn restore
+    echo "
+# pleb-vpn restore
 /mnt/hdd/app-data/pleb-vpn/pleb-vpn.install.sh restore
 # get latest pleb-vpn update
 /mnt/hdd/app-data/pleb-vpn/pleb-vpn.install.sh update
