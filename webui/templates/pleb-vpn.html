@@ -1,0 +1,100 @@
+{% extends "base.html" %} {% block title %}Pleb-VPN{% endblock %} {% block
+content %}
+<div class="container text-center">
+  <div class="row">
+    <div class="col">
+      <img
+        src="/static/images/plebNet_logo.png"
+        height="50"
+        alt="PlebNet logo"
+        loading="lazy"
+      />
+    </div>
+    <div class="col-6">
+      <h1>Pleb-VPN Settings</h1>
+    </div>
+    <div class="col">
+      <img
+        src="/static/images/OpenVPN_logo.png"
+        height="50"
+        alt="OpenVPN logo"
+        loading="lazy"
+      />
+    </div>
+  </div>
+</div>
+<br />
+{% if setting['plebVPN'] != "on" %} {% if plebVPN_status['config_exists'] !=
+"yes" %}
+<div class="container">
+  <div class="row">
+    <div class="col">
+      <h2 align="center">Upload plebvpn.conf file</h2>
+    </div>
+  </div>
+  <form method="POST" enctype="multipart/form-data">
+    <div class="row">
+      <div class="col">
+        <input type="file" name="plebvpn_conf" />
+      </div>
+      <div class="col">
+        <button
+          type="button"
+          class="btn btn-success"
+          onClick="this.form.submit()"
+        >
+          Upload plebvpn.conf
+        </button>
+      </div>
+    </div>
+  </form>
+</div>
+{% else %}
+<div class="container">
+  <div class="row">
+    <div class="col">
+      <h2 align="center">plebvpn.conf file detected</h2>
+    </div>
+  </div>
+  <form method="POST">
+    <div class="row">
+      <div class="col">
+        <p>Activate Pleb-VPN</p>
+      </div>
+      <div class="col">
+        <button
+          type="button"
+          class="btn btn-success"
+          onClick="setplebVPN({{ current_user.id }})"
+        >
+          Activate
+        </button>
+      </div>
+    </div>
+  </form>
+</div>
+{% endif %} {% else %}
+<div class="container">
+  <div class="row">
+    <div class="col">
+      <h2 align="center">Deactivate Pleb-VPN</h2>
+    </div>
+  </div>
+  <form method="POST">
+    <div class="row">
+      <div class="col">
+        <p>Dectivate Pleb-VPN</p>
+      </div>
+      <div class="col">
+        <button
+          type="button"
+          class="btn btn-danger"
+          onClick="setplebVPN({{ current_user.id }})"
+        >
+          Dectivate
+        </button>
+      </div>
+    </div>
+  </form>
+</div>
+{% endif %} {% endblock %}

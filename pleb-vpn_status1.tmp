@@ -1,0 +1,5 @@
+vpn_operating='yes'
+current_ip='68.183.118.179'
+config_exists='yes'
+firewall_configured='yes'
+message='Pleb-VPN is activated and working properly.'
