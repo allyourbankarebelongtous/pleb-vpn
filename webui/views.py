@@ -8,7 +8,8 @@ import json, os, subprocess
 views = Blueprint('views', __name__)
 
 ALLOWED_EXTENSIONS = {'conf'}
-UPLOAD_FOLDER = 'C:/Users/march/OneDrive/Documents/Github/pleb-vpn_web/'
+UPLOAD_FOLDER = '/mnt/hdd/mynode/pleb-vpn/'
+conf_file_location = '/mnt/hdd/mynode/pleb-vpn/pleb-vpn.conf'
 plebVPN_status = {}
 
 @views.route('/', methods=['GET', 'POST'])
@@ -69,10 +70,8 @@ def set_plebVPN():
 
 def set_conf(name, value):
     setting = get_conf()
-    conf_file_location = "C:/Users/march/OneDrive/Documents/Github/pleb-vpn_web/pleb-vpn.conf"
-    sed_exe = "C:/Program Files (x86)/GnuWin32/bin/sed.exe"
     if not setting[name]:
-        cmd_str = [sed_exe, "-i", "2i" + name + "=", conf_file_location]
+        cmd_str = ["sed", "-i", "2i" + name + "=", conf_file_location]
         subprocess.run(cmd_str, shell=True)
     cmd_str = [sed_exe, "-i", "s:^" + name + "=.*:" + name + "=" + value + ":g", conf_file_location]
     print(cmd_str)
