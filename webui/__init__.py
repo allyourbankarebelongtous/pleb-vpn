@@ -10,7 +10,7 @@ DB_NAME = "pleb-vpn.db"
 
 def create_app():
     app = Flask(__name__)
-    secret_key = secrets.token_urlsafe(16)
+    secret_key = 'aasdfslkdjf983572h8h8ger' #secrets.token_urlsafe(16)
     app.config['SECRET_KEY'] = secret_key
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + DB_NAME
     db.init_app(app)
