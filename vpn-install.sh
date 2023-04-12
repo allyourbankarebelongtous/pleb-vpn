@@ -13,7 +13,7 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   exit 1
 fi
 
-plebVPNConf="/home/admin/pleb-vpn/pleb-vpn.conf"
+plebVPNConf="/mnt/hdd/mynode/pleb-vpn/pleb-vpn.conf"
 
 function setting() # FILE LINENUMBER NAME VALUE
 {
@@ -26,16 +26,16 @@ function setting() # FILE LINENUMBER NAME VALUE
   echo "# ${NAME} exists->(${settingExists})"
   if [ "${settingExists}" == "0" ]; then
     echo "# adding setting (${NAME})"
-    sudo sed -i --follow-symlinks "${LINENUMBER}i${NAME}=" ${FILE}
+    sed -i --follow-symlinks "${LINENUMBER}i${NAME}=" ${FILE}
   fi
   echo "# updating setting (${NAME}) with value(${VALUE})"
-  sudo sed -i --follow-symlinks "s/^${NAME}=.*/${NAME}=${VALUE}/g" ${FILE}
+  sed -i --follow-symlinks "s/^${NAME}=.*/${NAME}=${VALUE}/g" ${FILE}
 }
 
 status() {
   source ${plebVPNConf}
 
-  isConfig=$(ls /mnt/hdd/app-data/pleb-vpn/openvpn/ | grep -c plebvpn.conf)
+  isConfig=$(ls /mnt/hdd/mynode/pleb-vpn/openvpn/ | grep -c plebvpn.conf)
   message="Pleb-VPN is installed, configured, and operating as expected"
   if [ ${isConfig} -eq 0 ]; then
     isConfig="no"
@@ -43,15 +43,11 @@ status() {
     isConfig="yes"
   fi
   if [ "${plebVPN}" = "off" ]; then
-    whiptail --title "Pleb-VPN status" --msgbox "
-Pleb-VPN installed: no
-Pleb-VPN config found: ${isConfig}
-Use menu to install Pleb-VPN.
-" 10 40
+    message="Pleb-VPN is not installed. Install Pleb-VPN by selecting Pleb-VPN from the Services Menu above."
     exit 0
   else
     currentIP=$(curl https://api.ipify.org)
-    sleep 5
+    sleep 1
     if ! [ "${currentIP}" = "${vpnIP}" ]; then
       vpnWorking="no"
       message="ERROR: your current IP does not match your vpnIP"
