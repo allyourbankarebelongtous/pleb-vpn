@@ -3,15 +3,22 @@ from flask_sqlalchemy import SQLAlchemy
 from os import path
 from flask_login import LoginManager
 from werkzeug.security import generate_password_hash
-import secrets
+import secrets, os
 
 db = SQLAlchemy()
 DB_NAME = "pleb-vpn.db"
 
 def create_app():
     app = Flask(__name__)
-    if os.path.exists(os.path.abspath('./.secretKey.conf'))
-        secret_key = 'aasdfslkdjf983572h8h8ger' #secrets.token_urlsafe(16)
+
+    if os.path.exists(os.path.abspath('./.secretKey.conf')):
+        with open(os.path.abspath('./.secretKey.conf'), 'r') as secretKey:
+            secret_key = secretKey.read()
+    else:
+        secret_key = secrets.token_urlsafe(16)
+        with open('/Users/nikpi/Desktop/textfile.txt', 'w') as secretKey:
+            secretKey.write(secret_key)
+
     app.config['SECRET_KEY'] = secret_key
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + DB_NAME
     db.init_app(app)
