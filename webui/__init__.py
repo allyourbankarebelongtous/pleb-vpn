@@ -16,7 +16,7 @@ def create_app():
             secret_key = secretKey.read()
     else:
         secret_key = secrets.token_urlsafe(16)
-        with open('/Users/nikpi/Desktop/textfile.txt', 'w') as secretKey:
+        with open(os.path.abspath('./.secretKey.conf'), 'w') as secretKey:
             secretKey.write(secret_key)
 
     app.config['SECRET_KEY'] = secret_key
