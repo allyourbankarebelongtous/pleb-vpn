@@ -4,7 +4,7 @@ content %}
   <div class="row">
     <div class="col">
       <img
-        src="/static/images/plebNet_logo.png"
+        src="{{ url_for('static', filename='PlebNet_logo.png') }}"
         height="50"
         alt="PlebNet logo"
         loading="lazy"
@@ -15,7 +15,7 @@ content %}
     </div>
     <div class="col">
       <img
-        src="/static/images/OpenVPN_logo.png"
+        src="{{ url_for('static', filename='OpenVPN_logo.png') }}"
         height="50"
         alt="OpenVPN logo"
         loading="lazy"
