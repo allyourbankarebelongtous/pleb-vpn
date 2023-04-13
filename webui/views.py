@@ -60,15 +60,15 @@ def set_plebVPN():
     if user:
         if user.id == current_user.id:
             if setting['plebVPN'] == 'on':
-                cmd_str = ["sudo /mnt/hdd/mynode/pleb-vpn/vpn-install.sh", "off"]
-                result = subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                cmd_str = ["sudo /mnt/hdd/mynode/pleb-vpn/vpn-install.sh off"]
+                result = subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
                 if not result.stderr:
                     flash('Pleb-VPN disconnected.', category='success')
                 else:
                     flash('An unknown error occured!', category='error')
             else:
-                cmd_str = ["sudo /mnt/hdd/mynode/pleb-vpn/vpn-install.sh", "on"]
-                result = subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                cmd_str = ["sudo /mnt/hdd/mynode/pleb-vpn/vpn-install.sh on"]
+                result = subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
                 if not result.stderr:
                     flash('Pleb-VPN connected!', category='success')
                 else:
@@ -111,8 +111,8 @@ def get_conf():
 def get_plebVPN_status():
     # get status of pleb-vpn connection to vps
     plebVPN_status = {}
-    cmd_str = ["sudo /mnt/hdd/mynode/pleb-vpn/vpn-install.sh", "status"]
-    subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    cmd_str = ["sudo /mnt/hdd/mynode/pleb-vpn/vpn-install.sh status"]
+    subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
     with open(os.path.abspath('./pleb-vpn_status.tmp')) as status:
         for line in status:
             if "=" in line:
