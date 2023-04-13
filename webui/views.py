@@ -16,16 +16,14 @@ plebVPN_status = {}
 @login_required
 def home():
     if plebVPN_status == {}:
-        global plebVPN_status
-        plebVPN_status = get_plebVPN_status()
+        get_plebVPN_status()
     return render_template("home.html", user=current_user, setting=get_conf(), plebVPN_status=plebVPN_status)
 
 @views.route('/refresh_plebVPN_data', methods=['POST'])
 @login_required
 def refresh_plebVPN_data():
     # refresh pleb-vpn status of connection to vps
-    global plebVPN_status
-    plebVPN_status = get_plebVPN_status()
+    get_plebVPN_status()
 
     return jsonify({})
 
@@ -49,8 +47,7 @@ def pleb_VPN():
             if not os.path.exists(PLEBVPN_CONF_UPLOAD_FOLDER):
                 os.mkdir(PLEBVPN_CONF_UPLOAD_FOLDER)
             file.save(os.path.join(PLEBVPN_CONF_UPLOAD_FOLDER, filename))
-            global plebVPN_status
-            plebVPN_status = get_plebVPN_status()
+            get_plebVPN_status()
             flash('Upload successful!', category='success')
 
     return render_template("pleb-vpn.html", user=current_user, setting=get_conf(), plebVPN_status=plebVPN_status)
@@ -91,8 +88,7 @@ def delete_plebvpn_conf():
         if user.id == current_user.id:
             if os.path.exists(os.path.abspath('./openvpn/plebvpn.conf')):
                 os.remove(os.path.abspath('./openvpn/plebvpn.conf'))
-                global plebVPN_status
-                plebVPN_status = get_plebVPN_status()
+                get_plebVPN_status()
                 flash('plebvpn.conf file deleted', category='success')
     
     return jsonify({})
@@ -117,6 +113,7 @@ def get_conf():
 
 def get_plebVPN_status():
     # get status of pleb-vpn connection to vps
+    global plebVPN_status
     plebVPN_status = {}
     cmd_str = ["sudo /mnt/hdd/mynode/pleb-vpn/vpn-install.sh status"]
     subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
@@ -126,7 +123,6 @@ def get_plebVPN_status():
                 name, value = line.split("=")
                 plebVPN_status[name] = str(value).rstrip().strip('\'\'')
     os.remove(os.path.abspath('./pleb-vpn_status.tmp'))
-    return plebVPN_status
 
 def allowed_file(filename):
     return '.' in filename and \
