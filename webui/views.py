@@ -15,6 +15,9 @@ plebVPN_status = {}
 @views.route('/', methods=['GET', 'POST'])
 @login_required
 def home():
+    if plebVPN_status == {}:
+        global plebVPN_status
+        plebVPN_status = get_plebVPN_status()
     return render_template("home.html", user=current_user, setting=get_conf(), plebVPN_status=plebVPN_status)
 
 @views.route('/refresh_plebVPN_data', methods=['POST'])
