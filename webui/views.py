@@ -46,6 +46,8 @@ def pleb_VPN():
             if not os.path.exists(PLEBVPN_CONF_UPLOAD_FOLDER):
                 os.mkdir(PLEBVPN_CONF_UPLOAD_FOLDER)
             file.save(os.path.join(PLEBVPN_CONF_UPLOAD_FOLDER, filename))
+            global plebVPN_status
+            plebVPN_status = get_plebVPN_status()
             flash('Upload successful!', category='success')
 
     return render_template("pleb-vpn.html", user=current_user, setting=get_conf(), plebVPN_status=plebVPN_status)
@@ -86,6 +88,8 @@ def delete_plebvpn_conf():
         if user.id == current_user.id:
             if os.path.exists(os.path.abspath('./openvpn/plebvpn.conf')):
                 os.remove(os.path.abspath('./openvpn/plebvpn.conf'))
+                global plebVPN_status
+                plebVPN_status = get_plebVPN_status()
                 flash('plebvpn.conf file deleted', category='success')
     
     return jsonify({})
