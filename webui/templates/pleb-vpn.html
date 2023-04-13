@@ -65,7 +65,7 @@ content %}
         <button
           type="button"
           class="btn btn-success"
-          onClick="setplebVPN({{ current_user.id }})"
+          onClick="setplebVPN_on({{ current_user.id }})"
         >
           Activate
         </button>
@@ -103,7 +103,7 @@ content %}
         <button
           type="button"
           class="btn btn-danger"
-          onClick="setplebVPN({{ current_user.id }})"
+          onClick="setplebVPN_off({{ current_user.id }})"
         >
           Dectivate
         </button>
