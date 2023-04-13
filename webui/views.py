@@ -64,7 +64,6 @@ def set_plebVPN():
             if setting['plebVPN'] == 'on':
                 cmd_str = ["sudo /mnt/hdd/mynode/pleb-vpn/vpn-install.sh off"]
                 result = subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True)
-                result.wait()
                 # for debug purposes
                 print(result.stdout, result.stderr)
                 get_plebVPN_status()
@@ -75,7 +74,6 @@ def set_plebVPN():
             else:
                 cmd_str = ["sudo /mnt/hdd/mynode/pleb-vpn/vpn-install.sh on"]
                 result = subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True)
-                result.wait()
                 # for debug purposes
                 print(result.stdout, result.stderr)
                 get_plebVPN_status()
