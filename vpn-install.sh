@@ -44,6 +44,9 @@ status() {
   fi
   if [ "${plebVPN}" = "off" ]; then
     message="Pleb-VPN is not installed. Install Pleb-VPN by selecting Pleb-VPN from the Services Menu above."
+    echo "vpn_operating=no
+config_exists=${isConfig}
+message='${message}'" | tee /mnt/hdd/mynode/pleb-vpn/pleb-vpn_status.tmp
     exit 0
   else
     currentIP=$(curl https://api.ipify.org)
@@ -89,17 +92,11 @@ Otherwise your VPN will not reach the server and connect."
     else
       serviceExists="yes"
     fi
-    whiptail --title "Pleb-VPN status" --msgbox "
-VPN installed: yes
-VPN operating: ${vpnWorking}
-VPN service installed: ${serviceExists}
-VPN config file found: ${isConfig}
-VPN server IP: ${vpnIP}
-VPN server port: ${vpnPort}
-Current IP (should match VPN server IP): ${currentIP}
-Firewall configuration OK: ${firewallOK}
-${message}
-" 16 100
+    echo "vpn_operating=${vpnWorking}
+current_ip='${currentIP}'
+config_exists=${isConfig}
+firewall_configured=${firewallOK}
+message='${message}'" | tee /mnt/hdd/mynode/pleb-vpn/pleb-vpn_status.tmp
     exit 0
   fi
 }
@@ -108,89 +105,16 @@ on() {
   # install and configure openvpn
   source ${plebVPNConf}
 
-  # check for openvpn.conf file
-  local keepconfig="${1}"
-  local isRestore="${1}"
-  isconfig=$(sudo ls /mnt/hdd/app-data/pleb-vpn/openvpn/ | grep -c plebvpn.conf)
-  if ! [ ${isconfig} -eq 0 ]; then
-    if [ -z "${keepconfig}" ]; then
-      whiptail --title "Use Existing Configuration?" \
-      --yes-button "Use Existing Config" \
-      --no-button "Create New Config" \
-      --yesno "There's an existing configuration found from a previous install of openvpn. Do you wish to reuse this config file?" 10 80
-      if [ $? -eq 1 ]; then
-        keepconfig="0"
-      else
-        keepconfig="1"
-      fi
-    fi
-  else
-    keepconfig="0"    
-  fi
   # install openvpn
   sudo apt-get -y install openvpn
-  if [ "${keepconfig}" = "0" ]; then
-    # remove old conf file if applicable
-    isfolder=$(sudo ls /mnt/hdd/app-data/pleb-vpn/ | grep -c openvpn)
-    if ! [ ${isfolder} -eq 0 ]; then
-      sudo rm -rf /mnt/hdd/app-data/pleb-vpn/openvpn
-    fi
-    # get new conf file
-    # get local ip
-    source <(/home/admin/config.scripts/internet.sh status local)
-    # upload plebvpn.conf
-    filename=""
-    while [ "${filename}" = "" ]
-      do
-        clear
-        echo "********************************"
-        echo "* UPLOAD THE PLEBVPN.CONF FILE *"
-        echo "********************************"
-        echo "If you are using the paid version of pleb-vpn, obtain an openvpn"
-        echo "configuration file called plebvpn.conf from allyourbankarebelongtous."
-        echo "You can obtain this by contacting @allyourbankarebelongtous on Telegram."
-        echo
-        echo "If you have a plebvpn.conf file, or if you are using your own openvpn setup"
-        echo "upload your configuration file. MAKE SURE IT IS NAMED plebvpn.conf!"
-        echo
-        echo "To upload, open a new terminal on your laptop,"
-        echo "change into the directory where your plebvpn.conf file is and"
-        echo "COPY, PASTE AND EXECUTE THE FOLLOWING COMMAND:"
-        echo "scp -r plebvpn.conf admin@${localip}:/home/admin/"
-        echo
-        echo "Use your password A to authenticate file transfer."
-        echo "PRESS ENTER when upload is done"
-        read key
-        # check to see if upload was successful
-        isuploaded=$(sudo ls /home/admin/ | grep -c plebvpn.conf)
-        if ! [ $isuploaded -eq 0 ]; then
-          filename="plebvpn.conf"
-          echo "OK - File found: ${filename}"
-          echo "PRESS ENTER to continue."
-          read key
-        else
-          echo "# WARNING #"
-          echo "There was no plebvpn.conf found in /home/admin/"
-          echo "PRESS ENTER to continue & retry ... or 'x' + ENTER to cancel"
-          read keyRetry
-        fi
-        if [ "${keyRetry}" == "x" ] || [ "${keyRetry}" == "X" ] || [ "${keyRetry}" == "'x'" ]; then
-          # create no result file and exit
-          echo "# USER CANCEL"
-          exit 1
-        fi
-    done
-    # move plebvpn.conf
-    sudo mkdir /mnt/hdd/app-data/pleb-vpn/openvpn
-    sudo mv /home/admin/plebvpn.conf /mnt/hdd/app-data/pleb-vpn/openvpn/plebvpn.conf
-  fi
+
   # get vpnIP for pleb-vpn.conf
-  vpnIP=$(cat /mnt/hdd/app-data/pleb-vpn/openvpn/plebvpn.conf | grep remote | sed 's/remote-.*$//g' | cut -d " " -f2)
-  vpnPort=$(cat /mnt/hdd/app-data/pleb-vpn/openvpn/plebvpn.conf | grep remote | sed 's/remote-.*$//g' | cut -d " " -f3)
+  vpnIP=$(cat /mnt/hdd/mynode/pleb-vpn/openvpn/plebvpn.conf | grep remote | sed 's/remote-.*$//g' | cut -d " " -f2)
+  vpnPort=$(cat /mnt/hdd/mynode/pleb-vpn/openvpn/plebvpn.conf | grep remote | sed 's/remote-.*$//g' | cut -d " " -f3)
   setting ${plebVPNConf} "2" "vpnPort" "'${vpnPort}'"
   setting ${plebVPNConf} "2" "vpnIP" "'${vpnIP}'"
   # copy plebvpn.conf to /etc/openvpn
-  sudo cp -p /mnt/hdd/app-data/pleb-vpn/openvpn/plebvpn.conf /etc/openvpn/
+  sudo cp -p /mnt/hdd/mynode/pleb-vpn/openvpn/plebvpn.conf /etc/openvpn/
   # fix permissions
   sudo chown admin:admin /etc/openvpn/plebvpn.conf
   sudo chmod 644 /etc/openvpn/plebvpn.conf
@@ -210,6 +134,7 @@ on() {
   fi 
   # configure firewall
   echo "configuring firewall"
+  LAN=$(ip rou | grep default | cut -d " " -f3 | sed 's/^\(.*\)\.\(.*\)\.\(.*\)\.\(.*\)$/\1\.\2\.\3/g')
   # disable firewall 
   sudo ufw disable
   # allow local lan ssh
@@ -225,35 +150,6 @@ on() {
   sudo ufw allow in on tun0 from any to any
   # enable firewall
   sudo ufw --force enable
-  # check firewall
-  # skip test if restore
-  if [ ! "${isRestore}" = "1" ]; then
-    echo "checking configuration"
-    echo "stop vpn"
-    sudo systemctl stop openvpn@plebvpn
-    echo "vpn stopped"
-    echo "checking firewall"
-    currentIP=$(curl https://api.ipify.org)
-    echo "current IP = (${currentIP})...should be blank"
-    if [ "${currentIP}" = "" ]; then
-      echo "firewall config ok"
-    else 
-      echo "error...firewall not configured. Clearnet accessible when VPN is off. Uninstall and re-install pleb-vpn"
-      sudo systemctl start openvpn@plebvpn
-      exit 1
-    fi
-    echo "start vpn"
-    sudo systemctl start openvpn@plebvpn
-    sleep 10
-    currentIP=$(curl https://api.ipify.org)
-    if ! [ "${currentIP}" = "${vpnIP}" ]; then
-      echo "error: vpn not working"
-      echo "your current IP is not your vpn IP"
-      exit 1
-    else
-      echo "OK ... your vpn is now active"
-    fi 
-  fi
   setting ${plebVPNConf} "2" "plebVPN" "on"
   echo "OK ... plebvpn installed and configured!"
   exit 0
@@ -263,14 +159,6 @@ off() {
   # remove and uninstall openvpn
   source ${plebVPNConf}
 
-  # first ensure that no nodes are operating on clearnet and wireguard and letsencrypt are uninstalled
-  if [ "${lndHybrid}" = "on" ] || [ "${clnHybrid}" = "on" ] || [ "${wireguard}" = "on" ] || [ "${letsencrypt_ssl}" = "on" ]; then
-    echo "# WARNING #"
-    echo "you must first disable hybrid mode on your node(s) before removing openvpn"
-    echo "otherwise your home IP will be visible"
-    echo "you must also disable wireguard and letsencrypt, as they will not function without a static ip"
-    exit 1
-  fi
   # uninstall openvpn
   sudo apt-get -y purge openvpn 
   sudo rm -rf /etc/openvpn

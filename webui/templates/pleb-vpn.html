@@ -71,6 +71,20 @@ content %}
         </button>
       </div>
     </div>
+    <div class="row">
+      <div class="col">
+        <p>Delete plebvpn.conf</p>
+      </div>
+      <div class="col">
+        <button
+          type="button"
+          class="btn btn-danger"
+          onClick="delete_plebvpn_conf({{ current_user.id }})"
+        >
+          Delete
+        </button>
+      </div>
+    </div>
   </form>
 </div>
 {% endif %} {% else %}
