@@ -111,8 +111,8 @@ def get_conf():
 def get_plebVPN_status():
     # get status of pleb-vpn connection to vps
     plebVPN_status = {}
-    cmd_str = ["sudo", "/mnt/hdd/mynode/pleb-vpn/vpn.install.sh", "status"]
-    subprocess.run(cmd_str, shell=True)
+    cmd_str = ["sudo /mnt/hdd/mynode/pleb-vpn/vpn.install.sh", "status"]
+    subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     with open(os.path.abspath('./pleb-vpn_status.tmp')) as status:
         for line in status:
             if "=" in line:
