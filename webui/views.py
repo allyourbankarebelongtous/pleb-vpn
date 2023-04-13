@@ -63,21 +63,23 @@ def set_plebVPN():
         if user.id == current_user.id:
             if setting['plebVPN'] == 'on':
                 cmd_str = ["sudo /mnt/hdd/mynode/pleb-vpn/vpn-install.sh off"]
-                result = subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+                result = subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True)
+                result.wait()
                 # for debug purposes
                 print(result.stdout, result.stderr)
                 get_plebVPN_status()
-                if not result.stderr:
+                if result.returncode == 0:
                     flash('Pleb-VPN disconnected.', category='success')
                 else:
                     flash('An unknown error occured!', category='error')
             else:
                 cmd_str = ["sudo /mnt/hdd/mynode/pleb-vpn/vpn-install.sh on"]
-                result = subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+                result = subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True)
+                result.wait()
                 # for debug purposes
                 print(result.stdout, result.stderr)
                 get_plebVPN_status()
-                if not result.stderr:
+                if result.returncode == 0:
                     flash('Pleb-VPN connected!', category='success')
                 else:
                     flash('An unknown error occured!', category='error')
@@ -105,7 +107,6 @@ def set_conf(name, value):
         cmd_str = ["sed", "-i", "2i" + name + "=", conf_file_location]
         subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     cmd_str = ["sed", "-i", "s:^" + name + "=.*:" + name + "=" + value + ":g", conf_file_location]
-    print(cmd_str)
     subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
 def get_conf():
