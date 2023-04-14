@@ -224,7 +224,7 @@ update() {
     cd /mnt/hdd/mynode/pleb-vpn
     sudo rm -rf /mnt/hdd/mynode/pleb-vpn-tmp
   fi
-  echo "Update successful! You now have Pleb-VPN version ${ver}." 
+  echo "Update success!" 
   echo "Press ENTER to continue"
   read key </dev/tty
   exit 0
