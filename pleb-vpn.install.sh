@@ -12,7 +12,7 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   exit 1
 fi
 
-ver="1.0beta"
+ver="mynode_v1.0beta"
 
 function setting() # FILE LINENUMBER NAME VALUE
 {
