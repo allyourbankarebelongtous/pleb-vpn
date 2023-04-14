@@ -31,7 +31,61 @@
       <h2 align="center">Status</h2>
     </div>
   </div>
+
+  {% if plebVPN_status['message'] != null %}
   <div class="row">
+    <div class="col" style="border-top: 1px solid lightgrey">
+      <h5 align="center">{{ plebVPN_status['message'] }}</h5>
+    </div>
+  </div>
+  {% endif %}
+
+  <div class="row">
+    <div class="col" style="border-top: 1px solid lightgrey">
+      <table class="table">
+        <thead>
+          <tr>
+            <th scope="col">Setting</th>
+            <th scope="col">Value</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th scope="row">Pleb-VPN Status</th>
+            <td>{{ setting['plebVPN'] }}</td>
+          </tr>
+          <tr>
+            <th scope="row">Pleb-VPN Operating</th>
+            <td>{{ plebVPN_status['vpn_operating'] }}</td>
+          </tr>
+          <tr>
+            <th scope="row">Current IP</th>
+            <td>{{ plebVPN_status['current_ip'] }}</td>
+          </tr>
+          {% if setting['plebVPN'] == "on" %}
+          <tr>
+            <th scope="row">Pleb-VPN IP</th>
+            <td>{{ setting['vpnIP'] }}</td>
+          </tr>
+          <tr>
+            <th scope="row">Pleb-VPN Port for VPS</th>
+            <td>{{ setting['vpnPort'] }}</td>
+          </tr>
+          {% endif %}
+          <tr>
+            <th scope="row">VPN config file exists</th>
+            <td>{{ plebVPN_status['config_exists'] }}</td>
+          </tr>
+          <tr>
+            <th scope="row">Firewall Config OK</th>
+            <td>{{ plebVPN_status['firewall_configured'] }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!--   <div class="row">
     <div class="col" style="border-top: 1px solid lightgrey">
       <p>Pleb-VPN Status</p>
     </div>
@@ -109,12 +163,8 @@
     >
       <p>{{ plebVPN_status['firewall_configured'] }}</p>
     </div>
-  </div>
-  <div class="row">
-    <div class="col" style="border-top: 1px solid lightgrey">
-      <h5>{{ plebVPN_status['message'] }}</h5>
-    </div>
-  </div>
+  </div> -->
+
   <div class="row">
     <div class="col text-center">
       <button
@@ -126,5 +176,5 @@
       </button>
     </div>
   </div>
-  {% endblock %}
 </div>
+{% endblock %}
