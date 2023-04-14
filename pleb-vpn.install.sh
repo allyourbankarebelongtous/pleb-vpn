@@ -203,42 +203,26 @@ on() {
 
 update() {
   # git clone to temp directory
-  sudo mkdir /home/admin/pleb-vpn-tmp
-  cd /home/admin/pleb-vpn-tmp
+  sudo mkdir /mnt/hdd/mynode/pleb-vpn-tmp
+  cd /mnt/hdd/mynode/pleb-vpn-tmp
   sudo git clone https://github.com/allyourbankarebelongtous/pleb-vpn.git
   # these commands are for checking out a specific branch for testing
-  #cd /home/admin/pleb-vpn-tmp/pleb-vpn
-  #sudo git checkout -b check-for-port-duplicates
-  #sudo git pull origin check-for-port-duplicates
+  cd /mnt/hdd/mynode/pleb-vpn-tmp/pleb-vpn
+  sudo git checkout -b mynode
+  sudo git pull origin mynode
   # check if successful
-  isSuccess=$(ls /home/admin/pleb-vpn-tmp/ | grep -c pleb-vpn)
+  isSuccess=$(ls /mnt/hdd/mynode/pleb-vpn-tmp/ | grep -c pleb-vpn)
   if [ ${isSuccess} -eq 0 ]; then
     echo "error: git clone failed. Check internet connection and try again."
-    sudo rm -rf /home/admin/pleb-vpn-tmp
+    sudo rm -rf /mnt/hdd/mynode/pleb-vpn-tmp
     exit 1
   else
-    sudo rm -rf /home/admin/pleb-vpn
-    sudo cp -p -r /home/admin/pleb-vpn-tmp/pleb-vpn /home/admin/
-    sudo cp -p -r /home/admin/pleb-vpn /mnt/hdd/app-data/
+    sudo cp -p -r /mnt/hdd/mynode/pleb-vpn-tmp/pleb-vpn /mnt/hdd/mynode/
     # fix permissions
-    sudo chown -R admin:admin /mnt/hdd/app-data/pleb-vpn
-    sudo chown -R admin:admin /home/admin/pleb-vpn
-    sudo chmod -R 755 /mnt/hdd/app-data/pleb-vpn
-    sudo chmod -R 755 /home/admin/pleb-vpn
-    if [ -d /mnt/hdd/app-data/pleb-vpn/split-tunnel/ ]; then
-      sudo cp -p -r /mnt/hdd/app-data/pleb-vpn/split-tunnel /home/admin/pleb-vpn/
-    fi
-    sudo cp -p -r /mnt/hdd/app-data/pleb-vpn/payments /home/admin/pleb-vpn/
-    sudo ln -s /mnt/hdd/app-data/pleb-vpn/pleb-vpn.conf /home/admin/pleb-vpn/pleb-vpn.conf
-    cd /home/admin
-    # check for updates.sh and if exists, run it, then delete it
-    isUpdateScript=$(ls /home/admin/pleb-vpn | grep -c updates.sh)
-    if [ ${isUpdateScript} -eq 1 ]; then
-      sudo /home/admin/pleb-vpn/updates.sh
-      sudo rm /home/admin/pleb-vpn/updates.sh
-      sudo rm /mnt/hdd/app-data/pleb-vpn/updates.sh
-    fi
-    sudo rm -rf /home/admin/pleb-vpn-tmp
+    sudo chown -R admin:admin /mnt/hdd/mynode/pleb-vpn
+    sudo chmod -R 755 /mnt/hdd/mynode/pleb-vpn
+    cd /mnt/hdd/mynode/pleb-vpn
+    sudo rm -rf /mnt/hdd/mynode/pleb-vpn-tmp
   fi
   echo "Update successful! You now have Pleb-VPN version ${ver}." 
   echo "Press ENTER to continue"
