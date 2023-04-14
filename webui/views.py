@@ -108,7 +108,7 @@ def test_scripts():
     if user:
         if user.id == current_user.id:
             if os.path.exists(os.path.abspath('./test.enter.sh')):
-                cmd_str = ["/mnt/hdd/mynode/test.enter.sh"]
+                cmd_str = ["bash", "/mnt/hdd/mynode/test.enter.sh"]
                 result = subprocess.Popen(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE, universal_newlines=True)
                 output, error = result.communicate()
                 print(output)
