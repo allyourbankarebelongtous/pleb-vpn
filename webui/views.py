@@ -1,7 +1,7 @@
 from flask import Blueprint, Flask, render_template, request, flash, jsonify, request, redirect, url_for
 from flask_login import login_required, current_user
 from werkzeug.utils import secure_filename
-from subprocess import Popen
+from subprocess import Popen, PIPE, STDOUT
 from .models import User
 from . import db
 import json, os, subprocess, time, keyboard
@@ -110,7 +110,7 @@ def test_scripts():
         if user.id == current_user.id:
             if os.path.exists(os.path.abspath('./test.enter.sh')):
                 cmd_str = ["sudo /mnt/hdd/mynode/test.enter.sh"]
-                result = Popen(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE, shell=True, universal_newlines=True)
+                result = Popen(cmd_str, stdout=PIPE, stderr=PIPE, stdin=PIPE, shell=True, universal_newlines=True)
                 print(result.stdout)
                 time.sleep(5)
                 pause_key(message=result.stdout, key='enter')
