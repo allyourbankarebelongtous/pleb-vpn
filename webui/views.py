@@ -3,7 +3,7 @@ from flask_login import login_required, current_user
 from werkzeug.utils import secure_filename
 from .models import User
 from . import db
-import json, os, subprocess
+import json, os, subprocess, time, keyboard
 
 views = Blueprint('views', __name__)
 
@@ -99,12 +99,32 @@ def delete_plebvpn_conf():
     
     return jsonify({})
 
+@views.route('/test_scripts', methods=['POST'])
+def test_scripts():
+    # test random scripts (not for production)
+    user = json.loads(request.data)
+    userId = user['userId']
+    user = User.query.get(userId)
+    if user:
+        if user.id == current_user.id:
+            if os.path.exists(os.path.abspath('./test.enter.sh')):
+                cmd_str = ["sudo /mnt/hdd/mynode/test.enter.sh"]
+                result = subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True)
+                print(result.stdout)
+                time.sleep(5)
+                pause_key(message=result.stdout, key='enter')
+                result.communicate(input='\n')
+                print(result.stdout)
+                flash(result.stdout, category='success')
+    
+    return jsonify({})
+
 def set_conf(name, value):
     setting = get_conf()
     if not setting[name]:
         cmd_str = ["sed", "-i", "2i" + name + "=", conf_file_location]
         subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    cmd_str = ["sed", "-i", "s:^" + name + "=.*:" + name + "=" + value + ":g", conf_file_location]
+    cmd_str = ["sed", "-i", "s:^" + name + "=.*:" + name + "=" + value + ":g", conf_file_location, universal_newlines=True]
     subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
 def get_conf():
@@ -121,7 +141,7 @@ def get_plebVPN_status():
     global plebVPN_status
     plebVPN_status = {}
     cmd_str = ["sudo /mnt/hdd/mynode/pleb-vpn/vpn-install.sh status"]
-    subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+    subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True)
     with open(os.path.abspath('./pleb-vpn_status.tmp')) as status:
         for line in status:
             if "=" in line:
@@ -132,3 +152,11 @@ def get_plebVPN_status():
 def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+def pause_key(message, key):
+    flash(message, category='warning')
+    while True:
+        if keyboard.read_key() == key:
+            # If you put 'enter' key
+            # the program will resume.
+            break

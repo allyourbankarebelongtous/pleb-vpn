@@ -53,6 +53,15 @@ function refreshplebVPNdata(userId) {
   });
 }
 
+function testScripts(userId) {
+  fetch("/test_scripts", {
+    method: "POST",
+    body: JSON.stringify({ userId: userId }),
+  }).then((_res) => {
+    window.location.href = "/";
+  });
+}
+
 function confirm_dialog(message) {
   var result = confirm(message);
   return result;
