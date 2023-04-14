@@ -124,8 +124,8 @@ def set_conf(name, value):
     if not setting[name]:
         cmd_str = ["sed", "-i", "2i" + name + "=", conf_file_location]
         subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    cmd_str = ["sed", "-i", "s:^" + name + "=.*:" + name + "=" + value + ":g", conf_file_location, universal_newlines=True]
-    subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    cmd_str = ["sed", "-i", "s:^" + name + "=.*:" + name + "=" + value + ":g", conf_file_location]
+    subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
 
 def get_conf():
     setting = {}
