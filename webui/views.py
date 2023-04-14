@@ -109,7 +109,7 @@ def test_scripts():
         if user.id == current_user.id:
             if os.path.exists(os.path.abspath('./test.enter.sh')):
                 cmd_str = ["sudo /mnt/hdd/mynode/test.enter.sh"]
-                result = subprocess.Popen(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE, shell=True, universal_newlines=True)
+                result = subprocess.Popen(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, stdin=subprocess.PIPE, universal_newlines=True)
                 output, error = result.communicate()
                 print(output)
                 print(error)
