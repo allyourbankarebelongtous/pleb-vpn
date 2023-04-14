@@ -110,10 +110,11 @@ def test_scripts():
             if os.path.exists(os.path.abspath('./test.enter.sh')):
                 cmd_str = ["sudo /mnt/hdd/mynode/test.enter.sh"]
                 result = subprocess.Popen(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE, shell=True, universal_newlines=True)
-                print(result.communicate()['stdout'])
-                print(result.communicate()['stderr'])
+                output, error = result.communicate()
+                print(output)
+                print(error)
                 time.sleep(5)
-                pause_key(message=result.communicate()['stdout'], key='enter')
+                pause_key(message=output, key='enter')
                 result.communicate(input='\n')
                 print(result.stdout)
                 flash(result.stdout, category='success')
