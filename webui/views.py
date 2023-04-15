@@ -2,9 +2,10 @@ from flask import Blueprint, render_template, request, flash, jsonify, request, 
 from flask_login import login_required, current_user
 from werkzeug.utils import secure_filename
 from socket_io import socketio
+from select import select
 from .models import User
 from . import db
-import json, os, subprocess, keyboard, select
+import json, os, subprocess, keyboard
 
 views = Blueprint('views', __name__)
 
@@ -112,22 +113,20 @@ def start_process(data):
     result = subprocess.Popen(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE, shell=True)
     # Loop through the output of the Bash script in real-time
     while True:
-        # Check if there is data to read from stdout or user input
-        ready_to_read, _, _ = select.select([result.stdout, result.stdin], [], [], 0)
-        for fd in ready_to_read:
-            if fd is result.stdout:
-                output = result.stdout.readline().decode()
-                if output:
-                    print(output.strip())
-                    socketio.emit('output', output.strip())
-            elif fd is result.stdin:
-                user_input = socketio_queue.get()
-                if user_input is not None:
-                    result.stdin.write(user_input.encode() + b'\n')
-                    result.stdin.flush()
-        # Check if the process has terminated
+        output = result.stdout.readline().decode()
+        if output:
+            print(output.strip())
+            socketio.emit('output', output.strip())
         if result.poll() is not None:
             break
+        # Check if the subprocess is requesting input
+        if select([result.stdout], [], [], 0)[0]:
+            # Send any pending user input to the subprocess stdin
+            user_input = socketio.wait(0)[0]
+            if user_input is not None:
+                user_input = request.sid + ": " + user_input
+                result.stdin.write(user_input.encode() + b'\n')
+                result.stdin.flush()
 
 @views.route('/update_scripts', methods=['POST'])
 def update_scripts():
