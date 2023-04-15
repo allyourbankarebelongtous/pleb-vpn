@@ -117,7 +117,7 @@ def test_scripts():
                         print(output.strip())
                     if output.strip() == 'Press ENTER to continue':
                         # user_input = input()
-                        pause_key(message=output, key='enter')
+                        pause_key(message = output, key = str('enter'))
                         if result.poll() is None:
                             result.stdin.write(b'\n')
                             result.stdin.flush()
