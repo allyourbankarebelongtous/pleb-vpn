@@ -1,4 +1,5 @@
-from webui import create_app, socketio
+from webui import create_app
+from socketio import socketio
 import subprocess
 
 app = create_app()

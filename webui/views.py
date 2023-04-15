@@ -1,8 +1,9 @@
 from flask import Blueprint, render_template, request, flash, jsonify, request, redirect, url_for
 from flask_login import login_required, current_user
 from werkzeug.utils import secure_filename
+from socketio import socketio
 from .models import User
-from . import db, socketio
+from . import db
 import json, os, subprocess, keyboard
 
 views = Blueprint('views', __name__)
