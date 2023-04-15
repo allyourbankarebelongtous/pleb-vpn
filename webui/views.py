@@ -108,21 +108,20 @@ def test_scripts():
     if user:
         if user.id == current_user.id:
             if os.path.exists(os.path.abspath('./test.enter.sh')):
-                cmd_str = ['./test.enter.sh']
+                cmd_str = ["sudo /mnt/hdd/mynode/pleb-vpn/test.enter.sh"]
                 result = subprocess.Popen(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE, shell=True)
                 # Loop through the output of the Bash script in real-time
                 while result.poll() is not None:
                     output = result.stdout.readline().decode()
                     if output:
                         print(output.strip())
-                    # Prompt the user for input while the script is running (will resume after hitting enter)
-                    user_input = input()
-                    # Check if the subprocess has finished before writing to its stdin stream  
-                    if output == '' and result.poll() is None:
-                        result.stdin.write(user_input.encode() + b'\n')
-                        result.stdin.flush()
-                        # Always close stdin stream
-                        result.stdin.close()
+                    if output.strip() == 'Press ENTER to continue':
+                        # user_input = input()
+                        pause_key(message=output, key='enter')
+                        if result.poll() is None:
+                            result.stdin.write(b'\n')
+                            result.stdin.flush()
+                            result.stdin.close()
 
                 # Print the final output of the Bash script
                 output, error = result.communicate()
