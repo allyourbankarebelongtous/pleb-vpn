@@ -124,8 +124,8 @@ def test_scripts():
                         if result.poll() is None:
                             result.stdin.write(user_input.encode() + b'\n')
                             result.stdin.flush()
-                # Always close stdin stream
-                result.stdin.close()
+                            # Always close stdin stream
+                            result.stdin.close()
                 # Print the final output of the Bash script
                 output, error = result.communicate()
                 if output:
@@ -164,8 +164,8 @@ def update_scripts():
                         if result.poll() is None:
                             result.stdin.write(user_input.encode() + b'\n')
                             result.stdin.flush()
-                # Always close stdin stream
-                result.stdin.close()
+                            # Always close stdin stream
+                            result.stdin.close()
                 # Print the final output of the Bash script
                 output, error = result.communicate()
                 if output:
