@@ -106,9 +106,9 @@ def lnd_Hybrid():
 
     return render_template('lnd-hybrid.html', user=current_user)
 
-@socketio.on('message')
-def handle_message(message):
-    cmd_str = ["/mnt/hdd/mynode/pleb-vpn/test.enter.sh"]
+@socketio.on('start_process')
+def start_process(data):
+    cmd_str = [data]
     process = subprocess.Popen(
         cmd_str,
         stdout=subprocess.PIPE,
