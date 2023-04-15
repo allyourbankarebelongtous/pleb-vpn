@@ -111,20 +111,18 @@ def test_scripts():
                 cmd_str = ['./test.enter.sh']
                 result = subprocess.Popen(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE, shell=True)
                 # Loop through the output of the Bash script in real-time
-                while True:
+                while result.poll() is not None:
                     output = result.stdout.readline().decode()
                     if output:
                         print(output.strip())
-                    if result.poll() is not None:
-                        break
                     # Prompt the user for input while the script is running (will resume after hitting enter)
-                    user_input = input()
                     # Check if the subprocess has finished before writing to its stdin stream  
                     if result.poll() is None:
+                        user_input = input()
                         result.stdin.write(user_input.encode() + b'\n')
                         result.stdin.flush()
-                    # Always close stdin stream
-                    result.stdin.close()
+                        # Always close stdin stream
+                        result.stdin.close()
 
                 # Print the final output of the Bash script
                 output, error = result.communicate()
