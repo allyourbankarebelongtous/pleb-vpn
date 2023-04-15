@@ -172,8 +172,8 @@ def allowed_file(filename):
 
 def pause_key(message, key):
     flash(message, category='warning')
-    while True:
-        if keyboard.read_key() == key:
-            # If you put 'enter' key
-            # the program will resume.
-            break
+    paused = True
+    while paused:
+        pressed_key = keyboard.read_key()
+        if pressed_key == key:
+            paused = False
