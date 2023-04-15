@@ -118,7 +118,7 @@ def test_scripts():
                     # Prompt the user for input while the script is running (will resume after hitting enter)
                     user_input = input()
                     # Check if the subprocess has finished before writing to its stdin stream  
-                    if result.poll() is None:
+                    if output == '' and result.poll() is None:
                         result.stdin.write(user_input.encode() + b'\n')
                         result.stdin.flush()
                         # Always close stdin stream
