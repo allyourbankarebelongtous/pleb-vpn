@@ -113,7 +113,7 @@ def test_scripts():
                 # Loop through the output of the Bash script in real-time
                 while True:
                     output = result.stdout.readline().decode()
-                    if output == '' and result.poll() is not None:
+                    if result.poll() is not None:
                         break
                     if output:
                         print(output.strip())
