@@ -108,12 +108,13 @@ def lnd_Hybrid():
 
 @socketio.on('start_process')
 def start_process(data):
-    cmd_str = [data]
+    cmd_str = ["./" + data]
     process = subprocess.Popen(
         cmd_str,
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
-        stdin=subprocess.PIPE
+        stdin=subprocess.PIPE,
+        shell=True
     )
     for line in iter(process.stdout.readline, ''):
         socketio.emit('output', line.decode('utf-8'))
