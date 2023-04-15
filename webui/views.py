@@ -109,7 +109,7 @@ def test_scripts():
         if user.id == current_user.id:
             if os.path.exists(os.path.abspath('./test.enter.sh')):
                 cmd_str = ['./test.enter.sh']
-                result = subprocess.Popen(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+                result = subprocess.Popen(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE, shell=True)
                 # Loop through the output of the Bash script in real-time
                 while True:
                     output = result.stdout.readline().decode()
