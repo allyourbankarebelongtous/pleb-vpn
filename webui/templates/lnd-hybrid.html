@@ -41,6 +41,23 @@ content %}
   $("#input-form").submit(function (event) {
     event.preventDefault();
     var input = $("#input-field").val();
+    socket.emit("store_input", input);
+    $("#input-field").val("");
+  });
+  $("#start-form").submit(function (event) {
+    event.preventDefault();
+    var input = $("#start-cmd").val();
+    socket.emit("start_process", input);
+    $("#start-cmd").val("");
+  });
+
+  /*   var socket = io.connect("http://" + document.domain + ":" + location.port);
+  socket.on("output", function (data) {
+    $("#output").append(data);
+  });
+  $("#input-form").submit(function (event) {
+    event.preventDefault();
+    var input = $("#input-field").val();
     socket.send(input);
     $("#input-field").val("");
   });
@@ -49,6 +66,6 @@ content %}
     var input = $("#start-cmd").val();
     socket.emit("start_process", input);
     $("#input-field").val("");
-  });
+  }); */
 </script>
 {% endblock %}

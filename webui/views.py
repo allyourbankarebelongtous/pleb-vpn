@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, flash, jsonify, redirect, url_for
+from flask import Blueprint, render_template, request, flash, jsonify, redirect, url_for, session
 from flask_login import login_required, current_user
 from werkzeug.utils import secure_filename
 from socket_io import socketio
@@ -111,6 +111,34 @@ def lnd_Hybrid():
 def start_process(data):
     cmd_str = ["./" + data]
     result = subprocess.Popen(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE, shell=True)
+    while True:
+        output = result.stdout.readline().decode()
+        if output:
+            print(output.strip())
+            socketio.emit('output', output.strip())
+        if result.poll() is not None:
+            break
+        # Check if the subprocess is requesting input
+        if select([result.stdout], [], [], 0)[0]:
+            # Get user input from session
+            user_input = session.get('user_input')
+            if user_input is not None:
+                user_input = request.sid + ": " + user_input
+                result.stdin.write(user_input.encode() + b'\n')
+                result.stdin.flush()
+                session.pop('user_input')
+    # Save remaining user input to session
+    user_input = session.get('user_input')
+    if user_input is not None:
+        socketio.emit('output', "Closing process due to disconnect...")
+        result.stdin.write(user_input.encode() + b'\n')
+        result.stdin.flush()
+        session.pop('user_input')
+
+""" @socketio.on('start_process')
+def start_process(data):
+    cmd_str = ["./" + data]
+    result = subprocess.Popen(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE, shell=True)
     # Loop through the output of the Bash script in real-time
     while True:
         output = result.stdout.readline().decode()
@@ -128,7 +156,7 @@ def start_process(data):
                 user_input = socketio.get_session(request.sid).get('user_input')
             user_input = request.sid + ": " + user_input
             result.stdin.write(user_input.encode() + b'\n')
-            result.stdin.flush()
+            result.stdin.flush() """
 
 @views.route('/update_scripts', methods=['POST'])
 def update_scripts():
