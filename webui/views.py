@@ -2,7 +2,7 @@ from flask import Blueprint, render_template, request, flash, jsonify, request, 
 from flask_login import login_required, current_user
 from werkzeug.utils import secure_filename
 from .models import User
-from . import db
+from . import db, socketio
 import json, os, subprocess, keyboard
 
 views = Blueprint('views', __name__)
@@ -104,6 +104,18 @@ def delete_plebvpn_conf():
 def lnd_Hybrid():
 
     return render_template('lnd-hybrid.html', user=current_user)
+
+@socketio.on('message')
+def handle_message(message):
+    cmd_str = ["/mnt/hdd/mynode/pleb-vpn/test.enter.sh"]
+    process = subprocess.Popen(
+        cmd_str,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+        stdin=subprocess.PIPE
+    )
+    for line in iter(process.stdout.readline, ''):
+        socketio.emit('output', line.decode('utf-8'))
 
 @views.route('/update_scripts', methods=['POST'])
 def update_scripts():
