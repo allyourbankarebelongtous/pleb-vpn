@@ -1,14 +1,12 @@
 from flask import Blueprint, render_template, request, flash, jsonify, request, redirect, url_for
 from flask_login import login_required, current_user
 from werkzeug.utils import secure_filename
-from flask_socketio import SocketIO
 from .models import User
-from main import app
+from main import socketio
 from . import db
 import json, os, subprocess, keyboard
 
 views = Blueprint('views', __name__)
-socketio=SocketIO(app)
 
 ALLOWED_EXTENSIONS = {'conf'}
 PLEBVPN_CONF_UPLOAD_FOLDER = '/mnt/hdd/mynode/pleb-vpn/openvpn'

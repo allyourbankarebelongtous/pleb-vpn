@@ -1,6 +1,7 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
+from flask_socketio import SocketIO
 from werkzeug.security import generate_password_hash
 import secrets, os
 
@@ -9,6 +10,7 @@ DB_NAME = "pleb-vpn.db"
 
 def create_app():
     app = Flask(__name__)
+    socketio = SocketIO(app)
 
     if os.path.exists(os.path.abspath('./.secretKey.conf')):
         with open(os.path.abspath('./.secretKey.conf'), 'r') as secretKey:
@@ -48,4 +50,4 @@ def create_app():
     def load_user(id):
         return User.query.get(int(id))
     
-    return app
+    return socketio
