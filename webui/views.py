@@ -118,13 +118,54 @@ def test_scripts():
                     if result.poll() is not None:
                         break
                     # Prompt the user for input while the script is running (will resume after hitting enter)
-                    user_input = input()
-                    # Check if the subprocess has finished before writing to its stdin stream  
-                    if result.poll() is None:
-                        result.stdin.write(user_input.encode() + b'\n')
-                        result.stdin.flush()
-                    # Always close stdin stream
-                    result.stdin.close()
+                    if "Press ENTER to continue" in output.strip():
+                        user_input = input()
+                        # Check if the subprocess has finished before writing to its stdin stream  
+                        if result.poll() is None:
+                            result.stdin.write(user_input.encode() + b'\n')
+                            result.stdin.flush()
+                # Always close stdin stream
+                result.stdin.close()
+                # Print the final output of the Bash script
+                output, error = result.communicate()
+                if output:
+                    print(output.decode())
+                    message = output.decode()
+                    flash(message, category='success')
+                if error:
+                    print(error.decode())
+                    message = error.decode()
+                    flash(message, category='error')
+    
+    return jsonify({})
+
+@views.route('/update_scripts', methods=['POST'])
+def update_scripts():
+    # test random scripts (not for production)
+    user = json.loads(request.data)
+    userId = user['userId']
+    user = User.query.get(userId)
+    if user:
+        if user.id == current_user.id:
+            if os.path.exists(os.path.abspath('./pleb-vpn.install.sh')):
+                cmd_str = ["sudo /mnt/hdd/mynode/pleb-vpn/pleb-vpn.install.sh update"]
+                result = subprocess.Popen(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE, shell=True)
+                # Loop through the output of the Bash script in real-time
+                while True:
+                    output = result.stdout.readline().decode()
+                    if output:
+                        print(output.strip())
+                    if result.poll() is not None:
+                        break
+                    # Prompt the user for input while the script is running (will resume after hitting enter)
+                    if "Press ENTER to continue" in output.strip():
+                        user_input = input()
+                        # Check if the subprocess has finished before writing to its stdin stream  
+                        if result.poll() is None:
+                            result.stdin.write(user_input.encode() + b'\n')
+                            result.stdin.flush()
+                # Always close stdin stream
+                result.stdin.close()
                 # Print the final output of the Bash script
                 output, error = result.communicate()
                 if output:

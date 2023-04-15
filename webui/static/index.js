@@ -62,6 +62,15 @@ function testScripts(userId) {
   });
 }
 
+function updateScripts(userId) {
+  fetch("/update_scripts", {
+    method: "POST",
+    body: JSON.stringify({ userId: userId }),
+  }).then((_res) => {
+    window.location.href = "/";
+  });
+}
+
 function confirm_dialog(message) {
   var result = confirm(message);
   return result;
