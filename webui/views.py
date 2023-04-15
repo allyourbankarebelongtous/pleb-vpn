@@ -105,7 +105,7 @@ def lnd_Hybrid():
 
     return render_template('lnd-hybrid')
 
-@socketio.on('message')
+@views.on('message')
 @login_required
 def handle_message(message):
     cmd_str = ["/mnt/hdd/mynode/pleb-vpn/test.enter.sh"]
