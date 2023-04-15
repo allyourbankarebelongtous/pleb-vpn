@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, flash, jsonify, request, redirect, url_for
+from flask import Blueprint, render_template, request, flash, jsonify, redirect, url_for
 from flask_login import login_required, current_user
 from werkzeug.utils import secure_filename
 from socket_io import socketio
@@ -122,11 +122,13 @@ def start_process(data):
         # Check if the subprocess is requesting input
         if select([result.stdout], [], [], 0)[0]:
             # Send any pending user input to the subprocess stdin
-            user_input = socketio.wait(0)[0]
-            if user_input is not None:
-                user_input = request.sid + ": " + user_input
-                result.stdin.write(user_input.encode() + b'\n')
-                result.stdin.flush()
+            user_input = None
+            while user_input is None:
+                socketio.sleep(0)
+                user_input = socketio.get_session(request.sid).get('user_input')
+            user_input = request.sid + ": " + user_input
+            result.stdin.write(user_input.encode() + b'\n')
+            result.stdin.flush()
 
 @views.route('/update_scripts', methods=['POST'])
 def update_scripts():
