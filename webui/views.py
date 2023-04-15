@@ -3,7 +3,7 @@ from flask_login import login_required, current_user
 from werkzeug.utils import secure_filename
 from .models import User
 from . import db
-import json, os, subprocess, time, keyboard
+import json, os, subprocess, keyboard
 
 views = Blueprint('views', __name__)
 
@@ -110,14 +110,25 @@ def test_scripts():
             if os.path.exists(os.path.abspath('./test.enter.sh')):
                 cmd_str = ['./test.enter.sh']
                 result = subprocess.Popen(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
-                output = result.stdout.readline()
-                while output:
-                    print(output.decode().strip())
-                    output = result.stdout.readline()
-                user_input = input('Enter input: ')
-                result.stdin.write(user_input.encode())
-                result.stdin.flush()
-                flash(result.stdout, category='success')
+                # Loop through the output of the Bash script in real-time
+                while True:
+                    output = result.stdout.readline().decode()
+                    if output == '' and result.poll() is not None:
+                        break
+                    if output:
+                        print(output.strip())
+                    # Prompt the user for input while the script is running
+                    user_input = input()
+                    # Send the user input to the script as input
+                    result.stdin.write(user_input.encode() + b'\n')
+                    result.stdin.flush()
+
+                # Print the final output of the Bash script
+                output, error = result.communicate()
+                if output:
+                    print(output.decode())
+                if error:
+                    print(error.decode())
     
     return jsonify({})
 
