@@ -4,7 +4,7 @@ from werkzeug.utils import secure_filename
 from socket_io import socketio
 from .models import User
 from . import db
-import json, os, subprocess, keyboard
+import json, os, subprocess, keyboard, select
 
 views = Blueprint('views', __name__)
 
@@ -109,15 +109,23 @@ def lnd_Hybrid():
 @socketio.on('start_process')
 def start_process(data):
     cmd_str = ["./" + data]
-    process = subprocess.Popen(
-        cmd_str,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.STDOUT,
-        stdin=subprocess.PIPE,
-        shell=True
-    )
-    for line in iter(process.stdout.readline, ''):
-        socketio.emit('output', line.decode('utf-8'))
+    result = subprocess.Popen(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE, shell=True)
+    # Loop through the output of the Bash script in real-time
+    while True:
+        output = result.stdout.readline().decode()
+        if output:
+            print(output.strip())
+            socketio.emit('output', output.strip())
+        if result.poll() is not None:
+            break
+        # Check if the subprocess is requesting input
+        if select([result.stdout], [], [], 0)[0]:
+            # Send any pending user input to the subprocess stdin
+            user_input = socketio.wait(0)[0]
+            if user_input is not None:
+                user_input = request.sid + ": " + user_input
+                result.stdin.write(user_input.encode() + b'\n')
+                result.stdin.flush()
 
 @views.route('/update_scripts', methods=['POST'])
 def update_scripts():
