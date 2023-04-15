@@ -1,11 +1,14 @@
-from flask import Blueprint, Flask, render_template, request, flash, jsonify, request, redirect, url_for
+from flask import Blueprint, render_template, request, flash, jsonify, request, redirect, url_for
 from flask_login import login_required, current_user
 from werkzeug.utils import secure_filename
+from flask_socketio import SocketIO
 from .models import User
+from main import app
 from . import db
 import json, os, subprocess, keyboard
 
 views = Blueprint('views', __name__)
+socketio=SocketIO(app)
 
 ALLOWED_EXTENSIONS = {'conf'}
 PLEBVPN_CONF_UPLOAD_FOLDER = '/mnt/hdd/mynode/pleb-vpn/openvpn'
@@ -99,45 +102,24 @@ def delete_plebvpn_conf():
     
     return jsonify({})
 
-@views.route('/test_scripts', methods=['POST'])
-def test_scripts():
-    # test random scripts (not for production)
-    user = json.loads(request.data)
-    userId = user['userId']
-    user = User.query.get(userId)
-    if user:
-        if user.id == current_user.id:
-            if os.path.exists(os.path.abspath('./test.enter.sh')):
-                cmd_str = ["sudo /mnt/hdd/mynode/pleb-vpn/test.enter.sh"]
-                result = subprocess.Popen(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE, shell=True)
-                # Loop through the output of the Bash script in real-time
-                while True:
-                    output = result.stdout.readline().decode()
-                    if output:
-                        print(output.strip())
-                    if result.poll() is not None:
-                        break
-                    # Prompt the user for input while the script is running (will resume after hitting enter)
-                    if "Press ENTER to continue" in output.strip():
-                        user_input = input()
-                        # Check if the subprocess has finished before writing to its stdin stream  
-                        if result.poll() is None:
-                            result.stdin.write(user_input.encode() + b'\n')
-                            result.stdin.flush()
-                            # Always close stdin stream
-                            result.stdin.close()
-                # Print the final output of the Bash script
-                output, error = result.communicate()
-                if output:
-                    print(output.decode())
-                    message = output.decode()
-                    flash(message, category='success')
-                if error:
-                    print(error.decode())
-                    message = error.decode()
-                    flash(message, category='error')
-    
-    return jsonify({})
+@views.route('/lnd-hybrid', methods=['GET', 'POST'])
+@login_required
+def lnd_Hybrid():
+
+    return render_template('lnd-hybrid')
+
+@socketio.on('message')
+@login_required
+def handle_message(message):
+    cmd_str = ["/mnt/hdd/mynode/pleb-vpn/test.enter.sh"]
+    process = subprocess.Popen(
+        cmd_str,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+        stdin=subprocess.PIPE
+    )
+    for line in iter(process.stdout.readline, ''):
+        socketio.emit('output', line.decode('utf-8'))
 
 @views.route('/update_scripts', methods=['POST'])
 def update_scripts():

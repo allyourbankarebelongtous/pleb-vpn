@@ -1,0 +1,44 @@
+{% extends "base.html" %} {% block title %}Pleb-VPN{% endblock %} {% block
+content %}
+<div class="container text-center">
+  <div class="row">
+    <div class="col">
+      <img
+        src="{{ url_for('static', filename='PlebNet_logo.png') }}"
+        height="50"
+        alt="PlebNet logo"
+        loading="lazy"
+      />
+    </div>
+    <div class="col-6">
+      <h1>LND Hybrid Status</h1>
+    </div>
+    <div class="col">
+      <img
+        src="{{ url_for('static', filename='OpenVPN_logo.png') }}"
+        height="50"
+        alt="OpenVPN logo"
+        loading="lazy"
+      />
+    </div>
+  </div>
+</div>
+<br />
+<div id="output"></div>
+<form id="input-form">
+  <input id="input-field" type="text" />
+  <button id="submit-button" type="submit">Submit</button>
+</form>
+<script>
+  var socket = io.connect("http://" + document.domain + ":" + location.port);
+  socket.on("output", function (data) {
+    $("#output").append(data);
+  });
+  $("#input-form").submit(function (event) {
+    event.preventDefault();
+    var input = $("#input-field").val();
+    socket.send(input);
+    $("#input-field").val("");
+  });
+</script>
+{% endblock %}

@@ -14,7 +14,8 @@
       integrity="sha384-KK94CHFLLe+nY2dmCWGMq91rCGa5gtU4mk92HdvYe+M/SXH301p5ILy+dN9+nJOZ"
       crossorigin="anonymous"
     />
-
+    <script src="//cdnjs.cloudflare.com/ajax/libs/socket.io/3.1.3/socket.io.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <title>{% block title %}Home{% endblock %}</title>
   </head>
 
@@ -50,6 +51,9 @@
             </a>
             <ul class="dropdown-menu">
               <li><a class="dropdown-item" href="/pleb-VPN">Pleb-VPN</a></li>
+              <li>
+                <a class="dropdown-item" href="/lnd-hybrid">LND Hybrid</a>
+              </li>
             </ul>
           </li>
           <a
