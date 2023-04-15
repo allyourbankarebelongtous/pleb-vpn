@@ -108,15 +108,15 @@ def test_scripts():
     if user:
         if user.id == current_user.id:
             if os.path.exists(os.path.abspath('./test.enter.sh')):
-                cmd_str = ["bash", "/mnt/hdd/mynode/pleb-vpn/test.enter.sh"]
-                result = subprocess.Popen(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE, universal_newlines=True)
-                output, error = result.communicate()
-                print(output)
-                print(error)
-                time.sleep(1)
-                pause_key(message=output, key='enter')
-                result.communicate(input='\n')
-                print(result.stdout)
+                cmd_str = ['./test.enter.sh']
+                result = subprocess.Popen(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                output = result.stdout.readline()
+                while output:
+                    print(output.decode().strip())
+                    output = result.stdout.readline()
+                user_input = input('Enter input: ')
+                result.stdin.write(user_input.encode())
+                result.stdin.flush()
                 flash(result.stdout, category='success')
     
     return jsonify({})
