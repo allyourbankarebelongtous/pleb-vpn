@@ -113,10 +113,10 @@ def test_scripts():
                 # Loop through the output of the Bash script in real-time
                 while True:
                     output = result.stdout.readline().decode()
-                    if output == '' and result.poll() is not None:
-                        break
                     if output:
                         print(output.strip())
+                    if result.poll() is not None:
+                        break
                     # Prompt the user for input while the script is running (will resume after hitting enter)
                     user_input = input()
                     # Check if the subprocess has finished before writing to its stdin stream  
