@@ -119,12 +119,12 @@ def test_scripts():
                         print(output.strip())
                     # Prompt the user for input while the script is running (will resume after hitting enter)
                     user_input = input()
-                    # Send the user input to the script as input (here we just want to send the 'enter' key)
-                    if user_input == "":
-                        result.stdin.write(b'\n')
-                    else:
+                    # Check if the subprocess has finished before writing to its stdin stream  
+                    if result.poll() is None:
                         result.stdin.write(user_input.encode() + b'\n')
-                    result.stdin.flush()
+                        result.stdin.flush()
+                    # Always close stdin stream
+                    result.stdin.close()
 
                 # Print the final output of the Bash script
                 output, error = result.communicate()
