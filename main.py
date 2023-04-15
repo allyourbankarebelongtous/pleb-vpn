@@ -1,5 +1,5 @@
 from webui import create_app
-from socketio import socketio
+from socket_io import socketio
 
 app = create_app()
 

@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, request, flash, jsonify, request, redirect, url_for
 from flask_login import login_required, current_user
 from werkzeug.utils import secure_filename
-from socketio import socketio
+from socket_io import socketio
 from .models import User
 from . import db
 import json, os, subprocess, keyboard
