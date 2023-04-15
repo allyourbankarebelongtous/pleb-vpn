@@ -107,7 +107,7 @@ def lnd_Hybrid():
 
     return render_template('lnd-hybrid.html', user=current_user)
 
-@socketio.on('start_process')
+""" @socketio.on('start_process')
 def start_process(data):
     cmd_str = ["./" + data]
     result = subprocess.Popen(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE, shell=True)
@@ -133,9 +133,9 @@ def start_process(data):
         socketio.emit('output', "Closing process due to disconnect...")
         result.stdin.write(user_input.encode() + b'\n')
         result.stdin.flush()
-        session.pop('user_input')
+        session.pop('user_input') """
 
-""" @socketio.on('start_process')
+@socketio.on('start_process')
 def start_process(data):
     cmd_str = ["./" + data]
     result = subprocess.Popen(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE, shell=True)
@@ -156,7 +156,7 @@ def start_process(data):
                 user_input = socketio.get_session(request.sid).get('user_input')
             user_input = request.sid + ": " + user_input
             result.stdin.write(user_input.encode() + b'\n')
-            result.stdin.flush() """
+            result.stdin.flush()
 
 @views.route('/update_scripts', methods=['POST'])
 def update_scripts():

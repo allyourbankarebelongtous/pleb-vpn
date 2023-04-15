@@ -28,13 +28,14 @@ content %}
 <form id="input-form">
   <input id="input-field" type="text" />
   <button id="submit-button" type="submit">Submit</button>
+  <button id="enter-button" type="button">Enter</button>
 </form>
 <form id="start-form">
   <input id="start-cmd" type="text" />
   <button id="start-button" type="submit">Start Process</button>
 </form>
 <script>
-  var socket = io.connect("http://" + document.domain + ":" + location.port);
+  /*   var socket = io.connect("http://" + document.domain + ":" + location.port);
   socket.on("output", function (data) {
     $("#output").append(data);
   });
@@ -49,9 +50,9 @@ content %}
     var input = $("#start-cmd").val();
     socket.emit("start_process", input);
     $("#start-cmd").val("");
-  });
+  }); */
 
-  /*   var socket = io.connect("http://" + document.domain + ":" + location.port);
+  var socket = io.connect("http://" + document.domain + ":" + location.port);
   socket.on("output", function (data) {
     $("#output").append(data);
   });
@@ -66,6 +67,9 @@ content %}
     var input = $("#start-cmd").val();
     socket.emit("start_process", input);
     $("#input-field").val("");
-  }); */
+  });
+  $("#enter-button").click(function () {
+    socket.emit("keypress", "\n");
+  });
 </script>
 {% endblock %}
