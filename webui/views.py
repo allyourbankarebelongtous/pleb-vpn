@@ -2,7 +2,6 @@ from flask import Blueprint, render_template, request, flash, jsonify, request, 
 from flask_login import login_required, current_user
 from werkzeug.utils import secure_filename
 from .models import User
-from main import socketio
 from . import db
 import json, os, subprocess, keyboard
 
