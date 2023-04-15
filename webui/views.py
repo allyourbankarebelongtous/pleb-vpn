@@ -159,10 +159,10 @@ def update_scripts():
                         break
                     # Prompt the user for input while the script is running (will resume after hitting enter)
                     if "Press ENTER to continue" in output.strip():
-                        user_input = input()
+                        pause_key(message = "Press ENTER to continue", key = 'enter')
                         # Check if the subprocess has finished before writing to its stdin stream  
                         if result.poll() is None:
-                            result.stdin.write(user_input.encode() + b'\n')
+                            result.stdin.write(b'\n')
                             result.stdin.flush()
                             # Always close stdin stream
                             result.stdin.close()
@@ -217,6 +217,5 @@ def pause_key(message, key):
     flash(message, category='warning')
     paused = True
     while paused:
-        pressed_key = keyboard.read_key()
-        if pressed_key == key:
+        if keyboard.read_key() == key:
             paused = False
