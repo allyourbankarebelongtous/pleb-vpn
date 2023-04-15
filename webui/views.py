@@ -111,23 +111,17 @@ def test_scripts():
                 cmd_str = ["sudo /mnt/hdd/mynode/pleb-vpn/test.enter.sh"]
                 result = subprocess.Popen(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE, shell=True)
                 # Loop through the output of the Bash script in real-time
-                while result.poll() is not None:
+                while result.poll() is None:
                     output = result.stdout.readline().decode()
                     if output:
                         print(output.strip())
-                    if output.strip() == 'Press ENTER to continue':
-                        # user_input = input()
-                        flash(output, category='warning')
-                        paused = True
-                        while paused:
-                            pressed_key = keyboard.read_key()
-                            if pressed_key == 'enter':
-                                paused = False
-                        if result.poll() is None:
-                            result.stdin.write(b'\n')
-                            result.stdin.flush()
-                            result.stdin.close()
-
+                    # Prompt the user for input
+                    user_input = input()
+                    # Write to stdin of the subprocess
+                    result.stdin.write(user_input.encode() + b'\n')
+                    result.stdin.flush()
+                # Close the stdin of the subprocess
+                result.stdin.close()
                 # Print the final output of the Bash script
                 output, error = result.communicate()
                 if output:
