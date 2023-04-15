@@ -118,8 +118,9 @@ def test_scripts():
                     # Prompt the user for input
                     user_input = input()
                     # Write to stdin of the subprocess
-                    result.stdin.write(user_input.encode() + b'\n')
-                    result.stdin.flush()
+                    if result.poll() is None:
+                        result.stdin.write(user_input.encode() + b'\n')
+                        result.stdin.flush()
                 # Close the stdin of the subprocess
                 result.stdin.close()
                 # Print the final output of the Bash script
