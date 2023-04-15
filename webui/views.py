@@ -117,18 +117,25 @@ def test_scripts():
                         break
                     if output:
                         print(output.strip())
-                    # Prompt the user for input while the script is running
+                    # Prompt the user for input while the script is running (will resume after hitting enter)
                     user_input = input()
-                    # Send the user input to the script as input
-                    result.stdin.write(user_input.encode() + b'\n')
+                    # Send the user input to the script as input (here we just want to send the 'enter' key)
+                    if user_input == "":
+                        result.stdin.write('\n')
+                    else:
+                        result.stdin.write(user_input.encode() + b'\n')
                     result.stdin.flush()
 
                 # Print the final output of the Bash script
                 output, error = result.communicate()
                 if output:
                     print(output.decode())
+                    message = output.decode()
+                    flash(message, category='success')
                 if error:
                     print(error.decode())
+                    message = error.decode()
+                    flash(message, category='error')
     
     return jsonify({})
 
