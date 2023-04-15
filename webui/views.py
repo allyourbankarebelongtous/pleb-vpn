@@ -121,7 +121,7 @@ def test_scripts():
                     user_input = input()
                     # Send the user input to the script as input (here we just want to send the 'enter' key)
                     if user_input == "":
-                        result.stdin.write('\n')
+                        result.stdin.write(b'\n')
                     else:
                         result.stdin.write(user_input.encode() + b'\n')
                     result.stdin.flush()
