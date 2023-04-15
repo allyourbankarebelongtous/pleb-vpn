@@ -120,7 +120,8 @@ def test_scripts():
                     # Write to stdin of the subprocess
                     if result.poll() is None:
                         result.stdin.write(user_input.encode() + b'\n')
-                        result.stdin.flush()
+                        if result.poll() is None:
+                            result.stdin.flush()
                 # Close the stdin of the subprocess
                 result.stdin.close()
                 # Print the final output of the Bash script
