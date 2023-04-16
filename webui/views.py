@@ -164,7 +164,8 @@ def start_process(data):
             user_input = None
         if enter_input is True:
             print("Sending ENTER to stdin:")
-            result.stdin.write(keyboard.press_and_release('enter'))
+            enter_key = keyboard.press_and_release('enter')
+            result.stdin.write(enter_key.encode())
             result.stdin.flush()
             enter_input = False  
         if result.poll() is not None:
