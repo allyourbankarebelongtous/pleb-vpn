@@ -4,7 +4,7 @@ from werkzeug.utils import secure_filename
 from socket_io import socketio
 from .models import User
 from . import db
-import json, os, subprocess, keyboard, select, time, pty
+import json, os, subprocess, keyboard, select, time, pty, pexpect
 
 views = Blueprint('views', __name__)
 
@@ -209,7 +209,7 @@ def start_process(data):
                 break
             time.sleep(0.1) """
 
-@socketio.on('start_process')
+""" @socketio.on('start_process')
 def start_process(data):
     global user_input
     global enter_input
@@ -250,7 +250,33 @@ def start_process(data):
                 except OSError:
                     pass
                 break
-            time.sleep(0.1)
+            time.sleep(0.1) """
+
+@socketio.on('start_process')
+def start_process(data):
+    global user_input
+    global enter_input
+    cmd_str = ["./" + data]
+    child = pexpect.spawn('bash', cmd_str)
+    while True:
+        try:
+            child.expect(['\r\n', pexpect.EOF, pexpect.TIMEOUT], timeout=0.1)
+            output = child.before.decode('utf-8')
+            if output:
+                print(output.strip())
+                socketio.emit('output', output.strip())
+        except pexpect.TIMEOUT:
+            pass
+        if user_input is not None:
+            print("Sending to master end of pseudo-terminal: ", user_input)
+            child.sendline(user_input)
+            user_input = None
+        if enter_input is True:
+            print("Sending ENTER to slave end of pseudo-terminal:")
+            child.sendline('')
+            enter_input = False
+        if child.eof():
+            break
 
 @socketio.on('user_input')
 def set_user_input(input):
