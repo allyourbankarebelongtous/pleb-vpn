@@ -110,8 +110,6 @@ def lnd_Hybrid():
 
 @socketio.on('start_process')
 def start_process(data):
-    global user_input
-    global enter_input
     cmd_str = ["./" + data]
     result = subprocess.Popen(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE, shell=True)
 
@@ -120,32 +118,43 @@ def start_process(data):
         if output:
             print(output.strip())
             socketio.emit('output', output.strip())
-        if user_input is not None:
+        user_input = get_user_input(result)
+        if user_input is not None
             print("Sending to stdin: ", user_input)
             result.stdin.write(user_input.encode() + b'\n')
             result.stdin.flush()
-            result.stdin.close()
             user_input = None
+        enter_input = get_enter_input(result)
         if enter_input is not None:
             print("Sending ENTER to stdin: ", enter_input)
             result.stdin.write(enter_input.encode())
             result.stdin.flush()
-            result.stdin.close()
-            enter_input = None
+            enter_input = None  
         if result.poll() is not None:
             break
+    result.stdin.close()
 
 @socketio.on('user_input')
-def get_user_input(input):
+def set_user_input(input):
     global user_input
     user_input = input
-    print(user_input)
+    print("set_user_input: ", user_input)
 
 @socketio.on('enter_input')
-def get_enter_input(input):
+def set_enter_input(input):
     global enter_input
     enter_input = input
-    print("!ENTER! ", enter_input)
+    print("set_enter_input: !ENTER! ", enter_input)
+
+def get_user_input(result):
+    global user_input
+    print("returned user_input: ", user_input)
+    return user_input
+
+def get_enter_input(result):
+    global enter_input
+    print("returned enter_input: !ENTER! ", user_input)
+    return enter_input
 
 """ @socketio.on('start_process')
 def start_process(data):
