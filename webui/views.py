@@ -111,6 +111,8 @@ def lnd_Hybrid():
 @socketio.on('start_process')
 def start_process(data):
     # create a pseudo-terminal
+    global user_input
+    global enter_input
     master, slave = pty.openpty()
 
     # start the command as a new process with the slave PTY as its controlling terminal
@@ -126,20 +128,22 @@ def start_process(data):
             socketio.emit('output', output.strip())
 
         # check if there's any user input from the client
-        user_input = get_user_input()
         if user_input is not None:
             print("Sending to process: ", user_input)
             os.write(master, user_input.encode() + b'\n')
+            user_input = None
 
         # check if there's any enter input from the client
-        enter_input = get_enter_input()
         if enter_input is True:
             print("Sending ENTER to process:")
             os.write(master, b'\r')
+            enter_input = False
 
         # check if the process has exited
         if os.waitpid(pid, os.WNOHANG)[0] != 0:
             break
+
+        time.sleep(0.1)
 
 """ @socketio.on('start_process')
 def start_process(data):
