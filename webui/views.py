@@ -173,7 +173,7 @@ def start_process(data):
             break
         time.sleep(0.1) """
 
-""" @socketio.on('start_process')
+@socketio.on('start_process')
 def start_process(data):
     global user_input
     global enter_input
@@ -188,7 +188,7 @@ def start_process(data):
         os.close(slave)
         os.execvp(cmd_str[0], cmd_str)
     else:  # Parent process
-        os.close(slave)
+        #os.close(slave)
         while True:
             r, _, _ = select.select([master], [], [], 0)
             if master in r:
@@ -206,8 +206,9 @@ def start_process(data):
                 enter_input = False
             if os.waitpid(result, os.WNOHANG)[0] != 0:
                 os.close(master)
+                os.close(slave)
                 break
-            time.sleep(0.1) """
+            time.sleep(0.1)
 
 """ @socketio.on('start_process')
 def start_process(data):
@@ -277,35 +278,6 @@ def start_process(data):
             enter_input = False
         if child.eof():
             break """
-
-@socketio.on('start_process')
-def start_process(data):
-    global user_input
-    global enter_input
-    cmd_str = ["./" + data]
-    child = pexpect.spawn('bash', cmd_str)
-    while True:
-        try:
-            # Wait for prompt to appear
-            child.expect(['\r\n', pexpect.EOF, pexpect.TIMEOUT], timeout=0.1)
-            output = child.before.decode('utf-8')
-            if output:
-                print(output.strip())
-                socketio.emit('output', output.strip())
-            # Look for input prompt
-            if child.prompt[-1] == ': ' or child.prompt[-1] == '> ':
-                if user_input is not None:
-                    print("Sending to terminal: ", user_input)
-                    child.sendline(user_input)
-                    user_input = None
-                if enter_input is True:
-                    print("Sending ENTER to terminal")
-                    child.sendline('')
-                    enter_input = False
-        except pexpect.TIMEOUT:
-            pass
-        if child.eof():
-            break
 
 @socketio.on('user_input')
 def set_user_input(input):
