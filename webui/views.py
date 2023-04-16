@@ -4,7 +4,7 @@ from werkzeug.utils import secure_filename
 from socket_io import socketio
 from .models import User
 from . import db
-import json, os, subprocess, keyboard, select, sys, time
+import json, os, subprocess, keyboard, select, time
 
 views = Blueprint('views', __name__)
 
@@ -113,7 +113,7 @@ def start_process(data):
     cmd_str = ["./" + data]
     result = subprocess.Popen(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE, shell=True)
     while True:
-        while sys.stdout in select.select([sys.stdout], [], [], 0)[0]:
+        while result.stdout in select.select([result.stdout], [], [], 0)[0]:
             output = result.stdout.readline().decode()
             if output:
                 print(output.strip())
