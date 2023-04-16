@@ -139,22 +139,21 @@ def start_process(data):
 def get_user_input(result):
     while True:
         # Wait for user input or key press from SocketIO
-        socketio.sleep(0.01)  # pause for 10 milliseconds
-        event, data = socketio.wait()
-
-        # Handle user input
-        if event == 'user_input':
-            user_input = data
-            print("Received user input: ", user_input) 
-            result.stdin.write(user_input.encode() + b'\n')
-            result.stdin.flush()
-
-        # Handle key press
-        elif event == 'keypress':
-            key = data
-            print("Received enter key: ", key)
-            result.stdin.write(key.encode())
-            result.stdin.flush()
+        socketio.sleep(0.1) # wait for 0.1 seconds to allow other events to be processed
+        events = socketio.get_events()
+        for event in events:
+            event_name = event["name"]
+            event_data = event["args"][0] if len(event["args"]) > 0 else None
+            # Handle user input
+            if event_name == 'user_input':
+                user_input = event_data
+                result.stdin.write(user_input.encode() + b'\n')
+                result.stdin.flush()
+            # Handle key press
+            elif event_name == 'keypress':
+                key = event_data
+                result.stdin.write(key.encode())
+                result.stdin.flush()
 
 """ @socketio.on('start_process')
 def start_process(data):
