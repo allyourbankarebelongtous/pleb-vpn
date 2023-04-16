@@ -143,7 +143,8 @@ def set_user_input(input):
 @socketio.on('enter_input')
 def set_enter_input(input):
     global enter_input
-    enter_input = input
+    print("received enter_input: ", input)
+    enter_input = "\n"
     print("set_enter_input: !ENTER! ", enter_input)
 
 def get_user_input(result):
