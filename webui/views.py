@@ -13,7 +13,7 @@ PLEBVPN_CONF_UPLOAD_FOLDER = '/mnt/hdd/mynode/pleb-vpn/openvpn'
 conf_file_location = '/mnt/hdd/mynode/pleb-vpn/pleb-vpn.conf'
 plebVPN_status = {}
 user_input = None
-enter_input = None
+enter_input = False
 
 @views.route('/', methods=['GET', 'POST'])
 @login_required
@@ -125,14 +125,14 @@ def start_process(data):
             result.stdin.flush()
             user_input = None
         enter_input = get_enter_input(result)
-        if enter_input is not None:
-            print("Sending ENTER to stdin: ", enter_input)
-            result.stdin.write(enter_input.encode())
+        if enter_input is True:
+            print("Sending ENTER to stdin:")
+            result.stdin.write('\n'.encode())
             result.stdin.flush()
-            enter_input = None  
+            enter_input = False  
         if result.poll() is not None:
+            result.stdin.close()
             break
-    result.stdin.close()
 
 @socketio.on('user_input')
 def set_user_input(input):
@@ -143,18 +143,18 @@ def set_user_input(input):
 @socketio.on('enter_input')
 def set_enter_input(input):
     global enter_input
-    print("received enter_input: ", input)
-    enter_input = "\n"
-    print("set_enter_input: !ENTER! ", enter_input)
+    print("received enter_input: !ENTER!")
+    enter_input = True
+    print("set_enter_input: !ENTER!", enter_input)
 
-def get_user_input(result):
+def get_user_input():
     global user_input
     print("returned user_input: ", user_input)
     return user_input
 
-def get_enter_input(result):
+def get_enter_input():
     global enter_input
-    print("returned enter_input: !ENTER! ", user_input)
+    print("returned enter_input: !ENTER! ", enter_input)
     return enter_input
 
 """ @socketio.on('start_process')
