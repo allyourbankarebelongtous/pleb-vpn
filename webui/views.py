@@ -135,6 +135,10 @@ def start_process(data):
         result.stdin.flush()
         session.pop('user_input')
 
+@socketio.on('user_input')
+def handle_user_input(data):
+    session['user_input'] = data
+
 """ @socketio.on('start_process')
 def start_process(data):
     cmd_str = ["./" + data]
