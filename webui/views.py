@@ -139,6 +139,7 @@ def start_process(data):
 def get_user_input(result):
     while True:
         # Wait for user input or key press from SocketIO
+        socketio.sleep(0.01)  # pause for 10 milliseconds
         event, data = socketio.wait()
 
         # Handle user input
