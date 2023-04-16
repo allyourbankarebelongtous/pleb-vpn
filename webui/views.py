@@ -115,9 +115,9 @@ def start_process(data):
     while True:
         while sys.stdout in select.select([sys.stdout], [], [], 0)[0]:
             output = result.stdout.readline().decode()
-        if output:
-            print(output.strip())
-            socketio.emit('output', output.strip())
+            if output:
+                print(output.strip())
+                socketio.emit('output', output.strip())
         user_input = get_user_input()
         print("got user_input: ", user_input)
         if user_input is not None:
