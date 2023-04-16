@@ -2,6 +2,7 @@ from flask import Blueprint, render_template, request, flash, jsonify, redirect,
 from flask_login import login_required, current_user
 from werkzeug.utils import secure_filename
 from socket_io import socketio
+from threading import Thread
 from select import select
 from .models import User
 from . import db
@@ -111,6 +112,43 @@ def lnd_Hybrid():
 def start_process(data):
     cmd_str = ["./" + data]
     result = subprocess.Popen(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE, shell=True)
+
+    # Start thread to handle user input from SocketIO
+    input_thread = Thread(target=get_user_input, args=(result,))
+    input_thread.start()
+
+    while True:
+        output = result.stdout.readline().decode()
+        if output:
+            print(output.strip())
+            socketio.emit('output', output.strip())
+        if result.poll() is not None:
+            break
+
+    # Wait for input thread to finish
+    input_thread.join()
+
+    # Save remaining user input to session
+    user_input = session.get('user_input')
+    if user_input is not None:
+        socketio.emit('output', "Closing process due to disconnect...")
+        result.stdin.write(user_input.encode() + b'\n')
+        result.stdin.flush()
+        session.pop('user_input')
+
+def get_user_input(result):
+    while True:
+        # Wait for user input from SocketIO
+        user_input = socketio.wait_for_event('user_input')
+
+        # Send user input to subprocess
+        result.stdin.write(user_input.encode() + b'\n')
+        result.stdin.flush()
+
+""" @socketio.on('start_process')
+def start_process(data):
+    cmd_str = ["./" + data]
+    result = subprocess.Popen(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE, shell=True)
     while True:
         output = result.stdout.readline().decode()
         if output:
@@ -119,7 +157,7 @@ def start_process(data):
         if result.poll() is not None:
             break
         # Check if the subprocess is requesting input
-        if select([result.stdout], [], [], 1)[0]:
+        if select([result.stdout], [], [], 0)[0]:
             # Get user input from session
             user_input = session.get('user_input')
             if user_input is not None:
@@ -133,11 +171,7 @@ def start_process(data):
         socketio.emit('output', "Closing process due to disconnect...")
         result.stdin.write(user_input.encode() + b'\n')
         result.stdin.flush()
-        session.pop('user_input')
-
-@socketio.on('user_input')
-def handle_user_input(data):
-    session['user_input'] = data
+        session.pop('user_input') """
 
 """ @socketio.on('start_process')
 def start_process(data):
