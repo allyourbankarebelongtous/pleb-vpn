@@ -139,25 +139,27 @@ def start_process(data):
 def get_user_input(result):
     while True:
         # Wait for user input or key press from SocketIO
+        socketio.sleep(0.1)
         events = socketio.get_events()
-        if not events:
-            if '' not in socketio.server.manager.rooms:
-                continue
-            if not socketio.server.manager.rooms[''].clients:
-                continue
-            socketio.sleep(0.1)
-            continue
-
-        # Handle user input or key press
         for event in events:
-            if event['event'] == 'user_input':
-                user_input = event['data']
+            event_name = event["name"]
+            event_data = event["args"][0]
+
+            # Handle user input
+            if event_name == 'user_input':
+                user_input = event_data
                 result.stdin.write(user_input.encode() + b'\n')
                 result.stdin.flush()
-            elif event['event'] == 'keypress':
-                key = event['data']
+
+            # Handle key press
+            elif event_name == 'keypress':
+                key = event_data
                 result.stdin.write(key.encode())
                 result.stdin.flush()
+
+        # Check if there are no more clients connected
+        if not socketio.server.manager.rooms[""].clients:
+            break
 
 """ @socketio.on('start_process')
 def start_process(data):
