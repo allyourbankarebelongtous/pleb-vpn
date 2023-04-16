@@ -2,8 +2,6 @@ from flask import Blueprint, render_template, request, flash, jsonify, redirect,
 from flask_login import login_required, current_user
 from werkzeug.utils import secure_filename
 from socket_io import socketio
-from threading import Thread
-from select import select
 from .models import User
 from . import db
 import json, os, subprocess, keyboard
@@ -14,6 +12,8 @@ ALLOWED_EXTENSIONS = {'conf'}
 PLEBVPN_CONF_UPLOAD_FOLDER = '/mnt/hdd/mynode/pleb-vpn/openvpn'
 conf_file_location = '/mnt/hdd/mynode/pleb-vpn/pleb-vpn.conf'
 plebVPN_status = {}
+user_input = None
+enter_input = None
 
 @views.route('/', methods=['GET', 'POST'])
 @login_required
@@ -110,62 +110,36 @@ def lnd_Hybrid():
 
 @socketio.on('start_process')
 def start_process(data):
+    global user_input
+    global enter_input
     cmd_str = ["./" + data]
     result = subprocess.Popen(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE, shell=True)
-
-    # Start thread to handle user input from SocketIO
-    input_thread = Thread(target=get_user_input, args=(result,))
-    input_thread.start()
 
     while True:
         output = result.stdout.readline().decode()
         if output:
             print(output.strip())
             socketio.emit('output', output.strip())
+        if user_input is not None:
+            result.stdin.write(user_input.encode() + b'\n')
+            result.stdin.flush()
+            user_input = None
+        if enter_input is not None:
+            result.stdin.write(enter_input.encode())
+            result.stdin.flush()
+            enter_input = None
         if result.poll() is not None:
             break
 
-    # Wait for input thread to finish
-    input_thread.join()
+@socketio.on('user_input')
+def get_user_input(input):
+    global user_input
+    user_input = input
 
-    # Save remaining user input to session
-    user_input = session.get('user_input')
-    if user_input is not None:
-        socketio.emit('output', "Closing process due to disconnect...")
-        result.stdin.write(user_input.encode() + b'\n')
-        result.stdin.flush()
-        session.pop('user_input')
-
-def get_user_input(result):
-    while True:
-        # Wait for user input or key press from SocketIO
-        pkt = socketio.server.eio.recv_packet()
-        if pkt is None:
-            break
-        packet_type, packet_data = pkt
-
-        # Parse packet to extract event name and data
-        if packet_type == 'message':
-            msg_type, msg_data = json.loads(packet_data)
-            if msg_type == 'event':
-                event_name = msg_data['name']
-                event_data = msg_data['args'][0]
-
-                # Handle user input
-                if event_name == 'user_input':
-                    user_input = event_data
-                    result.stdin.write(user_input.encode() + b'\n')
-                    result.stdin.flush()
-
-                # Handle key press
-                elif event_name == 'keypress':
-                    key = event_data
-                    result.stdin.write(key.encode())
-                    result.stdin.flush()
-
-        # Check if there are no more clients connected
-        if not socketio.server.manager.rooms[""].clients:
-            break
+@socketio.on('enter_input')
+def get_enter_input(input):
+    global enter_input
+    enter_input = input
 
 """ @socketio.on('start_process')
 def start_process(data):
