@@ -1,3 +1,6 @@
 from flask_socketio import SocketIO
+import eventlet
 
-socketio = SocketIO()
+eventlet.monkey_patch()
+
+socketio = SocketIO(async_mode='eventlet')
