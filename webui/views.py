@@ -143,6 +143,7 @@ def start_process(data):
         while True:
             output = result.stdout.readline().decode()
             if result.poll() is not None:
+                result.stdin.close()
                 break
             print(output.strip())
             socketio.emit('output', output.strip())
@@ -161,9 +162,6 @@ def start_process(data):
                 result.stdin.write('\n'.encode())
                 result.stdin.flush()
                 enter_input = False
-            if result.poll() is not None:
-                result.stdin.close()
-                break
             await asyncio.sleep(0.1)
 
     asyncio.ensure_future(handle_output())
