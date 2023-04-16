@@ -135,11 +135,13 @@ def start_process(data):
 def get_user_input(input):
     global user_input
     user_input = input
+    print(user_input)
 
 @socketio.on('enter_input')
 def get_enter_input(input):
     global enter_input
     enter_input = input
+    print("!ENTER!")
 
 """ @socketio.on('start_process')
 def start_process(data):

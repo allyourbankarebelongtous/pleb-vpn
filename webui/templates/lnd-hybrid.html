@@ -28,8 +28,8 @@ content %}
 <form id="input-form">
   <input id="input-field" type="text" />
   <button id="submit-button" type="submit">Submit</button>
-  <button id="enter-button" type="button">Enter</button>
 </form>
+<button id="enter-button" type="button">Enter</button>
 <form id="start-form">
   <input id="start-cmd" type="text" />
   <button id="start-button" type="submit">Start Process</button>
@@ -52,7 +52,7 @@ content %}
     $("#start-cmd").val("");
   });
   $("#enter-button").click(function () {
-    socket.emit("keypress", "\n");
+    socket.emit("enter_input", "\n");
   });
 </script>
 {% endblock %}
