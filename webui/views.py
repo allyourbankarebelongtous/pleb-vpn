@@ -4,7 +4,7 @@ from werkzeug.utils import secure_filename
 from socket_io import socketio
 from .models import User
 from . import db
-import json, os, subprocess, keyboard
+import json, os, subprocess, keyboard, select, sys, time
 
 views = Blueprint('views', __name__)
 
@@ -113,7 +113,8 @@ def start_process(data):
     cmd_str = ["./" + data]
     result = subprocess.Popen(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE, shell=True)
     while True:
-        output = result.stdout.readline().decode()
+        while sys.stdout in select.select([sys.stdout], [], [], 0)[0]:
+            output = result.stdout.readline().decode()
         if output:
             print(output.strip())
             socketio.emit('output', output.strip())
@@ -134,6 +135,7 @@ def start_process(data):
         if result.poll() is not None:
             result.stdin.close()
             break
+        time.sleep(0.1)
 
 @socketio.on('user_input')
 def set_user_input(input):
