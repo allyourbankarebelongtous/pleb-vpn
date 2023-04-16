@@ -145,7 +145,7 @@ def start_process(data):
 
         time.sleep(0.1) """
 
-@socketio.on('start_process')
+""" @socketio.on('start_process')
 def start_process(data):
     global user_input
     global enter_input
@@ -171,7 +171,43 @@ def start_process(data):
         if result.poll() is not None:
             result.stdin.close()
             break
-        time.sleep(0.1)
+        time.sleep(0.1) """
+
+@socketio.on('start_process')
+def start_process(data):
+    global user_input
+    global enter_input
+    cmd_str = ["./" + data]
+    master, slave = pty.openpty()
+    result = os.fork()
+    if result == 0:  # Child process
+        os.close(master)
+        os.dup2(slave, 0)  # Redirect stdin to the slave end of the pseudo-terminal
+        os.dup2(slave, 1)  # Redirect stdout to the slave end of the pseudo-terminal
+        os.dup2(slave, 2)  # Redirect stderr to the slave end of the pseudo-terminal
+        os.close(slave)
+        os.execvp(cmd_str[0], cmd_str)
+    else:  # Parent process
+        os.close(slave)
+        while True:
+            r, _, _ = select.select([master], [], [], 0)
+            if master in r:
+                output = os.read(master, 1024).decode()
+                if output:
+                    print(output.strip())
+                    socketio.emit('output', output.strip())
+            if user_input is not None:
+                print("Sending to stdin: ", user_input)
+                os.write(master, user_input.encode() + b'\n')
+                user_input = None
+            if enter_input is True:
+                print("Sending ENTER to stdin:")
+                os.write(master, b'\r')
+                enter_input = False
+            if os.waitpid(result, os.WNOHANG)[0] != 0:
+                os.close(master)
+                break
+            time.sleep(0.1)
 
 @socketio.on('user_input')
 def set_user_input(input):
