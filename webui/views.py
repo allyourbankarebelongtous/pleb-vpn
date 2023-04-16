@@ -139,7 +139,7 @@ def start_process(data):
     cmd_str = ["./" + data]
     result = subprocess.Popen(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE, shell=True)
 
-    def handle_output():
+    async def handle_output():
         while True:
             output = result.stdout.readline().decode()
             if output:
@@ -162,8 +162,8 @@ def start_process(data):
             if result.poll() is not None:
                 result.stdin.close()
                 break
-
-    asyncio.run_coroutine_threadsafe(handle_output(), asyncio.get_event_loop())
+    
+    asyncio.create_task(handle_output()) # run coroutine in the background
 
 @socketio.on('user_input')
 def set_user_input(input):
