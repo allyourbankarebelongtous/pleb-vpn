@@ -119,7 +119,7 @@ def start_process(data):
             print(output.strip())
             socketio.emit('output', output.strip())
         user_input = get_user_input(result)
-        if user_input is not None
+        if user_input is not None:
             print("Sending to stdin: ", user_input)
             result.stdin.write(user_input.encode() + b'\n')
             result.stdin.flush()
