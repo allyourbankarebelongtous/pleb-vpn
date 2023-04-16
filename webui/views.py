@@ -137,6 +137,53 @@ def start_process(data):
         session.pop('user_input')
 
 def get_user_input(result):
+    # Map event names to actions
+    event_actions = {
+        'user_input': lambda data: result.stdin.write((data + '\n').encode()),
+        'keypress': lambda data: result.stdin.write(data.encode())
+    }
+
+    while True:
+        # Wait for event from SocketIO
+        event, data = None, None
+        for e in socketio._queue:
+            event, data = e['args']
+            if event in event_actions:
+                break
+
+        # Execute corresponding action for event
+        if event and event in event_actions:
+            event_actions[event](data)
+
+""" @socketio.on('start_process')
+def start_process(data):
+    cmd_str = ["./" + data]
+    result = subprocess.Popen(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE, shell=True)
+
+    # Start thread to handle user input from SocketIO
+    input_thread = Thread(target=get_user_input, args=(result,))
+    input_thread.start()
+
+    while True:
+        output = result.stdout.readline().decode()
+        if output:
+            print(output.strip())
+            socketio.emit('output', output.strip())
+        if result.poll() is not None:
+            break
+
+    # Wait for input thread to finish
+    input_thread.join()
+
+    # Save remaining user input to session
+    user_input = session.get('user_input')
+    if user_input is not None:
+        socketio.emit('output', "Closing process due to disconnect...")
+        result.stdin.write(user_input.encode() + b'\n')
+        result.stdin.flush()
+        session.pop('user_input')
+
+def get_user_input(result):
     while True:
         # Wait for user input or key press from SocketIO
         socketio.sleep(0.1) # wait for 0.1 seconds to allow other events to be processed
@@ -153,7 +200,7 @@ def get_user_input(result):
             elif event_name == 'keypress':
                 key = event_data
                 result.stdin.write(key.encode())
-                result.stdin.flush()
+                result.stdin.flush() """
 
 """ @socketio.on('start_process')
 def start_process(data):
