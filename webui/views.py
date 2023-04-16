@@ -173,7 +173,7 @@ def start_process(data):
             break
         time.sleep(0.1) """
 
-@socketio.on('start_process')
+""" @socketio.on('start_process')
 def start_process(data):
     global user_input
     global enter_input
@@ -206,6 +206,49 @@ def start_process(data):
                 enter_input = False
             if os.waitpid(result, os.WNOHANG)[0] != 0:
                 os.close(master)
+                break
+            time.sleep(0.1) """
+
+@socketio.on('start_process')
+def start_process(data):
+    global user_input
+    global enter_input
+    cmd_str = ["./" + data]
+    master, slave = pty.openpty()
+    result = os.fork()
+    if result == 0:  # Child process
+        os.close(master)
+        os.dup2(slave, 0)  # Redirect stdin to the slave end of the pseudo-terminal
+        os.dup2(slave, 1)  # Redirect stdout to the slave end of the pseudo-terminal
+        os.dup2(slave, 2)  # Redirect stderr to the slave end of the pseudo-terminal
+        os.close(slave)
+        os.execvp(cmd_str[0], cmd_str)
+    else:  # Parent process
+        os.close(slave)
+        while True:
+            r, _, _ = select.select([master], [], [], 0)
+            if master in r:
+                output = os.read(master, 1024).decode()
+                if output:
+                    print(output.strip())
+                    socketio.emit('output', output.strip())
+            if user_input is not None:
+                print("Sending to master end of pseudo-terminal: ", user_input)
+                os.write(master, user_input.encode() + b'\n')
+                user_input = None
+            if enter_input is True:
+                print("Sending ENTER to slave end of pseudo-terminal:")
+                try:
+                    os.write(slave, b'\r')
+                except OSError:
+                    pass
+                enter_input = False
+            if os.waitpid(result, os.WNOHANG)[0] != 0:
+                os.close(master)
+                try:
+                    os.close(slave)
+                except OSError:
+                    pass
                 break
             time.sleep(0.1)
 
