@@ -137,20 +137,27 @@ def start_process(data):
         session.pop('user_input')
 
 def get_user_input(result):
-    @socketio.on('user_input')
-    def handle_user_input(user_input):
-        result.stdin.write(user_input.encode() + b'\n')
-        result.stdin.flush()
-
-    @socketio.on('keypress')
-    def handle_keypress(key):
-        result.stdin.write(key.encode())
-        result.stdin.flush()
-
     while True:
-        if not socketio.server.manager.rooms[""].clients:
+        # Wait for user input or key press from SocketIO
+        events = socketio.get_events()
+        if not events:
+            if '' not in socketio.server.manager.rooms:
+                continue
+            if not socketio.server.manager.rooms[''].clients:
+                continue
+            socketio.sleep(0.1)
             continue
-        socketio.sleep(0.1)
+
+        # Handle user input or key press
+        for event in events:
+            if event['event'] == 'user_input':
+                user_input = event['data']
+                result.stdin.write(user_input.encode() + b'\n')
+                result.stdin.flush()
+            elif event['event'] == 'keypress':
+                key = event['data']
+                result.stdin.write(key.encode())
+                result.stdin.flush()
 
 """ @socketio.on('start_process')
 def start_process(data):
