@@ -139,33 +139,27 @@ def start_process(data):
     cmd_str = ["./" + data]
     result = subprocess.Popen(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE, shell=True)
 
-    async def handle_output():
+    def handle_output():
         while True:
             output = result.stdout.readline().decode()
-            if result.poll() is not None:
-                result.stdin.close()
-                break
-            print(output.strip())
-            socketio.emit('output', output.strip())
-
-    async def handle_input():
-        while True:
-            user_input = get_user_input()
+            if output:
+                print(output.strip())
+                socketio.emit('output', output.strip())
             if user_input is not None:
                 print("Sending to stdin: ", user_input)
                 result.stdin.write(user_input.encode() + b'\n')
                 result.stdin.flush()
                 user_input = None
-            enter_input = get_enter_input()
             if enter_input is True:
                 print("Sending ENTER to stdin:")
                 result.stdin.write('\n'.encode())
                 result.stdin.flush()
-                enter_input = False
-            await asyncio.sleep(0.1)
+                enter_input = False  
+            if result.poll() is not None:
+                result.stdin.close()
+                break
 
-    asyncio.ensure_future(handle_output())
-    asyncio.ensure_future(handle_input())
+    asyncio.run_coroutine_threadsafe(handle_output(), asyncio.get_event_loop())
 
 @socketio.on('user_input')
 def set_user_input(input):
