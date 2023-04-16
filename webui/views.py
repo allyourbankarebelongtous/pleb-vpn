@@ -146,12 +146,14 @@ def start_process(data):
                 print(output.strip())
                 socketio.emit('output', output.strip())
             user_input = get_user_input()
+            print("got user_input: ", user_input)
             if user_input is not None:
                 print("Sending to stdin: ", user_input)
                 result.stdin.write(user_input.encode() + b'\n')
                 result.stdin.flush()
                 user_input = None
             enter_input = get_enter_input()
+            print("got enter_input: !ENTER!", enter_input)
             if enter_input is True:
                 print("Sending ENTER to stdin:")
                 result.stdin.write('\n'.encode())
