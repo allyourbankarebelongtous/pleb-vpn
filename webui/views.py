@@ -106,7 +106,7 @@ def delete_plebvpn_conf():
 @login_required
 def lnd_Hybrid():
 
-    return render_template('lnd-hybrid.html', user=current_user
+    return render_template('lnd-hybrid.html', user=current_user)
 
 @socketio.on('start_process')
 def start_process(data):
