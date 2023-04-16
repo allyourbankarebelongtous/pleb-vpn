@@ -4,7 +4,7 @@ from werkzeug.utils import secure_filename
 from socket_io import socketio
 from .models import User
 from . import db
-import json, os, subprocess, keyboard, select, time
+import json, os, subprocess, keyboard, select, time, pty
 
 views = Blueprint('views', __name__)
 
@@ -106,9 +106,42 @@ def delete_plebvpn_conf():
 @login_required
 def lnd_Hybrid():
 
-    return render_template('lnd-hybrid.html', user=current_user)
+    return render_template('lnd-hybrid.html', user=current_user
 
 @socketio.on('start_process')
+def start_process(data):
+    # create a pseudo-terminal
+    master, slave = pty.openpty()
+
+    # start the command as a new process with the slave PTY as its controlling terminal
+    cmd_str = ["./" + data]
+    pid = os.spawnvp(os.P_NOWAIT, cmd_str[0], cmd_str)
+
+    # loop to read output and send user input to the process
+    while True:
+        # check if there's any output from the process
+        if select.select([master], [], [], 0)[0]:
+            output = os.read(master, 1024).decode()
+            print(output.strip())
+            socketio.emit('output', output.strip())
+
+        # check if there's any user input from the client
+        user_input = get_user_input()
+        if user_input is not None:
+            print("Sending to process: ", user_input)
+            os.write(master, user_input.encode() + b'\n')
+
+        # check if there's any enter input from the client
+        enter_input = get_enter_input()
+        if enter_input is True:
+            print("Sending ENTER to process:")
+            os.write(master, b'\r')
+
+        # check if the process has exited
+        if os.waitpid(pid, os.WNOHANG)[0] != 0:
+            break
+
+""" @socketio.on('start_process')
 def start_process(data):
     global user_input
     global enter_input
@@ -127,13 +160,13 @@ def start_process(data):
             user_input = None
         if enter_input is True:
             print("Sending ENTER to stdin:")
-            result.stdin.write('\\n')
+            result.stdin.write(b'\n')
             result.stdin.flush()
             enter_input = False  
         if result.poll() is not None:
             result.stdin.close()
             break
-        time.sleep(0.1)
+        time.sleep(0.1) """
 
 @socketio.on('user_input')
 def set_user_input(input):
