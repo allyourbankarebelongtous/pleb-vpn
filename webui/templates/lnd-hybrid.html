@@ -42,7 +42,7 @@ content %}
   $("#input-form").submit(function (event) {
     event.preventDefault();
     var input = $("#input-field").val();
-    socket.send(input);
+    socket.send("user_input" input);
     $("#input-field").val("");
   });
   $("#start-form").submit(function (event) {
