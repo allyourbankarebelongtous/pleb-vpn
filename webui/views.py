@@ -4,7 +4,7 @@ from werkzeug.utils import secure_filename
 from socket_io import socketio
 from .models import User
 from . import db
-import json, os, subprocess, keyboard
+import json, os, subprocess, keyboard, asyncio
 
 views = Blueprint('views', __name__)
 
@@ -108,7 +108,7 @@ def lnd_Hybrid():
 
     return render_template('lnd-hybrid.html', user=current_user)
 
-@socketio.on('start_process')
+""" @socketio.on('start_process')
 def start_process(data):
     cmd_str = ["./" + data]
     result = subprocess.Popen(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE, shell=True)
@@ -132,7 +132,42 @@ def start_process(data):
             enter_input = False  
         if result.poll() is not None:
             result.stdin.close()
-            break
+            break """
+
+@socketio.on('start_process')
+def start_process(data):
+    cmd_str = ["./" + data]
+    result = subprocess.Popen(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE, shell=True)
+
+    async def handle_output():
+        while True:
+            output = result.stdout.readline().decode()
+            if result.poll() is not None:
+                break
+            print(output.strip())
+            socketio.emit('output', output.strip())
+
+    async def handle_input():
+        while True:
+            user_input = get_user_input()
+            if user_input is not None:
+                print("Sending to stdin: ", user_input)
+                result.stdin.write(user_input.encode() + b'\n')
+                result.stdin.flush()
+                user_input = None
+            enter_input = get_enter_input()
+            if enter_input is True:
+                print("Sending ENTER to stdin:")
+                result.stdin.write('\n'.encode())
+                result.stdin.flush()
+                enter_input = False
+            if result.poll() is not None:
+                result.stdin.close()
+                break
+            await asyncio.sleep(0.1)
+
+    asyncio.ensure_future(handle_output())
+    asyncio.ensure_future(handle_input())
 
 @socketio.on('user_input')
 def set_user_input(input):
@@ -156,104 +191,6 @@ def get_enter_input():
     global enter_input
     print("returned enter_input: !ENTER! ", enter_input)
     return enter_input
-
-""" @socketio.on('start_process')
-def start_process(data):
-    cmd_str = ["./" + data]
-    result = subprocess.Popen(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE, shell=True)
-
-    # Start thread to handle user input from SocketIO
-    input_thread = Thread(target=get_user_input, args=(result,))
-    input_thread.start()
-
-    while True:
-        output = result.stdout.readline().decode()
-        if output:
-            print(output.strip())
-            socketio.emit('output', output.strip())
-        if result.poll() is not None:
-            break
-
-    # Wait for input thread to finish
-    input_thread.join()
-
-    # Save remaining user input to session
-    user_input = session.get('user_input')
-    if user_input is not None:
-        socketio.emit('output', "Closing process due to disconnect...")
-        result.stdin.write(user_input.encode() + b'\n')
-        result.stdin.flush()
-        session.pop('user_input')
-
-def get_user_input(result):
-    while True:
-        # Wait for user input or key press from SocketIO
-        socketio.sleep(0.1) # wait for 0.1 seconds to allow other events to be processed
-        events = socketio.get_events()
-        for event in events:
-            event_name = event["name"]
-            event_data = event["args"][0] if len(event["args"]) > 0 else None
-            # Handle user input
-            if event_name == 'user_input':
-                user_input = event_data
-                result.stdin.write(user_input.encode() + b'\n')
-                result.stdin.flush()
-            # Handle key press
-            elif event_name == 'keypress':
-                key = event_data
-                result.stdin.write(key.encode())
-                result.stdin.flush() """
-
-""" @socketio.on('start_process')
-def start_process(data):
-    cmd_str = ["./" + data]
-    result = subprocess.Popen(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE, shell=True)
-    while True:
-        output = result.stdout.readline().decode()
-        if output:
-            print(output.strip())
-            socketio.emit('output', output.strip())
-        if result.poll() is not None:
-            break
-        # Check if the subprocess is requesting input
-        if select([result.stdout], [], [], 0)[0]:
-            # Get user input from session
-            user_input = session.get('user_input')
-            if user_input is not None:
-                user_input = request.sid + ": " + user_input
-                result.stdin.write(user_input.encode() + b'\n')
-                result.stdin.flush()
-                session.pop('user_input')
-    # Save remaining user input to session
-    user_input = session.get('user_input')
-    if user_input is not None:
-        socketio.emit('output', "Closing process due to disconnect...")
-        result.stdin.write(user_input.encode() + b'\n')
-        result.stdin.flush()
-        session.pop('user_input') """
-
-""" @socketio.on('start_process')
-def start_process(data):
-    cmd_str = ["./" + data]
-    result = subprocess.Popen(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE, shell=True)
-    # Loop through the output of the Bash script in real-time
-    while True:
-        output = result.stdout.readline().decode()
-        if output:
-            print(output.strip())
-            socketio.emit('output', output.strip())
-        if result.poll() is not None:
-            break
-        # Check if the subprocess is requesting input
-        if select([result.stdout], [], [], 0)[0]:
-            # Send any pending user input to the subprocess stdin
-            user_input = None
-            while user_input is None:
-                socketio.sleep(0)
-                user_input = socketio.get_session(request.sid).get('user_input')
-            user_input = request.sid + ": " + user_input
-            result.stdin.write(user_input.encode() + b'\n')
-            result.stdin.flush() """
 
 @views.route('/update_scripts', methods=['POST'])
 def update_scripts():
