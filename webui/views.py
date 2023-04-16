@@ -202,7 +202,7 @@ def start_process(data):
                 user_input = None
             if enter_input is True:
                 print("Sending ENTER to slave end of pseudo-terminal:")
-                os.write(slave, b'\r')
+                os.write(slave, b'\r\n')
                 enter_input = False
             if os.waitpid(result, os.WNOHANG)[0] != 0:
                 os.close(master)
