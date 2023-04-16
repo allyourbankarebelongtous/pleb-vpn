@@ -119,7 +119,7 @@ def start_process(data):
         if result.poll() is not None:
             break
         # Check if the subprocess is requesting input
-        if select([result.stdout], [], [], 0)[0]:
+        if select([result.stdout], [], [], 1)[0]:
             # Get user input from session
             user_input = session.get('user_input')
             if user_input is not None:
