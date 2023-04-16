@@ -121,12 +121,16 @@ def start_process(data):
             print(output.strip())
             socketio.emit('output', output.strip())
         if user_input is not None:
+            print("Sending to stdin: ", user_input)
             result.stdin.write(user_input.encode() + b'\n')
             result.stdin.flush()
+            result.stdin.close()
             user_input = None
         if enter_input is not None:
+            print("Sending ENTER to stdin: ", enter_input)
             result.stdin.write(enter_input.encode())
             result.stdin.flush()
+            result.stdin.close()
             enter_input = None
         if result.poll() is not None:
             break
@@ -141,7 +145,7 @@ def get_user_input(input):
 def get_enter_input(input):
     global enter_input
     enter_input = input
-    print("!ENTER!")
+    print("!ENTER! ", enter_input)
 
 """ @socketio.on('start_process')
 def start_process(data):
