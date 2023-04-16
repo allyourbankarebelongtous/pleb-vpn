@@ -108,7 +108,7 @@ def lnd_Hybrid():
 
     return render_template('lnd-hybrid.html', user=current_user)
 
-@socketio.on('start_process')
+""" @socketio.on('start_process')
 def start_process(data):
     # create a pseudo-terminal
     global user_input
@@ -143,9 +143,9 @@ def start_process(data):
         if os.waitpid(pid, os.WNOHANG)[0] != 0:
             break
 
-        time.sleep(0.1)
+        time.sleep(0.1) """
 
-""" @socketio.on('start_process')
+@socketio.on('start_process')
 def start_process(data):
     global user_input
     global enter_input
@@ -164,13 +164,13 @@ def start_process(data):
             user_input = None
         if enter_input is True:
             print("Sending ENTER to stdin:")
-            result.stdin.write(b'\n')
+            result.stdin.write(keyboard.press_and_release('enter'))
             result.stdin.flush()
             enter_input = False  
         if result.poll() is not None:
             result.stdin.close()
             break
-        time.sleep(0.1) """
+        time.sleep(0.1)
 
 @socketio.on('user_input')
 def set_user_input(input):
