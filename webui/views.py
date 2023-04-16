@@ -127,7 +127,7 @@ def start_process(data):
             user_input = None
         if enter_input is True:
             print("Sending ENTER to stdin:")
-            result.stdin.write(b'\r\n')
+            result.stdin.write(b'')
             result.stdin.flush()
             enter_input = False  
         if result.poll() is not None:
