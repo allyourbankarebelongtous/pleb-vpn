@@ -137,23 +137,27 @@ def start_process(data):
         session.pop('user_input')
 
 def get_user_input(result):
-    # Map event names to actions
-    event_actions = {
-        'user_input': lambda data: result.stdin.write((data + '\n').encode()),
-        'keypress': lambda data: result.stdin.write(data.encode())
-    }
-
     while True:
-        # Wait for event from SocketIO
-        event, data = None, None
-        for e in socketio._queue:
-            event, data = e['args']
-            if event in event_actions:
-                break
+        # Check if there are any events in the queue
+        if not socketio.queue:
+            # Sleep to avoid blocking the event loop
+            socketio.sleep(0.1)
+            continue
 
-        # Execute corresponding action for event
-        if event and event in event_actions:
-            event_actions[event](data)
+        # Process the next event in the queue
+        event, data = socketio.queue.pop(0)
+
+        # Handle user input
+        if event == 'user_input':
+            user_input = data
+            result.stdin.write(user_input.encode() + b'\n')
+            result.stdin.flush()
+
+        # Handle key press
+        elif event == 'keypress':
+            key = data
+            result.stdin.write(key.encode())
+            result.stdin.flush()
 
 """ @socketio.on('start_process')
 def start_process(data):
