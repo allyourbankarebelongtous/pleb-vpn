@@ -135,7 +135,7 @@ def start_process(data):
             break """
 
 @socketio.on('start_process')
-def start_process(data):
+async def start_process(data):
     cmd_str = ["./" + data]
     result = subprocess.Popen(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE, shell=True)
 
@@ -162,8 +162,8 @@ def start_process(data):
             if result.poll() is not None:
                 result.stdin.close()
                 break
-    
-    asyncio.create_task(handle_output()) # run coroutine in the background
+
+    await asyncio.ensure_future(handle_output())
 
 @socketio.on('user_input')
 def set_user_input(input):
