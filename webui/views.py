@@ -4,7 +4,7 @@ from werkzeug.utils import secure_filename
 from socket_io import socketio
 from .models import User
 from . import db
-import json, os, subprocess, keyboard, asyncio
+import json, os, subprocess, keyboard
 
 views = Blueprint('views', __name__)
 
@@ -108,23 +108,24 @@ def lnd_Hybrid():
 
     return render_template('lnd-hybrid.html', user=current_user)
 
-""" @socketio.on('start_process')
+@socketio.on('start_process')
 def start_process(data):
     cmd_str = ["./" + data]
     result = subprocess.Popen(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE, shell=True)
-
     while True:
         output = result.stdout.readline().decode()
         if output:
             print(output.strip())
             socketio.emit('output', output.strip())
         user_input = get_user_input()
+        print("got user_input: ", user_input)
         if user_input is not None:
             print("Sending to stdin: ", user_input)
             result.stdin.write(user_input.encode() + b'\n')
             result.stdin.flush()
             user_input = None
         enter_input = get_enter_input()
+        print("got enter_input: !ENTER!", enter_input)
         if enter_input is True:
             print("Sending ENTER to stdin:")
             result.stdin.write('\n'.encode())
@@ -132,38 +133,7 @@ def start_process(data):
             enter_input = False  
         if result.poll() is not None:
             result.stdin.close()
-            break """
-
-@socketio.on('start_process')
-async def start_process(data):
-    cmd_str = ["./" + data]
-    result = subprocess.Popen(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE, shell=True)
-
-    async def handle_output():
-        while True:
-            output = result.stdout.readline().decode()
-            if output:
-                print(output.strip())
-                socketio.emit('output', output.strip())
-            user_input = get_user_input()
-            print("got user_input: ", user_input)
-            if user_input is not None:
-                print("Sending to stdin: ", user_input)
-                result.stdin.write(user_input.encode() + b'\n')
-                result.stdin.flush()
-                user_input = None
-            enter_input = get_enter_input()
-            print("got enter_input: !ENTER!", enter_input)
-            if enter_input is True:
-                print("Sending ENTER to stdin:")
-                result.stdin.write('\n'.encode())
-                result.stdin.flush()
-                enter_input = False  
-            if result.poll() is not None:
-                result.stdin.close()
-                break
-
-    await asyncio.ensure_future(handle_output())
+            break
 
 @socketio.on('user_input')
 def set_user_input(input):
