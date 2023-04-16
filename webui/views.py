@@ -197,12 +197,12 @@ def start_process(data):
                     print(output.strip())
                     socketio.emit('output', output.strip())
             if user_input is not None:
-                print("Sending to stdin: ", user_input)
+                print("Sending to master end of pseudo-terminal: ", user_input)
                 os.write(master, user_input.encode() + b'\n')
                 user_input = None
             if enter_input is True:
-                print("Sending ENTER to stdin:")
-                os.write(master, b'\r')
+                print("Sending ENTER to slave end of pseudo-terminal:")
+                os.write(slave, b'\r')
                 enter_input = False
             if os.waitpid(result, os.WNOHANG)[0] != 0:
                 os.close(master)
