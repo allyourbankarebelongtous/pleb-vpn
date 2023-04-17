@@ -26,67 +26,68 @@
 <br />
 
 <div class="container container-fluid">
-  <div class="col">
-    <div class="row">
-      <div class="col">
-        <h2 align="center">VPN Status</h2>
+  <div class="row">
+    <div class="col">
+      <div class="row">
+        <div class="col">
+          <h2 align="center">VPN Status</h2>
+        </div>
       </div>
-    </div>
 
-    {% if plebVPN_status['message'] != null %}
-    <div class="row">
-      <div class="col" style="border-top: 1px solid lightgrey">
-        <h7 align="center">{{ plebVPN_status['message'] }}</h7>
+      {% if plebVPN_status['message'] != null %}
+      <div class="row">
+        <div class="col" style="border-top: 1px solid lightgrey">
+          <h7 align="center">{{ plebVPN_status['message'] }}</h7>
+        </div>
       </div>
-    </div>
-    {% endif %}
+      {% endif %}
 
-    <div class="row">
-      <div class="col" style="border-top: 1px solid lightgrey">
-        <table class="table">
-          <thead>
-            <tr>
-              <th scope="col">Setting</th>
-              <th scope="col">Value</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <th scope="row">Pleb-VPN Status</th>
-              <td>{{ setting['plebVPN'] }}</td>
-            </tr>
-            <tr>
-              <th scope="row">Pleb-VPN Operating</th>
-              <td>{{ plebVPN_status['vpn_operating'] }}</td>
-            </tr>
-            <tr>
-              <th scope="row">Current IP</th>
-              <td>{{ plebVPN_status['current_ip'] }}</td>
-            </tr>
-            {% if setting['plebVPN'] == "on" %}
-            <tr>
-              <th scope="row">Pleb-VPN IP</th>
-              <td>{{ setting['vpnIP'] }}</td>
-            </tr>
-            <tr>
-              <th scope="row">Pleb-VPN Port for VPS</th>
-              <td>{{ setting['vpnPort'] }}</td>
-            </tr>
-            {% endif %}
-            <tr>
-              <th scope="row">VPN config file exists</th>
-              <td>{{ plebVPN_status['config_exists'] }}</td>
-            </tr>
-            <tr>
-              <th scope="row">Firewall Config OK</th>
-              <td>{{ plebVPN_status['firewall_configured'] }}</td>
-            </tr>
-          </tbody>
-        </table>
+      <div class="row">
+        <div class="col" style="border-top: 1px solid lightgrey">
+          <table class="table">
+            <thead>
+              <tr>
+                <th scope="col">Setting</th>
+                <th scope="col">Value</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <th scope="row">Pleb-VPN Status</th>
+                <td>{{ setting['plebVPN'] }}</td>
+              </tr>
+              <tr>
+                <th scope="row">Pleb-VPN Operating</th>
+                <td>{{ plebVPN_status['vpn_operating'] }}</td>
+              </tr>
+              <tr>
+                <th scope="row">Current IP</th>
+                <td>{{ plebVPN_status['current_ip'] }}</td>
+              </tr>
+              {% if setting['plebVPN'] == "on" %}
+              <tr>
+                <th scope="row">Pleb-VPN IP</th>
+                <td>{{ setting['vpnIP'] }}</td>
+              </tr>
+              <tr>
+                <th scope="row">Pleb-VPN Port for VPS</th>
+                <td>{{ setting['vpnPort'] }}</td>
+              </tr>
+              {% endif %}
+              <tr>
+                <th scope="row">VPN config file exists</th>
+                <td>{{ plebVPN_status['config_exists'] }}</td>
+              </tr>
+              <tr>
+                <th scope="row">Firewall Config OK</th>
+                <td>{{ plebVPN_status['firewall_configured'] }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
-    </div>
 
-    <!--   <div class="row">
+      <!--   <div class="row">
     <div class="col" style="border-top: 1px solid lightgrey">
       <p>Pleb-VPN Status</p>
     </div>
@@ -166,39 +167,40 @@
     </div>
   </div> -->
 
-    <div class="row">
-      <div class="col text-center">
-        <button
-          type="button"
-          class="btn btn-success"
-          onClick="refreshplebVPNdata({{ current_user.id }})"
-        >
-          Refresh Data
-        </button>
+      <div class="row">
+        <div class="col text-center">
+          <button
+            type="button"
+            class="btn btn-success"
+            onClick="refreshplebVPNdata({{ current_user.id }})"
+          >
+            Refresh Data
+          </button>
+        </div>
       </div>
     </div>
-  </div>
-  <div class="col text-center">
-    <div class="row">
-      <button id="update-scripts" type="button" class="btn btn-success">
-        Update Pleb-VPN
-      </button>
+    <div class="col text-center">
+      <div class="row">
+        <button id="update-scripts" type="button" class="btn btn-success">
+          Update Pleb-VPN
+        </button>
+      </div>
+      <div class="row">
+        <div id="output"></div>
+      </div>
+      <div class="row">
+        <button id="enter-button" type="button" class="btn btn-primary">
+          Enter
+        </button>
+      </div>
+      {% if update_available == True %}
+      <div class="row">
+        <button id="reboot-button" type="button" class="btn btn-primary">
+          Enter
+        </button>
+      </div>
+      {% endif %}
     </div>
-    <div class="row">
-      <div id="output"></div>
-    </div>
-    <div class="row">
-      <button id="enter-button" type="button" class="btn btn-primary">
-        Enter
-      </button>
-    </div>
-    {% if update_available == True %}
-    <div class="row">
-      <button id="reboot-button" type="button" class="btn btn-primary">
-        Enter
-      </button>
-    </div>
-    {% endif %}
   </div>
 </div>
 <script>
