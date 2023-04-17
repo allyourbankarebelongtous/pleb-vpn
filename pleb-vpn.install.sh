@@ -227,6 +227,7 @@ update() {
   echo "Update success!" 
   echo "Press ENTER to continue"
   read key </dev/tty
+  echo "exiting script with exit code 0"
   exit 0
 }
 
