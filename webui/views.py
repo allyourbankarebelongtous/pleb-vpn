@@ -302,8 +302,10 @@ def start_process(data):
     # Parse the output to extract the $? value
     lines = output.strip().split("\n")
     last_line = lines[-1] if lines else ""
+    print(last_line)
     if last_line.startswith("exit_code="):
         exit_code = int(last_line.split("=")[-1])
+        print(exit_code)
     else:
         exit_code = 42069
     if exit_code == 0:
@@ -359,8 +361,10 @@ def update_scripts():
     # Parse the output to extract the $? value
     lines = output.strip().split("\n")
     last_line = lines[-1] if lines else ""
+    print(last_line)
     if last_line.startswith("exit_code="):
         exit_code = int(last_line.split("=")[-1])
+        print(exit_code)
     else:
         exit_code = 42069
     if exit_code == 0:
