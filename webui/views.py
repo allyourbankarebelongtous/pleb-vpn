@@ -295,13 +295,20 @@ def start_process(data):
     # Wait for the command to complete and capture the output
     child.expect(pexpect.EOF)
     output = child.before.decode()
+    # Send a command to the shell to print the exit code
+    child.sendline('echo "exit_code=$?"')
+    child.expect(['\r\n', pexpect.EOF, pexpect.TIMEOUT], timeout=0.1)
+    output += child.before.decode()
     # Parse the output to extract the $? value
     lines = output.strip().split("\n")
     last_line = lines[-1] if lines else ""
-    exit_code = int(last_line.strip().split("=")[-1]) if last_line else 42069
+    if last_line.startswith("exit_code="):
+        exit_code = int(last_line.split("=")[-1])
+    else:
+        exit_code = 42069
     if exit_code == 0:
         flash('Script exited successfully!', category='success')
-    elif last_line == 42069:
+    elif exit_code == 42069:
         flash('Script exited.', category='info')
     else:
         flash('Script exited with an error.', category='error')
@@ -345,10 +352,17 @@ def update_scripts():
     # Wait for the command to complete and capture the output
     child.expect(pexpect.EOF)
     output = child.before.decode()
+    # Send a command to the shell to print the exit code
+    child.sendline('echo "exit_code=$?"')
+    child.expect(['\r\n', pexpect.EOF, pexpect.TIMEOUT], timeout=0.1)
+    output += child.before.decode()
     # Parse the output to extract the $? value
     lines = output.strip().split("\n")
     last_line = lines[-1] if lines else ""
-    exit_code = int(last_line.strip().split("=")[-1]) if last_line else 42069
+    if last_line.startswith("exit_code="):
+        exit_code = int(last_line.split("=")[-1])
+    else:
+        exit_code = 42069
     if exit_code == 0:
         flash('Pleb-VPN update successful! Click restart to restart Pleb-VPN', category='success')
         update_available = True
