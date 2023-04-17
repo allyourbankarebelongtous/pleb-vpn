@@ -317,7 +317,7 @@ def update_scripts():
     global enter_input
     show_enter_key = True
     # update pleb-vpn (not for production)
-    cmd_str = ["sudo", "/mnt/hdd/mynode/pleb-vpn/pleb-vpn.install.sh", "update"]
+    cmd_str = ["sudo /mnt/hdd/mynode/pleb-vpn/pleb-vpn.install.sh update"]
     child = pexpect.spawn('bash', cmd_str)
     try:
         child.expect(['\r\n', pexpect.EOF, pexpect.TIMEOUT], timeout=0.1)
