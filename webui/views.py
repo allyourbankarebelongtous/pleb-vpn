@@ -294,12 +294,18 @@ def start_process(data):
         if child.eof():
             break
     # Wait for the command to complete and capture the output
-    child.expect([pexpect.EOF, pexpect.TIMEOUT], timeout=0.1)
+    try:
+        child.expect(['\r\n', pexpect.EOF, pexpect.TIMEOUT], timeout=0.1)
+    except pexpect.TIMEOUT:
+        pass
     output = child.before.decode('utf-8')
     # Send a command to the shell to print the exit code
-    child.sendline('echo "exit_code=$?"')
+    child.sendline('echo "exit_code=$?";')
     # Wait for the command to complete and capture the output
-    child.expect([pexpect.EOF, pexpect.TIMEOUT], timeout=0.1)
+    try:
+        child.expect(['\r\n', pexpect.EOF, pexpect.TIMEOUT], timeout=0.1)
+    except pexpect.TIMEOUT:
+        pass
     output += child.before.decode('utf-8')
     # Parse the output to extract the $? value
     lines = output.strip().split("\n")
