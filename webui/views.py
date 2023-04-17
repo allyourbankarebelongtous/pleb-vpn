@@ -293,24 +293,30 @@ def start_process(data):
             enter_input = False
         if child.eof():
             break
-    # Wait for the command to complete and capture the output
-    try:
-        child.expect(['\r\n', pexpect.EOF, pexpect.TIMEOUT], timeout=0.1)
-    except pexpect.TIMEOUT:
-        pass
-    output = child.before.decode('utf-8')
-    # Send a command to the shell to print the exit code
-    child.sendline('echo "exit_code=$?";')
-    # Wait for the command to complete and capture the output
-    try:
-        child.expect(['\r\n', pexpect.EOF, pexpect.TIMEOUT], timeout=0.1)
-    except pexpect.TIMEOUT:
-        pass
-    output += child.before.decode('utf-8')
-    # Parse the output to extract the $? value
-    lines = output.strip().split("\n")
-    last_line = lines[0] if lines else ""
-    print(last_line)
+    # # Wait for the command to complete and capture the output
+    # try:
+    #     child.expect(['\r\n', pexpect.EOF, pexpect.TIMEOUT], timeout=0.1)
+    # except pexpect.TIMEOUT:
+    #     pass
+    # output = child.before.decode('utf-8')
+    # # Send a command to the shell to print the exit code
+    # child.sendline('echo "exit_code=$?"')
+    # # Wait for the command to complete and capture the output
+    # try:
+    #     child.expect(['\r\n', pexpect.EOF, pexpect.TIMEOUT], timeout=0.1)
+    # except pexpect.TIMEOUT:
+    #     pass
+    # output += child.before.decode('utf-8')
+    # # Parse the output to extract the $? value
+    # lines = output.strip().split("\n")
+    # last_line = lines[0] if lines else ""
+    # print(last_line)
+    # if last_line.startswith("exit_code="):
+    #     exit_code = int(last_line.split("=")[-1])
+    # else:
+    #     exit_code = int(42069)
+    result = subprocess.Popen('echo "exit_code=$?"', stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+    last_line = result.stdout.readline().decode()
     if last_line.startswith("exit_code="):
         exit_code = int(last_line.split("=")[-1])
     else:
