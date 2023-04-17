@@ -297,7 +297,8 @@ def start_process(data):
     output = child.before.decode()
     # Send a command to the shell to print the exit code
     child.sendline('echo "exit_code=$?"')
-    child.expect(['\r\n', pexpect.EOF, pexpect.TIMEOUT], timeout=0.1)
+    # Wait for the command to complete and capture the output
+    child.expect(pexpect.EOF)
     output += child.before.decode()
     # Parse the output to extract the $? value
     lines = output.strip().split("\n")
@@ -356,7 +357,8 @@ def update_scripts():
     output = child.before.decode()
     # Send a command to the shell to print the exit code
     child.sendline('echo "exit_code=$?"')
-    child.expect(['\r\n', pexpect.EOF, pexpect.TIMEOUT], timeout=0.1)
+    # Wait for the command to complete and capture the output
+    child.expect(pexpect.EOF)
     output += child.before.decode()
     # Parse the output to extract the $? value
     lines = output.strip().split("\n")
