@@ -216,17 +216,22 @@ update() {
     echo "error: git clone failed. Check internet connection and try again."
     sudo rm -rf /mnt/hdd/mynode/pleb-vpn-tmp
     exit 1
-  else
-    sudo cp -p -r /mnt/hdd/mynode/pleb-vpn-tmp/pleb-vpn /mnt/hdd/mynode/
-    # fix permissions
-    sudo chown -R admin:admin /mnt/hdd/mynode/pleb-vpn
-    sudo chmod -R 755 /mnt/hdd/mynode/pleb-vpn
-    cd /mnt/hdd/mynode/pleb-vpn
-    sudo rm -rf /mnt/hdd/mynode/pleb-vpn-tmp
+  # else
+  #   sudo cp -p -r /mnt/hdd/mynode/pleb-vpn-tmp/pleb-vpn /mnt/hdd/mynode/
+  #   # fix permissions
+  #   sudo chown -R admin:admin /mnt/hdd/mynode/pleb-vpn
+  #   sudo chmod -R 755 /mnt/hdd/mynode/pleb-vpn
+  #   cd /mnt/hdd/mynode/pleb-vpn
+  #   sudo rm -rf /mnt/hdd/mynode/pleb-vpn-tmp
   fi
   echo "Update success!" 
   echo "Press ENTER to continue"
   read key </dev/tty
+  exit 0
+}
+
+reboot() {
+  echo "do a manual reboot for now"
   exit 0
 }
 
@@ -423,5 +428,6 @@ case "${1}" in
   update) update ;;
   restore) restore ;;
   uninstall) uninstall ;;
+  reboot) reboot ;;
   *) echo "err=Unknown action: ${1}" ; exit 1 ;;
 esac

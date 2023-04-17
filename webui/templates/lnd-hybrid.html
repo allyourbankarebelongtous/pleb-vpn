@@ -52,7 +52,7 @@ content %}
     $("#start-cmd").val("");
   });
   $("#enter-button").click(function () {
-    socket.emit("enter_input", "\n");
+    socket.emit("enter_input");
   });
 </script>
 {% endblock %}

@@ -14,13 +14,14 @@ conf_file_location = '/mnt/hdd/mynode/pleb-vpn/pleb-vpn.conf'
 plebVPN_status = {}
 user_input = None
 enter_input = False
+update_available = False
 
 @views.route('/', methods=['GET', 'POST'])
 @login_required
 def home():
     if plebVPN_status == {}:
         get_plebVPN_status()
-    return render_template("home.html", user=current_user, setting=get_conf(), plebVPN_status=plebVPN_status)
+    return render_template("home.html", user=current_user, setting=get_conf(), plebVPN_status=plebVPN_status, update_available=update_available)
 
 @views.route('/refresh_plebVPN_data', methods=['POST'])
 @login_required
@@ -271,7 +272,7 @@ def start_process(data):
         try:
             child.expect(['\r\n', pexpect.EOF, pexpect.TIMEOUT], timeout=0.1)
             output1 = child.before.decode('utf-8')
-            if output1 != output:
+            if output1 != output: 
                 output = output1
                 print(output.strip())
                 socketio.emit('output', output.strip()) 
@@ -287,58 +288,64 @@ def start_process(data):
             enter_input = False
         if child.eof():
             break
+    # Wait for the command to complete and capture the output
+    child.expect(pexpect.EOF)
+    output = child.before.decode()
+    # Parse the output to extract the $? value
+    lines = output.strip().split("\n")
+    last_line = lines[-1]
+    exit_code = int(last_line.strip().split("=")[-1])
+    if exit_code == 0:
+        flash('Script exited successfully!', category='success')
+    else:
+        flash('Script exited with an error.', category='error')
 
-@socketio.on('user_input')
-def set_user_input(input):
-    global user_input
-    user_input = input
-    print("set_user_input: ", user_input)
-
-@socketio.on('enter_input')
-def set_enter_input(input):
-    global enter_input
-    enter_input = True
-    print("set_enter_input: !ENTER!", enter_input)
-
-@views.route('/update_scripts', methods=['POST'])
+@socketio.on('update_scripts')
 def update_scripts():
-    # test random scripts (not for production)
-    user = json.loads(request.data)
-    userId = user['userId']
-    user = User.query.get(userId)
-    if user:
-        if user.id == current_user.id:
-            if os.path.exists(os.path.abspath('./pleb-vpn.install.sh')):
-                cmd_str = ["sudo /mnt/hdd/mynode/pleb-vpn/pleb-vpn.install.sh update"]
-                result = subprocess.Popen(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE, shell=True)
-                # Loop through the output of the Bash script in real-time
-                while True:
-                    output = result.stdout.readline().decode()
-                    if output:
-                        print(output.strip())
-                    if result.poll() is not None:
-                        break
-                    # Prompt the user for input while the script is running (will resume after hitting enter)
-                    if "Press ENTER to continue" in output.strip():
-                        pause_key(message = "Press ENTER to continue", key = 'enter')
-                        # Check if the subprocess has finished before writing to its stdin stream  
-                        if result.poll() is None:
-                            result.stdin.write(b'\n')
-                            result.stdin.flush()
-                            # Always close stdin stream
-                            result.stdin.close()
-                # Print the final output of the Bash script
-                output, error = result.communicate()
-                if output:
-                    print(output.decode())
-                    message = output.decode()
-                    flash(message, category='success')
-                if error:
-                    print(error.decode())
-                    message = error.decode()
-                    flash(message, category='error')
-    
-    return jsonify({})
+    global update_available
+    # update pleb-vpn (not for production)
+    cmd_str = ["sudo /mnt/hdd/mynode/pleb-vpn/pleb-vpn.install.sh update"]
+    child = pexpect.spawn('bash', cmd_str)
+    try:
+        child.expect(['\r\n', pexpect.EOF, pexpect.TIMEOUT], timeout=0.1)
+        output = child.before.decode('utf-8')
+        if output:
+            print(output.strip())
+            socketio.emit('output', output.strip()) 
+    except pexpect.TIMEOUT:
+        pass
+    while True:
+        try:
+            child.expect(['\r\n', pexpect.EOF, pexpect.TIMEOUT], timeout=0.1)
+            output1 = child.before.decode('utf-8')
+            if output1 != output: 
+                output = output1
+                print(output.strip())
+                socketio.emit('output', output.strip()) 
+        except pexpect.TIMEOUT:
+            pass
+        if user_input is not None:
+            print("Sending to terminal: ", user_input) 
+            child.sendline(user_input)
+            user_input = None
+        if enter_input is True:
+            print("Sending ENTER to terminal")
+            child.sendline('')
+            enter_input = False
+        if child.eof():
+            break
+    # Wait for the command to complete and capture the output
+    child.expect(pexpect.EOF)
+    output = child.before.decode()
+    # Parse the output to extract the $? value
+    lines = output.strip().split("\n")
+    last_line = lines[-1]
+    exit_code = int(last_line.strip().split("=")[-1])
+    if exit_code == 0:
+        flash('Pleb-VPN update successful! Click restart to restart Pleb-VPN', category='success')
+        update_available = True
+    else:
+        flash('Pleb-VPN update unsuccessful. Check your internet connection and try again.', category='error')
 
 def set_conf(name, value):
     setting = get_conf()
@@ -370,13 +377,18 @@ def get_plebVPN_status():
                 plebVPN_status[name] = str(value).rstrip().strip('\'\'')
     os.remove(os.path.abspath('./pleb-vpn_status.tmp'))
 
+@socketio.on('user_input')
+def set_user_input(input):
+    global user_input
+    user_input = input
+    print("set_user_input: ", user_input)
+
+@socketio.on('enter_input')
+def set_enter_input(input):
+    global enter_input
+    enter_input = True
+    print("set_enter_input: !ENTER!", enter_input)
+
 def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
-
-def pause_key(message, key):
-    flash(message, category='warning')
-    paused = True
-    while paused:
-        if keyboard.read_key() == key:
-            paused = False
