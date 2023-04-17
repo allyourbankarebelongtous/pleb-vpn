@@ -313,6 +313,8 @@ def start_process(data):
 def update_scripts():
     global show_enter_key
     global update_available
+    global user_input
+    global enter_input
     show_enter_key = True
     # update pleb-vpn (not for production)
     cmd_str = ["sudo", "/mnt/hdd/mynode/pleb-vpn/pleb-vpn.install.sh", "update"]
