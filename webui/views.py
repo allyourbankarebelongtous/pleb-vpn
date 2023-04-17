@@ -301,10 +301,12 @@ def start_process(data):
     output = child.before.decode()
     # Parse the output to extract the $? value
     lines = output.strip().split("\n")
-    last_line = lines[-1]
-    exit_code = int(last_line.strip().split("=")[-1])
+    last_line = lines[-1] if lines else ""
+    exit_code = int(last_line.strip().split("=")[-1]) if last_line else 42069
     if exit_code == 0:
         flash('Script exited successfully!', category='success')
+    elif last_line == 42069:
+        flash('Script exited.', category='info')
     else:
         flash('Script exited with an error.', category='error')
     show_enter_key = False
@@ -317,7 +319,7 @@ def update_scripts():
     global enter_input
     show_enter_key = True
     # update pleb-vpn (not for production)
-    cmd_str = ["sudo /mnt/hdd/mynode/pleb-vpn/pleb-vpn.install.sh update"]
+    cmd_str = ["sudo /mnt/hdd/mynode/pleb-vpn/pleb-vpn.install.sh", "update"]
     child = pexpect.spawn('bash', cmd_str)
     try:
         child.expect(['\r\n', pexpect.EOF, pexpect.TIMEOUT], timeout=0.1)
@@ -352,10 +354,13 @@ def update_scripts():
     output = child.before.decode()
     # Parse the output to extract the $? value
     lines = output.strip().split("\n")
-    last_line = lines[-1]
-    exit_code = int(last_line.strip().split("=")[-1])
+    last_line = lines[-1] if lines else ""
+    exit_code = int(last_line.strip().split("=")[-1]) if last_line else 42069
     if exit_code == 0:
         flash('Pleb-VPN update successful! Click restart to restart Pleb-VPN', category='success')
+        update_available = True
+    elif last_line == 42069:
+        flash('Script exited.', category='info')
         update_available = True
     else:
         flash('Pleb-VPN update unsuccessful. Check your internet connection and try again.', category='error')
