@@ -265,7 +265,7 @@ def start_process(data):
     global enter_input
     cmd_str = ["./" + data]
     child = pexpect.spawn('/bin/bash')
-    child.sendline(cmd_str)
+    child.sendline('bash' + cmd_str)
     try:
         child.expect(['\r\n', pexpect.EOF, pexpect.TIMEOUT], timeout=0.1)
         output = child.before.decode('utf-8')
