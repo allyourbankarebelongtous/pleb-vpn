@@ -15,13 +15,19 @@ plebVPN_status = {}
 user_input = None
 enter_input = False
 update_available = False
+show_enter_key = False
 
 @views.route('/', methods=['GET', 'POST'])
 @login_required
 def home():
     if plebVPN_status == {}:
         get_plebVPN_status()
-    return render_template("home.html", user=current_user, setting=get_conf(), plebVPN_status=plebVPN_status, update_available=update_available)
+    return render_template("home.html", 
+                           user=current_user, 
+                           setting=get_conf(), 
+                           plebVPN_status=plebVPN_status, 
+                           update_available=update_available, 
+                           show_enter_key=show_enter_key)
 
 @views.route('/refresh_plebVPN_data', methods=['POST'])
 @login_required
@@ -256,8 +262,10 @@ def start_process(data):
 
 @socketio.on('start_process')
 def start_process(data):
+    global show_enter_key
     global user_input
     global enter_input
+    show_enter_key = True
     cmd_str = ["./" + data]
     child = pexpect.spawn('bash', cmd_str)
     try:
@@ -299,10 +307,13 @@ def start_process(data):
         flash('Script exited successfully!', category='success')
     else:
         flash('Script exited with an error.', category='error')
+    show_enter_key = False
 
 @socketio.on('update_scripts')
 def update_scripts():
+    global show_enter_key
     global update_available
+    show_enter_key = True
     # update pleb-vpn (not for production)
     cmd_str = ["sudo /mnt/hdd/mynode/pleb-vpn/pleb-vpn.install.sh update"]
     child = pexpect.spawn('bash', cmd_str)
@@ -346,6 +357,7 @@ def update_scripts():
         update_available = True
     else:
         flash('Pleb-VPN update unsuccessful. Check your internet connection and try again.', category='error')
+    show_enter_key = False
 
 def set_conf(name, value):
     setting = get_conf()
