@@ -307,7 +307,7 @@ def start_process(data):
     if last_line.startswith("exit_code="):
         exit_code = int(last_line.split("=")[-1])
     else:
-        exit_code = 42069
+        exit_code = int(42069)
     print(exit_code)
     if exit_code == 0:
         flash('Script exited successfully!', category='success')
@@ -372,7 +372,7 @@ def update_scripts():
     if exit_code == 0:
         flash('Pleb-VPN update successful! Click restart to restart Pleb-VPN', category='success')
         update_available = True
-    elif last_line == 42069:
+    elif exit_code == int(42069):
         flash('Script exited.', category='info')
         update_available = True
     else:
