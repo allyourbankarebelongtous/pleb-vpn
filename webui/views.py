@@ -303,7 +303,7 @@ def start_process(data):
     output += child.before.decode('utf-8')
     # Parse the output to extract the $? value
     lines = output.strip().split("\n")
-    last_line = lines[-1] if lines else ""
+    last_line = lines[0] if lines else ""
     print(last_line)
     if last_line.startswith("exit_code="):
         exit_code = int(last_line.split("=")[-1])
@@ -311,10 +311,13 @@ def start_process(data):
         exit_code = int(42069)
     print(exit_code)
     if exit_code == 0:
+        print('flashing message: Script exited successfully!, category=success')
         flash('Script exited successfully!', category='success')
     elif exit_code == 42069:
+        print('flashing message: Script exited., category=info')
         flash('Script exited.', category='info')
     else:
+        print('flashing message: Script exited with an error., category=error')
         flash('Script exited with an error.', category='error')
 
 @socketio.on('update_scripts')
