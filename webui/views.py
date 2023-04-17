@@ -293,12 +293,12 @@ def start_process(data):
         if child.eof():
             break
     # Wait for the command to complete and capture the output
-    child.expect(pexpect.EOF)
+    child.expect([pexpect.EOF, pexpect.TIMEOUT], timeout=0.1)
     output = child.before.decode()
     # Send a command to the shell to print the exit code
     child.sendline('echo "exit_code=$?"')
     # Wait for the command to complete and capture the output
-    child.expect(pexpect.EOF)
+    child.expect([pexpect.EOF, pexpect.TIMEOUT], timeout=0.1)
     output += child.before.decode()
     # Parse the output to extract the $? value
     lines = output.strip().split("\n")
@@ -353,12 +353,12 @@ def update_scripts():
         if child.eof():
             break
     # Wait for the command to complete and capture the output
-    child.expect(pexpect.EOF)
+    child.expect([pexpect.EOF, pexpect.TIMEOUT], timeout=0.1)
     output = child.before.decode()
     # Send a command to the shell to print the exit code
     child.sendline('echo "exit_code=$?"')
     # Wait for the command to complete and capture the output
-    child.expect(pexpect.EOF)
+    child.expect([pexpect.EOF, pexpect.TIMEOUT], timeout=0.1)
     output += child.before.decode()
     # Parse the output to extract the $? value
     lines = output.strip().split("\n")
