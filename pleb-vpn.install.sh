@@ -231,7 +231,13 @@ update() {
 }
 
 reboot() {
-  echo "do a manual reboot for now"
+  # not for production use
+  sudo cp -p -r /mnt/hdd/mynode/pleb-vpn-tmp/pleb-vpn /mnt/hdd/mynode/
+  # fix permissions
+  sudo chown -R admin:admin /mnt/hdd/mynode/pleb-vpn
+  sudo chmod -R 755 /mnt/hdd/mynode/pleb-vpn
+  cd /mnt/hdd/mynode/pleb-vpn
+  sudo rm -rf /mnt/hdd/mynode/pleb-vpn-tmp
   exit 0
 }
 
