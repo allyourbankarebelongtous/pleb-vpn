@@ -294,21 +294,21 @@ def start_process(data):
             break
     # Wait for the command to complete and capture the output
     child.expect([pexpect.EOF, pexpect.TIMEOUT], timeout=0.1)
-    output = child.before.decode()
+    output = child.before.decode('utf-8')
     # Send a command to the shell to print the exit code
     child.sendline('echo "exit_code=$?"')
     # Wait for the command to complete and capture the output
     child.expect([pexpect.EOF, pexpect.TIMEOUT], timeout=0.1)
-    output += child.before.decode()
+    output += child.before.decode('utf-8')
     # Parse the output to extract the $? value
     lines = output.strip().split("\n")
     last_line = lines[-1] if lines else ""
     print(last_line)
     if last_line.startswith("exit_code="):
         exit_code = int(last_line.split("=")[-1])
-        print(exit_code)
     else:
         exit_code = 42069
+    print(exit_code)
     if exit_code == 0:
         flash('Script exited successfully!', category='success')
     elif exit_code == 42069:
@@ -354,21 +354,21 @@ def update_scripts():
             break
     # Wait for the command to complete and capture the output
     child.expect([pexpect.EOF, pexpect.TIMEOUT], timeout=0.1)
-    output = child.before.decode()
+    output = child.before.decode('utf-8')
     # Send a command to the shell to print the exit code
     child.sendline('echo "exit_code=$?"')
     # Wait for the command to complete and capture the output
     child.expect([pexpect.EOF, pexpect.TIMEOUT], timeout=0.1)
-    output += child.before.decode()
+    output += child.before.decode('utf-8')
     # Parse the output to extract the $? value
     lines = output.strip().split("\n")
     last_line = lines[-1] if lines else ""
     print(last_line)
     if last_line.startswith("exit_code="):
         exit_code = int(last_line.split("=")[-1])
-        print(exit_code)
     else:
         exit_code = 42069
+    print(exit_code)
     if exit_code == 0:
         flash('Pleb-VPN update successful! Click restart to restart Pleb-VPN', category='success')
         update_available = True
