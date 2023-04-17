@@ -181,17 +181,36 @@
     </div>
     <div class="col text-center">
       <div class="row">
-        <button id="update-scripts" type="button" class="btn btn-success">
-          Update Pleb-VPN
-        </button>
+        <h2 align="center">Update Pleb-VPN</h2>
+      </div>
+      <div class="row">
+        <div class="col" style="border-top: 1px solid lightgrey">
+          <table class="table">
+            <tbody>
+              <tr>
+                <th scope="row">Current Version</th>
+                <td>{{ setting['version'] }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col text-center">
+          <button id="update-scripts" type="button" class="btn btn-success">
+            Update Pleb-VPN
+          </button>
+        </div>
       </div>
       <div class="row">
         <div id="output"></div>
       </div>
       <div class="row">
-        <button id="enter-button" type="button" class="btn btn-primary">
-          Enter
-        </button>
+        <div class="col text-center">
+          <button id="enter-button" type="button" class="btn btn-primary">
+            Enter
+          </button>
+        </div>
       </div>
       {% if update_available == True %}
       <div class="row">
