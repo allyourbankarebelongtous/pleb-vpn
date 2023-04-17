@@ -19,6 +19,7 @@ update_available = False
 @views.route('/', methods=['GET', 'POST'])
 @login_required
 def home():
+    global plebVPN_status
     if plebVPN_status == {}:
         get_plebVPN_status()
     return render_template("home.html", 
