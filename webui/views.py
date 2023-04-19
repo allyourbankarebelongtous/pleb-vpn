@@ -261,131 +261,22 @@ def start_process(data):
 
 @socketio.on('start_process')
 def start_process(data):
-    global user_input
-    global enter_input
-    cmd_str = str("./" + data)
-    child = pexpect.spawn('/bin/bash')
-    child.sendline(cmd_str)
-    try:
-        child.expect(['\r\n', pexpect.EOF, pexpect.TIMEOUT], timeout=0.1)
-        output = child.before.decode('utf-8')
-        if output:
-            print(output.strip())
-            socketio.emit('output', output.strip()) 
-    except pexpect.TIMEOUT:
-        pass
-    while True:
-        try:
-            child.expect(['\r\n', pexpect.EOF, pexpect.TIMEOUT], timeout=0.1)
-            output1 = child.before.decode('utf-8')
-            if output1 != output: 
-                output = output1
-                print(output.strip())
-                socketio.emit('output', output.strip()) 
-        except pexpect.TIMEOUT:
-            pass
-        if user_input is not None:
-            print("Sending to terminal: ", user_input)
-            child.sendline(user_input)
-            user_input = None
-        if enter_input is True:
-            print("Sending ENTER to terminal")
-            child.sendline('')
-            enter_input = False
-        if child.eof():
-            break
-    # Wait for the command to complete and capture the output
-    try:
-        child.expect(['\r\n', pexpect.EOF, pexpect.TIMEOUT], timeout=0.1)
-    except pexpect.TIMEOUT:
-        pass
-    output = child.before.decode('utf-8')
-    # Send a command to the shell to print the exit code
-    child.sendline('echo "exit_code=$?"')
-    # Wait for the command to complete and capture the output
-    try:
-        child.expect(['\r\n', pexpect.EOF, pexpect.TIMEOUT], timeout=0.1)
-    except pexpect.TIMEOUT:
-        pass
-    output += child.before.decode('utf-8')
-    # Parse the output to extract the $? value
-    lines = output.strip().split("\n")
-    last_line = lines[0] if lines else ""
-    print(last_line)
-    if last_line.startswith("exit_code="):
-        exit_code = int(last_line.split("=")[-1])
-    else:
-        exit_code = int(42069)
-    print(exit_code)
-    child.close()
-    if exit_code == 0:
-        print('flashing message: Script exited successfully!, category=success')
-        flash('Script exited successfully!', category='success')
-    elif exit_code == 42069:
-        print('flashing message: Script exited., category=info')
-        flash('Script exited.', category='info')
-    else:
-        print('flashing message: Script exited with an error., category=error')
-        flash('Script exited with an error.', category='error')
+
+    cmd_str = str(data)
+    exit_code = run_cmd(cmd_str)
+    print('the exit code is: ', exit_code)
 
 @socketio.on('update_scripts')
 def update_scripts():
     global update_available
-    global user_input
-    global enter_input
     # update pleb-vpn (not for production)
     cmd_str = ["/mnt/hdd/mynode/pleb-vpn/pleb-vpn.install.sh", "update"]
-    child = pexpect.spawn('bash', cmd_str)
-    try:
-        child.expect(['\r\n', pexpect.EOF, pexpect.TIMEOUT], timeout=0.1)
-        output = child.before.decode('utf-8')
-        if output:
-            print(output.strip())
-            socketio.emit('output', output.strip()) 
-    except pexpect.TIMEOUT:
-        pass
-    while True:
-        try:
-            child.expect(['\r\n', pexpect.EOF, pexpect.TIMEOUT], timeout=0.1)
-            output1 = child.before.decode('utf-8')
-            if output1 != output: 
-                output = output1
-                print(output.strip())
-                socketio.emit('output', output.strip()) 
-        except pexpect.TIMEOUT:
-            pass
-        if user_input is not None:
-            print("Sending to terminal: ", user_input) 
-            child.sendline(user_input)
-            user_input = None
-        if enter_input is True:
-            print("Sending ENTER to terminal")
-            child.sendline('')
-            enter_input = False
-        if child.eof():
-            break
-    # Wait for the command to complete and capture the output
-    child.expect([pexpect.EOF, pexpect.TIMEOUT], timeout=0.1)
-    output = child.before.decode('utf-8')
-    # Send a command to the shell to print the exit code
-    child.sendline('echo "exit_code=$?"')
-    # Wait for the command to complete and capture the output
-    child.expect([pexpect.EOF, pexpect.TIMEOUT], timeout=0.1)
-    output += child.before.decode('utf-8')
-    # Parse the output to extract the $? value
-    lines = output.strip().split("\n")
-    last_line = lines[-1] if lines else ""
-    print(last_line)
-    if last_line.startswith("exit_code="):
-        exit_code = int(last_line.split("=")[-1])
-    else:
-        exit_code = 42069
-    print(exit_code)
+    exit_code = run_cmd(cmd_str)
     if exit_code == 0:
-        flash('Pleb-VPN update successful! Click restart to restart Pleb-VPN', category='success')
+        flash('Pleb-VPN update successful! Click restart to restart Pleb-VPN webui.', category='success')
         update_available = True
     elif exit_code == int(42069):
-        flash('Script exited.', category='info')
+        flash('Script exited with unknown status. Click restart to restart Pleb-VPN webui.', category='info')
         update_available = True
     else:
         flash('Pleb-VPN update unsuccessful. Check your internet connection and try again.', category='error')
@@ -431,6 +322,77 @@ def set_enter_input():
     global enter_input
     enter_input = True
     print("set_enter_input: !ENTER!", enter_input)
+
+def run_cmd(cmd_str):
+    global user_input
+    global enter_input
+    child = pexpect.spawn('/bin/bash')
+    try:
+        child.expect(['\r\n', pexpect.EOF, pexpect.TIMEOUT], timeout=0.1)
+        output = child.before.decode('utf-8')
+        if output:
+            print('first output: ', output.strip())
+            socketio.emit('output', 'first output: ' + output.strip() + '\n') 
+    except pexpect.TIMEOUT:
+        pass
+    child.sendline(cmd_str)
+    while True:
+        try:
+            child.expect(['\r\n', pexpect.EOF, pexpect.TIMEOUT], timeout=0.1)
+            output1 = child.before.decode('utf-8')
+            if output1 != output: 
+                output = output1
+                print(output.strip())
+                socketio.emit('output', output.strip() + '\n') 
+        except pexpect.TIMEOUT:
+            pass
+        if user_input is not None:
+            print("Sending to terminal: ", user_input)
+            child.sendline(user_input)
+            user_input = None
+        if enter_input is True:
+            print("Sending ENTER to terminal")
+            child.sendline('')
+            enter_input = False
+        if child.eof():
+            break
+    # Wait for the command to complete and capture the output
+    try:
+        child.expect(['\r\n', pexpect.EOF, pexpect.TIMEOUT], timeout=0.1)
+    except pexpect.TIMEOUT:
+        pass
+    output = child.before.decode('utf-8')
+    # Send a command to the shell to print the exit code
+    child.sendline('echo "exit_code=$?"')
+    # Wait for the command to complete and capture the output
+    try:
+        child.expect(['\r\n', pexpect.EOF, pexpect.TIMEOUT], timeout=0.1)
+    except pexpect.TIMEOUT:
+        pass
+    output += child.before.decode('utf-8')
+    # Parse the output to extract the $? value
+    lines = output.strip().split("\n")
+    last_line = lines[0] if lines else ""
+    print('Last line: ', last_line)
+    socketio.emit('Last line: ', last_line + '\n') 
+    if last_line.startswith("exit_code="):
+        exit_code = int(last_line.split("=")[-1])
+    else:
+        exit_code = int(42069)
+    print('Exit code = ', exit_code)
+    socketio.emit('Exit code = ', exit_code + '\n') 
+    child.close()
+    if exit_code == 0:
+        print('flashing message: Script exited successfully!, category=success')
+        flash('Script exited successfully!', category='success')
+    elif exit_code == 42069:
+        print('flashing message: Script exited., category=info')
+        flash('Script exited.', category='info')
+    else:
+        print('flashing message: Script exited with an error., category=error')
+        flash('Script exited with an error.', category='error')
+    
+    return exit_code
 
 def allowed_file(filename):
     return '.' in filename and \
