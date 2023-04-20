@@ -195,7 +195,7 @@ def run_cmd(cmd_str, suppress_output=True):
     try:
         child.expect(['\r\n', pexpect.EOF, pexpect.TIMEOUT], timeout=0.1)
         output = child.before.decode('utf-8')
-        cmd_line = output.strip() + ' '
+        cmd_line = output.strip()
         print('cmd_line: ', cmd_line) # for debug purposes only
         socketio.emit('output', 'cmd_line: ' + cmd_line + '\n') # for debug purposes only
         if output: # for debug purposes only
@@ -259,7 +259,7 @@ def run_cmd(cmd_str, suppress_output=True):
     # Parse the output to extract the $? value
     print('Exit code command result: ', output.strip().replace(cmd_line, '')) # for debug purposes only
     socketio.emit('Exit code command result: ', output.strip().replace(cmd_line, '') + '\n')  # for debug purposes only
-    if output.strip().replace(cmd_line, '').startswith(" exit_code="):
+    if output.strip().replace(cmd_line, '').startswith("exit_code="):
         exit_code = int(output.strip().replace(cmd_line, '').split("=")[-1])
     else:
         exit_code = int(42069)
