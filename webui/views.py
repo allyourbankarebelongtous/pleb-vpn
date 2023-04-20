@@ -263,7 +263,7 @@ def start_process(data):
 def start_process(data):
 
     cmd_str = str(data)
-    exit_code = run_cmd(cmd_str)
+    exit_code = run_cmd(cmd_str, False)
     print('Back on start_process, the exit code received from run_cmd(cmd_str) is: ', exit_code)
     if exit_code == 0:
         print('flashing message: Script exited successfully!, category=success')
@@ -280,7 +280,7 @@ def update_scripts():
     global update_available
     # update pleb-vpn (not for production)
     cmd_str = ["/mnt/hdd/mynode/pleb-vpn/pleb-vpn.install.sh", "update"]
-    exit_code = run_cmd(cmd_str)
+    exit_code = run_cmd(cmd_str, False)
     if exit_code == 0:
         flash('Pleb-VPN update successful! Click restart to restart Pleb-VPN webui.', category='success')
         update_available = True
@@ -332,19 +332,20 @@ def set_enter_input():
     enter_input = True
     print("set_enter_input: !ENTER!", enter_input)
 
-def run_cmd(cmd_str):
+def run_cmd(cmd_str, suppress_output=True):
     global user_input
     global enter_input
+    end_script = False
     child = pexpect.spawn('/bin/bash')
     try:
         child.expect(['\r\n', pexpect.EOF, pexpect.TIMEOUT], timeout=0.1)
         output = child.before.decode('utf-8')
         cmd_line = output.strip()
-        print('cmd_line: ', cmd_line)
-        socketio.emit('output', 'cmd_line: ' + cmd_line + '\n')
-        if output:
-            print('first output: ', output.strip())
-            socketio.emit('output', 'first output: ' + output.strip() + '\n') 
+        print('cmd_line: ', cmd_line) # for debug purposes only
+        socketio.emit('output', 'cmd_line: ' + cmd_line + '\n') # for debug purposes only
+        if output: # for debug purposes only
+            print('first output: ', output.strip()) # for debug purposes only
+            socketio.emit('output', 'first output: ' + output.strip() + '\n')  # for debug purposes only
     except pexpect.TIMEOUT:
         pass
     child.sendline(cmd_str)
@@ -354,8 +355,8 @@ def run_cmd(cmd_str):
         output1 = output1.replace(cmd_line, '')
         if output1 != output: 
             output = output1
-            print(output.strip())
-            socketio.emit('output', output.strip() + '\n') 
+            print(output.strip()) # for debug purposes only
+            socketio.emit('output', output.strip() + '\n')  # for debug purposes only
     except pexpect.TIMEOUT:
         pass
     while True:
@@ -366,16 +367,17 @@ def run_cmd(cmd_str):
                 end_script = True
             if output1 != output: 
                 output = output1
-                print(output.strip().replace(cmd_line, ''))
-                socketio.emit('output', output.strip().replace(cmd_line, '') + '\n') 
+                if suppress_output == False:
+                    print(output.strip().replace(cmd_line, '')) # for debug purposes only
+                    socketio.emit('output', output.strip().replace(cmd_line, '') + '\n') 
         except pexpect.TIMEOUT:
             pass
         if user_input is not None:
-            print("Sending to terminal: ", user_input)
+            print("Sending to terminal: ", user_input) # for debug purposes only
             child.sendline(user_input)
             user_input = None
         if enter_input is True:
-            print("Sending ENTER to terminal")
+            print("Sending ENTER to terminal") # for debug purposes only
             child.sendline('')
             enter_input = False
         if child.eof() or end_script:
@@ -395,14 +397,14 @@ def run_cmd(cmd_str):
         pass
     output = child.before.decode('utf-8')
     # Parse the output to extract the $? value
-    print('Exit code command result: ', output.strip().replace(cmd_line, ''))
-    socketio.emit('Exit code command result: ', output.strip().replace(cmd_line, '') + '\n') 
+    print('Exit code command result: ', output.strip().replace(cmd_line, '')) # for debug purposes only
+    socketio.emit('Exit code command result: ', output.strip().replace(cmd_line, '') + '\n')  # for debug purposes only
     if output.strip().replace(cmd_line, '').startswith("exit_code="):
         exit_code = int(output.strip().replace(cmd_line, '').split("=")[-1])
     else:
         exit_code = int(42069)
-    print('Exit code = ', exit_code)
-    socketio.emit('Exit code = ', exit_code + '\n') 
+    print('Exit code = ', exit_code) # for debug purposes only
+    socketio.emit('Exit code = ', exit_code + '\n')  # for debug purposes only
     child.close()
     
     return exit_code
