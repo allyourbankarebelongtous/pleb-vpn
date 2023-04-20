@@ -37,7 +37,7 @@ content %}
 <script>
   var socket = io.connect("http://" + document.domain + ":" + location.port);
   socket.on("output", function (data) {
-    $("#output").append(data);
+    $("#output").append(data + "<br>");
   });
   $("#input-form").submit(function (event) {
     event.preventDefault();

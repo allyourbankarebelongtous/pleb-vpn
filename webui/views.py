@@ -264,7 +264,16 @@ def start_process(data):
 
     cmd_str = str(data)
     exit_code = run_cmd(cmd_str)
-    print('the exit code is: ', exit_code)
+    print('Back on start_process, the exit code received from run_cmd(cmd_str) is: ', exit_code)
+    if exit_code == 0:
+        print('flashing message: Script exited successfully!, category=success')
+        flash('Script exited successfully!', category='success')
+    elif exit_code == 42069:
+        print('flashing message: Script exited., category=info')
+        flash('Script exited.', category='info')
+    else:
+        print('flashing message: Script exited with an error., category=error')
+        flash('Script exited with an error.', category='error')
 
 @socketio.on('update_scripts')
 def update_scripts():
@@ -330,20 +339,35 @@ def run_cmd(cmd_str):
     try:
         child.expect(['\r\n', pexpect.EOF, pexpect.TIMEOUT], timeout=0.1)
         output = child.before.decode('utf-8')
+        cmd_line = output.strip()
+        print('cmd_line: ', cmd_line)
+        socketio.emit('output', 'cmd_line: ' + cmd_line + '\n')
         if output:
             print('first output: ', output.strip())
             socketio.emit('output', 'first output: ' + output.strip() + '\n') 
     except pexpect.TIMEOUT:
         pass
     child.sendline(cmd_str)
+    try:
+        child.expect(['\r\n', pexpect.EOF, pexpect.TIMEOUT], timeout=0.1)
+        output1 = child.before.decode('utf-8')
+        output1 = output1.replace(cmd_line, '')
+        if output1 != output: 
+            output = output1
+            print(output.strip())
+            socketio.emit('output', output.strip() + '\n') 
+    except pexpect.TIMEOUT:
+        pass
     while True:
         try:
             child.expect(['\r\n', pexpect.EOF, pexpect.TIMEOUT], timeout=0.1)
             output1 = child.before.decode('utf-8')
+            if cmd_line in output1:
+                end_script = True
             if output1 != output: 
                 output = output1
-                print(output.strip())
-                socketio.emit('output', output.strip() + '\n') 
+                print(output.strip().replace(cmd_line, ''))
+                socketio.emit('output', output.strip().replace(cmd_line, '') + '\n') 
         except pexpect.TIMEOUT:
             pass
         if user_input is not None:
@@ -354,14 +378,14 @@ def run_cmd(cmd_str):
             print("Sending ENTER to terminal")
             child.sendline('')
             enter_input = False
-        if child.eof():
+        if child.eof() or end_script:
             break
-    # Wait for the command to complete and capture the output
-    try:
-        child.expect(['\r\n', pexpect.EOF, pexpect.TIMEOUT], timeout=0.1)
-    except pexpect.TIMEOUT:
-        pass
-    output = child.before.decode('utf-8')
+    # # Wait for the command to complete and capture the output
+    # try:
+    #     child.expect(['\r\n', pexpect.EOF, pexpect.TIMEOUT], timeout=0.1)
+    # except pexpect.TIMEOUT:
+    #     pass
+    # output = child.before.decode('utf-8')
     # Send a command to the shell to print the exit code
     child.sendline('echo "exit_code=$?"')
     # Wait for the command to complete and capture the output
@@ -369,28 +393,17 @@ def run_cmd(cmd_str):
         child.expect(['\r\n', pexpect.EOF, pexpect.TIMEOUT], timeout=0.1)
     except pexpect.TIMEOUT:
         pass
-    output += child.before.decode('utf-8')
+    output = child.before.decode('utf-8')
     # Parse the output to extract the $? value
-    lines = output.strip().split("\n")
-    last_line = lines[0] if lines else ""
-    print('Last line: ', last_line)
-    socketio.emit('Last line: ', last_line + '\n') 
-    if last_line.startswith("exit_code="):
-        exit_code = int(last_line.split("=")[-1])
+    print('Exit code command result: ', output.strip().replace(cmd_line, ''))
+    socketio.emit('Exit code command result: ', output.strip().replace(cmd_line, '') + '\n') 
+    if output.strip().replace(cmd_line, '').startswith("exit_code="):
+        exit_code = int(output.strip().replace(cmd_line, '').split("=")[-1])
     else:
         exit_code = int(42069)
     print('Exit code = ', exit_code)
     socketio.emit('Exit code = ', exit_code + '\n') 
     child.close()
-    if exit_code == 0:
-        print('flashing message: Script exited successfully!, category=success')
-        flash('Script exited successfully!', category='success')
-    elif exit_code == 42069:
-        print('flashing message: Script exited., category=info')
-        flash('Script exited.', category='info')
-    else:
-        print('flashing message: Script exited with an error., category=error')
-        flash('Script exited with an error.', category='error')
     
     return exit_code
 

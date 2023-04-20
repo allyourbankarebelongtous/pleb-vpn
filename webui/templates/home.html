@@ -4,8 +4,8 @@
   <div class="row">
     <div class="col">
       <img
-        src="{{ url_for('static', filename='plebVPN_round_logo_600.png') }}"
-        height="300"
+        src="{{ url_for('static', filename='full-logo cutout-orange.png') }}"
+        style="height: 150px"
         alt="PlebNet logo"
         loading="lazy"
       />
@@ -214,7 +214,7 @@
 <script>
   var socket = io.connect("http://" + document.domain + ":" + location.port);
   socket.on("output", function (data) {
-    $("#output").append(data);
+    $("#output").append(data + "<br>");
   });
   $("#update-scripts").click(function () {
     socket.emit("update_scripts");
