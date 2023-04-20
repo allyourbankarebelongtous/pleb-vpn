@@ -5,7 +5,7 @@
     <div class="col">
       <img
         src="{{ url_for('static', filename='full-logo cutout-orange.png') }}"
-        style="height: 150px"
+        style="height: 100px"
         alt="PlebNet logo"
         loading="lazy"
       />
@@ -49,11 +49,11 @@
                 <th scope="row">Pleb-VPN Operating</th>
                 <td>{{ plebVPN_status['vpn_operating'] }}</td>
               </tr>
+              {% if setting['plebVPN'] == "on" %}
               <tr>
                 <th scope="row">Current IP</th>
                 <td>{{ plebVPN_status['current_ip'] }}</td>
               </tr>
-              {% if setting['plebVPN'] == "on" %}
               <tr>
                 <th scope="row">Pleb-VPN IP</th>
                 <td>{{ setting['vpnIP'] }}</td>
@@ -62,100 +62,19 @@
                 <th scope="row">Pleb-VPN Port for VPS</th>
                 <td>{{ setting['vpnPort'] }}</td>
               </tr>
+              <tr>
+                <th scope="row">Firewall Config OK</th>
+                <td>{{ plebVPN_status['firewall_configured'] }}</td>
+              </tr>
               {% endif %}
               <tr>
                 <th scope="row">VPN config file exists</th>
                 <td>{{ plebVPN_status['config_exists'] }}</td>
               </tr>
-              <tr>
-                <th scope="row">Firewall Config OK</th>
-                <td>{{ plebVPN_status['firewall_configured'] }}</td>
-              </tr>
             </tbody>
           </table>
         </div>
       </div>
-
-      <!--   <div class="row">
-    <div class="col" style="border-top: 1px solid lightgrey">
-      <p>Pleb-VPN Status</p>
-    </div>
-    <div
-      class="col-8"
-      style="border-top: 1px solid lightgrey; border-left: 1px solid lightgrey"
-    >
-      <p>{{ setting['plebVPN'] }}</p>
-    </div>
-  </div>
-  <div class="row">
-    <div class="col" style="border-top: 1px solid lightgrey">
-      <p>Pleb-VPN Operating</p>
-    </div>
-    <div
-      class="col-8"
-      style="border-top: 1px solid lightgrey; border-left: 1px solid lightgrey"
-    >
-      <p>{{ plebVPN_status['vpn_operating'] }}</p>
-    </div>
-  </div>
-  <div class="row">
-    <div class="col" style="border-top: 1px solid lightgrey">
-      <p>Current IP</p>
-    </div>
-    <div
-      class="col-8"
-      style="border-top: 1px solid lightgrey; border-left: 1px solid lightgrey"
-    >
-      <p>{{ plebVPN_status['current_ip'] }}</p>
-    </div>
-  </div>
-  {% if setting['plebVPN'] == "on" %}
-  <div class="row">
-    <div class="col" style="border-top: 1px solid lightgrey">
-      <p>Pleb-VPN IP</p>
-    </div>
-    <div
-      class="col-8"
-      style="border-top: 1px solid lightgrey; border-left: 1px solid lightgrey"
-    >
-      <p>{{ setting['vpnIP'] }}</p>
-    </div>
-  </div>
-  <div class="row">
-    <div class="col" style="border-top: 1px solid lightgrey">
-      <p>Pleb-VPN Port for VPS</p>
-    </div>
-    <div
-      class="col-8"
-      style="border-top: 1px solid lightgrey; border-left: 1px solid lightgrey"
-    >
-      <p>{{ setting['vpnPort'] }}</p>
-    </div>
-  </div>
-  {% endif %}
-  <div class="row">
-    <div class="col" style="border-top: 1px solid lightgrey">
-      <p>VPN config file exists</p>
-    </div>
-    <div
-      class="col-8"
-      style="border-top: 1px solid lightgrey; border-left: 1px solid lightgrey"
-    >
-      <p>{{ plebVPN_status['config_exists'] }}</p>
-    </div>
-  </div>
-  <div class="row">
-    <div class="col" style="border-top: 1px solid lightgrey">
-      <p>Firewall config OK</p>
-    </div>
-    <div
-      class="col-8"
-      style="border-top: 1px solid lightgrey; border-left: 1px solid lightgrey"
-    >
-      <p>{{ plebVPN_status['firewall_configured'] }}</p>
-    </div>
-  </div> -->
-
       <div class="row">
         <div class="col text-center">
           <button
