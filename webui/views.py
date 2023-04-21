@@ -136,8 +136,9 @@ def start_process(data):
     else:
         message = 'Script exited with an error.'
         category = 'error'
+
     print('before returning, message = ', message, 'category = ', category) # for debug purposes only
-    return redirect(url_for('views.home', message=message, category=category))
+    socketio.emit('process_complete', {'message': message, 'category': category})
 
 @socketio.on('update_scripts')
 def update_scripts():
@@ -157,7 +158,8 @@ def update_scripts():
         message = 'Pleb-VPN update unsuccessful. Check your internet connection and try again.'
         category = 'error'
 
-    return redirect(url_for('views.lnd_Hybrid', message=message, category=category))
+    print('before returning, message = ', message, 'category = ', category) # for debug purposes only
+    socketio.emit('update_complete', {'message': message, 'category': category})
 
 def set_conf(name, value):
     setting = get_conf()

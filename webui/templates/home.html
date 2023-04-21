@@ -144,5 +144,15 @@
   $("#reboot-button").click(function () {
     socket.emit("start_reboot");
   });
+  socket.on("update_complete", function (data) {
+    var message = data.message;
+    var category = data.category;
+    var url =
+      "/?message=" +
+      encodeURIComponent(message) +
+      "&category=" +
+      encodeURIComponent(category);
+    window.location.href = url;
+  });
 </script>
 {% endblock %}

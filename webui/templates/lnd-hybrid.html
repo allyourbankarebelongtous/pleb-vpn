@@ -54,5 +54,15 @@ content %}
   $("#enter-button").click(function () {
     socket.emit("enter_input");
   });
+  socket.on("process_complete", function (data) {
+    var message = data.message;
+    var category = data.category;
+    var url =
+      "/lnd-hybrid?message=" +
+      encodeURIComponent(message) +
+      "&category=" +
+      encodeURIComponent(category);
+    window.location.href = url;
+  });
 </script>
 {% endblock %}
