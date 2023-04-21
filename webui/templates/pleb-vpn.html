@@ -141,7 +141,8 @@ content %}
     </div>
   </form>
 </div>
-<script>
+<!-- // This is for showing/hinding loading buttons when using SocketIO to communicate. For POST forms, see index.js.
+  <script> 
   var socket = io.connect("http://" + document.domain + ":" + location.port);
   document.addEventListener("DOMContentLoaded", function () {
     // Set the style of the regular button to display by default
@@ -161,5 +162,5 @@ content %}
     document.getElementById("deactivate").style.display = "inline-block";
     document.getElementById("deactivate_loading").style.display = "none";
   });
-</script>
+</script> -->
 {% endif %} {% endblock %}
