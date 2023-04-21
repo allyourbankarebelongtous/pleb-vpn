@@ -136,6 +136,7 @@ def start_process(data):
     else:
         message = 'Script exited with an error.'
         category = 'error'
+    print('before returning, message = ', message, 'category = ', category) # for debug purposes only
     return redirect(url_for('views.home', message=message, category=category))
 
 @socketio.on('update_scripts')
