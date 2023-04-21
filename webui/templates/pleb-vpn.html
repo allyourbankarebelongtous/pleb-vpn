@@ -72,6 +72,7 @@ content %}
         </button>
         <button
           id="activate_loading"
+          style="display: none"
           class="btn btn-primary"
           type="button"
           disabled
@@ -115,7 +116,7 @@ content %}
       </div>
       <div class="col">
         <button
-          id="deactivate"
+          id="deactivate "
           type="button"
           class="btn btn-danger"
           onClick="setplebVPN_off({{ current_user.id }})"
@@ -124,6 +125,7 @@ content %}
         </button>
         <button
           id="deactivate_loading"
+          style="display: none"
           class="btn btn-primary"
           type="button"
           disabled
