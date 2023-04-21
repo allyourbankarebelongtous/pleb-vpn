@@ -18,10 +18,12 @@ update_available = False
 
 @views.route('/', methods=['GET', 'POST'])
 @login_required
-def home(message = None, category = None):
+def home():
     global plebVPN_status
     if plebVPN_status == {}:
         get_plebVPN_status()
+    message = request.args.get('message')
+    category = request.args.get('category')
     if message is not None:
         print('flashing message: ', message) # for debug purposes only
         flash(message, category=category)
@@ -113,7 +115,9 @@ def delete_plebvpn_conf():
 
 @views.route('/lnd-hybrid', methods=['GET'])
 @login_required
-def lnd_Hybrid(message = None, category = None):
+def lnd_Hybrid():
+    message = request.args.get('message')
+    category = request.args.get('category')
 
     if message is not None:
         print('flashing message: ', message) # for debug purposes only
