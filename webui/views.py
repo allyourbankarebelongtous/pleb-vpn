@@ -125,7 +125,7 @@ def lnd_Hybrid(message = None, category = None):
 def start_process(data):
 
     cmd_str = str(data)
-    exit_code = run_cmd(cmd_str, False)
+    exit_code = run_cmd(cmd_str, False, False)
     print('Back on start_process, the exit code received from run_cmd(cmd_str) is: ', exit_code)
     if exit_code == 0:
         message = 'Script exited successfully!'
@@ -202,8 +202,10 @@ def set_enter_input():
 
 @socketio.on('start_reboot')
 def start_reboot():
+    global update_available
     print("starting reboot") # debug purposes only
     cmd_str = ["sudo /mnt/hdd/mynode/pleb-vpn/vpn-install.sh reboot"]
+    update_available = False
     run_cmd(cmd_str)
 
 def run_cmd(cmd_str, suppress_output = True, suppress_input = True):
