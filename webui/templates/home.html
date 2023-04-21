@@ -103,6 +103,7 @@
           </table>
         </div>
       </div>
+      {% if update_available == False %}
       <div class="row">
         <div class="col text-center">
           <button id="update-scripts" type="button" class="btn btn-success">
@@ -120,11 +121,13 @@
           </button>
         </div>
       </div>
-      {% if update_available == True %}
+      {% else %}
       <div class="row">
-        <button id="reboot-button" type="button" class="btn btn-primary">
-          Enter
-        </button>
+        <div class="col text-center">
+          <button id="reboot-button" type="button" class="btn btn-primary">
+            Reboot (needs systemd server to work)
+          </button>
+        </div>
       </div>
       {% endif %}
     </div>

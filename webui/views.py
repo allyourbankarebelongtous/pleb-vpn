@@ -69,6 +69,8 @@ def pleb_VPN():
 @views.route('/set_plebVPN', methods=['POST'])
 def set_plebVPN():
     # turns pleb-vpn connection to vps on or off
+    # start loading button...
+    socketio.emit('activate_started')
     setting = get_conf()
     user = json.loads(request.data)
     userId = user['userId']
@@ -85,6 +87,8 @@ def set_plebVPN():
                     flash('Pleb-VPN disconnected.', category='success')
                 else:
                     flash('An unknown error occured!', category='error')
+                # stop loading button...
+                socketio.emit('process_completed')
             else:
                 cmd_str = ["sudo /mnt/hdd/mynode/pleb-vpn/vpn-install.sh on"]
                 result = subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True)
@@ -95,7 +99,8 @@ def set_plebVPN():
                     flash('Pleb-VPN connected!', category='success')
                 else:
                     flash('An unknown error occured!', category='error')
-    
+                # stop loading button...
+                socketio.emit('process_completed')
     return jsonify({})
 
 @views.route('/delete_plebvpn_conf', methods=['POST'])

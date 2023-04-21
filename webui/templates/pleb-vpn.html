@@ -63,11 +63,25 @@ content %}
       </div>
       <div class="col">
         <button
+          id="activate"
           type="button"
           class="btn btn-success"
           onClick="setplebVPN_on({{ current_user.id }})"
         >
           Activate
+        </button>
+        <button
+          id="activate_loading"
+          class="btn btn-primary"
+          type="button"
+          disabled
+        >
+          <span
+            class="spinner-grow spinner-grow-sm"
+            role="status"
+            aria-hidden="true"
+          ></span>
+          Loading...
         </button>
       </div>
     </div>
@@ -101,14 +115,49 @@ content %}
       </div>
       <div class="col">
         <button
+          id="deactivate"
           type="button"
           class="btn btn-danger"
           onClick="setplebVPN_off({{ current_user.id }})"
         >
           Dectivate
         </button>
+        <button
+          id="deactivate_loading"
+          class="btn btn-primary"
+          type="button"
+          disabled
+        >
+          <span
+            class="spinner-grow spinner-grow-sm"
+            role="status"
+            aria-hidden="true"
+          ></span>
+          Loading...
+        </button>
       </div>
     </div>
   </form>
 </div>
+<script>
+  var socket = io.connect("http://" + document.domain + ":" + location.port);
+  document.addEventListener("DOMContentLoaded", function () {
+    // Set the style of the regular button to display by default
+    document.getElementById("activate").style.display = "inline-block";
+    document.getElementById("deactivate").style.display = "inline-block";
+  });
+  socket.on("process_started", function () {
+    document.getElementById("activate").style.display = "none";
+    document.getElementById("activate_loading").style.display = "inline-block";
+    document.getElementById("deactivate").style.display = "none";
+    document.getElementById("deactivate_loading").style.display =
+      "inline-block";
+  });
+  socket.on("process_completed", function () {
+    document.getElementById("activate").style.display = "inline-block";
+    document.getElementById("activate_loading").style.display = "none";
+    document.getElementById("deactivate").style.display = "inline-block";
+    document.getElementById("deactivate_loading").style.display = "none";
+  });
+</script>
 {% endif %} {% endblock %}
