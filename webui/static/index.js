@@ -14,7 +14,8 @@ function delete_plebvpn_conf(userId) {
   }
 }
 
-function setplebVPN_on(userId) {
+function setplebVPN_on(userId, event) {
+  event.preventDefault(); // Prevent the default form submission behavior
   if (
     confirm_dialog(
       (message =
@@ -39,7 +40,8 @@ function setplebVPN_on(userId) {
   }
 }
 
-function setplebVPN_off(userId) {
+function setplebVPN_off(userId, event) {
+  event.preventDefault(); // Prevent the default form submission behavior
   if (
     confirm_dialog((message = "Are you sure you want to turn off Pleb-VPN?")) ==
     true
