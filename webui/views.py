@@ -148,7 +148,7 @@ def start_process(data):
 def update_scripts():
     global update_available
     # update pleb-vpn (not for production)
-    cmd_str = ["/mnt/hdd/mynode/pleb-vpn/pleb-vpn.install.sh update"]
+    cmd_str = "/mnt/hdd/mynode/pleb-vpn/pleb-vpn.install.sh update"
     exit_code = run_cmd(cmd_str, False, False)
     if exit_code == 0:
         message = 'Pleb-VPN update successful! Click restart to restart Pleb-VPN webui.'
@@ -211,7 +211,7 @@ def set_enter_input():
 def start_reboot():
     global update_available
     print("starting reboot") # debug purposes only
-    cmd_str = ["/mnt/hdd/mynode/pleb-vpn/vpn-install.sh reboot"]
+    cmd_str = "/mnt/hdd/mynode/pleb-vpn/vpn-install.sh reboot"
     update_available = False
     run_cmd(cmd_str)
 
