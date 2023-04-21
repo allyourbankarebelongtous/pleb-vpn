@@ -18,10 +18,13 @@ update_available = False
 
 @views.route('/', methods=['GET', 'POST'])
 @login_required
-def home():
+def home(message = None, category = None):
     global plebVPN_status
     if plebVPN_status == {}:
         get_plebVPN_status()
+    if message is not None:
+        print('flashing message: ', message) # for debug purposes only
+        flash(message, category=category)
     return render_template("home.html", 
                            user=current_user, 
                            setting=get_conf(), 
@@ -108,9 +111,13 @@ def delete_plebvpn_conf():
     
     return jsonify({})
 
-@views.route('/lnd-hybrid', methods=['GET', 'POST'])
+@views.route('/lnd-hybrid', methods=['GET'])
 @login_required
-def lnd_Hybrid():
+def lnd_Hybrid(message = None, category = None):
+
+    if message is not None:
+        print('flashing message: ', message) # for debug purposes only
+        flash(message, category=category)
 
     return render_template('lnd-hybrid.html', user=current_user)
 
@@ -121,29 +128,35 @@ def start_process(data):
     exit_code = run_cmd(cmd_str, False)
     print('Back on start_process, the exit code received from run_cmd(cmd_str) is: ', exit_code)
     if exit_code == 0:
-        print('flashing message: Script exited successfully!, category=success')
-        flash('Script exited successfully!', category='success')
+        message = 'Script exited successfully!'
+        category = 'success'
     elif exit_code == 42069:
-        print('flashing message: Script exited., category=info')
-        flash('Script exited.', category='info')
+        message = 'Script exited with unknown status.'
+        category = 'info'
     else:
-        print('flashing message: Script exited with an error., category=error')
-        flash('Script exited with an error.', category='error')
+        message = 'Script exited with an error.'
+        category = 'error'
+    return redirect(url_for('views.home', message=message, category=category))
 
 @socketio.on('update_scripts')
 def update_scripts():
     global update_available
     # update pleb-vpn (not for production)
     cmd_str = ["/mnt/hdd/mynode/pleb-vpn/pleb-vpn.install.sh", "update"]
-    exit_code = run_cmd(cmd_str, False)
+    exit_code = run_cmd(cmd_str, False, False)
     if exit_code == 0:
-        flash('Pleb-VPN update successful! Click restart to restart Pleb-VPN webui.', category='success')
+        message = 'Pleb-VPN update successful! Click restart to restart Pleb-VPN webui.'
+        category = 'success'
         update_available = True
     elif exit_code == int(42069):
-        flash('Script exited with unknown status. Click restart to restart Pleb-VPN webui.', category='info')
+        message = 'Script exited with unknown status. Click restart to restart Pleb-VPN webui.'
+        category = 'info'
         update_available = True
     else:
-        flash('Pleb-VPN update unsuccessful. Check your internet connection and try again.', category='error')
+        message = 'Pleb-VPN update unsuccessful. Check your internet connection and try again.'
+        category = 'error'
+
+    return redirect(url_for('views.lnd_Hybrid', message=message, category=category))
 
 def set_conf(name, value):
     setting = get_conf()
@@ -179,15 +192,21 @@ def get_plebVPN_status():
 def set_user_input(input):
     global user_input
     user_input = input
-    print("set_user_input: ", user_input)
+    print("set_user_input: ", user_input) # debug purposes only
 
 @socketio.on('enter_input')
 def set_enter_input():
     global enter_input
     enter_input = True
-    print("set_enter_input: !ENTER!", enter_input)
+    print("set_enter_input: !ENTER!", enter_input) # debug purposes only
 
-def run_cmd(cmd_str, suppress_output=True):
+@socketio.on('start_reboot')
+def start_reboot():
+    print("starting reboot") # debug purposes only
+    cmd_str = ["sudo /mnt/hdd/mynode/pleb-vpn/vpn-install.sh reboot"]
+    run_cmd(cmd_str)
+
+def run_cmd(cmd_str, suppress_output = True, suppress_input = True):
     global user_input
     global enter_input
     end_script = False
@@ -227,14 +246,15 @@ def run_cmd(cmd_str, suppress_output=True):
                     socketio.emit('output', output.strip().replace(cmd_line, '') + '\n') 
         except pexpect.TIMEOUT:
             pass
-        if user_input is not None:
-            print("Sending to terminal: ", user_input) # for debug purposes only
-            child.sendline(user_input)
-            user_input = None
-        if enter_input is True:
-            print("Sending ENTER to terminal") # for debug purposes only
-            child.sendline('')
-            enter_input = False
+        if not suppress_input:
+            if user_input is not None:
+                print("Sending to terminal: ", user_input) # for debug purposes only
+                child.sendline(user_input)
+                user_input = None
+            if enter_input is True:
+                print("Sending ENTER to terminal") # for debug purposes only
+                child.sendline('')
+                enter_input = False
         if child.eof() or end_script:
             break
     # # Wait for the command to complete and capture the output
