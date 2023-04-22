@@ -10,7 +10,8 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   exit 1
 fi
 
-plebVPNConf="/home/admin/pleb-vpn/pleb-vpn.conf"
+plebVPNConf="/mnt/hdd/mynode/pleb-vpn/pleb-vpn.conf"
+lndConfFile="/mnt/hdd/mynode/lnd/lnd.conf"
 
 function setting() # FILE LINENUMBER NAME VALUE
 {
@@ -58,21 +59,18 @@ status() {
     else
       address1Type="torv3"
     fi
-    whiptail --title "LND Node hybrid status" --msgbox "
-Alias = ${nodeName}
-Hybrid Mode = ${lndHybrid}
-Node ID = ${nodeID}
-${address0Type} address: ${address0}
-${address1Type} address: ${address1}
-" 13 100
-    exit 0
+    echo "Alias='${nodeName}'
+Node_ID='${nodeID}'
+address0='${address0}'
+address1='${address1}'
+address0Type='${address0Type}'
+address1Type='${address1Type}'" | tee /mnt/hdd/mynode/pleb-vpn/lnd_hybrid_status.tmp
+    exit 0 
   else
-    whiptail --title "Core Lightning status" --msgbox "
-Alias = ${nodeName}
-Hybrid Mode = ${lndHybrid}
-Node ID = ${nodeID}
-${address0Type} address: ${address0}
-" 12 100
+    echo "Alias='${nodeName}'
+Node_ID='${nodeID}'
+address0='${address0}'
+address0Type='${address0Type}'" | tee /mnt/hdd/mynode/pleb-vpn/lnd_hybrid_status.tmp
     exit 0
   fi
 }
@@ -80,8 +78,12 @@ ${address0Type} address: ${address0}
 on() {
   # enable hybrid mode 
   source ${plebVPNConf}
-  source /mnt/hdd/raspiblitz.conf
+  lnd_isOn=$(systemctl status lnd | grep Active | cut -d ":" -f2 | cut -d " " -f2)
+  if [ "${lnd_isOn}}" = "active" ]; then
+    lnd="on"
+  fi
   local isRestore="${1}"
+  local newlnPort="${2}"
 
   # check if plebvpn is on
   if ! [ "${plebVPN}" = "on" ]; then
@@ -94,6 +96,11 @@ on() {
     exit 1
   fi 
   # get LND port
+  # check to see if new lnd port passed as argument
+  if [ -z "${newlnPort}" ]; then
+    lnPort="${newlnPort}"
+    setting ${plebVPNConf} "2" "lnPort" "'${lnPort}'"
+  fi
   if [ ! -z "${lnPort}" ]; then
     # skip if restoring
     if [ ! "${isRestore}" = "1" ]; then
@@ -134,18 +141,7 @@ on() {
   if ! [ "${lnPort}" = "9735" ]; then
     sudo ufw allow ${lnPort} comment "LND Port"
   fi
-  # fix lnd.check.sh (also fixes database compact time)
-  sectionStart=$(cat /home/admin/config.scripts/lnd.check.sh | grep -n "\# enforce PublicIP if (if not running Tor)" | cut -d ":" -f1)
-  inc=1
-  while [ $inc -le 6 ]
-  do
-    fileLine=$(expr $sectionStart + $inc)
-	  sudo sed -i "${fileLine}s/^/#/" /home/admin/config.scripts/lnd.check.sh
-	  ((inc++))
-  done
   # edit lnd.conf
-  source /mnt/hdd/raspiblitz.conf
-  source <(/home/admin/config.scripts/network.aliases.sh getvars lnd)
   # Application Options 
   sectionName="Application Options"
   publicIP="${vpnIP}"
@@ -164,10 +160,6 @@ on() {
   echo "# sectionLine(${sectionLine})"
   setting ${lndConfFile} ${insertLine} "externalip" "${publicIP}:${lnPort}"
   setting ${lndConfFile} ${insertLine} "listen" "0.0.0.0:${lnPort}"
-  # set tlsextraip if wireguard="on"
-  if [ "${wireguard}" = "on" ]; then 
-    setting ${lndConfFile} ${insertLine} "tlsextraip" "${wgIP}"
-  fi
 
   # tor
   sectionName="tor"
@@ -185,32 +177,10 @@ on() {
   fi
   setting ${lndConfFile} ${insertLine} "tor.streamisolation" "false"
   setting ${lndConfFile} ${insertLine} "tor.skip-proxy-for-clearnet-targets" "true"
-  # edit raspiblitz.conf
-  raspiConfFile="/mnt/hdd/raspiblitz.conf"
-  lndAddress="${vpnIP}"
-  publicIP="${vpnIP}" 
-  echo "# RASPIBLITZ CONFIG FILE config ..."
-  sectionLine="1"
-  echo "# sectionLine(${sectionLine})"
-  insertLine=$(expr $sectionLine + 1)
-  echo "# insertLine(${insertLine})"
-  fileLines=$(wc -l ${raspiConfFile} | cut -d " " -f1)
-  echo "# fileLines(${fileLines})"
-  if [ ${fileLines} -lt ${insertLine} ]; then
-    echo "# adding new line for inserts"
-    echo "
-  " | sudo tee -a ${raspiConfFile}
-  fi
-  setting ${raspiConfFile} ${insertLine} "lndPort" "'${lnPort}'"
-  setting ${raspiConfFile} ${insertLine} "lndAddress" "'${lndAddress}'"
-  setting ${raspiConfFile} ${insertLine} "publicIP" "'${publicIP}'"
-  # restart lnd (skip this step on restore)
-  local norestart="${1}"
-  if ! [ "${norestart}" = "1" ]; then
-    sudo systemctl restart lnd 
-    # restart nginx
-    sudo systemctl restart nginx
-  fi
+
+  # restart lnd
+  sudo systemctl restart lnd 
+
   # set lnd-hybrid on in pleb-vpn.conf
   setting ${plebVPNConf} "2" "lndHybrid" "on"
   exit 0
@@ -219,33 +189,32 @@ on() {
 off() {
   # disable hybrid mode 
   source ${plebVPNConf}
-  if [ -z "${wgLAN}" ]; then
-    wireguard=0
-  else
-    wireguard=1
-  fi
+
   # configure firewall
   if ! [ "${lnPort}" = "9735" ]; then
     sudo ufw delete allow ${lnPort}
   fi
-  # fix lnd.check.sh (also fixes database compact time)
-  sectionStart=$(cat /home/admin/config.scripts/lnd.check.sh | grep -n "\  # enforce PublicIP if (if not running Tor)" | cut -d ":" -f1)
-  inc=1
-  while [ $inc -le 6 ]
-  do
-    fileLine=$(expr $sectionStart + $inc)
-	  sudo sed -i "${fileLine}s/#//" /home/admin/config.scripts/lnd.check.sh
-	  ((inc++))
-  done
+
   # edit lnd.conf
-  source /mnt/hdd/raspiblitz.conf
-  source <(/home/admin/config.scripts/network.aliases.sh getvars lnd)
+
   # Application Options 
   sudo sed -i '/^externalip=*/d' ${lndConfFile}
-  if [ $wireguard -eq 1 ]; then 
-    sudo sed -i '/^tlsextraip=*/d' ${lndConfFile}
+  sudo sed -i '/^tor.skip-proxy-for-clearnet-targets=*/d' ${lndConfFile}
+  sectionName="Application Options"
+  echo "# [${sectionName}] config ..."
+  sectionLine=$(cat ${lndConfFile} | grep -n "^\[${sectionName}\]" | cut -d ":" -f1)
+  echo "# sectionLine(${sectionLine})"
+  insertLine=$(expr $sectionLine + 1)
+  echo "# insertLine(${insertLine})"
+  fileLines=$(wc -l ${lndConfFile} | cut -d " " -f1)
+  echo "# fileLines(${fileLines})"
+  if [ ${fileLines} -lt ${insertLine} ]; then
+    echo "# adding new line for inserts"
+    echo "
+  " | sudo tee -a ${lndConfFile}
   fi
-  sudo sed -i '/^listen=*/d' ${lndConfFile}
+  echo "# sectionLine(${sectionLine})"
+  setting ${lndConfFile} ${insertLine} "listen" "localhost"
   # tor
   sectionName="tor"
   echo "# [${sectionName}] config ..."
@@ -260,12 +229,8 @@ off() {
     echo "
   " | sudo tee -a ${lndConfFile}
   fi
-  setting ${lndConfFile} ${insertLine} "tor.skip-proxy-for-clearnet-targets" "false"
-  # edit raspiblitz.conf
-  raspiConfFile="/mnt/hdd/raspiblitz.conf"
-  sudo sed -i '/^lndPort=*/d' ${raspiConfFile}
-  sudo sed -i '/^lndAddress=*/d' ${raspiConfFile}
-  sudo sed -i '/^publicIP=*/d' ${raspiConfFile}
+  setting ${lndConfFile} ${insertLine} "tor.streamisolation" "true"
+
   # restart lnd
   sudo systemctl restart lnd 
   # set lnd-hybrid off in pleb-vpn.conf
@@ -275,7 +240,7 @@ off() {
 
 case "${1}" in
   status) status ;;
-  on) on "${2}" ;;
+  on) on "${2}" "${3}";;
   off) off ;;
   *) echo "err=Unknown action: ${1}" ; exit 1 ;;
 esac
