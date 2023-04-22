@@ -38,7 +38,7 @@ function setplebVPN_on(userId) {
   }
 }
 
-function setplebVPN_off(userId, event) {
+function setplebVPN_off(userId) {
   if (
     confirm_dialog((message = "Are you sure you want to turn off Pleb-VPN?")) ==
     true

@@ -65,14 +65,14 @@ content %}
         <button
           id="activate"
           type="button"
-          class="btn btn-success d-block"
+          class="btn btn-success"
           onClick="setplebVPN_on({{ current_user.id }})"
         >
           Activate
         </button>
         <button
           id="activate_loading"
-          class="btn btn-success .d-none"
+          class="d-none btn btn-success"
           type="button"
           disabled
         >
@@ -117,7 +117,7 @@ content %}
         <button
           id="deactivate "
           type="button"
-          class="btn btn-danger d-block"
+          class="btn btn-danger"
           onClick="setplebVPN_off({{ current_user.id }})"
         >
           Dectivate
@@ -125,7 +125,7 @@ content %}
         <button
           id="deactivate_loading"
           style="display: none"
-          class="btn btn-danger .d-none"
+          class="d-none btn btn-danger"
           type="button"
           disabled
         >
