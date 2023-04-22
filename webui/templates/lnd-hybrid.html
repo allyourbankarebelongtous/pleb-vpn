@@ -20,19 +20,20 @@
 
     {% if setting['lndHybrid'] != "on" %}
     <div class="container">
+      {% if setting['lnPort'] == '' %}
       <div class="row">
         <div class="col">
           <h5 align="center">Add LND Port for hybrid mode</h5>
         </div>
       </div>
-      {% if setting['lnPort'] == '' %}
       <form method="POST">
         <div class="row">
           <div class="col">
             <p>Missing LND Port for hybrid mode. Enter your Pleb-VPN assigned LND port.</p>
             </div>
+            </div>
             <div class="row">
-                <div class="col">
+            <div class="col">
             <div class="form-group">
                 <label for="lnPort">LND Port</label>
                 <input
@@ -43,8 +44,6 @@
                   placeholder="Enter port"
                 />
             </div>
-        </div>
-          </div>
           <div class="col">
             <button
               type="button"
@@ -55,11 +54,8 @@
             </button>
           </div>
         </div>
-        </div>
       </form>
-    </div>
     {% else %}
-    <div class="container">
       <div class="row">
         <div class="col">
           <h5 align="center">LND Port detected</h5>
@@ -127,10 +123,11 @@
             </button>
           </div>
         </div>
-        </div>
     </form>
-    </div>
-    {% endif %} {% else %}
+    
+    {% endif %} 
+</div>
+{% else %}
     <div class="container">
       <div class="row">
         <div class="col">
