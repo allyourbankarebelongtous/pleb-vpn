@@ -21,18 +21,42 @@ function setplebVPN_on(userId) {
         "Use currently uploaded plebvpn.conf file and turn on Pleb-VPN?")
     ) == true
   ) {
-    document.getElementById("activate").classList.add("d-none");
-    document.getElementById("activate_loading").classList.remove("d-none");
-    document.getElementById("deactivate").classList.add("d-none");
-    document.getElementById("deactivate_loading").classList.remove("d-none");
+    var activateBtn = document.getElementById("activate");
+    if (activateBtn !== null) {
+      activateBtn.classList.add("d-none");
+    }
+    var activateLoading = document.getElementById("activate_loading");
+    if (activateLoading !== null) {
+      activateLoading.classList.remove("d-none");
+    }
+    var deactivateBtn = document.getElementById("deactivate");
+    if (deactivateBtn !== null) {
+      deactivateBtn.classList.add("d-none");
+    }
+    var deactivateLoading = document.getElementById("deactivate_loading");
+    if (deactivateLoading !== null) {
+      deactivateLoading.classList.remove("d-none");
+    }
     fetch("/set_plebVPN", {
       method: "POST",
       body: JSON.stringify({ userId: userId }),
     }).then((_res) => {
-      document.getElementById("activate").classList.remove("d-none");
-      document.getElementById("activate_loading").classList.add("d-none");
-      document.getElementById("deactivate").classList.remove("d-none");
-      document.getElementById("deactivate_loading").classList.add("d-none");
+      var activateBtn = document.getElementById("activate");
+      if (activateBtn !== null) {
+        activateBtn.classList.remove("d-none");
+      }
+      var activateLoading = document.getElementById("activate_loading");
+      if (activateLoading !== null) {
+        activateLoading.classList.add("d-none");
+      }
+      var deactivateBtn = document.getElementById("deactivate");
+      if (deactivateBtn !== null) {
+        deactivateBtn.classList.remove("d-none");
+      }
+      var deactivateLoading = document.getElementById("deactivate_loading");
+      if (deactivateLoading !== null) {
+        deactivateLoading.classList.add("d-none");
+      }
       window.location.href = "/pleb-VPN";
     });
   }
