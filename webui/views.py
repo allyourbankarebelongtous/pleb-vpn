@@ -122,7 +122,7 @@ def delete_plebvpn_conf():
 @login_required
 def lnd_hybrid():
 
-    return render_template('lnd-hybrid.html', user=current_user)
+    return render_template('lnd-hybrid.html', user=current_user, setting=get_conf())
 
 @views.route('/test-scripts', methods=['GET'])
 @login_required
