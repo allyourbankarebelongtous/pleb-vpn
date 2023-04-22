@@ -92,26 +92,28 @@ content %}
         </button>
       </div>
     </div>
-  </form>
-  <form method="POST">
     <div class="row">
       <div class="col">
         <p>LND Port: {{ setting['lnPort'] }}</p>
       </div>
+    </div>
+  </form>
+  <form method="POST">
+    <div class="row">
       <div class="col">
         <p>Change LND Port</p>
       </div>
     </div>
+
     <div class="row">
       <div class="col">
         <div class="form-group">
-          <label for="lnPort">LND Port</label>
           <input
             type="text"
             class="form-control"
             id="lnPort"
             name="lnPort"
-            placeholder="Enter port"
+            placeholder="Enter LND port"
           />
         </div>
       </div>

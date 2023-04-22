@@ -79,8 +79,7 @@ function setplebVPN_off(userId) {
 function setlndHybrid_on(userId) {
   if (
     confirm_dialog(
-      (message =
-        "Use currently uploaded plebvpn.conf file and turn on Pleb-VPN?")
+      (message = "Use the current LND port and enable hybrid mode?")
     ) == true
   ) {
     var activateBtn = document.getElementById("activate");
@@ -110,8 +109,9 @@ function setlndHybrid_on(userId) {
 
 function setlndHybrid_off(userId) {
   if (
-    confirm_dialog((message = "Are you sure you want to turn off Pleb-VPN?")) ==
-    true
+    confirm_dialog(
+      (message = "Are you sure you want to disable hybrid mode?")
+    ) == true
   ) {
     var deactivateBtn = document.getElementById("deactivate");
     if (deactivateBtn !== null) {
