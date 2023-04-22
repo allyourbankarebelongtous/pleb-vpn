@@ -43,10 +43,14 @@ function setplebVPN_off(userId) {
     confirm_dialog((message = "Are you sure you want to turn off Pleb-VPN?")) ==
     true
   ) {
-    document.getElementById("activate").classList.add("d-none");
-    document.getElementById("activate_loading").classList.remove("d-none");
-    document.getElementById("deactivate").classList.add("d-none");
-    document.getElementById("deactivate_loading").classList.remove("d-none");
+    try {
+      document.getElementById("activate").classList.add("d-none");
+      document.getElementById("activate_loading").classList.remove("d-none");
+      document.getElementById("deactivate").classList.add("d-none");
+      document.getElementById("deactivate_loading").classList.remove("d-none");
+    } catch (error) {
+      console.log("Error:", error);
+    }
     fetch("/set_plebVPN", {
       method: "POST",
       body: JSON.stringify({ userId: userId }),
