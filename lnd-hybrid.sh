@@ -32,9 +32,9 @@ function setting() # FILE LINENUMBER NAME VALUE
 
 status() {
   source ${plebVPNConf}
-  nodeName=$(lncli getinfo | jq .alias | sed 's/\"//g')
-  nodeID=$(lncli getinfo | jq .identity_pubkey | sed 's/\"//g')
-  address0=$(lncli getinfo | jq .uris[0] | sed 's/\"//g' | cut -d "@" -f2)
+  nodeName=$(sudo -u bitcoin lncli getinfo | jq .alias | sed 's/\"//g')
+  nodeID=$(sudo -u bitcoin lncli getinfo | jq .identity_pubkey | sed 's/\"//g')
+  address0=$(sudo -u bitcoin lncli getinfo | jq .uris[0] | sed 's/\"//g' | cut -d "@" -f2)
   istor=$(echo "${address0}" | grep -c onion)
   isv6=$(echo "${address0}" | grep -c :)
   if [ $istor -eq 0 ]; then
@@ -47,7 +47,7 @@ status() {
     address0Type="torv3"
   fi
   if [ "${lndHybrid}" = "on" ]; then
-    address1=$(lncli getinfo | jq .uris[1] | sed 's/\"//g' | cut -d "@" -f2)
+    address1=$(sudo -u bitcoin lncli getinfo | jq .uris[1] | sed 's/\"//g' | cut -d "@" -f2)
     istor=$(echo "${address1}" | grep -c onion)
     isv6=$(echo "${address1}" | grep -c :)
     if [ $istor -eq 0 ]; then
@@ -102,15 +102,8 @@ on() {
   if [ ! -z "${lnPort}" ]; then
     # skip if restoring
     if [ ! "${isRestore}" = "1" ]; then
-      whiptail --title "Use Existing Port?" \
-      --yes-button "Use Existing" \
-      --no-button "Enter New Port" \
-      --yesno "There is an existing port from a previous install. Do you want to re-use ${lnPort} or enter a new one?" 10 80
-      if [ $? -eq 1 ]; then
-        keepport="0"
-      else
-        keepport="1"
-      fi
+      echo "error: need a port to enable hybrid mode"
+      exit 1
     else
       keepport="1"
     fi
@@ -118,21 +111,8 @@ on() {
     keepport="0"
   fi
   if [ "${keepport}" = "0" ]; then
-    sudo touch /var/cache/raspiblitz/.tmp
-    sudo chmod 777 /var/cache/raspiblitz/.tmp
-    whiptail --title "LND Clearnet Port" --inputbox "Enter the port that is forwarded to your node from the VPS for hybrid mode. If you don't have one, forward one from your VPS or contact your VPS provider to obtain one. (example: 9740)" 12 80 2>/var/cache/raspiblitz/.tmp
-    lnPort=$(cat /var/cache/raspiblitz/.tmp)
-    # check to make sure port isn't already used by CLN or WireGuard
-    if [ "${lnPort}" = "${CLNPort}" ] || [ "${lnPort}" = "${wgPort}" ]; then
-      whiptail --title "LND Clearnet Port" --inputbox "ERROR: You must not use the same port as a previous service. Enter a different port than ${lnPort}." 12 80 2>/var/cache/raspiblitz/.tmp
-      lnPort=$(cat /var/cache/raspiblitz/.tmp)
-      if [ "${lnPort}" = "${CLNPort}" ] || [ "${lnPort}" = "${wgPort}" ]; then
-        echo "error: port must be different than other services"
-        exit 1
-      fi
-    fi
-    # add LND port to pleb-vpn.conf 
-    setting ${plebVPNConf} "2" "lnPort" "'${lnPort}'"
+    echo "error: need a port to enable hybrid mode"
+    exit 1
   fi
 
   # configure firewall
