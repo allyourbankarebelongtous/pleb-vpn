@@ -125,6 +125,7 @@ def lnd_hybrid():
             elif len(lnPort) != 4:
                 flash('Error! LND Hybrid Port must be four numbers (example: 9739)', category='error')
             else:
+                lnPort = "'" + lnPort + "'"
                 set_conf('lnPort', lnPort)
                 flash('Received new LND Port: ' + lnPort, category='success') 
 
