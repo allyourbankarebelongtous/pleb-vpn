@@ -89,6 +89,7 @@ on() {
 
   local isRestore="${1}"
   local newlnPort="${2}"
+  echo "New Ln Port: ${newlnPort}"
 
   # check if plebvpn is on
   if ! [ "${plebVPN}" = "on" ]; then
@@ -104,8 +105,8 @@ on() {
   # get LND port
   # check to see if new lnd port passed as argument
   if [ -z "${newlnPort}" ]; then
-    lnPort="${newlnPort}"
-    setting ${plebVPNConf} "2" "lnPort" "'${lnPort}'"
+    setting ${plebVPNConf} "2" "lnPort" "'${newlnPort}'"
+    source ${plebVPNConf}
   fi
   if [ ! -z "${lnPort}" ]; then
     # skip if restoring
