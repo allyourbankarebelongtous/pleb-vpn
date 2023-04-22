@@ -78,10 +78,7 @@ address0Type='${address0Type}'" | tee /mnt/hdd/mynode/pleb-vpn/lnd_hybrid_status
 on() {
   # enable hybrid mode 
   source ${plebVPNConf}
-  lnd_isOn=$(systemctl status lnd | grep Active | cut -d ":" -f2 | cut -d " " -f2)
-  if [ "${lnd_isOn}}" = "active" ]; then
-    lnd="on"
-  fi
+
   local isRestore="${1}"
   local newlnPort="${2}"
 
@@ -91,7 +88,8 @@ on() {
     exit 1
   fi
   # check if LND node is availabe
-  if ! [ "${lnd}" = "on" ]; then
+  lnd_isOn=$(systemctl status lnd | grep Active | cut -d ":" -f2 | cut -d " " -f2)
+  if ! [ "${lnd_isOn}" = "active" ]; then
     echo "error: no LND node found"
     exit 1
   fi 
