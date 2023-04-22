@@ -158,7 +158,7 @@ on() {
   setting ${lndCustomConf} ${insertLine} "listen" "0.0.0.0:${lnPort}"
 
   # tor
-  sectionName="tor"
+  sectionName="Tor"
   echo "# [${sectionName}] config ..."
   sectionLine=$(cat ${lndCustomConf} | grep -n "^\[${sectionName}\]" | cut -d ":" -f1 | head -n 1)
   echo "# sectionLine(${sectionLine})"
