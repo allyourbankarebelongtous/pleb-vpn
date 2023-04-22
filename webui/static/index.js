@@ -14,7 +14,7 @@ function delete_plebvpn_conf(userId) {
   }
 }
 
-function setplebVPN_on(userId, event) {
+function setplebVPN_on(userId) {
   if (
     confirm_dialog(
       (message =
