@@ -12,6 +12,7 @@ ALLOWED_EXTENSIONS = {'conf'}
 PLEBVPN_CONF_UPLOAD_FOLDER = '/mnt/hdd/mynode/pleb-vpn/openvpn'
 conf_file_location = '/mnt/hdd/mynode/pleb-vpn/pleb-vpn.conf'
 plebVPN_status = {}
+lnd_hybrid_status = {}
 user_input = None
 enter_input = False
 update_available = False
@@ -19,11 +20,12 @@ update_available = False
 @views.route('/', methods=['GET', 'POST'])
 @login_required
 def home():
-    global plebVPN_status
     if plebVPN_status == {}:
         get_plebVPN_status()
-    message = request.args.get('message')
-    category = request.args.get('category')
+    if lnd_hybrid_status == {}:
+        get_lnd_hybrid_status()
+    message = request.args.get('message') # for when activiating a script with SocketIO, to flash messages after redirecting to home page
+    category = request.args.get('category') # for when activiating a script with SocketIO, to flash messages after redirecting to home page
     if message is not None:
         print('flashing message: ', message) # for debug purposes only
         flash(message, category=category)
@@ -31,6 +33,7 @@ def home():
                            user=current_user, 
                            setting=get_conf(), 
                            plebVPN_status=plebVPN_status, 
+                           lnd_hybrid_status=lnd_hybrid_status
                            update_available=update_available)
 
 @views.route('/refresh_plebVPN_data', methods=['POST'])
@@ -38,6 +41,7 @@ def home():
 def refresh_plebVPN_data():
     # refresh pleb-vpn status of connection to vps
     get_plebVPN_status()
+    get_lnd_hybrid_status()
 
     return jsonify({})
 
@@ -244,6 +248,19 @@ def get_plebVPN_status():
                 name, value = line.split("=")
                 plebVPN_status[name] = str(value).rstrip().strip('\'\'')
     os.remove(os.path.abspath('./pleb-vpn_status.tmp'))
+
+def get_lnd_hybrid_status():
+    # get status of lnd hybrid mode
+    global lnd_hybrid_status
+    lnd_hybrid_status = {}
+    cmd_str = ["sudo /mnt/hdd/mynode/pleb-vpn/lnd-hybrid.sh status"]
+    subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True)
+    with open(os.path.abspath('./lnd_hybrid_status.tmp')) as status:
+        for line in status:
+            if "=" in line:
+                name, value = line.split("=")
+                lnd_hybrid_status[name] = str(value).rstrip().strip('\'\'')
+    os.remove(os.path.abspath('./lnd_hybrid_status.tmp'))
 
 @socketio.on('user_input')
 def set_user_input(input):
