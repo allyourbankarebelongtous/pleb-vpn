@@ -1,52 +1,171 @@
 {% extends "base.html" %} {% block title %}Pleb-VPN{% endblock %} {% block
-content %}
-<div class="container text-center">
-  <div class="row">
-    <div class="col">
-      <h3>LND Hybrid</h3>
+    content %}
+    <div class="container text-center">
+      <div class="row">
+        <div class="col">
+          <h3>LND Hybrid</h3>
+        </div>
+      </div>
     </div>
-  </div>
-</div>
-<br />
-<div id="output"></div>
-<form id="input-form">
-  <input id="input-field" type="text" />
-  <button id="submit-button" type="submit">Submit</button>
-</form>
-<button id="enter-button" type="button">Enter</button>
-<form id="start-form">
-  <input id="start-cmd" type="text" />
-  <button id="start-button" type="submit">Start Process</button>
-</form>
-<script>
-  var socket = io.connect("http://" + document.domain + ":" + location.port);
-  socket.on("output", function (data) {
-    $("#output").append(data + "<br>");
-  });
-  $("#input-form").submit(function (event) {
-    event.preventDefault();
-    var input = $("#input-field").val();
-    socket.emit("user_input", input);
-    $("#input-field").val("");
-  });
-  $("#start-form").submit(function (event) {
-    event.preventDefault();
-    var input = $("#start-cmd").val();
-    socket.emit("start_process", input);
-    $("#start-cmd").val("");
-  });
-  $("#enter-button").click(function () {
-    socket.emit("enter_input");
-  });
-  socket.on("process_complete", function (data) {
-    var message = data.message;
-    var category = data.category;
-    var url =
-      "/lnd-hybrid?message=" +
-      encodeURIComponent(message) +
-      "&category=" +
-      encodeURIComponent(category);
-    window.location.href = url;
-  });
-</script>
-{% endblock %}
+    <br />
+    {% if setting['plebVPN'] != "on" %} 
+    <div class="container">
+        <div class="row">
+          <div class="col">
+            <h5 align="center">Pleb-VPN is not connected. Enable Plev-VPN first!</h5>
+          </div>
+        </div>
+        </div>
+    {% else %}
+
+    {% if setting['lndHybrid'] != "on" %}
+    <div class="container">
+      <div class="row">
+        <div class="col">
+          <h5 align="center">Add LND Port for hybrid mode</h5>
+        </div>
+      </div>
+      {% if setting['lnPort'] == '' %}
+      <form method="POST">
+        <div class="row">
+          <div class="col">
+            <p>Missing LND Port for hybrid mode. Enter your Pleb-VPN assigned LND port.</p>
+            </div>
+            <div class="row">
+                <div class="col">
+            <div class="form-group">
+                <label for="lnPort">LND Port</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="lnPort"
+                  name="lnPort"
+                  placeholder="Enter port"
+                />
+            </div>
+        </div>
+          </div>
+          <div class="col">
+            <button
+              type="button"
+              class="btn btn-success"
+              onClick="this.form.submit()"
+            >
+              Set LND Port
+            </button>
+          </div>
+        </div>
+        </div>
+      </form>
+    </div>
+    {% else %}
+    <div class="container">
+      <div class="row">
+        <div class="col">
+          <h5 align="center">LND Port detected</h5>
+        </div>
+      </div>
+      <form method="POST">
+        <div class="row">
+          <div class="col">
+            <p>Enable LND Hybrid mode</p>
+          </div>
+          <div class="col">
+            <button
+              id="activate"
+              type="button"
+              class="btn btn-success"
+              onClick="setlndHybrid_on({{ current_user.id }})"
+            >
+              Activate
+            </button>
+            <button
+              id="activate_loading"
+              class="btn btn-success d-none"
+              type="button"
+              disabled
+            >
+              <span
+                class="spinner-grow spinner-grow-sm"
+                role="status"
+                aria-hidden="true"
+              ></span>
+              Loading...
+            </button>
+          </div>
+        </div>
+    </form>
+    <form method="POST">
+        <div class="row">
+            <div class="col">
+                <p>LND Port: {{ setting['lnPort'] }}</p>
+              </div>
+          <div class="col">
+            <p>Change LND Port</p>
+          </div>
+          </div>
+          <div class="row">
+          <div class="col">
+          <div class="form-group">
+            <label for="lnPort">LND Port</label>
+            <input
+              type="text"
+              class="form-control"
+              id="lnPort"
+              name="lnPort"
+              placeholder="Enter port"
+            />
+          </div>
+          </div>
+          <div class="col">
+            <button
+              type="button"
+              class="btn btn-success"
+              onClick="this.form.submit()"
+            >
+              Change LND Port
+            </button>
+          </div>
+        </div>
+        </div>
+    </form>
+    </div>
+    {% endif %} {% else %}
+    <div class="container">
+      <div class="row">
+        <div class="col">
+          <h5 align="center">Deactivate LND Hybrid mode</h5>
+        </div>
+      </div>
+      <form method="POST">
+        <div class="row">
+          <div class="col">
+            <p>Dectivate LND Hybrid</p>
+          </div>
+          <div class="col">
+            <button
+              id="deactivate"
+              type="button"
+              class="btn btn-danger"
+              onClick="setlndHybrid_off({{ current_user.id }})"
+            >
+              Dectivate
+            </button>
+            <button
+              id="deactivate_loading"
+              class="btn btn-danger d-none"
+              type="button"
+              disabled
+            >
+              <span
+                class="spinner-grow spinner-grow-sm"
+                role="status"
+                aria-hidden="true"
+              ></span>
+              Loading...
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+    {% endif %} {% endblock %}

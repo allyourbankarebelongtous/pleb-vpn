@@ -1,0 +1,52 @@
+{% extends "base.html" %} {% block title %}Pleb-VPN{% endblock %} {% block
+content %}
+<div class="container text-center">
+  <div class="row">
+    <div class="col">
+      <h3>Script testing only</h3>
+    </div>
+  </div>
+</div>
+<br />
+<div id="output"></div>
+<form id="input-form">
+  <input id="input-field" type="text" />
+  <button id="submit-button" type="submit">Submit</button>
+</form>
+<button id="enter-button" type="button">Enter</button>
+<form id="start-form">
+  <input id="start-cmd" type="text" />
+  <button id="start-button" type="submit">Start Process</button>
+</form>
+<script>
+  var socket = io.connect("http://" + document.domain + ":" + location.port);
+  socket.on("output", function (data) {
+    $("#output").append(data + "<br>");
+  });
+  $("#input-form").submit(function (event) {
+    event.preventDefault();
+    var input = $("#input-field").val();
+    socket.emit("user_input", input);
+    $("#input-field").val("");
+  });
+  $("#start-form").submit(function (event) {
+    event.preventDefault();
+    var input = $("#start-cmd").val();
+    socket.emit("start_process", input);
+    $("#start-cmd").val("");
+  });
+  $("#enter-button").click(function () {
+    socket.emit("enter_input");
+  });
+  socket.on("process_complete", function (data) {
+    var message = data.message;
+    var category = data.category;
+    var url =
+      "/lnd-hybrid?message=" +
+      encodeURIComponent(message) +
+      "&category=" +
+      encodeURIComponent(category);
+    window.location.href = url;
+  });
+</script>
+{% endblock %}

@@ -118,9 +118,15 @@ def delete_plebvpn_conf():
     
     return jsonify({})
 
-@views.route('/lnd-hybrid', methods=['GET'])
+@views.route('/lnd-hybrid', methods=['GET', 'POST'])
 @login_required
-def lnd_Hybrid():
+def lnd_hybrid():
+
+    return render_template('lnd-hybrid.html', user=current_user)
+
+@views.route('/test-scripts', methods=['GET'])
+@login_required
+def test_scripts():
     message = request.args.get('message')
     category = request.args.get('category')
 
@@ -128,7 +134,7 @@ def lnd_Hybrid():
         print('flashing message: ', message) # for debug purposes only
         flash(message, category=category)
 
-    return render_template('lnd-hybrid.html', user=current_user)
+    return render_template('test-scripts.html', user=current_user)
 
 @socketio.on('start_process')
 def start_process(data):
