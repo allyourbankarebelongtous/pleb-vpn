@@ -1,22 +1,26 @@
 {% extends "base.html" %} {% block title %}Home{% endblock %} {% block content
 %}
 <div class="container">
-  <div class="row text-center">
-    <img
-      src="{{ url_for('static', filename='full-logo cutout-orange.png') }}"
-      style="height: 80px"
-      alt="PlebNet logo"
-      loading="lazy"
-    />
+  <div class="row">
+    <div class="col text-center">
+      <img
+        src="{{ url_for('static', filename='full-logo cutout-orange.png') }}"
+        style="height: 80px"
+        alt="PlebNet logo"
+        loading="lazy"
+      />
+    </div>
   </div>
-  <div class="row text-center">
-    <button
-      type="button"
-      class="btn btn-success"
-      onClick="refreshplebVPNdata({{ current_user.id }})"
-    >
-      Refresh Data
-    </button>
+  <div class="row">
+    <div class="col text-center">
+      <button
+        type="button"
+        class="btn btn-success"
+        onClick="refreshplebVPNdata({{ current_user.id }})"
+      >
+        Refresh Data
+      </button>
+    </div>
   </div>
 </div>
 <br />
