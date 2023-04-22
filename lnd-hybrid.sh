@@ -104,9 +104,9 @@ on() {
   fi 
   # get LND port
   # check to see if new lnd port passed as argument
-  if [ -z "${newlnPort}" ]; then
+  if [ ! -z "${newlnPort}" ]; then
+    lnPort="${newlnPort}"
     setting ${plebVPNConf} "2" "lnPort" "'${newlnPort}'"
-    source ${plebVPNConf}
   fi
   if [ ! -z "${lnPort}" ]; then
     # skip if restoring
