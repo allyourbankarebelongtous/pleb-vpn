@@ -13,7 +13,7 @@ content %}
 <div class="container">
   <div class="row">
     <div class="col">
-      <h2 align="center">Upload plebvpn.conf file</h2>
+      <h5 align="center">Upload plebvpn.conf file</h5>
     </div>
   </div>
   <form method="POST" enctype="multipart/form-data">
@@ -37,7 +37,7 @@ content %}
 <div class="container">
   <div class="row">
     <div class="col">
-      <h2 align="center">plebvpn.conf file detected</h2>
+      <h5 align="center">plebvpn.conf file detected</h5>
     </div>
   </div>
   <form method="POST">
@@ -89,7 +89,7 @@ content %}
 <div class="container">
   <div class="row">
     <div class="col">
-      <h2 align="center">Deactivate Pleb-VPN</h2>
+      <h5 align="center">Deactivate Pleb-VPN</h5>
     </div>
   </div>
   <form method="POST">
@@ -123,26 +123,4 @@ content %}
     </div>
   </form>
 </div>
-<!-- // This is for showing/hinding loading buttons when using SocketIO to communicate. For POST forms, see index.js.
-  <script> 
-  var socket = io.connect("http://" + document.domain + ":" + location.port);
-  document.addEventListener("DOMContentLoaded", function () {
-    // Set the style of the regular button to display by default
-    document.getElementById("activate").style.display = "inline-block";
-    document.getElementById("deactivate").style.display = "inline-block";
-  });
-  socket.on("process_started", function () {
-    document.getElementById("activate").style.display = "none";
-    document.getElementById("activate_loading").style.display = "inline-block";
-    document.getElementById("deactivate").style.display = "none";
-    document.getElementById("deactivate_loading").style.display =
-      "inline-block";
-  });
-  socket.on("process_completed", function () {
-    document.getElementById("activate").style.display = "inline-block";
-    document.getElementById("activate_loading").style.display = "none";
-    document.getElementById("deactivate").style.display = "inline-block";
-    document.getElementById("deactivate_loading").style.display = "none";
-  });
-</script> -->
 {% endif %} {% endblock %}
