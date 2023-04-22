@@ -33,7 +33,7 @@ def home():
                            user=current_user, 
                            setting=get_conf(), 
                            plebVPN_status=plebVPN_status, 
-                           lnd_hybrid_status=lnd_hybrid_status
+                           lnd_hybrid_status=lnd_hybrid_status,
                            update_available=update_available)
 
 @views.route('/refresh_plebVPN_data', methods=['POST'])
