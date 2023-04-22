@@ -24,10 +24,18 @@ function setting() # FILE LINENUMBER NAME VALUE
   echo "# ${NAME} exists->(${settingExists})"
   if [ "${settingExists}" == "0" ]; then
     echo "# adding setting (${NAME})"
-    sudo sed -i --follow-symlinks "${LINENUMBER}i${NAME}=" ${FILE}
+    if [ "${FILE}" = "${lndConfFile}" ]; then
+      sudo -u bitcoin sed -i --follow-symlinks "${LINENUMBER}i${NAME}=" ${FILE}
+    else
+      sudo sed -i --follow-symlinks "${LINENUMBER}i${NAME}=" ${FILE}
+    fi
   fi
   echo "# updating setting (${NAME}) with value(${VALUE})"
-  sudo sed -i --follow-symlinks "s/^${NAME}=.*/${NAME}=${VALUE}/g" ${FILE}
+  if [ "${FILE}" = "${lndConfFile}" ]; then
+    sudo -u bitcoin sed -i --follow-symlinks "s/^${NAME}=.*/${NAME}=${VALUE}/g" ${FILE}
+  else
+    sudo sed -i --follow-symlinks "s/^${NAME}=.*/${NAME}=${VALUE}/g" ${FILE}
+  fi
 }
 
 status() {
