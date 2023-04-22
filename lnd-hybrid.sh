@@ -124,7 +124,7 @@ on() {
   sectionName="Application Options"
   publicIP="${vpnIP}"
   echo "# [${sectionName}] config ..."
-  sectionLine=$(cat ${lndConfFile} | grep -n "^\[${sectionName}\]" | cut -d ":" -f1)
+  sectionLine=$(cat ${lndConfFile} | grep -n "^\[${sectionName}\]" | cut -d ":" -f1 | head -n 1)
   echo "# sectionLine(${sectionLine})"
   insertLine=$(expr $sectionLine + 1)
   echo "# insertLine(${insertLine})"
@@ -142,7 +142,7 @@ on() {
   # tor
   sectionName="tor"
   echo "# [${sectionName}] config ..."
-  sectionLine=$(cat ${lndConfFile} | grep -n "^\[${sectionName}\]" | cut -d ":" -f1)
+  sectionLine=$(cat ${lndConfFile} | grep -n "^\[${sectionName}\]" | cut -d ":" -f1 | head -n 1)
   echo "# sectionLine(${sectionLine})"
   insertLine=$(expr $sectionLine + 1)
   echo "# insertLine(${insertLine})"
@@ -180,7 +180,7 @@ off() {
   sudo sed -i '/^tor.skip-proxy-for-clearnet-targets=*/d' ${lndConfFile}
   sectionName="Application Options"
   echo "# [${sectionName}] config ..."
-  sectionLine=$(cat ${lndConfFile} | grep -n "^\[${sectionName}\]" | cut -d ":" -f1)
+  sectionLine=$(cat ${lndConfFile} | grep -n "^\[${sectionName}\]" | cut -d ":" -f1 | head -n 1)
   echo "# sectionLine(${sectionLine})"
   insertLine=$(expr $sectionLine + 1)
   echo "# insertLine(${insertLine})"
@@ -196,7 +196,7 @@ off() {
   # tor
   sectionName="tor"
   echo "# [${sectionName}] config ..."
-  sectionLine=$(cat ${lndConfFile} | grep -n "^\[${sectionName}\]" | cut -d ":" -f1)
+  sectionLine=$(cat ${lndConfFile} | grep -n "^\[${sectionName}\]" | cut -d ":" -f1 | head -n 1)
   echo "# sectionLine(${sectionLine})"
   insertLine=$(expr $sectionLine + 1)
   echo "# insertLine(${insertLine})"
@@ -218,7 +218,7 @@ off() {
 
 case "${1}" in
   status) status ;;
-  on) on "${2}" "${3}";;
+  on) on "${2}" "${3}" ;;
   off) off ;;
   *) echo "err=Unknown action: ${1}" ; exit 1 ;;
 esac
