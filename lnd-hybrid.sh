@@ -12,6 +12,8 @@ fi
 
 plebVPNConf="/mnt/hdd/mynode/pleb-vpn/pleb-vpn.conf"
 lndConfFile="/mnt/hdd/mynode/lnd/lnd.conf"
+lndCustomConf="/mnt/hdd/mynode/settings/lnd_custom.conf"
+lndCustomConfOld="/mnt/hdd/mynode/settings/lnd_custom_old.conf"
 
 function setting() # FILE LINENUMBER NAME VALUE
 {
@@ -128,42 +130,49 @@ on() {
   if ! [ "${lnPort}" = "9735" ]; then
     sudo ufw allow ${lnPort} comment "LND Port"
   fi
+
   # edit lnd.conf
+  # check for old lndCustomConf and copy to lndCustomConfOld if exists
+  if [ -f ${lndCustomConf} ]; then
+    sudo cp -p ${lndCustomConf} ${lndCustomConfOld}
+  fi
+  # copy lnd.conf to lndCustomConf
+  sudo cp -p ${lndConfFile} ${lndCustomConf}
   # Application Options 
   sectionName="Application Options"
   publicIP="${vpnIP}"
   echo "# [${sectionName}] config ..."
-  sectionLine=$(cat ${lndConfFile} | grep -n "^\[${sectionName}\]" | cut -d ":" -f1 | head -n 1)
+  sectionLine=$(cat ${lndCustomConf} | grep -n "^\[${sectionName}\]" | cut -d ":" -f1 | head -n 1)
   echo "# sectionLine(${sectionLine})"
   insertLine=$(expr $sectionLine + 1)
   echo "# insertLine(${insertLine})"
-  fileLines=$(wc -l ${lndConfFile} | cut -d " " -f1)
+  fileLines=$(wc -l ${lndCustomConf} | cut -d " " -f1)
   echo "# fileLines(${fileLines})"
   if [ ${fileLines} -lt ${insertLine} ]; then
     echo "# adding new line for inserts"
     echo "
-  " | sudo tee -a ${lndConfFile}
+  " | sudo tee -a ${lndCustomConf}
   fi
   echo "# sectionLine(${sectionLine})"
-  setting ${lndConfFile} ${insertLine} "externalip" "${publicIP}:${lnPort}"
-  setting ${lndConfFile} ${insertLine} "listen" "0.0.0.0:${lnPort}"
+  setting ${lndCustomConf} ${insertLine} "externalip" "${publicIP}:${lnPort}"
+  setting ${lndCustomConf} ${insertLine} "listen" "0.0.0.0:${lnPort}"
 
   # tor
   sectionName="tor"
   echo "# [${sectionName}] config ..."
-  sectionLine=$(cat ${lndConfFile} | grep -n "^\[${sectionName}\]" | cut -d ":" -f1 | head -n 1)
+  sectionLine=$(cat ${lndCustomConf} | grep -n "^\[${sectionName}\]" | cut -d ":" -f1 | head -n 1)
   echo "# sectionLine(${sectionLine})"
   insertLine=$(expr $sectionLine + 1)
   echo "# insertLine(${insertLine})"
-  fileLines=$(wc -l ${lndConfFile} | cut -d " " -f1)
+  fileLines=$(wc -l ${lndCustomConf} | cut -d " " -f1)
   echo "# fileLines(${fileLines})"
   if [ ${fileLines} -lt ${insertLine} ]; then
     echo "# adding new line for inserts"
     echo "
-  " | sudo tee -a ${lndConfFile}
+  " | sudo tee -a ${lndCustomConf}
   fi
-  setting ${lndConfFile} ${insertLine} "tor.streamisolation" "false"
-  setting ${lndConfFile} ${insertLine} "tor.skip-proxy-for-clearnet-targets" "true"
+  setting ${lndCustomConf} ${insertLine} "tor.streamisolation" "false"
+  setting ${lndCustomConf} ${insertLine} "tor.skip-proxy-for-clearnet-targets" "true"
 
   # restart lnd
   sudo systemctl restart lnd 
@@ -182,41 +191,46 @@ off() {
     sudo ufw delete allow ${lnPort}
   fi
 
-  # edit lnd.conf
-
-  # Application Options 
-  sudo sed -i '/^externalip=*/d' ${lndConfFile}
-  sudo sed -i '/^tor.skip-proxy-for-clearnet-targets=*/d' ${lndConfFile}
-  sectionName="Application Options"
-  echo "# [${sectionName}] config ..."
-  sectionLine=$(cat ${lndConfFile} | grep -n "^\[${sectionName}\]" | cut -d ":" -f1 | head -n 1)
-  echo "# sectionLine(${sectionLine})"
-  insertLine=$(expr $sectionLine + 1)
-  echo "# insertLine(${insertLine})"
-  fileLines=$(wc -l ${lndConfFile} | cut -d " " -f1)
-  echo "# fileLines(${fileLines})"
-  if [ ${fileLines} -lt ${insertLine} ]; then
-    echo "# adding new line for inserts"
-    echo "
-  " | sudo tee -a ${lndConfFile}
+  # remove lndCustomConf
+  sudo rm ${lndCustomConf}
+  # check if lndCustomConfOld exists and if so, copy back to lndCustomConf
+  if [ -f ${lndCustomConfOld} ]; then
+    sudo cp -p ${lndCustomConfOld} ${lndCustomConf}
+    sudo rm ${lndCustomConfOld}
   fi
-  echo "# sectionLine(${sectionLine})"
-  setting ${lndConfFile} ${insertLine} "listen" "localhost"
-  # tor
-  sectionName="tor"
-  echo "# [${sectionName}] config ..."
-  sectionLine=$(cat ${lndConfFile} | grep -n "^\[${sectionName}\]" | cut -d ":" -f1 | head -n 1)
-  echo "# sectionLine(${sectionLine})"
-  insertLine=$(expr $sectionLine + 1)
-  echo "# insertLine(${insertLine})"
-  fileLines=$(wc -l ${lndConfFile} | cut -d " " -f1)
-  echo "# fileLines(${fileLines})"
-  if [ ${fileLines} -lt ${insertLine} ]; then
-    echo "# adding new line for inserts"
-    echo "
-  " | sudo tee -a ${lndConfFile}
-  fi
-  setting ${lndConfFile} ${insertLine} "tor.streamisolation" "true"
+  # # Application Options 
+  # sudo sed -i '/^externalip=*/d' ${lndConfFile}
+  # sudo sed -i '/^tor.skip-proxy-for-clearnet-targets=*/d' ${lndConfFile}
+  # sectionName="Application Options"
+  # echo "# [${sectionName}] config ..."
+  # sectionLine=$(cat ${lndConfFile} | grep -n "^\[${sectionName}\]" | cut -d ":" -f1 | head -n 1)
+  # echo "# sectionLine(${sectionLine})"
+  # insertLine=$(expr $sectionLine + 1)
+  # echo "# insertLine(${insertLine})"
+  # fileLines=$(wc -l ${lndConfFile} | cut -d " " -f1)
+  # echo "# fileLines(${fileLines})"
+  # if [ ${fileLines} -lt ${insertLine} ]; then
+    # echo "# adding new line for inserts"
+    # echo "
+  # " | sudo tee -a ${lndConfFile}
+  # fi
+  # echo "# sectionLine(${sectionLine})"
+  # setting ${lndConfFile} ${insertLine} "listen" "localhost"
+  # # tor
+  # sectionName="tor"
+  # echo "# [${sectionName}] config ..."
+  # sectionLine=$(cat ${lndConfFile} | grep -n "^\[${sectionName}\]" | cut -d ":" -f1 | head -n 1)
+  # echo "# sectionLine(${sectionLine})"
+  # insertLine=$(expr $sectionLine + 1)
+  # echo "# insertLine(${insertLine})"
+  # fileLines=$(wc -l ${lndConfFile} | cut -d " " -f1)
+  # echo "# fileLines(${fileLines})"
+  # if [ ${fileLines} -lt ${insertLine} ]; then
+    # echo "# adding new line for inserts"
+    # echo "
+  # " | sudo tee -a ${lndConfFile}
+  # fi
+  # setting ${lndConfFile} ${insertLine} "tor.streamisolation" "true"
 
   # restart lnd
   sudo systemctl restart lnd 
