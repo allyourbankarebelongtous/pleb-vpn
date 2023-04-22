@@ -69,8 +69,6 @@ def pleb_VPN():
 @views.route('/set_plebVPN', methods=['POST'])
 def set_plebVPN():
     # turns pleb-vpn connection to vps on or off
-    # start loading button...
-    socketio.emit('activate_started')
     setting = get_conf()
     user = json.loads(request.data)
     userId = user['userId']
@@ -87,8 +85,6 @@ def set_plebVPN():
                     flash('Pleb-VPN disconnected.', category='success')
                 else:
                     flash('An unknown error occured!', category='error')
-                # stop loading button...
-                socketio.emit('process_completed')
             else:
                 cmd_str = ["sudo /mnt/hdd/mynode/pleb-vpn/vpn-install.sh on"]
                 result = subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True)
@@ -99,8 +95,7 @@ def set_plebVPN():
                     flash('Pleb-VPN connected!', category='success')
                 else:
                     flash('An unknown error occured!', category='error')
-                # stop loading button...
-                socketio.emit('process_completed')
+
     return jsonify({})
 
 @views.route('/delete_plebvpn_conf', methods=['POST'])
@@ -121,8 +116,51 @@ def delete_plebvpn_conf():
 @views.route('/lnd-hybrid', methods=['GET', 'POST'])
 @login_required
 def lnd_hybrid():
+    # get new LND port
+    if request.method == 'POST':
+        if "lnPort" in request.form:
+            lnPort = request.form.get('lnPort')
+            if not lnPort.isdigit():
+                flash('Error! LND Hybrid Port must be four numbers (example: 9739)', category='error')
+            elif len(lnPort) != 4:
+                flash('Error! LND Hybrid Port must be four numbers (example: 9739)', category='error')
+            else:
+                set_conf('lnPort', lnPort)
+                flash('Received new LND Port: ' + lnPort, category='success') 
 
     return render_template('lnd-hybrid.html', user=current_user, setting=get_conf())
+
+@views.route('/set_lndHybrid', methods=['POST'])
+def set_lndHybrid():
+    # turns pleb-vpn connection to vps on or off
+    setting = get_conf()
+    user = json.loads(request.data)
+    userId = user['userId']
+    user = User.query.get(userId)
+    if user:
+        if user.id == current_user.id:
+            if setting['lndHybrid'] == 'on':
+                cmd_str = ["sudo /mnt/hdd/mynode/pleb-vpn/lnd-hybrid.sh off"]
+                result = subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True)
+                # for debug purposes
+                print(result.stdout, result.stderr)
+                get_plebVPN_status()
+                if result.returncode == 0:
+                    flash('LND Hybrid mode disabled.', category='success')
+                else:
+                    flash('An unknown error occured!', category='error')
+            else:
+                cmd_str = ["sudo /mnt/hdd/mynode/pleb-vpn/lnd-hybrid.sh on 1"]
+                result = subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True)
+                # for debug purposes
+                print(result.stdout, result.stderr)
+                get_plebVPN_status()
+                if result.returncode == 0:
+                    flash('LND Hybrid mode enabled!', category='success')
+                else:
+                    flash('An unknown error occured!', category='error')
+
+    return jsonify({})
 
 @views.route('/test-scripts', methods=['GET'])
 @login_required
@@ -180,7 +218,7 @@ def set_conf(name, value):
     setting = get_conf()
     if not setting[name]:
         cmd_str = ["sed", "-i", "2i" + name + "=", conf_file_location]
-        subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
     cmd_str = ["sed", "-i", "s:^" + name + "=.*:" + name + "=" + value + ":g", conf_file_location]
     subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
 
