@@ -8,8 +8,18 @@ content %}
   </div>
 </div>
 <br />
-{% if setting['plebVPN'] != "on" %} {% if plebVPN_status['config_exists'] !=
-"yes" %}
+{% if setting['lndHybrid'] == "on" %}
+<div class="container">
+  <div class="row">
+    <div class="col">
+      <h5 align="center">
+        You cannot disable Pleb-VPN unless you turn off LND Hybrid first!
+      </h5>
+    </div>
+  </div>
+</div>
+{% else %} {% if setting['plebVPN'] != "on" %} {% if
+plebVPN_status['config_exists'] != "yes" %}
 <div class="container">
   <div class="row">
     <div class="col">
@@ -130,4 +140,4 @@ content %}
     </div>
   </form>
 </div>
-{% endif %} {% endblock %}
+{% endif %} {% endif %} {% endblock %}
