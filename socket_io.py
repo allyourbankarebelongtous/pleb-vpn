@@ -3,4 +3,4 @@ from gevent import monkey
 
 monkey.patch_all()
 
-socketio = SocketIO(async_mode='gevent')
+socketio = SocketIO(async_mode='gevent', websocket=True)
