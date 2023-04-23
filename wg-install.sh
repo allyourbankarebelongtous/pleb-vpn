@@ -11,7 +11,7 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   exit 1
 fi
 
-plebVPNConf="/home/admin/pleb-vpn/pleb-vpn.conf"
+plebVPNConf="/mnt/hdd/mynode/pleb-vpn/pleb-vpn.conf"
 
 function setting() # FILE LINENUMBER NAME VALUE
 {
@@ -31,8 +31,7 @@ function setting() # FILE LINENUMBER NAME VALUE
 }
 
 function validWgIP() {
-  source <(/home/admin/_cache.sh get internet_localip)
-  currentLAN=$(echo "${internet_localip}" | sed 's/^\(.*\)\.\(.*\)\.\(.*\)\.\(.*\)$/\1\.\2\.\3/g')
+  currentLAN=$(ip rou | grep default | cut -d " " -f3 | sed 's/^\(.*\)\.\(.*\)\.\(.*\)\.\(.*\)$/\1\.\2\.\3/g')
   local ip=$1
   currentWGLAN=$(echo "${ip}" | sed 's/^\(.*\)\.\(.*\)\.\(.*\)\.\(.*\)$/\1\.\2\.\3/g')
   local stat=1
@@ -54,10 +53,7 @@ status() {
   source ${plebVPNConf}
   message="Wireguard installed, configured, and operating as expected"
   if [ "${wireguard}" = "off" ]; then
-    whiptail --title "WireGuard status" --msgbox "
-WireGuard installed: no
-Use menu to install wireguard.
-" 10 40
+    message="Wireguard not installed."
   else
     checkwgIP=$(ip addr | grep wg0 | grep inet | cut -d " " -f6 | cut -d "/" -f1)
     isConfig=$(sudo ls /etc/wireguard | grep -c wg0.conf)
@@ -85,18 +81,16 @@ Use menu to install wireguard.
     else
       serviceExists="yes"
     fi
-    whiptail --title "WireGuard status" --msgbox "
-WireGuard installed: yes
-WireGuard operating: ${isrunning}
-WireGuard service installed: ${serviceExists}
-WireGuard config file found: ${isConfig}
-WireGuard server (node) IP: ${wgIP}
-WireGuard client 1 (mobile) IP: ${clientIPselect[0]}
-WireGuard client 2 (laptop) IP: ${clientIPselect[1]}
-WireGuard client 3 (desktop) IP: ${clientIPselect[2]}
-${message}
-" 16 85
   fi
+  echo "installed=yes
+operating=${isrunning}
+service_installed=${serviceExists}
+config_file_found=${isConfig}
+server_IP=${wgIP}
+client1_IP=${clientIPselect[0]}
+client2_IP=${clientIPselect[1]}
+client3_IP=${clientIPselect[2]}
+message=${message}" | tee /mnt/hdd/mynode/pleb-vpn/wireguard_status.tmp
   exit 0
 }
 
@@ -111,9 +105,9 @@ download all three config files by chosing 'Download'" 12 80
   if [ ${?} -eq 0 ]; then
     clear
     echo "##############"
-    echo "qrencode -t ansiutf8 < /etc/wireguard/clients/mobile.conf"
+    echo "qrencode -t ansiutf8 < /etc/wireguard/clients/client1.conf"
     echo "##############"
-    qrencode -t ansiutf8 < /mnt/hdd/app-data/pleb-vpn/wireguard/clients/mobile.conf
+    qrencode -t ansiutf8 < /mnt/hdd/app-data/pleb-vpn/wireguard/clients/client1.conf
     echo "Press ENTER when finished."
     read key
   else
@@ -144,38 +138,28 @@ download all three config files by chosing 'Download'" 12 80
 on() {
   # install and configure wireguard
   source ${plebVPNConf}
-  source /mnt/hdd/raspiblitz.conf
+  local new_config = "${1}"
 
   # check if plebvpn is on
   if ! [ "${plebVPN}" = "on" ]; then
     echo "error: turn on plebvpn before enabling wireguard"
     exit 1
   fi
-  # determine if previous config files exist
-  local keepconfig="${1}"
-  isconfig=$(sudo ls /mnt/hdd/app-data/pleb-vpn/wireguard/ | grep -c wg0.conf)
-  if ! [ ${isconfig} -eq 0 ]; then
-    if [ -z "${keepconfig}" ]; then
-      whiptail --title "Use Existing Configuration?" \
-      --yes-button "Use Existing Config" \
-      --no-button "Create New Config" \
-      --yesno "There's an existing configuration found from a previous install of wireguard. Do you wish to reuse it or to start fresh?" 10 80
-      if [ $? -eq 1 ]; then
-        keepconfig="0"
-      else
-        keepconfig="1"
-      fi
-    fi
-  else
+  # check if this is a new wireguard config
+  if [ ! -z "${new_config}" ]; then
     keepconfig="0"
+  else
+    # determine if config files exist
+    isconfig=$(sudo ls /mnt/hdd/mynode/pleb-vpn/wireguard/ | grep -c wg0.conf)
+    if [ ${isconfig} -eq 0 ]; then
+      echo "error: no config file found"
+      exit 1
+    fi
+    keepconfig="1"
   fi
   # install wireguard
-  echo "deb http://deb.debian.org/debian/ unstable main" | sudo tee --append /etc/apt/sources.list
-  sudo apt-key adv --keyserver   keyserver.ubuntu.com --recv-keys 04EE7237B7D453EC
-  sudo apt-key adv --keyserver   keyserver.ubuntu.com --recv-keys 648ACFD622F3D138
-  sudo sh -c 'printf "Package: *\nPin: release a=unstable\nPin-Priority: 90\n" > /etc/apt/preferences.d/limit-unstable'
-  sudo apt-get update &> /dev/null
   sudo apt install -y wireguard
+
   if [ "${keepconfig}" = "0" ]; then
     # configure wireguard keys
     sudo chmod -R 777 /etc/wireguard
@@ -191,30 +175,6 @@ on() {
     sudo wg genkey | sudo tee /etc/wireguard/client3_private_key | wg pubkey > /etc/wireguard/client3_public_key
     client3PrivateKey=$(sudo cat /etc/wireguard/client3_private_key)
     client3PublicKey=$(sudo cat /etc/wireguard/client3_public_key)
-    sudo touch /var/cache/raspiblitz/.tmp
-    sudo chmod 777 /var/cache/raspiblitz/.tmp
-    whiptail --title "Wireguard LAN address" --inputbox "Enter your desired wireguard LAN IP, chosing from 10.0.0.0 to 10.255.255.252. Do not use the same IP as your LAN." 11 83 2>/var/cache/raspiblitz/.tmp
-    wgIP=$(cat /var/cache/raspiblitz/.tmp)
-    validWgIP ${wgIP}
-    while [ ! ${?} -eq 0 ]
-    do
-      whiptail --title "Wireguard LAN address" --inputbox "ERROR: ${wgIP} is an invalid IP address. Enter your desired wireguard LAN IP, chosing from 10.0.0.0 to 10.255.255.252. Do not use the same IP as your LAN." 11 83 2>/var/cache/raspiblitz/.tmp
-      wgIP=$(cat /var/cache/raspiblitz/.tmp)
-      validWgIP ${wgIP}
-    done
-    whiptail --title "Wireguard port" --inputbox "Enter the port that is forwarded to you from the VPS for wireguard. If you don't have one, forward one from your VPS or contact your VPS provider to obtain one." 12 80 2>/var/cache/raspiblitz/.tmp
-    wgPort=$(cat /var/cache/raspiblitz/.tmp)
-    # check to make sure port isn't already used by LND or CLN
-    if [ "${wgPort}" = "${lnPort}" ] || [ "${wgPort}" = "${CLNPort}" ]; then
-      whiptail --title "Wireguard port" --inputbox "ERROR: You must not use the same port as a previous service. Enter a different port than ${wgPort}." 12 80 2>/var/cache/raspiblitz/.tmp
-      wgPort=$(cat /var/cache/raspiblitz/.tmp)
-      if [ "${wgPort}" = "${lnPort}" ] || [ "${wgPort}" = "${CLNPort}" ]; then
-        echo "error: port must be different than other services"
-        exit 1
-      fi
-    fi
-    # add wireguard LAN to pleb-vpn.conf 
-    setting ${plebVPNConf} "2" "wgPort" "'${wgPort}'"
     wgLAN=$(echo "${wgIP}" | sed 's/^\(.*\)\.\(.*\)\.\(.*\)\.\(.*\)$/\1\.\2\.\3/')
     serverHost=$(echo "${wgIP}" | cut -d "." -f4)
     client1Host=$(expr $serverHost + 1)
@@ -223,17 +183,18 @@ on() {
     client1ip=$(echo "${wgLAN}.${client1Host}")
     client2ip=$(echo "${wgLAN}.${client2Host}")
     client3ip=$(echo "${wgLAN}.${client3Host}")
+    internet_controller=$(ip rou | grep default | cut -d " " -f5)
+    LAN=$(ip rou | grep default | cut -d " " -f3 | sed 's/^\(.*\)\.\(.*\)\.\(.*\)\.\(.*\)$/\1\.\2\.\3/g')
     # add wireguard LAN to pleb-vpn.conf 
     setting ${plebVPNConf} "2" "wgLAN" "'${wgLAN}'"
-    setting ${plebVPNConf} "2" "wgIP" "'${wgIP}'"
     # create config files
     echo "[Interface]
 Address = ${wgIP}/24
 PrivateKey = ${serverPrivateKey}
 ListenPort = ${wgPort}
 
-PostUp = iptables -A FORWARD -i %i -j ACCEPT; iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
-PostDown = iptables -D FORWARD -i %i -j ACCEPT; iptables -t nat -D POSTROUTING -o eth0 -j MASQUERADE
+PostUp = iptables -A FORWARD -i %i -j ACCEPT; iptables -t nat -A POSTROUTING -o ${internet_controller} -j MASQUERADE
+PostDown = iptables -D FORWARD -i %i -j ACCEPT; iptables -t nat -D POSTROUTING -o ${internet_controller} -j MASQUERADE
 
 [Peer]
 PublicKey = ${client1PublicKey}
@@ -257,7 +218,7 @@ PrivateKey = ${client1PrivateKey}
 PublicKey = ${serverPublicKey}
 Endpoint = ${vpnIP}:${wgPort}
 AllowedIPs = ${wgLAN}.0/24, ${LAN}.0/24
-" | sudo tee /etc/wireguard/clients/mobile.conf
+" | sudo tee /etc/wireguard/clients/client1.conf
     echo "[Interface]
 Address = ${client2ip}/32
 PrivateKey = ${client2PrivateKey}
@@ -266,7 +227,7 @@ PrivateKey = ${client2PrivateKey}
 PublicKey = ${serverPublicKey}
 Endpoint = ${vpnIP}:${wgPort}
 AllowedIPs = ${wgLAN}.0/24, ${LAN}.0/24
-" | sudo tee /etc/wireguard/clients/laptop.conf
+" | sudo tee /etc/wireguard/clients/client2.conf
     echo "[Interface]
 Address = ${client3ip}/32
 PrivateKey = ${client3PrivateKey}
@@ -275,42 +236,23 @@ PrivateKey = ${client3PrivateKey}
 PublicKey = ${serverPublicKey}
 Endpoint = ${vpnIP}:${wgPort}
 AllowedIPs = ${wgLAN}.0/24, ${LAN}.0/24
-" | sudo tee /etc/wireguard/clients/desktop.conf
-    playstorelink="https://play.google.com/store/apps/details?id=com.wireguard.android"
-    appstorelink="https://apps.apple.com/us/app/wireguard/id1441195209"
-    whiptail --title "Install Wireguard on your Phone" \
-		--yes-button "Continue" \
-		--no-button "StoreLink" \
-		--yesno "Open the Android Play Store or Apple App Store on your mobile phone.\n\nSearch for --> 'WireGuard'\n\nWhen app is installed and started --> Continue." 12 65
-	  if [ $? -eq 1 ]; then
-		whiptail --title " App Store Link " --msgbox "\
-To install app on android open the following link:\n
-${playstoreLink}\n
-To install app on iphone open the following link:\n
-${appstoreLink}\n
-" 12 70
-	  fi
+" | sudo tee /etc/wireguard/clients/client3.conf
+
     # copy keys and config
-    sudo rm -rf /mnt/hdd/app-data/pleb-vpn/wireguard
-    sudo cp -p -r /etc/wireguard/ /mnt/hdd/app-data/pleb-vpn/
+    sudo rm -rf /mnt/hdd/mynode/pleb-vpn/wireguard
+    sudo cp -p -r /etc/wireguard/ /mnt/hdd/mynode/pleb-vpn/
+    sudo chown -R admin:admin /mnt/hdd/app-data/pleb-vpn/wireguard
     sudo chmod -R 755 /mnt/hdd/app-data/pleb-vpn/wireguard
-    # show QR code for mobile config
-    echo "##############"
-    echo "qrencode -t ansiutf8 < /etc/wireguard/clients/mobile.conf"
-    echo "##############"
-    qrencode -t ansiutf8 < /mnt/hdd/app-data/pleb-vpn/wireguard/clients/mobile.conf
-    echo "Press ENTER when finished."
-    read key
   else
     # update pleb-vpn.conf
-    wgIP=$(cat /mnt/hdd/app-data/pleb-vpn/wireguard/wg0.conf | grep Address | sed 's/^.* = //' | sed 's/^\(.*\)\/\(.*\)$/\1/')
+    wgIP=$(cat /mnt/hdd/mynode/pleb-vpn/wireguard/wg0.conf | grep Address | sed 's/^.* = //' | sed 's/^\(.*\)\/\(.*\)$/\1/')
     wgLAN=$(echo "${wgIP}" | sed 's/^\(.*\)\.\(.*\)\.\(.*\)\.\(.*\)$/\1\.\2\.\3/')
-    wgPort=$(cat /mnt/hdd/app-data/pleb-vpn/wireguard/wg0.conf | grep ListenPort | sed 's/^.* = //')
+    wgPort=$(cat /mnt/hdd/mynode/pleb-vpn/wireguard/wg0.conf | grep ListenPort | sed 's/^.* = //')
     setting ${plebVPNConf} "2" "wgPort" "'${wgPort}'"
     setting ${plebVPNConf} "2" "wgLAN" "'${wgLAN}'"
     setting ${plebVPNConf} "2" "wgIP" "'${wgIP}'"
     # copy keys and config  
-    sudo cp -p -r /mnt/hdd/app-data/pleb-vpn/wireguard/ /etc/
+    sudo cp -p -r /mnt/hdd/mynode/pleb-vpn/wireguard/ /etc/
   fi
   # open firewall ports
   sudo ufw allow ${wgPort}/udp comment "wireguard port"
@@ -329,45 +271,7 @@ ${appstoreLink}\n
   echo "Ok, wireguard installed and configured. Wait 10 seconds before enable..."
   sleep 10
   sudo systemctl restart wg-quick@wg0
-  # add tlsextraip to lnd.conf and recreate tls.cert (if lnd installed)
-  if [ "${keepconfig}" = "0" ]; then
-    if [ "${lnd}" = "on" ]; then
-      source <(/home/admin/config.scripts/network.aliases.sh getvars lnd)
-      sectionName="Application Options"
-      echo "# [${sectionName}] config ..."
-      sectionLine=$(cat ${lndConfFile} | grep -n "^\[${sectionName}\]" | cut -d ":" -f1)
-      echo "# sectionLine(${sectionLine})"
-      insertLine=$(expr $sectionLine + 1)
-      echo "# insertLine(${insertLine})"
-      fileLines=$(wc -l ${lndConfFile} | cut -d " " -f1)
-      echo "# fileLines(${fileLines})"
-      if [ ${fileLines} -lt ${insertLine} ]; then
-        echo "# adding new line for inserts"
-        echo "
-      " | tee -a ${lndConfFile}
-      fi
-      echo "# sectionLine(${sectionLine})"
-      setting ${lndConfFile} ${insertLine} "tlsextraip" "${wgIP}"
-      # remove old tls.cert and tls.key
-      sudo rm /mnt/hdd/lnd/*.old
-      sudo mv /mnt/hdd/lnd/tls.cert /mnt/hdd/lnd/tls.cert.old
-      sudo mv /mnt/hdd/lnd/tls.key /mnt/hdd/lnd/tls.key.old
-      # restart lnd
-      sudo systemctl restart lnd
-      if [ "${autoUnlock}" = "on" ]; then
-        # wait until wallet unlocked
-        echo "waiting for wallet unlock (takes some time)..."
-        sleep 30
-      else
-        # prompt user to unlock wallet
-        /home/admin/config.scripts/lnd.unlock.sh
-        echo "waiting for wallet unlock (takes some time)..."
-        sleep 50
-      fi
-      # restart nginx
-      sudo systemctl restart nginx
-    fi
-  fi
+
   # set wireguard on in pleb-vpn.conf
   setting ${plebVPNConf} "2" "wireguard" "on"
   exit 0

@@ -138,6 +138,99 @@ function setlndHybrid_off(userId) {
   }
 }
 
+function setWireguard_on(userId) {
+  if (
+    confirm_dialog(
+      (message = "Use the current Wireguard port and enable Wireguard?")
+    ) == true
+  ) {
+    var activateBtn = document.getElementById("activate");
+    if (activateBtn !== null) {
+      activateBtn.classList.add("d-none");
+    }
+    var activateLoading = document.getElementById("activate_loading");
+    if (activateLoading !== null) {
+      activateLoading.classList.remove("d-none");
+    }
+    fetch("/set_wireguard", {
+      method: "POST",
+      body: JSON.stringify({ userId: userId }),
+    }).then((_res) => {
+      var activateBtn = document.getElementById("activate");
+      if (activateBtn !== null) {
+        activateBtn.classList.remove("d-none");
+      }
+      var activateLoading = document.getElementById("activate_loading");
+      if (activateLoading !== null) {
+        activateLoading.classList.add("d-none");
+      }
+      window.location.href = "/wireguard";
+    });
+  }
+}
+
+function setWireguard_off(userId) {
+  if (
+    confirm_dialog(
+      (message = "Are you sure you want to turn Wireguard off?")
+    ) == true
+  ) {
+    var deactivateBtn = document.getElementById("deactivate");
+    if (deactivateBtn !== null) {
+      deactivateBtn.classList.add("d-none");
+    }
+    var deactivateLoading = document.getElementById("deactivate_loading");
+    if (deactivateLoading !== null) {
+      deactivateLoading.classList.remove("d-none");
+    }
+    fetch("/set_wireguard", {
+      method: "POST",
+      body: JSON.stringify({ userId: userId }),
+    }).then((_res) => {
+      var deactivateBtn = document.getElementById("deactivate");
+      if (deactivateBtn !== null) {
+        deactivateBtn.classList.remove("d-none");
+      }
+      var deactivateLoading = document.getElementById("deactivate_loading");
+      if (deactivateLoading !== null) {
+        deactivateLoading.classList.add("d-none");
+      }
+      window.location.href = "/wireguard";
+    });
+  }
+}
+
+function display_qrcode(filename) {
+  var image = document.getElementById("qr_image");
+
+  fetch("/qr_code")
+    .then((response) => response.json())
+    .then((data) => {
+      // Set the image source to the base64-encoded image
+      image.src = "data:image/png;base64," + data.image;
+    });
+}
+
+function download_file(filename) {
+  // Make an AJAX request to the Flask route
+  var xhr = new XMLHttpRequest();
+  xhr.open("GET", "/wireguard/download_client?filename=" + filename);
+  xhr.responseType = "blob";
+  xhr.onload = function () {
+    // Create a URL that points to the generated file
+    var url = URL.createObjectURL(xhr.response);
+
+    // Create a link with the URL and click it to initiate the download
+    var link = document.createElement("a");
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+  xhr.send();
+}
+
 function refreshplebVPNdata(userId) {
   fetch("/refresh_plebVPN_data", {
     method: "POST",

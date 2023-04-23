@@ -135,6 +135,7 @@ on() {
   # check for old lndCustomConf and copy to lndCustomConfOld if exists
   if [ -f ${lndCustomConf} ]; then
     sudo cp -p ${lndCustomConf} ${lndCustomConfOld}
+    sudo rm ${lndCustomConf}
   fi
   # copy lnd.conf to lndCustomConf
   sudo cp -p ${lndConfFile} ${lndCustomConf}

@@ -1,10 +1,11 @@
-from flask import Blueprint, render_template, request, flash, jsonify, redirect, url_for, session
+from flask import Blueprint, render_template, request, flash, jsonify, redirect, url_for, session, send_file
 from flask_login import login_required, current_user
 from werkzeug.utils import secure_filename
 from socket_io import socketio
+from PIL import Image
 from .models import User
 from . import db
-import json, os, subprocess, keyboard, select, time, pty, pexpect
+import json, os, subprocess, keyboard, select, time, pty, pexpect, random, qrcode, io, base64
 
 views = Blueprint('views', __name__)
 
@@ -156,6 +157,98 @@ def set_lndHybrid():
                     flash('An unknown error occured!', category='error')
             else:
                 cmd_str = ["sudo /mnt/hdd/mynode/pleb-vpn/lnd-hybrid.sh on 1"]
+                result = subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True)
+                # for debug purposes
+                print(result.stdout, result.stderr)
+                get_plebVPN_status()
+                if result.returncode == 0:
+                    flash('LND Hybrid mode enabled!', category='success')
+                else:
+                    flash('An unknown error occured!', category='error')
+
+    return jsonify({})
+
+@views.route('/wireguard', methods=['GET', 'POST'])
+@login_required
+def wireguard():
+    # get new Wireguard port
+    if request.method == 'POST':
+        if "wgPort" in request.form:
+            wgPort = request.form.get('wgPort')
+            if not wgPort.isdigit():
+                flash('Error! Wireguard Port must be four numbers (example: 9739)', category='error')
+            elif len(wgPort) != 4:
+                flash('Error! Wireguard Port must be four numbers (example: 9739)', category='error')
+            else:
+                wgPort = "'" + wgPort + "'"
+                set_conf('wgPort', wgPort)
+                flash('Received new Wireguard Port: ' + wgPort, category='success') 
+
+    return render_template('wireguard.html', user=current_user, setting=get_conf())
+
+@views.route('/wireguard/clientqrcode')
+def generate_qr_code(filename):
+    # Read the contents of the text file
+    path = os.path.join('/mnt/hdd/mynode/pleb-vpn/wireguard/clients', filename)
+    with open(path, 'r') as f:
+        file_contents = f.read()
+
+    # Generate the QR code
+    qr = qrcode.QRCode(version=1, box_size=10, border=5)
+    qr.add_data(file_contents)
+    qr.make(fit=True)
+
+    # Convert the QR code to a PNG image
+    img = qr.make_image(fill_color='black', back_color='white')
+    img_io = io.BytesIO()
+    img.save(img_io, 'PNG')
+    img_io.seek(0)
+
+    # Encode the image as base64
+    img_base64 = base64.b64encode(img_io.getvalue()).decode()
+
+    # Return the image as a JSON response
+    return jsonify(image=img_base64)
+
+@views.route('/wireguard/download_client')
+def download_file(filename):
+    # Assuming the file is located in /mnt/hdd/files/
+    path = os.path.join('/mnt/hdd/mynode/pleb-vpn/wireguard/clients', filename)
+    # Check if the file exists
+    if not os.path.exists(path):
+        return "File not found", 404
+    return send_file(path, as_attachment=True)
+
+@views.route('/set_wireguard', methods=['POST'])
+def set_wireguard():
+    # turns wireguard on or off
+    setting = get_conf()
+    user = json.loads(request.data)
+    userId = user['userId']
+    user = User.query.get(userId)
+    if user:
+        if user.id == current_user.id:
+            if setting['wireguard'] == 'on':
+                cmd_str = ["sudo /mnt/hdd/mynode/pleb-vpn/wg-install.sh off"]
+                result = subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True)
+                # for debug purposes
+                print(result.stdout, result.stderr)
+                get_plebVPN_status()
+                if result.returncode == 0:
+                    flash('Wireguard disabled.', category='success')
+                else:
+                    flash('An unknown error occured!', category='error')
+            else:
+                # check if no wireguard IP in pleb-vpn.conf, and if not, generate one
+                if not is_valid_ip(setting['wgIP']):
+                    while True:
+                        new_wgIP = '10.' + str(random.randint(0, 255)) + '.' + str(random.randint(0, 255)) + '.' + str(random.randint(0, 252))
+                        print(new_wgIP) # for debug purposes only
+                        if is_valid_ip(new_wgIP):
+                            break
+                    new_wgIP = "'" + new_wgIP + "'"
+                    set_conf('wgIP', new_wgIP)
+                cmd_str = ["sudo /mnt/hdd/mynode/pleb-vpn/wg-install.sh on 1"]
                 result = subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True)
                 # for debug purposes
                 print(result.stdout, result.stderr)
@@ -368,3 +461,29 @@ def run_cmd(cmd_str, suppress_output = True, suppress_input = True):
 def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+def is_valid_ip(ip_str):
+    setting = get_conf()
+    # check that the IP does not match our local IP
+    if setting['LAN'] in ip_str:
+        return False
+    # Split the IP address into four parts
+    parts = ip_str.split('.')
+    if len(parts) != 4:
+        return False
+    # Convert each part to an integer
+    try:
+        parts = [int(part) for part in parts]
+    except ValueError:
+        return False
+    # Check that each part is in the valid range
+    if parts[0] != 10:
+        return False
+    if not (0 <= parts[1] <= 255):
+        return False
+    if not (0 <= parts[2] <= 255):
+        return False
+    if not (0 <= parts[3] <= 252):
+        return False
+    # If all checks pass, return True
+    return True

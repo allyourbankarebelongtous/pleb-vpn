@@ -8,13 +8,41 @@ content %}
   </div>
 </div>
 <br />
-{% if setting['lndHybrid'] == "on" %}
+{% if setting['lndHybrid'] == "on" or setting['wireguard'] == "on" %}
 <div class="container">
   <div class="row">
     <div class="col">
       <h5 align="center">
-        You cannot disable Pleb-VPN unless you turn off LND Hybrid first!
+        You cannot disable Pleb-VPN unless you turn off all services first!
       </h5>
+    </div>
+  </div>
+  <br />
+  <div class="row">
+    <div class="col">
+      <h6 align="center">Status of current services</h6>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col" style="border-top: 1px solid lightgrey">
+      <table class="table">
+        <thead>
+          <tr>
+            <th scope="col">Setting</th>
+            <th scope="col">Value</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th scope="row">LND Hybrid Status</th>
+            <td>{{ setting['lndHybrid'] }}</td>
+          </tr>
+          <tr>
+            <th scope="row">Wireguard Status</th>
+            <td>{{ setting['wireguard'] }}</td>
+          </tr>
+        </tbody>
+      </table>
     </div>
   </div>
 </div>
