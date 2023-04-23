@@ -87,14 +87,21 @@
         </div>
       </div>
     </div>
-  </div>
-  <div class="row">
     <div class="col">
       <div class="row">
         <div class="col">
-          <h2 align="center">LND Hybrid Status</h2>
+          <h2 align="center">Wireguard LAN Status</h2>
         </div>
       </div>
+
+      {% if wireguard_status['message'] != null %}
+      <div class="row">
+        <div class="col" style="border-top: 1px solid lightgrey">
+          <h7 align="center">{{ wireguard_status['message'] }}</h7>
+        </div>
+      </div>
+      {% endif %}
+
       <div class="row">
         <div class="col" style="border-top: 1px solid lightgrey">
           <table class="table">
@@ -106,115 +113,172 @@
             </thead>
             <tbody>
               <tr>
-                <th scope="row">LND Alias</th>
-                <td>{{ lnd_hybrid_status['Alias'] }}</td>
+                <th scope="row">Wireguard Status</th>
+                <td>{{ setting['wireguard'] }}</td>
+              </tr>
+              {% if setting['wgPort'] != "" %}
+              <tr>
+                <th scope="row">Wireguard Port</th>
+                <td>{{ setting['wgPort'] }}</td>
+              </tr>
+              {% endif %}
+              <tr>
+                <th scope="row">Existing config found</th>
+                <td>{{ wireguard_status['config_file_found'] }}</td>
+              </tr>
+              {% if setting['wireguard'] == "on" %}
+              <tr>
+                <th scope="row">Wireguard Operating</th>
+                <td>{{ wireguard_status['operating'] }}</td>
               </tr>
               <tr>
-                <th scope="row">LND Node ID</th>
-                <td>{{ lnd_hybrid_status['Node_ID'] }}</td>
-              </tr>
-              <tr>
-                <th scope="row">LND Hybrid Status</th>
-                <td>{{ setting['lndHybrid'] }}</td>
-              </tr>
-              <tr>
-                <th scope="row">LND Hybrid Port</th>
-                <td>{{ setting['lnPort'] }}</td>
-              </tr>
-              <tr>
-                {% if lnd_hybrid_status['address0Type'] == 'torv3' %}
-                <th scope="row">LND Tor Address</th>
-                {% else %}
-                <th scope="row">LND IPV4 Address</th>
-                {% endif %}
-                <td>{{ lnd_hybrid_status['address0'] }}</td>
-              </tr>
-              {% if setting['lndHybrid'] == "on" %}
-              <tr>
-                {% if lnd_hybrid_status['address1Type'] == 'torv3' %}
-                <th scope="row">LND Tor Address</th>
-                {% else %}
-                <th scope="row">LND IPV4 Address</th>
-                {% endif %}
-                <td>{{ lnd_hybrid_status['address1'] }}</td>
+                <th scope="row">Wireguard Node IP</th>
+                <td>{{ wireguard_status['server_IP'] }}</td>
               </tr>
               {% endif %}
             </tbody>
           </table>
         </div>
       </div>
-    </div>
-  </div>
-  <div class="row">
-    <div class="col">
-      <div class="row">
-        <h2 align="center">Update Pleb-VPN</h2>
-      </div>
-      <div class="row">
-        <div class="col" style="border-top: 1px solid lightgrey">
-          <table class="table">
-            <tbody>
-              <tr>
-                <th scope="row">Current Version</th>
-                <td>{{ setting['version'] }}</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-      {% if update_available == False %}
+      {% if setting['wireguard'] == "on" %}
       <div class="row">
         <div class="col text-center">
-          <button id="update-scripts" type="button" class="btn btn-success">
-            Update Pleb-VPN
-          </button>
-        </div>
-      </div>
-      <div class="row">
-        <div id="output"></div>
-      </div>
-      <div class="row">
-        <div class="col text-center">
-          <button id="enter-button" type="button" class="btn btn-primary">
-            Enter
-          </button>
-        </div>
-      </div>
-      {% else %}
-      <div class="row">
-        <div class="col text-center">
-          <button id="reboot-button" type="button" class="btn btn-primary">
-            Reboot (needs systemd server to work)
-          </button>
+          <p>
+            Use the Wireguard page in the settings menu to download client
+            config files or qr codes.
+          </p>
         </div>
       </div>
       {% endif %}
     </div>
+    <div class="row">
+      <div class="col">
+        <div class="row">
+          <div class="col">
+            <h2 align="center">LND Hybrid Status</h2>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col" style="border-top: 1px solid lightgrey">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th scope="col">Setting</th>
+                  <th scope="col">Value</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <th scope="row">LND Alias</th>
+                  <td>{{ lnd_hybrid_status['Alias'] }}</td>
+                </tr>
+                <tr>
+                  <th scope="row">LND Node ID</th>
+                  <td>{{ lnd_hybrid_status['Node_ID'] }}</td>
+                </tr>
+                <tr>
+                  <th scope="row">LND Hybrid Status</th>
+                  <td>{{ setting['lndHybrid'] }}</td>
+                </tr>
+                <tr>
+                  <th scope="row">LND Hybrid Port</th>
+                  <td>{{ setting['lnPort'] }}</td>
+                </tr>
+                <tr>
+                  {% if lnd_hybrid_status['address0Type'] == 'torv3' %}
+                  <th scope="row">LND Tor Address</th>
+                  {% else %}
+                  <th scope="row">LND IPV4 Address</th>
+                  {% endif %}
+                  <td>{{ lnd_hybrid_status['address0'] }}</td>
+                </tr>
+                {% if setting['lndHybrid'] == "on" %}
+                <tr>
+                  {% if lnd_hybrid_status['address1Type'] == 'torv3' %}
+                  <th scope="row">LND Tor Address</th>
+                  {% else %}
+                  <th scope="row">LND IPV4 Address</th>
+                  {% endif %}
+                  <td>{{ lnd_hybrid_status['address1'] }}</td>
+                </tr>
+                {% endif %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col">
+        <div class="row">
+          <h2 align="center">Update Pleb-VPN</h2>
+        </div>
+        <div class="row">
+          <div class="col" style="border-top: 1px solid lightgrey">
+            <table class="table">
+              <tbody>
+                <tr>
+                  <th scope="row">Current Version</th>
+                  <td>{{ setting['version'] }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        {% if update_available == False %}
+        <div class="row">
+          <div class="col text-center">
+            <button id="update-scripts" type="button" class="btn btn-success">
+              Update Pleb-VPN
+            </button>
+          </div>
+        </div>
+        <div class="row">
+          <div id="output"></div>
+        </div>
+        <div class="row">
+          <div class="col text-center">
+            <button id="enter-button" type="button" class="btn btn-primary">
+              Enter
+            </button>
+          </div>
+        </div>
+        {% else %}
+        <div class="row">
+          <div class="col text-center">
+            <button id="reboot-button" type="button" class="btn btn-primary">
+              Reboot (needs systemd server to work)
+            </button>
+          </div>
+        </div>
+        {% endif %}
+      </div>
+    </div>
   </div>
+  <script>
+    var socket = io.connect("http://" + document.domain + ":" + location.port);
+    socket.on("output", function (data) {
+      $("#output").append(data + "<br>");
+    });
+    $("#update-scripts").click(function () {
+      socket.emit("update_scripts");
+    });
+    $("#enter-button").click(function () {
+      socket.emit("enter_input");
+    });
+    $("#reboot-button").click(function () {
+      socket.emit("start_reboot");
+    });
+    socket.on("update_complete", function (data) {
+      var message = data.message;
+      var category = data.category;
+      var url =
+        "/?message=" +
+        encodeURIComponent(message) +
+        "&category=" +
+        encodeURIComponent(category);
+      window.location.href = url;
+    });
+  </script>
+  {% endblock %}
 </div>
-<script>
-  var socket = io.connect("http://" + document.domain + ":" + location.port);
-  socket.on("output", function (data) {
-    $("#output").append(data + "<br>");
-  });
-  $("#update-scripts").click(function () {
-    socket.emit("update_scripts");
-  });
-  $("#enter-button").click(function () {
-    socket.emit("enter_input");
-  });
-  $("#reboot-button").click(function () {
-    socket.emit("start_reboot");
-  });
-  socket.on("update_complete", function (data) {
-    var message = data.message;
-    var category = data.category;
-    var url =
-      "/?message=" +
-      encodeURIComponent(message) +
-      "&category=" +
-      encodeURIComponent(category);
-    window.location.href = url;
-  });
-</script>
-{% endblock %}

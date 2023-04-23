@@ -2,10 +2,10 @@ from flask import Blueprint, render_template, request, flash, jsonify, redirect,
 from flask_login import login_required, current_user
 from werkzeug.utils import secure_filename
 from socket_io import socketio
-from PIL import Image
+# from PIL import Image
 from .models import User
 from . import db
-import json, os, subprocess, keyboard, select, time, pty, pexpect, random, qrcode, io, base64
+import json, os, subprocess, time, pexpect, random, qrcode, io, base64
 
 views = Blueprint('views', __name__)
 
@@ -14,6 +14,7 @@ PLEBVPN_CONF_UPLOAD_FOLDER = '/mnt/hdd/mynode/pleb-vpn/openvpn'
 conf_file_location = '/mnt/hdd/mynode/pleb-vpn/pleb-vpn.conf'
 plebVPN_status = {}
 lnd_hybrid_status = {}
+wireguard_status = {}
 user_input = None
 enter_input = False
 update_available = False
@@ -25,6 +26,8 @@ def home():
         get_plebVPN_status()
     if lnd_hybrid_status == {}:
         get_lnd_hybrid_status()
+    if wireguard_status == {}:
+        get_wireguard_status()
     message = request.args.get('message') # for when activiating a script with SocketIO, to flash messages after redirecting to home page
     category = request.args.get('category') # for when activiating a script with SocketIO, to flash messages after redirecting to home page
     if message is not None:
@@ -35,6 +38,7 @@ def home():
                            setting=get_conf(), 
                            plebVPN_status=plebVPN_status, 
                            lnd_hybrid_status=lnd_hybrid_status,
+                           wireguard_status=wireguard_status,
                            update_available=update_available)
 
 @views.route('/refresh_plebVPN_data', methods=['POST'])
@@ -43,6 +47,7 @@ def refresh_plebVPN_data():
     # refresh pleb-vpn status of connection to vps
     get_plebVPN_status()
     get_lnd_hybrid_status()
+    get_wireguard_status()
 
     return jsonify({})
 
@@ -364,6 +369,19 @@ def get_lnd_hybrid_status():
                 name, value = line.split("=")
                 lnd_hybrid_status[name] = str(value).rstrip().strip('\'\'')
     os.remove(os.path.abspath('./lnd_hybrid_status.tmp'))
+
+def get_wireguard_status():
+    # get status of wireguard service
+    global wireguard_status
+    wireguard_status = {}
+    cmd_str = ["sudo /mnt/hdd/mynode/pleb-vpn/wg-install.sh status"]
+    subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True)
+    with open(os.path.abspath('./wireguard_status.tmp')) as status:
+        for line in status:
+            if "=" in line:
+                name, value = line.split("=")
+                wireguard_status[name] = str(value).rstrip().strip('\'\'')
+    os.remove(os.path.abspath('./wireguard_status.tmp'))
 
 @socketio.on('user_input')
 def set_user_input(input):

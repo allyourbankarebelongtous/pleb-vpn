@@ -53,7 +53,15 @@ status() {
   source ${plebVPNConf}
   message="Wireguard installed, configured, and operating as expected"
   if [ "${wireguard}" = "off" ]; then
-    message="Wireguard not installed."
+    message="Wireguard not installed. Install wireguard in the services menu."
+    isConfig=$(sudo ls /mnt/hdd/mynode/pleb-vpn/wireguard | grep -c wg0.conf)
+    if [ ${isConfig} -eq 0 ]; then
+      isConfig="no"
+    else
+      isConfig="yes"
+    echo "installed=no
+config_file_found=${isConfig}
+message=${message}" | tee /mnt/hdd/mynode/pleb-vpn/wireguard_status.tmp
   else
     checkwgIP=$(ip addr | grep wg0 | grep inet | cut -d " " -f6 | cut -d "/" -f1)
     isConfig=$(sudo ls /etc/wireguard | grep -c wg0.conf)
@@ -72,17 +80,16 @@ status() {
       isrunning="yes"
     else
       isrunning="no"
-      message="ERROR: not started. Run 'sudo systemctl start wg-quick@wg0' on cmd line"
+      message="ERROR: not started. Run 'sudo systemctl enable --now wg-quick@wg0' on cmd line"
     fi
     serviceExists=$(ls /etc/systemd/system/multi-user.target.wants/ | grep -c wg-quick@wg0)
     if [ ${serviceExists} -eq 0 ]; then
       serviceExists="no"
-      message="ERROR: no service exists. Run 'sudo systemctl enable wg-quick@wg0' on cmd line"
+      message="ERROR: no service exists. Run 'sudo systemctl enable --now wg-quick@wg0' on cmd line"
     else
       serviceExists="yes"
     fi
-  fi
-  echo "installed=yes
+    echo "installed=yes
 operating=${isrunning}
 service_installed=${serviceExists}
 config_file_found=${isConfig}
@@ -91,6 +98,7 @@ client1_IP=${clientIPselect[0]}
 client2_IP=${clientIPselect[1]}
 client3_IP=${clientIPselect[2]}
 message=${message}" | tee /mnt/hdd/mynode/pleb-vpn/wireguard_status.tmp
+  fi
   exit 0
 }
 
@@ -242,7 +250,7 @@ AllowedIPs = ${wgLAN}.0/24, ${LAN}.0/24
     sudo rm -rf /mnt/hdd/mynode/pleb-vpn/wireguard
     sudo cp -p -r /etc/wireguard/ /mnt/hdd/mynode/pleb-vpn/
     sudo chown -R admin:admin /mnt/hdd/mynode/pleb-vpn/wireguard
-    sudo chmod -R 755 /mnt/hdd/app-data/mynode/wireguard
+    sudo chmod -R 755 /mnt/hdd/mynode/pleb-vpn/wireguard
   else
     # update pleb-vpn.conf
     wgIP=$(cat /mnt/hdd/mynode/pleb-vpn/wireguard/wg0.conf | grep Address | sed 's/^.* = //' | sed 's/^\(.*\)\/\(.*\)$/\1/')
