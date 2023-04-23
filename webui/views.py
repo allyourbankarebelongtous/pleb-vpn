@@ -248,13 +248,20 @@ def set_wireguard():
                             break
                     new_wgIP = "'" + new_wgIP + "'"
                     set_conf('wgIP', new_wgIP)
-                cmd_str = ["sudo /mnt/hdd/mynode/pleb-vpn/wg-install.sh on 1"]
+                    cmd_str = ["sudo /mnt/hdd/mynode/pleb-vpn/wg-install.sh on 1"]
+                else:
+                    if os.path.isfile('/mnt/hdd/mynode/pleb-vpn/wireguard/wg0.conf'):
+                        cmd_str = ["sudo /mnt/hdd/mynode/pleb-vpn/wg-install.sh on"]
+                    else:
+                        cmd_str = ["sudo /mnt/hdd/mynode/pleb-vpn/wg-install.sh on 1"]
                 result = subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True)
                 # for debug purposes
                 print(result.stdout, result.stderr)
                 get_plebVPN_status()
                 if result.returncode == 0:
                     flash('LND Hybrid mode enabled!', category='success')
+                elif result.returncode == 10:
+                    flash('Error: unable to find conf files. Create new conf files and re-enable wireguard.', category='error') 
                 else:
                     flash('An unknown error occured!', category='error')
 

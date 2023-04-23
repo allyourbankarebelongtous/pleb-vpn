@@ -153,7 +153,7 @@ on() {
     isconfig=$(sudo ls /mnt/hdd/mynode/pleb-vpn/wireguard/ | grep -c wg0.conf)
     if [ ${isconfig} -eq 0 ]; then
       echo "error: no config file found"
-      exit 1
+      exit 10
     fi
     keepconfig="1"
   fi
