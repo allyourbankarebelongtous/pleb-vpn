@@ -267,7 +267,7 @@ def set_wireguard():
                 print(result.stdout, result.stderr)
                 get_plebVPN_status()
                 if result.returncode == 0:
-                    flash('LND Hybrid mode enabled!', category='success')
+                    flash('Wireguard private LAN enabled!', category='success')
                 elif result.returncode == 10:
                     flash('Error: unable to find conf files. Create new conf files and re-enable wireguard.', category='error') 
                 else:

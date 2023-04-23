@@ -14,11 +14,25 @@
   <div class="row">
     <div class="col text-center">
       <button
+        id="activate"
         type="button"
         class="btn btn-success"
         onClick="refreshplebVPNdata({{ current_user.id }})"
       >
-        Refresh Data
+        Activate
+      </button>
+      <button
+        id="activate_loading"
+        class="btn btn-success d-none"
+        type="button"
+        disabled
+      >
+        <span
+          class="spinner-grow spinner-grow-sm"
+          role="status"
+          aria-hidden="true"
+        ></span>
+        Loading...
       </button>
     </div>
   </div>
@@ -36,8 +50,8 @@
 
       {% if plebVPN_status['message'] != null %}
       <div class="row">
-        <div class="col" style="border-top: 1px solid lightgrey">
-          <h7 align="center">{{ plebVPN_status['message'] }}</h7>
+        <div class="col text-center" style="border-top: 1px solid lightgrey">
+          <h7>{{ plebVPN_status['message'] }}</h7>
         </div>
       </div>
       {% endif %}
@@ -155,7 +169,7 @@
 
       {% if wireguard_status['message'] != null %}
       <div class="row">
-        <div class="col" style="border-top: 1px solid lightgrey">
+        <div class="col text-center" style="border-top: 1px solid lightgrey">
           <h7 align="center">{{ wireguard_status['message'] }}</h7>
         </div>
       </div>

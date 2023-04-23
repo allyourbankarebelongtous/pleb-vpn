@@ -235,10 +235,26 @@ function download_file(filename) {
 }
 
 function refreshplebVPNdata(userId) {
+  var activateBtn = document.getElementById("activate");
+  if (activateBtn !== null) {
+    activateBtn.classList.add("d-none");
+  }
+  var activateLoading = document.getElementById("activate_loading");
+  if (activateLoading !== null) {
+    activateLoading.classList.remove("d-none");
+  }
   fetch("/refresh_plebVPN_data", {
     method: "POST",
     body: JSON.stringify({ userId: userId }),
   }).then((_res) => {
+    var activateBtn = document.getElementById("activate");
+    if (activateBtn !== null) {
+      activateBtn.classList.remove("d-none");
+    }
+    var activateLoading = document.getElementById("activate_loading");
+    if (activateLoading !== null) {
+      activateLoading.classList.add("d-none");
+    }
     window.location.href = "/";
   });
 }
