@@ -196,7 +196,7 @@ def generate_qr_code():
         file_contents = f.read()
 
     # Generate the QR code
-    qr = qrcode.QRCode(version=1, box_size=10, border=5)
+    qr = qrcode.QRCode(version=1, box_size=5, border=3)
     qr.add_data(file_contents)
     qr.make(fit=True)
 
