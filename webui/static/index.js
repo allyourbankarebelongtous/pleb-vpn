@@ -200,7 +200,7 @@ function setWireguard_off(userId) {
   }
 }
 
-function setlndHybrid_off(userId) {
+function delete_wireguard_conf(userId) {
   if (
     confirm_dialog(
       (message =
