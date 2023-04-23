@@ -1,6 +1,6 @@
 from flask_socketio import SocketIO
-import eventlet
+from gevent import monkey
 
-eventlet.monkey_patch()
+monkey.patch_all()
 
-socketio = SocketIO(async_mode='eventlet')
+socketio = SocketIO(async_mode='gevent')
