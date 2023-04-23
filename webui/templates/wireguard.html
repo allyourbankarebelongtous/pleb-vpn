@@ -127,6 +127,21 @@ content %}
       </div>
     </div>
   </form>
+  {% endif %} {% if setting['wgIP'] != "" %}
+  <div class="row">
+    <div class="col">
+      <h5>Delete existing wireguard config</h5>
+    </div>
+    <div class="col">
+      <button
+        type="button"
+        class="btn btn-danger"
+        onClick="delete_wireguard_config({{ current_user.id }})"
+      >
+        Delete
+      </button>
+    </div>
+  </div>
   {% endif %}
 </div>
 {% else %}

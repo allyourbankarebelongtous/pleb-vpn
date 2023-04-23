@@ -5,7 +5,7 @@ from socket_io import socketio
 # from PIL import Image
 from .models import User
 from . import db
-import json, os, subprocess, time, pexpect, random, qrcode, io, base64
+import json, os, subprocess, time, pexpect, random, qrcode, io, base64, shutil
 
 views = Blueprint('views', __name__)
 
@@ -272,6 +272,22 @@ def set_wireguard():
                     flash('Error: unable to find conf files. Create new conf files and re-enable wireguard.', category='error') 
                 else:
                     flash('An unknown error occured!', category='error')
+
+    return jsonify({})
+
+@views.route('/delete_wireguard_conf', methods=['POST'])
+@login_required
+def delete_wireguard_conf():
+    user = json.loads(request.data)
+    userId = user['userId']
+    user = User.query.get(userId)
+    if user:
+        if user.id == current_user.id:
+            if os.path.exists('/mnt/hdd/mynode/pleb-vpn/wireguard'):
+                shutil.rmtree('/mnt/hdd/mynode/pleb-vpn/wireguard')
+            set_conf('wgIP', '')
+            set_conf('wgLAN', '')
+            set_conf('wgPort', '')
 
     return jsonify({})
 

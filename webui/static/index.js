@@ -200,6 +200,22 @@ function setWireguard_off(userId) {
   }
 }
 
+function setlndHybrid_off(userId) {
+  if (
+    confirm_dialog(
+      (message =
+        "Are you sure you want to delete your existing wireguard IP and config files? You will have to download new config files to connect.")
+    ) == true
+  ) {
+    fetch("/delete_wireguard_conf", {
+      method: "POST",
+      body: JSON.stringify({ userId: userId }),
+    }).then((_res) => {
+      window.location.href = "/wireguard";
+    });
+  }
+}
+
 function display_qrcode(filename) {
   var image = document.getElementById("qr_image");
 
