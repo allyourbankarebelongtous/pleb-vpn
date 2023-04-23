@@ -186,8 +186,10 @@ def wireguard():
 
     return render_template('wireguard.html', user=current_user, setting=get_conf())
 
-@views.route('/wireguard/clientqrcode')
-def generate_qr_code(filename):
+@views.route('/wireguard/clientqrcode', methods=['POST'])
+def generate_qr_code():
+    filename = json.loads(request.data)
+    filename = filename['filename']
     # Read the contents of the text file
     path = os.path.join('/mnt/hdd/mynode/pleb-vpn/wireguard/clients', filename)
     with open(path, 'r') as f:

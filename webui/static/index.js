@@ -203,7 +203,10 @@ function setWireguard_off(userId) {
 function display_qrcode(filename) {
   var image = document.getElementById("qr_image");
 
-  fetch("/wireguard/clientqrcode")
+  fetch("/wireguard/clientqrcode", {
+    method: "POST",
+    body: JSON.stringify({ filename: filename }),
+  })
     .then((response) => response.json())
     .then((data) => {
       // Set the image source to the base64-encoded image
