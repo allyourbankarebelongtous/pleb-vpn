@@ -211,8 +211,9 @@ def generate_qr_code(filename):
     return jsonify(image=img_base64)
 
 @views.route('/wireguard/download_client')
-def download_file(filename):
-    # Assuming the file is located in /mnt/hdd/files/
+def download_file():
+    # Get the filename from the URL query string
+    filename = request.args.get('filename')
     path = os.path.join('/mnt/hdd/mynode/pleb-vpn/wireguard/clients', filename)
     # Check if the file exists
     if not os.path.exists(path):

@@ -241,8 +241,8 @@ AllowedIPs = ${wgLAN}.0/24, ${LAN}.0/24
     # copy keys and config
     sudo rm -rf /mnt/hdd/mynode/pleb-vpn/wireguard
     sudo cp -p -r /etc/wireguard/ /mnt/hdd/mynode/pleb-vpn/
-    sudo chown -R admin:admin /mnt/hdd/app-data/pleb-vpn/wireguard
-    sudo chmod -R 755 /mnt/hdd/app-data/pleb-vpn/wireguard
+    sudo chown -R admin:admin /mnt/hdd/mynode/pleb-vpn/wireguard
+    sudo chmod -R 755 /mnt/hdd/app-data/mynode/wireguard
   else
     # update pleb-vpn.conf
     wgIP=$(cat /mnt/hdd/mynode/pleb-vpn/wireguard/wg0.conf | grep Address | sed 's/^.* = //' | sed 's/^\(.*\)\/\(.*\)$/\1/')
