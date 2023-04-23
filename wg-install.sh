@@ -138,7 +138,7 @@ download all three config files by chosing 'Download'" 12 80
 on() {
   # install and configure wireguard
   source ${plebVPNConf}
-  local new_config = "${1}"
+  local new_config="${1}"
 
   # check if plebvpn is on
   if ! [ "${plebVPN}" = "on" ]; then
