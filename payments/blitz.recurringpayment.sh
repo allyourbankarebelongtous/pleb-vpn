@@ -170,7 +170,7 @@ fi
 short_node_id=$(echo $NODE_ID | cut -c 1-7)
 script_name="/mnt/hdd/mynode/pleb-vpn/payments/keysends/_${short_node_id}_${freq}_${node}_keysend.sh"
 denomination=$(echo $DENOMINATION | tr '[:upper:]' '[:lower:]')
-echo -n "/usr/bin/python /mnt/hdd/mynode/pleb-vpn/payments/_recurringpayment_${node}.py " \
+echo -n "/mnt/hdd/mynode/pleb-vpn/.venv/bin/python /mnt/hdd/mynode/pleb-vpn/payments/_recurringpayment_${node}.py " \
       "--$denomination $AMOUNT " \
       "--node_id $NODE_ID " \
       > $script_name
