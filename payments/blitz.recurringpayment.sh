@@ -1,14 +1,16 @@
 #!/bin/bash
 
-# generates a payment script for a recurring payment and places the command in /home/admin/pleb-vpn/payments/keysends.
-# includes the script name and location in /home/admin/pleb-vpn/payments/[frequency]payments.sh
-# adds the payment as an option to delete in /home/admin/pleb-vpn/payments.conf
+# generates a payment script for a recurring payment and places the command in /mnt/hdd/mynode/pleb-vpn/payments/keysends.
+# includes the script name and location in /mnt/hdd/mynode/pleb-vpn/payments/[frequency][node]payments.sh
+# adds the payment as an option to delete in /mnt/hdd/mynode/pleb-vpn/payments.conf
 # checks for systemd timer and if required sets it up.
 
 HEIGHT=19
 WIDTH=120
 
-source /mnt/hdd/raspiblitz.conf
+# for mynode, only use lnd
+lnd="on"
+cl="off"
 
 # Node menu options (if necessary)
 NODE_OPTIONS=(LND "Send sats using the LND node" \
@@ -102,7 +104,7 @@ if [ "${node}" = "ask" ]; then
   esac
 fi
 if [ "${node}" = "none" ]; then
-  echo "error: no node implementation found in raspiblitz.conf"
+  echo "error: no node implementation found."
   exit 1
 fi
 
@@ -166,10 +168,9 @@ fi
  
 # Generate a keysend script
 short_node_id=$(echo $NODE_ID | cut -c 1-7)
-script_name="/home/admin/pleb-vpn/payments/keysends/_${short_node_id}_${freq}_${node}_keysend.sh"
-script_backup_name="/mnt/hdd/app-data/pleb-vpn/payments/keysends/_${short_node_id}_${freq}_${node}_keysend.sh"
+script_name="/mnt/hdd/mynode/pleb-vpn/payments/keysends/_${short_node_id}_${freq}_${node}_keysend.sh"
 denomination=$(echo $DENOMINATION | tr '[:upper:]' '[:lower:]')
-echo -n "/usr/bin/python /home/admin/pleb-vpn/payments/_recurringpayment_${node}.py " \
+echo -n "/usr/bin/python /mnt/hdd/mynode/pleb-vpn/payments/_recurringpayment_${node}.py " \
       "--$denomination $AMOUNT " \
       "--node_id $NODE_ID " \
       > $script_name
@@ -179,16 +180,13 @@ if [ ! "${message}" = "" ]; then
 " | tee -a $script_name
 fi
 chmod +x $script_name
-sudo cp -p $script_name $script_backup_name
 
 # add payment to execution list
-subscriptionlist="/home/admin/pleb-vpn/payments/${freq}${node}payments.sh"
-subscriptionbackuplist="/mnt/hdd/app-data/pleb-vpn/payments/${freq}${node}payments.sh"
+subscriptionlist="/mnt/hdd/mynode/pleb-vpn/payments/${freq}${node}payments.sh"
 # first check if already on the list to avoid duplicates in case of payment change
 scriptexists=$(cat ${subscriptionlist} | grep -c ${script_name})
 if [ ${scriptexists} -eq 0 ]; then
   echo "${script_name}" >>${subscriptionlist}
-  sudo cp -p $subscriptionlist $subscriptionbackuplist
 fi
 
 # check if systemd unit for frequency and node exists, and if not, create it
