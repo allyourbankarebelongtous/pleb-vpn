@@ -199,7 +199,7 @@ Description=Execute ${freq} payments
 [Service]
 User=bitcoin
 Group=bitcoin
-ExecStart=/bin/bash /home/admin/pleb-vpn/payments/${freq}${node}payments.sh" \
+ExecStart=/bin/bash /mnt/hdd/mynode/pleb-vpn/payments/${freq}${node}payments.sh" \
     > /etc/systemd/system/payments-${freq}-${node}.service
   echo -n "# this file will run ${freq} to execute any ${freq} recurring payments
 [Unit]
