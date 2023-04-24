@@ -10,8 +10,6 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   exit 1
 fi
 
-source /mnt/hdd/mynode/pleb-vpn/pleb-vpn.conf
-
 function dialog_menu()
 {
     selection["$1"]="$(dialog --clear \
