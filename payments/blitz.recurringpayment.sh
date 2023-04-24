@@ -160,10 +160,10 @@ who sent the payment. If you use this with @allyourbankarebelongtous VPS
 service, please include your TG handle or protonmail email for accounting.
 " 12 85
 if [ $? -eq 0 ]; then
-  sudo touch /var/cache/raspiblitz/.tmp
-  sudo chmod 777 /var/cache/raspiblitz/.tmp
-  whiptail --title "Enter Message" --inputbox "Enter the message you wish to send with each payment" 12 100 2>/var/cache/raspiblitz/.tmp
-  message=$(cat /var/cache/raspiblitz/.tmp)
+  sudo touch /mnt/hdd/mynode/pleb-vpn/payments/.tmp
+  sudo chmod 777 /mnt/hdd/mynode/pleb-vpn/payments/.tmp
+  whiptail --title "Enter Message" --inputbox "Enter the message you wish to send with each payment" 12 100 2>/mnt/hdd/mynode/pleb-vpn/payments/.tmp
+  message=$(cat /mnt/hdd/mynode/pleb-vpn/payments/.tmp)
 fi
  
 # Generate a keysend script
