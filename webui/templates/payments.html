@@ -334,11 +334,12 @@ content %}
       <h4>Schedule New Payment</h4>
     </div>
   </div>
+  <div class="row style="border-top: 1px solid lightgrey">
   <form method="POST">
-    <div class="row">
+
       <div class="col text-center">
         <div class="row">
-          <h6>Frequency</h6>
+          <h5>Frequency</h5>
         </div>
         <div class="row">
           <label for="frequency"
@@ -351,6 +352,17 @@ content %}
             <option value="yearly">Yearly</option>
           </select>
         </div>
+        <br />
+        <div class="row">
+            <div class="col text-center">
+              <button
+                type="button"
+                class="btn btn-success"
+                onClick="this.form.submit()"
+              >
+                Schedule New Payment
+              </button>
+            </div>
       </div>
 
       <div class="col-8">
@@ -408,23 +420,15 @@ content %}
           </tbody>
         </table>
       </div>
-      <div class="row">
-        <div class="col text-center">
-          <button
-            type="button"
-            class="btn btn-success"
-            onClick="this.form.submit()"
-          >
-            Schedule New Payment
-          </button>
-        </div>
       </div>
-    </div>
+    
   </form>
+</div>
+<br />
   <div class="row">
     <div class="col text-center">
       <div class="row text-center">
-        <h6>Delete All Payments</h6>
+        <h4>Delete All Payments</h4>
       </div>
       <div class="row">
         <div class="col text-center">
