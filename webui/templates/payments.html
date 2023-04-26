@@ -27,13 +27,13 @@ content %}
     <div class="col" style="border-top: 1px solid lightgrey">
       {% for line in current_payments['daily'] %}
       <div class="row">
-        <div class="col text-center">
+        <div class="col">
           <div class="row">
             <div class="col">
               <h6>Payment ID</h6>
             </div>
             <div class="col">
-              <h7>{{ line[1] }}</h7>
+              <h7>{{ line[0] }}</h7>
             </div>
           </div>
           <div class="row">
@@ -106,7 +106,7 @@ content %}
     <div class="col" style="border-top: 1px solid lightgrey">
       {% for line in current_payments['weekly'] %}
       <div class="row">
-        <div class="col text-center">
+        <div class="col">
           <div class="row">
             <div class="col">
               <h6>Payment ID</h6>
