@@ -334,97 +334,92 @@ content %}
       <h4>Schedule New Payment</h4>
     </div>
   </div>
-  <div class="row style="border-top: 1px solid lightgrey">
   <form method="POST">
-
-      <div class="col text-center">
-        <div class="row">
-          <h5>Frequency</h5>
-        </div>
-        <div class="row">
-          <label for="frequency"
-            >Select how often you want to submit this payment:</label
+    <div class="row" style=border-top: 1px solid lightgrey">
+    <div class="col text-center">
+      <div class="row">
+        <h5>Frequency</h5>
+      </div>
+      <div class="row">
+        <label for="frequency"
+          >Select how often you want to submit this payment:</label
+        >
+        <select class="form-control" id="frequency" name="frequency">
+          <option value="daily">Daily</option>
+          <option value="weekly">Weekly</option>
+          <option value="monthly">Monthly</option>
+          <option value="yearly">Yearly</option>
+        </select>
+      </div>
+      <br />
+      <div class="row">
+        <div class="col text-center">
+          <button
+            type="button"
+            class="btn btn-success"
+            onClick="this.form.submit()"
           >
-          <select class="form-control" id="frequency" name="frequency">
-            <option value="daily">Daily</option>
-            <option value="weekly">Weekly</option>
-            <option value="monthly">Monthly</option>
-            <option value="yearly">Yearly</option>
-          </select>
+            Schedule New Payment
+          </button>
         </div>
-        <br />
-        <div class="row">
-            <div class="col text-center">
-              <button
-                type="button"
-                class="btn btn-success"
-                onClick="this.form.submit()"
-              >
-                Schedule New Payment
-              </button>
-            </div>
       </div>
+    </div>
 
-      <div class="col-8">
-        <table class="table">
-          <tbody>
-            <tr>
-              <th scope="row">Destination Pubkey</th>
-              <td>
-                <input
-                  type="text"
-                  id="pubkey"
-                  name="pubkey"
-                  placeholder="Enter Destination Pubkey"
-                />
-              </td>
-            </tr>
-            <tr>
-              <th scope="row">
-                Amount in sats or USD (use format x.xx for USD)
-              </th>
-              <td>
-                <input
-                  type="text"
-                  id="amount"
-                  name="amount"
-                  placeholder="Enter Amount"
-                />
-              </td>
-            </tr>
-            <tr>
-              <th scope="row">Denomination</th>
-              <td>
-                <label for="denomination">Choose sats or USD</label>
-                <select
-                  class="form-control"
-                  id="denomination"
-                  name="denomination"
-                >
-                  <option value="sats">sats</option>
-                  <option value="USD">USD</option>
-                </select>
-              </td>
-            </tr>
-            <tr>
-              <th scope="row">Message</th>
-              <td>
-                <input
-                  type="text"
-                  id="amount"
-                  name="amount"
-                  placeholder="Enter Amount"
-                />
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-      </div>
-    
+    <div class="col-8">
+      <table class="table">
+        <tbody>
+          <tr>
+            <th scope="row">Destination Pubkey</th>
+            <td>
+              <input
+                type="text"
+                id="pubkey"
+                name="pubkey"
+                placeholder="Enter Destination Pubkey"
+              />
+            </td>
+          </tr>
+          <tr>
+            <th scope="row">Amount in sats or USD (use format x.xx for USD)</th>
+            <td>
+              <input
+                type="text"
+                id="amount"
+                name="amount"
+                placeholder="Enter Amount"
+              />
+            </td>
+          </tr>
+          <tr>
+            <th scope="row">Denomination</th>
+            <td>
+              <label for="denomination">Choose sats or USD</label>
+              <select
+                class="form-control"
+                id="denomination"
+                name="denomination"
+              >
+                <option value="sats">sats</option>
+                <option value="USD">USD</option>
+              </select>
+            </td>
+          </tr>
+          <tr>
+            <th scope="row">Message</th>
+            <td>
+              <input
+                type="text"
+                id="amount"
+                name="amount"
+                placeholder="Enter Amount"
+              />
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   </form>
-</div>
-<br />
+  <br />
   <div class="row">
     <div class="col text-center">
       <div class="row text-center">
