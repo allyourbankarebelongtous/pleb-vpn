@@ -9,7 +9,7 @@ content %}
 </div>
 <br />
 <div class="container">
-  {% if current_payments|length > 0 %}
+  {% if current_payments is not none %}
   <div class="row">
     <div class="col">
       <h6 align="center">Current Payments</h6>
