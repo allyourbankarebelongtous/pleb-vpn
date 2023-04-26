@@ -420,7 +420,7 @@ def get_payments():
             denomination = line_parts[4]
             if denomination == "usd":
                 denomination = "USD"
-            message = line_parts[5].strip('"')
+            message = line_parts[5].strip("'")
             if category not in current_payments:
                 current_payments[category] = []
             current_payments[category].append((id, pubkey, amount, denomination, message))
