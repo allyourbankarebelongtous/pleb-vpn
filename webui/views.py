@@ -5,7 +5,7 @@ from socket_io import socketio
 # from PIL import Image
 from .models import User
 from . import db
-import json, os, subprocess, time, pexpect, random, qrcode, io, base64, shutil
+import json, os, subprocess, time, pexpect, random, qrcode, io, base64, shutil, re
 
 views = Blueprint('views', __name__)
 
@@ -412,7 +412,7 @@ def get_payments():
     subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True)
     with open(os.path.abspath('./payments/current_payments.tmp')) as payments:
         for line in payments:
-            line_parts = line.split(' ', 6)
+            line_parts = re.findall(r'"[^"]*"|\S+', line.strip())
             category = line_parts[0]
             id = line_parts[1]
             pubkey = line_parts[2]
@@ -420,7 +420,7 @@ def get_payments():
             denomination = line_parts[4]
             if denomination == "usd":
                 denomination = "USD"
-            message = line_parts[5].strip("'")
+            message = line_parts[5].strip('"')
             if category not in current_payments:
                 current_payments[category] = []
             current_payments[category].append((id, pubkey, amount, denomination, message))
