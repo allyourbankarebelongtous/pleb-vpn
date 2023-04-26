@@ -50,7 +50,7 @@ function getpaymentinfo()
       else
         message=""
       fi
-      echo -e "${freq} ${short_node_id}_${freq}_${node} ${pubkey} ${amount} ${denomination} '${message}'" >>/mnt/hdd/mynode/pleb-vpn/payments/current_payments.tmp
+      echo -e '${freq} ${short_node_id}_${freq}_${node} ${pubkey} ${amount} ${denomination} "${message}"' >>/mnt/hdd/mynode/pleb-vpn/payments/current_payments.tmp
       ((inc1++))
     done
     ((inc++))
