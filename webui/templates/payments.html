@@ -12,14 +12,14 @@ content %}
   {% if current_payments is not none %}
   <div class="row">
     <div class="col">
-      <h6 align="center">Current Payments</h6>
+      <h4 align="center">Current Payments</h4>
     </div>
   </div>
   {% if current_payments['daily']|length > 0 %}
   <div class="row">
     <div class="col text-center">
       <div class="row">
-        <h7>Daily Payments</h7>
+        <h5>Daily Payments</h5>
       </div>
     </div>
   </div>
@@ -44,7 +44,7 @@ content %}
                 id="send_payment"
                 type="button"
                 class="btn btn-success"
-                onClick="send_payment({{ line[1] }})"
+                onClick="send_payment({{ line[0] }})"
               >
                 Send Now
               </button>
@@ -59,9 +59,9 @@ content %}
                 id="delete_payment"
                 type="button"
                 class="btn btn-danger"
-                onClick="delete_payment({{ line[1] }})"
+                onClick="delete_payment({{ line[0] }})"
               >
-                Delete {{ line[0] }}
+                Delete
               </button>
             </div>
           </div>
@@ -96,8 +96,8 @@ content %}
 
   {% endif %} {% if current_payments['weekly']|length > 0 %}
   <div class="row">
-    <div class="col">
-      <h7 align="center">Weekly Payments</h7>
+    <div class="col text-center">
+      <h5">Weekly Payments</h5>
     </div>
   </div>
   <div class="row">
@@ -121,7 +121,7 @@ content %}
                 id="send_payment"
                 type="button"
                 class="btn btn-success"
-                onClick="send_payment({{ line[1] }})"
+                onClick="send_payment({{ line[0] }})"
               >
                 Send Now
               </button>
@@ -136,9 +136,9 @@ content %}
                 id="delete_payment"
                 type="button"
                 class="btn btn-danger"
-                onClick="delete_payment({{ line[1] }})"
+                onClick="delete_payment({{ line[0] }})"
               >
-                Delete {{ line[0] }}
+                Delete
               </button>
             </div>
           </div>
@@ -173,8 +173,8 @@ content %}
 
   {% endif %} {% if current_payments['monthly']|length > 0 %}
   <div class="row">
-    <div class="col">
-      <h7 align="center">Monthly Payments</h7>
+    <div class="col text-center">
+      <h5>Monthly Payments</h5>
     </div>
   </div>
   <div class="row">
@@ -198,7 +198,7 @@ content %}
                 id="send_payment"
                 type="button"
                 class="btn btn-success"
-                onClick="send_payment({{ line[1] }})"
+                onClick="send_payment({{ line[0] }})"
               >
                 Send Now
               </button>
@@ -213,9 +213,9 @@ content %}
                 id="delete_payment"
                 type="button"
                 class="btn btn-danger"
-                onClick="delete_payment({{ line[1] }})"
+                onClick="delete_payment({{ line[0] }})"
               >
-                Delete {{ line[0] }}
+                Delete
               </button>
             </div>
           </div>
@@ -250,8 +250,8 @@ content %}
 
   {% endif %} {% if current_payments['yearly']|length > 0 %}
   <div class="row">
-    <div class="col">
-      <h7 align="center">Yearly Payments</h7>
+    <div class="col text-center">
+      <h5">Yearly Payments</h5>
     </div>
   </div>
   <div class="row">
@@ -275,7 +275,7 @@ content %}
                 id="send_payment"
                 type="button"
                 class="btn btn-success"
-                onClick="send_payment({{ line[1] }})"
+                onClick="send_payment({{ line[0] }})"
               >
                 Send Now
               </button>
@@ -290,9 +290,9 @@ content %}
                 id="delete_payment"
                 type="button"
                 class="btn btn-danger"
-                onClick="delete_payment({{ line[1] }})"
+                onClick="delete_payment({{ line[0] }})"
               >
-                Delete {{ line[0] }}
+                Delete
               </button>
             </div>
           </div>
