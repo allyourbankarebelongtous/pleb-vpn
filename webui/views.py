@@ -426,6 +426,7 @@ def get_payments():
             if category not in current_payments:
                 current_payments[category] = []
             current_payments[category].append((id, pubkey, amount, denomination, message))
+    print(current_payments) # for debug purposes only
     os.remove(os.path.abspath('./payments/current_payments.tmp'))
 
 @socketio.on('user_input')
