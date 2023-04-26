@@ -10,25 +10,10 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   exit 1
 fi
 
-function dialog_menu()
-{
-    selection["$1"]="$(dialog --clear \
-            --backtitle "$2" \
-            --title "$3" \
-            --ok-label "Select" \
-            --cancel-label "Cancel" \
-            --menu "$4" 30 120 30 \
-            "${!5}" --output-fd 1)"
-}
-
 function getpaymentinfo()
 {
-  sudo touch /mnt/hdd/mynode/pleb-vpn/payments/displaypayments.tmp
-  sudo chmod 777 /mnt/hdd/mynode/pleb-vpn/payments/displaypayments.tmp
-  sudo touch /mnt/hdd/mynode/pleb-vpn/payments/selectpayments.tmp
-  sudo chmod 777 /mnt/hdd/mynode/pleb-vpn/payments/selectpayments.tmp
-  echo "PAYMENTS=()" >/mnt/hdd/mynode/pleb-vpn/payments/selectpayments.tmp
-  echo -e "PAYMENT_ID \t\tDESTINATION \t\tAMOUNT--DENOMINATION \t\tMESSSAGE" >>/mnt/hdd/mynode/pleb-vpn/payments/displaypayments.tmp
+  sudo touch /mnt/hdd/mynode/pleb-vpn/payments/current_payments.tmp
+  sudo chmod 777 /mnt/hdd/mynode/pleb-vpn/payments/current_payments.tmp
   inc=1
   while [ $inc -le 4 ]
   do
@@ -52,21 +37,20 @@ function getpaymentinfo()
     currentPayments=$(cat /mnt/hdd/mynode/pleb-vpn/payments/${freq}${node}payments.sh | grep keysend)
     currentNumPayments=$(cat /mnt/hdd/mynode/pleb-vpn/payments/${freq}${node}payments.sh | grep -c keysend)
     inc1=1
-    echo "
-${FREQ} PAYMENTS" >>/mnt/hdd/mynode/pleb-vpn/payments/displaypayments.tmp
     while [ $inc1 -le $currentNumPayments ]
     do
       short_node_id=$(cat $(echo "${currentPayments}" | sed -n "${inc1}p") | awk '{print $6}' | cut -c 1-7)
       node_id=$(cat $(echo "${currentPayments}" | sed -n "${inc1}p") | awk '{print $6}' | cut -c 1-20)
+      pubkey=$(cat $(echo "${currentPayments}" | sed -n "${inc1}p") | awk '{print $6}')
       value=$(cat $(echo "${currentPayments}" | sed -n "${inc1}p") | awk '{print $4 $3}')
+      amount=$(echo "${value}" | awk -F"--" '{print $1}')
+      denomination=$(echo "${value}" | awk -F"--" '{print $2}')
       if [ $(cat $(echo "${currentPayments}" | sed -n "${inc1}p") | grep -c message) -gt 0 ]; then
         message=$(cat $(echo "${currentPayments}" | sed -n "${inc1}p") | sed 's/.*--message//' | sed 's/ //' | sed 's/\"//g')
       else
         message=""
       fi
-      echo -e "${short_node_id}_${freq}_${node} \t$node_id \t${value} \t${message}" >>/mnt/hdd/mynode/pleb-vpn/payments/displaypayments.tmp
-      echo "PAYMENTS+=(${short_node_id}_${freq}_${node}" >>/mnt/hdd/mynode/pleb-vpn/payments/selectpayments.tmp
-      sudo sed -i "s/${short_node_id}_${freq}_${node}.*/${short_node_id}_${freq}_${node} \"send to ${short_node_id} ${value} ${freq} from ${node}\"\)/g" /mnt/hdd/mynode/pleb-vpn/payments/selectpayments.tmp
+      echo -e "${freq} ${short_node_id}_${freq}_${node} ${pubkey} ${amount} ${denomination} ${message}" >>/mnt/hdd/mynode/pleb-vpn/payments/current_payments.tmp
       ((inc1++))
     done
     ((inc++))
@@ -76,9 +60,6 @@ ${FREQ} PAYMENTS" >>/mnt/hdd/mynode/pleb-vpn/payments/displaypayments.tmp
 # view payments
 if [ "$1" = "status" ]; then
   getpaymentinfo
-  dialog --title "Current Scheduled Payments" --cr-wrap --textbox /mnt/hdd/mynode/pleb-vpn/payments/displaypayments.tmp 35 140
-  sudo rm /mnt/hdd/mynode/pleb-vpn/payments/displaypayments.tmp
-  sudo rm /mnt/hdd/mynode/pleb-vpn/payments/selectpayments.tmp
   exit 0
 fi
 
@@ -171,3 +152,10 @@ Are you sure you want to delete all payments? This cannot be undone.
   exit 0
 fi
 
+case "${1}" in
+  status) status ;;
+  newpayment) newpayment "${2}" "${2}" "${2}" "${2}" ;;
+  deletepayment) deletepayment "${2}" ;;
+  deleteall) deleteall ;;
+  *) echo "err=Unknown action: ${1}" ; exit 1 ;;
+esac 

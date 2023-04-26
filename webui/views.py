@@ -15,6 +15,7 @@ conf_file_location = '/mnt/hdd/mynode/pleb-vpn/pleb-vpn.conf'
 plebVPN_status = {}
 lnd_hybrid_status = {}
 wireguard_status = {}
+current_payments = {}
 user_input = None
 enter_input = False
 update_available = False
@@ -172,6 +173,12 @@ def set_lndHybrid():
                     flash('An unknown error occured!', category='error')
 
     return jsonify({})
+
+@views.route('/payments', methods=['GET', 'POST'])
+@login_required
+def payments():
+
+    return render_template('payments.html', user=current_user, current_payments=get_payments())
 
 @views.route('/wireguard', methods=['GET', 'POST'])
 @login_required
@@ -398,6 +405,28 @@ def get_wireguard_status():
                 name, value = line.split("=")
                 wireguard_status[name] = str(value).rstrip().strip('\'\'')
     os.remove(os.path.abspath('./wireguard_status.tmp'))
+
+def get_payments():
+    # get current payments
+    global current_payments
+    current_payments = {}
+    cmd_str = ["sudo bash /mnt/hdd/mynode/pleb-vpn/payments/managepayments.sh status"]
+    subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True)
+    with open(os.path.abspath('./payments/current_payments.tmp')) as payments:
+        for line in payments:
+            line_parts = line.split(' ', 6)
+            category = line_parts[0]
+            id = line_parts[1]
+            pubkey = line_parts[2]
+            amount = line_parts[3]
+            denomination = line_parts[4]
+            if denomination == "usd":
+                denomination = "USD"
+            message = line_parts[5].strip('"')
+            if category not in current_payments:
+                current_payments[category] = []
+            current_payments[category].append((id, pubkey, amount, denomination, message))
+    os.remove(os.path.abspath('./payments/current_payments.tmp'))
 
 @socketio.on('user_input')
 def set_user_input(input):

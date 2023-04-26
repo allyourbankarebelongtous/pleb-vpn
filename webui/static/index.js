@@ -250,6 +250,54 @@ function download_file(filename) {
   xhr.send();
 }
 
+function delete_all_payments(userId) {
+  if (
+    confirm_dialog(
+      (message =
+        "Are you sure you want to delete all your scheduled payments? This is irreversible!")
+    ) == true
+  ) {
+    fetch("/delete_all_payments", {
+      method: "POST",
+      body: JSON.stringify({ userId: userId }),
+    }).then((_res) => {
+      window.location.href = "/payments";
+    });
+  }
+}
+
+function delete_payment(payment_id) {
+  if (
+    confirm_dialog(
+      (message =
+        "Are you sure you want to delete this payment? This is irreversible!")
+    ) == true
+  ) {
+    fetch("/delete_payment", {
+      method: "POST",
+      body: JSON.stringify({ payment_id: payment_id }),
+    }).then((_res) => {
+      window.location.href = "/payments";
+    });
+  }
+}
+
+function send_payment(payment_id) {
+  if (
+    confirm_dialog(
+      (message =
+        "Are you sure you want to send this payment now? It will still send on its next scheduled time.")
+    ) == true
+  ) {
+    fetch("/send_payment", {
+      method: "POST",
+      body: JSON.stringify({ payment_id: payment_id }),
+    }).then((_res) => {
+      window.location.href = "/payments";
+    });
+  }
+}
+
 function refreshplebVPNdata(userId) {
   var activateBtn = document.getElementById("activate");
   if (activateBtn !== null) {
