@@ -15,7 +15,6 @@ conf_file_location = '/mnt/hdd/mynode/pleb-vpn/pleb-vpn.conf'
 plebVPN_status = {}
 lnd_hybrid_status = {}
 wireguard_status = {}
-current_payments = {}
 user_input = None
 enter_input = False
 update_available = False
@@ -408,7 +407,6 @@ def get_wireguard_status():
 
 def get_payments():
     # get current payments
-    global current_payments
     current_payments = {}
     cmd_str = ["sudo bash /mnt/hdd/mynode/pleb-vpn/payments/managepayments.sh status"]
     subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True)
@@ -426,8 +424,8 @@ def get_payments():
             if category not in current_payments:
                 current_payments[category] = []
             current_payments[category].append((id, pubkey, amount, denomination, message))
-    print(current_payments) # for debug purposes only
     os.remove(os.path.abspath('./payments/current_payments.tmp'))
+    return current_payments
 
 @socketio.on('user_input')
 def set_user_input(input):

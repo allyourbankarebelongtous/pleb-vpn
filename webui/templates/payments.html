@@ -409,15 +409,17 @@ content %}
       <div class="row text-center">
         <h6>Delete All Payments</h6>
       </div>
-      <div class="row text-center">
-        <button
-          id="delete_all_payments"
-          type="button"
-          class="btn btn-danger"
-          onClick="delete_all_payments({{ current_user.id }})"
-        >
-          Delete All
-        </button>
+      <div class="row">
+        <div class="col text-center">
+          <button
+            id="delete_all_payments"
+            type="button"
+            class="btn btn-danger"
+            onClick="delete_all_payments({{ current_user.id }})"
+          >
+            Delete All
+          </button>
+        </div>
       </div>
     </div>
   </div>
