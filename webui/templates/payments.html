@@ -1,5 +1,17 @@
 {% extends "base.html" %} {% block title %}Payments{% endblock %} {% block
 content %}
+<style>
+  table.no-borders {
+    border-collapse: separate;
+    border-spacing: 10px;
+  }
+
+  table.no-borders td,
+  table.no-borders th {
+    border: none;
+    padding: 10px;
+  }
+</style>
 <div class="container text-center">
   <div class="row">
     <div class="col">
@@ -27,12 +39,28 @@ content %}
     <div class="col" style="border-top: 1px solid lightgrey">
       {% for line in current_payments['daily'] %}
       <div class="row">
-        <div class="col">
+        <div class="col-8">
           <table class="table">
             <tbody>
               <tr>
                 <th scope="row">Destination Pubkey</th>
                 <td>{{ line[1] }}</td>
+              </tr>
+              <tr>
+                <th scope="row">Amount</th>
+                <td>{{ line[2] }} {{ line[3] }}</td>
+              </tr>
+              <tr>
+                <th scope="row">Message</th>
+                <td>{{ line[4] }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="col">
+          <table class="my-table">
+            <tbody>
+              <tr>
                 <td>
                   <button
                     id="send_payment"
@@ -45,8 +73,6 @@ content %}
                 </td>
               </tr>
               <tr>
-                <th scope="row">Amount</th>
-                <td>{{ line[2] }} {{ line[3] }}</td>
                 <td>
                   <button
                     id="edit_payment"
@@ -58,8 +84,6 @@ content %}
                 </td>
               </tr>
               <tr>
-                <th scope="row">Message</th>
-                <td>{{ line[4] }}</td>
                 <td>
                   <button
                     id="delete_payment"
