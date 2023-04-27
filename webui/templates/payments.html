@@ -28,35 +28,6 @@ content %}
       {% for line in current_payments['daily'] %}
       <div class="row">
         <div class="col">
-          <br />
-          <div class="row">
-            <div class="col text-center">
-              <button
-                id="send_payment"
-                type="button"
-                class="btn btn-success"
-                onClick="send_payment({{ line[0] }})"
-              >
-                Send Now
-              </button>
-            </div>
-            <div class="col text-center">
-              <button id="edit_payment" type="button" class="btn btn-primary">
-                Edit
-              </button>
-            </div>
-            <div class="col text-center">
-              <button
-                id="delete_payment"
-                type="button"
-                class="btn btn-danger"
-                onClick="delete_payment({{ line[0] }})"
-              >
-                Delete
-              </button>
-            </div>
-          </div>
-
           <table class="table">
             <tbody>
               <tr>
@@ -73,6 +44,40 @@ content %}
               </tr>
             </tbody>
           </table>
+        </div>
+        <div class="col">
+          <br />
+          <div class="row">
+            <div class="col text-center">
+              <button
+                id="send_payment"
+                type="button"
+                class="btn btn-success"
+                onClick="send_payment({{ line[0] }})"
+              >
+                Send Now
+              </button>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col text-center">
+              <button id="edit_payment" type="button" class="btn btn-primary">
+                Edit
+              </button>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col text-center">
+              <button
+                id="delete_payment"
+                type="button"
+                class="btn btn-danger"
+                onClick="delete_payment({{ line[0] }})"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
         </div>
       </div>
       {% endfor %}
