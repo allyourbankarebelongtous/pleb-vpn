@@ -52,7 +52,7 @@ content %}
               <button
                 id="send_payment"
                 type="button"
-                class="btn btn-success"
+                class="btn btn-sm btn-success"
                 onClick="send_payment({{ line[0] }})"
               >
                 Send Now
@@ -62,7 +62,11 @@ content %}
           <br />
           <div class="row">
             <div class="col text-center">
-              <button id="edit_payment" type="button" class="btn btn-primary">
+              <button
+                id="edit_payment"
+                type="button"
+                class="btn btn-sm btn-primary"
+              >
                 Edit
               </button>
             </div>
@@ -73,7 +77,7 @@ content %}
               <button
                 id="delete_payment"
                 type="button"
-                class="btn btn-danger"
+                class="btn btn-sm btn-danger"
                 onClick="delete_payment({{ line[0] }})"
               >
                 Delete
