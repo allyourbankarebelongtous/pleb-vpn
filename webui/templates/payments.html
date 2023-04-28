@@ -26,27 +26,31 @@ content %}
     </div>
     <br />
     <div class="row">
-      <button
-        id="send_payment"
-        type="button"
-        class="btn btn-sm btn-success"
-        onClick="send_payment({{ line[0] }})"
-      >
-        Send
-      </button>
-      <p></p>
-      <button id="edit_payment" type="button" class="btn btn-sm btn-primary">
-        Edit
-      </button>
-      <p></p>
-      <button
-        id="delete_payment"
-        type="button"
-        class="btn btn-sm btn-danger"
-        onClick="delete_payment({{ line[0] }})"
-      >
-        Delete
-      </button>
+      <div class="col-sm mx-2">
+        <button
+          id="send_payment"
+          type="button"
+          class="btn btn-sm btn-success"
+          onClick="send_payment({{ line[0] }})"
+        >
+          Send
+        </button>
+      </div>
+      <div class="col-sm mx-2">
+        <button id="edit_payment" type="button" class="btn btn-sm btn-primary">
+          Edit
+        </button>
+      </div>
+      <div class="col-sm mx-2">
+        <button
+          id="delete_payment"
+          type="button"
+          class="btn btn-sm btn-danger"
+          onClick="delete_payment({{ line[0] }})"
+        >
+          Delete
+        </button>
+      </div>
     </div>
   </div>
   <div class="col-9">
