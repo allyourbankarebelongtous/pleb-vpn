@@ -19,7 +19,7 @@ content %}
   current_payments['daily'] %}
   <div class="row" style="border-top: 1px solid lightgrey">
     <div class="col">
-      <div class="row" style="margin-bottom: 0.5em">
+      <div class="row">
         <div class="col text-center">
           <br />
           <h5>Daily Payment</h5>
@@ -72,7 +72,7 @@ content %}
     for line in current_payments['weekly'] %}
     <div class="row" style="border-top: 1px solid lightgrey">
       <div class="col">
-        <div class="row" style="margin-bottom: 0.5em">
+        <div class="row">
           <div class="col text-center">
             <br />
             <h5>Weekly Payment</h5>
@@ -125,7 +125,7 @@ content %}
       {% for line in current_payments['monthly'] %}
       <div class="row" style="border-top: 1px solid lightgrey">
         <div class="col">
-          <div class="row" style="margin-bottom: 0.5em">
+          <div class="row">
             <div class="col text-center">
               <br />
               <h5>Monthly Payment</h5>
@@ -135,7 +135,7 @@ content %}
             </div>
           </div>
           <div class="row">
-            <div class="col">
+            <div class="col text-center">
               <button
                 id="send_payment"
                 type="button"
@@ -181,7 +181,7 @@ content %}
         <div class="row" style="border-top: 1px solid lightgrey">
           <div class="col">
             <div class="row">
-              <div class="col text-center">
+              <div class="col">
                 <br />
                 <h5>Yearly Payment</h5>
                 <p><small>every Dec 31st at midnight</small></p>
