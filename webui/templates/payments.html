@@ -67,294 +67,288 @@ content %}
         </tbody>
       </table>
     </div>
-    {% endfor %} {% endif %} {% if current_payments['weekly']|length > 0 %} {%
-    for line in current_payments['weekly'] %}
+  </div>
+  {% endfor %} {% endif %} {% if current_payments['weekly']|length > 0 %} {% for
+  line in current_payments['weekly'] %}
+  <div class="row" style="border-top: 1px solid lightgrey">
+    <div class="col-3">
+      <div class="row" style="margin-top: 0.5em">
+        <div class="col">
+          <h5>Weekly Payment</h5>
+          <p><small>every saturday night at midnight</small></p>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col">
+          <button
+            id="send_payment"
+            type="button"
+            class="btn btn-success"
+            onClick="send_payment({{ line[0] }})"
+          >
+            Send
+          </button>
+          <button id="edit_payment" type="button" class="btn btn-primary">
+            Edit
+          </button>
+          <button
+            id="delete_payment"
+            type="button"
+            class="btn btn-danger"
+            onClick="delete_payment({{ line[0] }})"
+          >
+            Delete
+          </button>
+        </div>
+      </div>
+    </div>
+    <div class="col-9">
+      <table class="table">
+        <tbody>
+          <tr>
+            <th scope="row">Destination Pubkey</th>
+            <td>{{ line[1] }}</td>
+          </tr>
+          <tr>
+            <th scope="row">Amount</th>
+            <td>{{ line[2] }} {{ line[3] }}</td>
+          </tr>
+          <tr>
+            <th scope="row">Message</th>
+            <td>{{ line[4] }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  {% endfor %} {% endif %} {% if current_payments['monthly']|length > 0 %} {%
+  for line in current_payments['monthly'] %}
+  <div class="row" style="border-top: 1px solid lightgrey">
+    <div class="col-3">
+      <div class="row" style="margin-top: 0.5em">
+        <div class="col">
+          <h5>Monthly Payment</h5>
+          <p>
+            <small>every last night of the month at midnight</small>
+          </p>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col">
+          <button
+            id="send_payment"
+            type="button"
+            class="btn btn-success"
+            onClick="send_payment({{ line[0] }})"
+          >
+            Send
+          </button>
+          <button id="edit_payment" type="button" class="btn btn-primary">
+            Edit
+          </button>
+          <button
+            id="delete_payment"
+            type="button"
+            class="btn btn-danger"
+            onClick="delete_payment({{ line[0] }})"
+          >
+            Delete
+          </button>
+        </div>
+      </div>
+    </div>
+    <div class="col-9">
+      <table class="table">
+        <tbody>
+          <tr>
+            <th scope="row">Destination Pubkey</th>
+            <td>{{ line[1] }}</td>
+          </tr>
+          <tr>
+            <th scope="row">Amount</th>
+            <td>{{ line[2] }} {{ line[3] }}</td>
+          </tr>
+          <tr>
+            <th scope="row">Message</th>
+            <td>{{ line[4] }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  {% endfor %} {% endif %} {% if current_payments['yearly']|length > 0 %} {% for
+  line in current_payments['yearly'] %}
+  <div class="row" style="border-top: 1px solid lightgrey">
+    <div class="col-3">
+      <div class="row" style="margin-top: 0.5em">
+        <div class="col">
+          <br />
+          <h5>Yearly Payment</h5>
+          <p><small>every Dec 31st at midnight</small></p>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col">
+          <button
+            id="send_payment"
+            type="button"
+            class="btn btn-success"
+            onClick="send_payment({{ line[0] }})"
+          >
+            Send
+          </button>
+          <button id="edit_payment" type="button" class="btn btn-primary">
+            Edit
+          </button>
+          <button
+            id="delete_payment"
+            type="button"
+            class="btn btn-danger"
+            onClick="delete_payment({{ line[0] }})"
+          >
+            Delete
+          </button>
+        </div>
+      </div>
+    </div>
+    <div class="col-9">
+      <table class="table">
+        <tbody>
+          <tr>
+            <th scope="row">Destination Pubkey</th>
+            <td>{{ line[1] }}</td>
+          </tr>
+          <tr>
+            <th scope="row">Amount</th>
+            <td>{{ line[2] }} {{ line[3] }}</td>
+          </tr>
+          <tr>
+            <th scope="row">Message</th>
+            <td>{{ line[4] }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+{% endif %} {% endif %}
+<br />
+<div class="container">
+  <div class="row">
+    <div class="col text-center">
+      <h4>Schedule New Payment</h4>
+    </div>
+  </div>
+  <form method="POST">
     <div class="row" style="border-top: 1px solid lightgrey">
-      <div class="col-3">
-        <div class="row" style="margin-top: 0.5em">
+      <div class="col text-center">
+        <div class="row">
           <div class="col">
-            <h5>Weekly Payment</h5>
-            <p><small>every saturday night at midnight</small></p>
+            <h5>Frequency</h5>
           </div>
         </div>
         <div class="row">
           <div class="col">
+            <label for="frequency"
+              >How often do you want to send this payment?</label
+            >
+            <select class="form-control" id="frequency" name="frequency">
+              <option value="daily">Daily</option>
+              <option value="weekly">Weekly</option>
+              <option value="monthly">Monthly</option>
+              <option value="yearly">Yearly</option>
+            </select>
+          </div>
+        </div>
+        <br />
+        <div class="row">
+          <div class="col text-center">
             <button
-              id="send_payment"
               type="button"
               class="btn btn-success"
-              onClick="send_payment({{ line[0] }})"
+              onClick="this.form.submit()"
             >
-              Send
-            </button>
-            <button id="edit_payment" type="button" class="btn btn-primary">
-              Edit
-            </button>
-            <button
-              id="delete_payment"
-              type="button"
-              class="btn btn-danger"
-              onClick="delete_payment({{ line[0] }})"
-            >
-              Delete
+              Schedule New Payment
             </button>
           </div>
         </div>
       </div>
+
       <div class="col-9">
         <table class="table">
           <tbody>
             <tr>
               <th scope="row">Destination Pubkey</th>
-              <td>{{ line[1] }}</td>
+              <td>
+                <input
+                  type="text"
+                  id="pubkey"
+                  name="pubkey"
+                  placeholder="Enter Destination Pubkey"
+                />
+              </td>
             </tr>
             <tr>
-              <th scope="row">Amount</th>
-              <td>{{ line[2] }} {{ line[3] }}</td>
+              <th scope="row">Amount in sats or USD (use x.xx for USD)</th>
+              <td>
+                <input
+                  type="text"
+                  id="amount"
+                  name="amount"
+                  placeholder="Enter Amount"
+                />
+              </td>
+            </tr>
+            <tr>
+              <th scope="row">Denomination</th>
+              <td>
+                <select
+                  class="form-control"
+                  id="denomination"
+                  name="denomination"
+                >
+                  <option value="sats">sats</option>
+                  <option value="USD">USD</option>
+                </select>
+              </td>
             </tr>
             <tr>
               <th scope="row">Message</th>
-              <td>{{ line[4] }}</td>
+              <td>
+                <input
+                  type="text"
+                  id="amount"
+                  name="amount"
+                  placeholder="Enter Amount"
+                />
+              </td>
             </tr>
           </tbody>
         </table>
       </div>
-      {% endfor %} {% endif %} {% if current_payments['monthly']|length > 0 %}
-      {% for line in current_payments['monthly'] %}
-      <div class="row" style="border-top: 1px solid lightgrey">
-        <div class="col-3">
-          <div class="row" style="margin-top: 0.5em">
-            <div class="col">
-              <h5>Monthly Payment</h5>
-              <p>
-                <small>every last night of the month at midnight</small>
-              </p>
-            </div>
-          </div>
-          <div class="row">
-            <div class="col">
-              <button
-                id="send_payment"
-                type="button"
-                class="btn btn-success"
-                onClick="send_payment({{ line[0] }})"
-              >
-                Send
-              </button>
-              <button id="edit_payment" type="button" class="btn btn-primary">
-                Edit
-              </button>
-              <button
-                id="delete_payment"
-                type="button"
-                class="btn btn-danger"
-                onClick="delete_payment({{ line[0] }})"
-              >
-                Delete
-              </button>
-            </div>
-          </div>
+    </div>
+  </form>
+  <br />
+  <div class="row">
+    <div class="col text-center">
+      <div class="row text-center">
+        <h4>Delete All Payments</h4>
+      </div>
+      <div class="row">
+        <div class="col text-center">
+          <button
+            id="delete_all_payments"
+            type="button"
+            class="btn btn-danger"
+            onClick="delete_all_payments({{ current_user.id }})"
+          >
+            Delete All
+          </button>
         </div>
-        <div class="col-9">
-          <table class="table">
-            <tbody>
-              <tr>
-                <th scope="row">Destination Pubkey</th>
-                <td>{{ line[1] }}</td>
-              </tr>
-              <tr>
-                <th scope="row">Amount</th>
-                <td>{{ line[2] }} {{ line[3] }}</td>
-              </tr>
-              <tr>
-                <th scope="row">Message</th>
-                <td>{{ line[4] }}</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-        {% endfor %} {% endif %} {% if current_payments['yearly']|length > 0 %}
-        {% for line in current_payments['yearly'] %}
-        <div class="row" style="border-top: 1px solid lightgrey">
-          <div class="col-3">
-            <div class="row" style="margin-top: 0.5em">
-              <div class="col">
-                <br />
-                <h5>Yearly Payment</h5>
-                <p><small>every Dec 31st at midnight</small></p>
-              </div>
-            </div>
-            <div class="row">
-              <div class="col">
-                <button
-                  id="send_payment"
-                  type="button"
-                  class="btn btn-success"
-                  onClick="send_payment({{ line[0] }})"
-                >
-                  Send
-                </button>
-                <button id="edit_payment" type="button" class="btn btn-primary">
-                  Edit
-                </button>
-                <button
-                  id="delete_payment"
-                  type="button"
-                  class="btn btn-danger"
-                  onClick="delete_payment({{ line[0] }})"
-                >
-                  Delete
-                </button>
-              </div>
-            </div>
-          </div>
-          <div class="col-9">
-            <table class="table">
-              <tbody>
-                <tr>
-                  <th scope="row">Destination Pubkey</th>
-                  <td>{{ line[1] }}</td>
-                </tr>
-                <tr>
-                  <th scope="row">Amount</th>
-                  <td>{{ line[2] }} {{ line[3] }}</td>
-                </tr>
-                <tr>
-                  <th scope="row">Message</th>
-                  <td>{{ line[4] }}</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-          {% endfor %}
-        </div>
-
-        {% endif %} {% endif %}
-        <br />
-        <div class="container">
-          <div class="row">
-            <div class="col text-center">
-              <h4>Schedule New Payment</h4>
-            </div>
-          </div>
-          <form method="POST">
-            <div class="row" style="border-top: 1px solid lightgrey">
-              <div class="col text-center">
-                <div class="row">
-                  <div class="col">
-                    <h5>Frequency</h5>
-                  </div>
-                </div>
-                <div class="row">
-                  <div class="col">
-                    <label for="frequency"
-                      >How often do you want to send this payment?</label
-                    >
-                    <select
-                      class="form-control"
-                      id="frequency"
-                      name="frequency"
-                    >
-                      <option value="daily">Daily</option>
-                      <option value="weekly">Weekly</option>
-                      <option value="monthly">Monthly</option>
-                      <option value="yearly">Yearly</option>
-                    </select>
-                  </div>
-                </div>
-                <br />
-                <div class="row">
-                  <div class="col text-center">
-                    <button
-                      type="button"
-                      class="btn btn-success"
-                      onClick="this.form.submit()"
-                    >
-                      Schedule New Payment
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              <div class="col-9">
-                <table class="table">
-                  <tbody>
-                    <tr>
-                      <th scope="row">Destination Pubkey</th>
-                      <td>
-                        <input
-                          type="text"
-                          id="pubkey"
-                          name="pubkey"
-                          placeholder="Enter Destination Pubkey"
-                        />
-                      </td>
-                    </tr>
-                    <tr>
-                      <th scope="row">
-                        Amount in sats or USD (use x.xx for USD)
-                      </th>
-                      <td>
-                        <input
-                          type="text"
-                          id="amount"
-                          name="amount"
-                          placeholder="Enter Amount"
-                        />
-                      </td>
-                    </tr>
-                    <tr>
-                      <th scope="row">Denomination</th>
-                      <td>
-                        <select
-                          class="form-control"
-                          id="denomination"
-                          name="denomination"
-                        >
-                          <option value="sats">sats</option>
-                          <option value="USD">USD</option>
-                        </select>
-                      </td>
-                    </tr>
-                    <tr>
-                      <th scope="row">Message</th>
-                      <td>
-                        <input
-                          type="text"
-                          id="amount"
-                          name="amount"
-                          placeholder="Enter Amount"
-                        />
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </form>
-          <br />
-          <div class="row">
-            <div class="col text-center">
-              <div class="row text-center">
-                <h4>Delete All Payments</h4>
-              </div>
-              <div class="row">
-                <div class="col text-center">
-                  <button
-                    id="delete_all_payments"
-                    type="button"
-                    class="btn btn-danger"
-                    onClick="delete_all_payments({{ current_user.id }})"
-                  >
-                    Delete All
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        {% endblock %}
       </div>
     </div>
   </div>
 </div>
+{% endblock %}
