@@ -19,36 +19,33 @@ content %}
   current_payments['daily'] %}
   <div class="row" style="border-top: 1px solid lightgrey">
     <div class="col">
-      <div class="row mx-2">
+      <div class="row">
         <div class="col">
+          <br />
           <h5>Daily Payment:</h5>
         </div>
       </div>
       <div class="row">
-        <div class="col-sm mx-2">
+        <div class="col">
           <button
             id="send_payment"
             type="button"
-            class="btn btn-sm btn-success"
+            class="btn btn-success"
             onClick="send_payment({{ line[0] }})"
           >
             Send
           </button>
         </div>
-        <div class="col-sm mx-2">
-          <button
-            id="edit_payment"
-            type="button"
-            class="btn btn-sm btn-primary"
-          >
+        <div class="col mx-2">
+          <button id="edit_payment" type="button" class="btn btn-primary">
             Edit
           </button>
         </div>
-        <div class="col-sm mx-2">
+        <div class="col mx-2">
           <button
             id="delete_payment"
             type="button"
-            class="btn btn-sm btn-danger"
+            class="btn btn-danger"
             onClick="delete_payment({{ line[0] }})"
           >
             Delete
