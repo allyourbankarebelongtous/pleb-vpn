@@ -18,7 +18,7 @@ content %}
   {% if current_payments['daily']|length > 0 %} {% for line in
   current_payments['daily'] %}
   <div class="row" style="border-top: 1px solid lightgrey">
-    <div class="col">
+    <div class="col-3">
       <div class="row" style="margin-top: 0.5em">
         <div class="col">
           <h5>Daily Payment</h5>
@@ -70,7 +70,7 @@ content %}
     {% endfor %} {% endif %} {% if current_payments['weekly']|length > 0 %} {%
     for line in current_payments['weekly'] %}
     <div class="row" style="border-top: 1px solid lightgrey">
-      <div class="col">
+      <div class="col-3">
         <div class="row" style="margin-top: 0.5em">
           <div class="col">
             <h5>Weekly Payment</h5>
@@ -122,7 +122,7 @@ content %}
       {% endfor %} {% endif %} {% if current_payments['monthly']|length > 0 %}
       {% for line in current_payments['monthly'] %}
       <div class="row" style="border-top: 1px solid lightgrey">
-        <div class="col">
+        <div class="col-3">
           <div class="row" style="margin-top: 0.5em">
             <div class="col">
               <h5>Monthly Payment</h5>
@@ -176,7 +176,7 @@ content %}
         {% endfor %} {% endif %} {% if current_payments['yearly']|length > 0 %}
         {% for line in current_payments['yearly'] %}
         <div class="row" style="border-top: 1px solid lightgrey">
-          <div class="col">
+          <div class="col-3">
             <div class="row" style="margin-top: 0.5em">
               <div class="col">
                 <br />
