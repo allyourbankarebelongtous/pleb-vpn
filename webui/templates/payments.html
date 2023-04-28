@@ -15,86 +15,67 @@ content %}
       <h4 align="center">Current Payments</h4>
     </div>
   </div>
-  {% if current_payments['daily']|length > 0 %}
-  <div class="row">
-    <div class="col text-center">
-      <div class="row">
-        <h5>Daily Payments</h5>
-      </div>
-    </div>
-  </div>
-  <div class="row">
-    <div class="col" style="border-top: 1px solid lightgrey">
-      {% for line in current_payments['daily'] %}
-      <div class="row">
-        <div class="col-8">
-          <table class="table">
-            <tbody>
-              <tr>
-                <th scope="row">Destination Pubkey</th>
-                <td>{{ line[1] }}</td>
-              </tr>
-              <tr>
-                <th scope="row">Amount</th>
-                <td>{{ line[2] }} {{ line[3] }}</td>
-              </tr>
-              <tr>
-                <th scope="row">Message</th>
-                <td>{{ line[4] }}</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-        <div class="col">
-          <table class="table">
-            <tbody>
-              <tr>
-                <td scope="row">Send payment now</td>
-                <td>
-                  <button
-                    id="send_payment"
-                    type="button"
-                    class="btn btn-sm btn-success"
-                    onClick="send_payment({{ line[0] }})"
-                  >
-                    Send
-                  </button>
-                </td>
-              </tr>
-              <tr>
-                <td scope="row">Edit payment</td>
-                <td>
-                  <button
-                    id="edit_payment"
-                    type="button"
-                    class="btn btn-sm btn-primary"
-                  >
-                    Edit
-                  </button>
-                </td>
-              </tr>
-              <tr>
-                <td scope="row">Delete Payment</td>
-                <td>
-                  <button
-                    id="delete_payment"
-                    type="button"
-                    class="btn btn-sm btn-danger"
-                    onClick="delete_payment({{ line[0] }})"
-                  >
-                    Delete
-                  </button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-      {% endfor %}
-    </div>
-  </div>
+  {% if current_payments['daily']|length > 0 %} {% for line in
+  current_payments['daily'] %}
 
-  {% endif %} {% if current_payments['weekly']|length > 0 %}
+  <div class="col text-center">
+    <div class="row">
+      <div class="col">
+        <h5>Daily Payment:</h5>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col">
+        <button
+          id="send_payment"
+          type="button"
+          class="btn btn-sm btn-success"
+          onClick="send_payment({{ line[0] }})"
+        >
+          Send
+        </button>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col">
+        <button id="edit_payment" type="button" class="btn btn-sm btn-primary">
+          Edit
+        </button>
+      </div>
+    </div>
+    <div class="col">
+      <div class="row">
+        <button
+          id="delete_payment"
+          type="button"
+          class="btn btn-sm btn-danger"
+          onClick="delete_payment({{ line[0] }})"
+        >
+          Delete
+        </button>
+      </div>
+    </div>
+  </div>
+  <div class="col-9">
+    <table class="table">
+      <tbody>
+        <tr>
+          <th scope="row">Destination Pubkey</th>
+          <td>{{ line[1] }}</td>
+        </tr>
+        <tr>
+          <th scope="row">Amount</th>
+          <td>{{ line[2] }} {{ line[3] }}</td>
+        </tr>
+        <tr>
+          <th scope="row">Message</th>
+          <td>{{ line[4] }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  {% endfor %} {% endif %} {% if current_payments['weekly']|length > 0 %}
+
   <div class="row">
     <div class="col text-center">
       <h5>Weekly Payments</h5>
@@ -293,18 +274,22 @@ content %}
     <div class="row" style="border-top: 1px solid lightgrey">
       <div class="col text-center">
         <div class="row">
-          <h5>Frequency</h5>
+          <div class="col">
+            <h5>Frequency</h5>
+          </div>
         </div>
         <div class="row">
-          <label for="frequency"
-            >How often do you want to send this payment?</label
-          >
-          <select class="form-control" id="frequency" name="frequency">
-            <option value="daily">Daily</option>
-            <option value="weekly">Weekly</option>
-            <option value="monthly">Monthly</option>
-            <option value="yearly">Yearly</option>
-          </select>
+          <div class="col">
+            <label for="frequency"
+              >How often do you want to send this payment?</label
+            >
+            <select class="form-control" id="frequency" name="frequency">
+              <option value="daily">Daily</option>
+              <option value="weekly">Weekly</option>
+              <option value="monthly">Monthly</option>
+              <option value="yearly">Yearly</option>
+            </select>
+          </div>
         </div>
         <br />
         <div class="row">
@@ -320,7 +305,7 @@ content %}
         </div>
       </div>
 
-      <div class="col-8">
+      <div class="col-9">
         <table class="table">
           <tbody>
             <tr>
