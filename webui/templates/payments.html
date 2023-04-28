@@ -17,13 +17,15 @@ content %}
   </div>
   {% if current_payments['daily']|length > 0 %} {% for line in
   current_payments['daily'] %}
-  <div class="row">
+  <div class="row style="border-top: 1px solid lightgrey">
     <div class="col text-center">
       <div class="row">
         <div class="col">
           <h5>Daily Payment:</h5>
         </div>
       </div>
+      <br />
+      <br />
       <div class="row">
         <div class="col">
           <button
@@ -35,8 +37,7 @@ content %}
             Send
           </button>
         </div>
-      </div>
-      <div class="row">
+        <p> </p>
         <div class="col">
           <button
             id="edit_payment"
@@ -46,8 +47,7 @@ content %}
             Edit
           </button>
         </div>
-      </div>
-      <div class="row">
+        <p> </p>
         <div class="col">
           <button
             id="delete_payment"
