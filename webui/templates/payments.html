@@ -11,8 +11,8 @@ content %}
 <div class="container">
   {% if current_payments is not none %}
   <div class="row">
-    <div class="col">
-      <h4 align="center">Current Payments</h4>
+    <div class="col text-center">
+      <h4>Current Payments</h4>
     </div>
   </div>
   {% if current_payments['daily']|length > 0 %} {% for line in
@@ -21,6 +21,7 @@ content %}
     <div class="col">
       <div class="row">
         <div class="col">
+          <br />
           <h5>Daily Payment:</h5>
         </div>
       </div>
