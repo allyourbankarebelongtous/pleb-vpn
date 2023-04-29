@@ -42,19 +42,34 @@ content %}
             </button>
             <ul class="dropdown-menu">
               <li>
-                <a class="dropdown-item" onClick="send_payment({{ line[0] }})"
-                  >Send Now</a
+                <button
+                  id="send_payment"
+                  type="button"
+                  class="btn btn-sm"
+                  onClick="send_payment({{ line[0] }})"
                 >
+                  Send
+                </button>
               </li>
               <li>
-                <a class="dropdown-item" onClick="edit_payment({{ line[0] }})"
-                  >Edit Payment</a
+                <button
+                  id="edit_payment"
+                  type="button"
+                  class="btn btn-sm"
+                  onClick="edit_payment({{ line[0] }})"
                 >
+                  Edit
+                </button>
               </li>
               <li>
-                <a class="dropdown-item" onClick="delete_payment({{ line[0] }})"
-                  >Delete Payment</a
+                <button
+                  id="delete_payment"
+                  type="button"
+                  class="btn btn-sm"
+                  onClick="delete_payment({{ line[0] }})"
                 >
+                  Delete
+                </button>
               </li>
             </ul>
           </div>
