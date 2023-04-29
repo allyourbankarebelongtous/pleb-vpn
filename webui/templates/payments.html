@@ -58,7 +58,7 @@ content %}
       <div class="row">
         <div class="col">
           <button
-            id="send_payment"
+            id="send_payment{{ line[0] }}"
             type="button"
             class="btn btn-success"
             onClick="send_payment({{ line[0] }})"
@@ -66,7 +66,7 @@ content %}
             Send
           </button>
           <button
-            id="edit_payment"
+            id="edit_payment{{ line[0] }}"
             type="button"
             class="btn btn-primary"
             onClick="edit_payment({{ line[0] }})"
@@ -74,7 +74,7 @@ content %}
             Edit
           </button>
           <button
-            id="delete_payment"
+            id="delete_payment{{ line[0] }}"
             type="button"
             class="btn btn-danger"
             onClick="delete_payment({{ line[0] }})"
