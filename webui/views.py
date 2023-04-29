@@ -185,7 +185,8 @@ def payments():
             message = request.form['message']
         else: 
             message = None
-        cmd_str = ["sudo bash /mnt/hdd/mynode/pleb-vpn/payments/managepayments.sh newpayment " + frequency + " " + pubkey + " " + amount + " " + denomination + " " + message]
+        cmd_str = ["sudo bash /mnt/hdd/mynode/pleb-vpn/payments/managepayments.sh newpayment " + frequency + " " + pubkey + " " + amount + " " + denomination + " \"" + message + "\""]
+        print(cmd_str) # for debug purposes only
         result = subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True)
         # for debug purposes
         print(result.stdout, result.stderr)
