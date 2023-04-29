@@ -177,15 +177,15 @@ Are you sure you want to delete all payments? This cannot be undone.
 " > /mnt/hdd/mynode/pleb-vpn/payments/dailylndpayments.sh
     echo -n "#!/bin/bash
 
-# daily payments (at 00:00:00 UTC)
+# weekly payments (Sunday at 00:00:00 UTC)
 " > /mnt/hdd/mynode/pleb-vpn/payments/weeklylndpayments.sh
     echo -n "#!/bin/bash
 
-# monthly payments (1st of each month)
+# monthly payments (1st of each month at 00:00:00 UTC)
 " > /mnt/hdd/mynode/pleb-vpn/payments/monthlylndpayments.sh
     echo -n "#!/bin/bash
 
-# yearly payments (1st of January)
+# yearly payments (1st of January at 00:00:00 UTC)
 " > /mnt/hdd/mynode/pleb-vpn/payments/yearlylndpayments.sh
 
     # delete all systemd files and remove services
