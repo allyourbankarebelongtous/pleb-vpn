@@ -26,7 +26,7 @@ content %}
       <div class="row" style="margin-top: 0.5em">
         <div class="col">
           <h5>Daily Payment</h5>
-          <p><small>{{ line[0] }} every night at midnight</small></p>
+          <p><small>every night at midnight</small></p>
         </div>
       </div>
       <div class="row">
@@ -42,34 +42,13 @@ content %}
             </button>
             <ul class="dropdown-menu">
               <li>
-                <button
-                  id="send_payment"
-                  type="button"
-                  class="btn btn-sm"
-                  onClick="send_payment({{ line[0] }})"
-                >
-                  Send {{ line[0] }}
-                </button>
+                <a onClick="send_payment({{ line[0] }})">Send</a>
               </li>
               <li>
-                <button
-                  id="edit_payment"
-                  type="button"
-                  class="btn btn-sm"
-                  onClick="edit_payment({{ line[0] }})"
-                >
-                  Edit {{ line[0] }}
-                </button>
+                <a onClick="edit_payment({{ line[0] }})">Edit</a>
               </li>
               <li>
-                <button
-                  id="delete_payment"
-                  type="button"
-                  class="btn btn-sm"
-                  onClick="delete_payment({{ line[0] }})"
-                >
-                  Delete {{ line[0] }}
-                </button>
+                <a onClick="delete_payment({{ line[0] }})">Delete</a>
               </li>
             </ul>
           </div>
