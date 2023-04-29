@@ -484,6 +484,7 @@ def get_payments():
     subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True)
     with open(os.path.abspath('./payments/current_payments.tmp')) as payments:
         for line in payments:
+            line_parts = re.findall(r'"[^"]*"|\S+', line.strip())
             try:
                 category = line_parts[0]
                 id = line_parts[1]
