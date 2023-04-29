@@ -64,22 +64,73 @@ if [ "$1" = "status" ]; then
 fi
 
 # create new payment
-if [ "$1" = "newpayment" ]; then
-  sudo /mnt/hdd/mynode/pleb-vpn/payments/blitz.recurringpayment.sh
+ if [ "$1" = "newpayment" ]; then
+  local freq="${1}"
+  local NODE_ID="${2}"
+  local AMOUNT="${3}"
+  local DENOMINATION="${4}"
+  local message="${5}"
+  node="lnd"
+    # Generate a keysend script
+  short_node_id=$(echo $NODE_ID | cut -c 1-7)
+  script_name="/mnt/hdd/mynode/pleb-vpn/payments/keysends/_${short_node_id}_${freq}_${node}_keysend.sh"
+  denomination=$(echo $DENOMINATION | tr '[:upper:]' '[:lower:]')
+  echo -n "/mnt/hdd/mynode/pleb-vpn/.venv/bin/python /mnt/hdd/mynode/pleb-vpn/payments/_recurringpayment_${node}.py " \
+        "--$denomination $AMOUNT " \
+        "--node_id $NODE_ID " \
+        > $script_name
+  # add message if present
+  if [ ! "${message}" = "" ]; then
+    echo "--message \"${message}\"
+  " | tee -a $script_name
+  fi
+  chmod 755 $script_name
+
+  # add payment to execution list
+  subscriptionlist="/mnt/hdd/mynode/pleb-vpn/payments/${freq}${node}payments.sh"
+  # first check if already on the list to avoid duplicates in case of payment change
+  scriptexists=$(cat ${subscriptionlist} | grep -c ${script_name})
+  if [ ${scriptexists} -eq 0 ]; then
+    echo "${script_name}" >>${subscriptionlist}
+  fi
+
+  # check if systemd unit for frequency and node exists, and if not, create it
+  istimer=$(sudo ls /etc/systemd/system/ | grep -c payments-${freq}-${node}.timer)
+  if [ ${istimer} -eq 0 ]; then
+    # create systemd timer and service
+    echo -n "[Unit]
+  Description=Execute ${freq} payments
+
+  [Service]
+  User=bitcoin
+  Group=bitcoin
+  ExecStart=/bin/bash /mnt/hdd/mynode/pleb-vpn/payments/${freq}${node}payments.sh" \
+      > /etc/systemd/system/payments-${freq}-${node}.service
+    echo -n "# this file will run ${freq} to execute any ${freq} recurring payments
+  [Unit]
+  Description=Run recurring payments ${freq}
+
+  [Timer]
+  OnCalendar=${calendarCode}
+
+  [Install]
+  WantedBy=timers.target" \
+      > /etc/systemd/system/payments-${freq}-${node}.timer
+  fi
+
+  # enable and start service and timer
+  sudo systemctl enable payments-${freq}-${node}.timer
+  sudo systemctl start payments-${freq}-${node}.timer
   exit 0
 fi
 
 # delete single payment
 if [ "$1" = "deletepayment" ]; then
+  local selection="${1}"
   ispayment=$(ls /mnt/hdd/mynode/pleb-vpn/payments/keysends | grep -c keysend)
   if [ $ispayment -eq 0 ]; then
-    whiptail --title "NO PAYMENTS FOUND" --msgbox "
-No payments found to delete.
-" 8 40
+    echo "No payments found to delete."
   else
-    getpaymentinfo
-    source /mnt/hdd/mynode/pleb-vpn/payments/selectpayments.tmp
-    dialog_menu payment_selection "Payments" "Delete Payments" "Select a payment to Delete" PAYMENTS[@]
     # remove keysend script
     script_name="/mnt/hdd/mynode/pleb-vpn/payments/keysends/_${selection}_keysend.sh"
     sudo rm ${script_name}
@@ -96,8 +147,6 @@ No payments found to delete.
       sudo rm /etc/systemd/system/payments-$freq-${node}.timer
       sudo rm /etc/systemd/system/payments-$freq-${node}.service
     fi
-    sudo rm /mnt/hdd/mynode/pleb-vpn/payments/selectpayments.tmp
-    sudo rm /mnt/hdd/mynode/pleb-vpn/payments/displaypayments.tmp
   fi
   exit 0
 fi
@@ -154,7 +203,7 @@ fi
 
 case "${1}" in
   status) status ;;
-  newpayment) newpayment "${2}" "${2}" "${2}" "${2}" ;;
+  newpayment) newpayment "${2}" "${3}" "${4}" "${5}" "${6}" ;;
   deletepayment) deletepayment "${2}" ;;
   deleteall) deleteall ;;
   *) echo "err=Unknown action: ${1}" ; exit 1 ;;

@@ -11,6 +11,7 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
 fi
 
 plebVPNConf="/mnt/hdd/mynode/pleb-vpn/pleb-vpn.conf"
+firewallConf="/usr/bin/mynode_firewall.sh"
 lndConfFile="/mnt/hdd/mynode/lnd/lnd.conf"
 lndCustomConf="/mnt/hdd/mynode/settings/lnd_custom.conf"
 lndCustomConfOld="/mnt/hdd/mynode/settings/lnd_custom_old.conf"
@@ -129,6 +130,10 @@ on() {
   # configure firewall
   if ! [ "${lnPort}" = "9735" ]; then
     sudo ufw allow ${lnPort} comment "LND Port"
+    # add new rules to firewallConf
+    sectionLine=$(cat ${firewallConf} | grep -n "^\# Add firewall rules" | cut -d ":" -f1 | head -n 1)
+    insertLine=$(expr $sectionLine + 1)
+    sed -i "${insertLine}iufw allow ${lnPort} comment 'LND Port'" ${firewallConf}
   fi
 
   # edit lnd.conf
@@ -190,6 +195,8 @@ off() {
   # configure firewall
   if ! [ "${lnPort}" = "9735" ]; then
     sudo ufw delete allow ${lnPort}
+    # remove from firewallConf
+    sed -i "/ufw allow ${lnPort}.*/d" ${firewallConf}
   fi
 
   # remove lndCustomConf

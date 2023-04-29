@@ -269,6 +269,14 @@ AllowedIPs = ${wgLAN}.0/24, ${LAN}.0/24
   sudo ufw allow in on wg0 from any to any
   sudo ufw allow in to ${wgLAN}.0/24
   sudo ufw allow out to ${wgLAN}.0/24
+  # add new rules to firewallConf
+  sectionLine=$(cat ${firewallConf} | grep -n "^\# Add firewall rules" | cut -d ":" -f1 | head -n 1)
+  insertLine=$(expr $sectionLine + 1)
+  sed -i "${insertLine}iufw allow ${wgPort}/udp comment 'wireguard port'" ${firewallConf}
+  sed -i "${insertLine}iufw allow out on wg0 from any to any" ${firewallConf}
+  sed -i "${insertLine}iufw allow in on wg0 from any to any" ${firewallConf}
+  sed -i "${insertLine}iufw allow in to ${wgLAN}.0/24" ${firewallConf}
+  sed -i "${insertLine}iufw allow out to ${wgLAN}.0/24" ${firewallConf}
   # enable ip forward
   sudo sed -i '/net.ipv4.ip_forward/ s/#//' /etc/sysctl.conf
   # enable systemd and fix permissions
@@ -301,6 +309,12 @@ off() {
   sudo ufw delete allow in on wg0 from any to any
   sudo ufw delete allow in to ${wgLAN}.0/24
   sudo ufw delete allow out to ${wgLAN}.0/24
+  # remove from firewallConf
+  sed -i "/ufw allow ${wgPort}.*/d" ${firewallConf}
+  sed -i "/ufw allow out on wg0 from any to any/d" ${firewallConf}
+  sed -i "/ufw allow in on wg0 from any to any/d" ${firewallConf}
+  sed -i "/ufw allow in to ${wgLAN}\.0\/24/d" ${firewallConf}
+  sed -i "/ufw allow out to ${wgLAN}\.0\/24/d" ${firewallConf}
   # set wireguard off in pleb-vpn.conf
   setting ${plebVPNConf} "2" "wireguard" "off"
   exit 0

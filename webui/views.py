@@ -176,8 +176,79 @@ def set_lndHybrid():
 @views.route('/payments', methods=['GET', 'POST'])
 @login_required
 def payments():
+    if request.method == 'POST':
+        frequency = request.form['frequency']
+        pubkey = request.form['pubkey']
+        amount = request.form['amount']
+        denomination = request.form['denomination']
+        if request.form['message'] is not None:
+            message = request.form['message']
+        else: 
+            message = None
+        cmd_str = ["sudo bash /mnt/hdd/mynode/pleb-vpn/payments/managepayments.sh newpayment " + frequency + " " + pubkey + " " + amount + " " + denomination + " " + message]
+        result = subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True)
+        # for debug purposes
+        print(result.stdout, result.stderr)
+        if result.returncode == 0:
+            flash('Payment saved and scheduled!', category='success')
+        else:
+            flash('An unknown error occured!', category='error')
 
     return render_template('payments.html', user=current_user, current_payments=get_payments())
+
+@views.route('/delete_payment', methods=['POST'])
+def delete_payment():
+    payment_id = json.loads(request.data)
+    payment_id = payment_id['payment_id']
+    cmd_str = ["sudo bash /mnt/hdd/mynode/pleb-vpn/payments/managepayments.sh deletepayment " + payment_id]
+    subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True)
+    result = subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True)
+    # for debug purposes
+    print(result.stdout, result.stderr)
+    if result.returncode == 0:
+        flash('Payment deleted!', category='success')
+    else:
+        flash('An unknown error occured!', category='error')
+
+    return jsonify({})
+
+@views.route('/delete_all_payments', methods=['POST'])
+def delete_all_payments():
+    cmd_str = ["sudo bash /mnt/hdd/mynode/pleb-vpn/payments/managepayments.sh deleteall 1"]
+    subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True)
+    result = subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True)
+    # for debug purposes
+    print(result.stdout, result.stderr)
+    if result.returncode == 0:
+        flash('All payments deleted!', category='success')
+    else:
+        flash('An unknown error occured!', category='error')
+    
+    return jsonify({})
+
+@views.route('/send_payment', methods=['POST'])
+def send_payment():
+    payment_id = json.loads(request.data)
+    payment_id = payment_id['payment_id']
+    cmd_str = ["sudo -u bitcoin /mnt/hdd/mynode/pleb-vpn/payments/keysends/_" + payment_id + "_keysend.sh"]
+    result = subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True)
+    # for debug purposes
+    print(result.stdout, result.stderr)
+    if result.returncode == 0:
+        flash('Payment sent!', category='success')
+    else:
+        flash('An unknown error occured!', category='error')
+    parts = payment_id.split("_")
+    cmd_str = ["sudo systemctl enable payments-" + parts[1] + "-" + parts[2] + ".timer"]
+    result = subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True)
+    # for debug purposes
+    print(result.stdout, result.stderr)
+    cmd_str = ["sudo systemctl start payments-" + parts[1] + "-" + parts[2] + ".timer"]
+    result = subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True)
+    # for debug purposes
+    print(result.stdout, result.stderr)
+
+    return jsonify({})
 
 @views.route('/wireguard', methods=['GET', 'POST'])
 @login_required

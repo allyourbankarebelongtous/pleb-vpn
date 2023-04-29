@@ -298,6 +298,43 @@ function send_payment(payment_id) {
   }
 }
 
+function edit_payment(payment_id) {
+  const paymentInfo = document.getElementById(`payment_info${payment_id}`);
+  const paymentEdit = document.getElementById(`payment_edit${payment_id}`);
+  if (paymentInfo && paymentEdit) {
+    paymentInfo.classList.add("d-none");
+    paymentEdit.classList.remove("d-none");
+  }
+}
+
+function save_edited_payment(payment_id) {
+  const paymentInfo = document.getElementById(`payment_info${payment_id}`);
+  const paymentEdit = document.getElementById(`payment_edit${payment_id}`);
+  const paymentEditForm = document.getElementById(
+    `payment_edit_form${payment_id}`
+  );
+  if (
+    confirm_dialog(
+      (message = "Are you sure you want to save this edited payment?")
+    ) == true
+  ) {
+    paymentEditForm.submit();
+    if (paymentInfo && paymentEdit) {
+      paymentInfo.classList.remove("d-none");
+      paymentEdit.classList.add("d-none");
+    }
+  }
+}
+
+function cancel_edited_payment(payment_id) {
+  const paymentInfo = document.getElementById(`payment_info${payment_id}`);
+  const paymentEdit = document.getElementById(`payment_edit${payment_id}`);
+  if (paymentInfo && paymentEdit) {
+    paymentInfo.classList.remove("d-none");
+    paymentEdit.classList.add("d-none");
+  }
+}
+
 function refreshplebVPNdata(userId) {
   var activateBtn = document.getElementById("activate");
   if (activateBtn !== null) {

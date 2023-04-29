@@ -17,7 +17,11 @@ content %}
   </div>
   {% if current_payments['daily']|length > 0 %} {% for line in
   current_payments['daily'] %}
-  <div class="row" style="border-top: 1px solid lightgrey">
+  <div
+    class="row"
+    id="payment_info{{ line[0] }}"
+    style="border-top: 1px solid lightgrey"
+  >
     <div class="col-3">
       <div class="row" style="margin-top: 0.5em">
         <div class="col">
@@ -27,25 +31,33 @@ content %}
       </div>
       <div class="row">
         <div class="col">
-          <button
-            id="send_payment"
-            type="button"
-            class="btn btn-success"
-            onClick="send_payment({{ line[0] }})"
-          >
-            Send
-          </button>
-          <button id="edit_payment" type="button" class="btn btn-primary">
-            Edit
-          </button>
-          <button
-            id="delete_payment"
-            type="button"
-            class="btn btn-danger"
-            onClick="delete_payment({{ line[0] }})"
-          >
-            Delete
-          </button>
+          <div class="btn-group">
+            <button
+              class="btn btn-secondary dropdown-toggle"
+              type="button"
+              data-bs-toggle="dropdown"
+              aria-expanded="false"
+            >
+              Dropdown
+            </button>
+            <ul class="dropdown-menu">
+              <li>
+                <a class="dropdown-item" onClick="send_payment({{ line[0] }})"
+                  >Send Now</a
+                >
+              </li>
+              <li>
+                <a class="dropdown-item" onClick="edit_payment({{ line[0] }})"
+                  >Edit Payment</a
+                >
+              </li>
+              <li>
+                <a class="dropdown-item" onClick="delete_payment({{ line[0] }})"
+                  >Delete Payment</a
+                >
+              </li>
+            </ul>
+          </div>
         </div>
       </div>
     </div>
@@ -68,6 +80,109 @@ content %}
       </table>
     </div>
   </div>
+
+  <div
+    class="row d-none"
+    id="payment_edit{{ line[0] }}"
+    style="border-top: 1px solid lightgrey"
+  >
+    <form method="POST" id="payment_edit_form{{ line[0] }}">
+      <div class="col-3">
+        <div class="row" style="margin-top: 0.5em">
+          <div class="col">
+            <h5>Daily Payment</h5>
+            <p><small>every night at midnight</small></p>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col">
+            <label for="frequency"
+              >How often do you want to send this payment?</label
+            >
+            <select class="form-control" id="frequency" name="frequency">
+              <option value="daily">Daily</option>
+              <option value="weekly">Weekly</option>
+              <option value="monthly">Monthly</option>
+              <option value="yearly">Yearly</option>
+            </select>
+          </div>
+        </div>
+        <br />
+        <div class="row">
+          <div class="col text-center">
+            <button
+              type="button"
+              class="btn btn-success"
+              onClick="this.form.submit()"
+            >
+              Save
+            </button>
+            <button
+              type="button"
+              class="btn btn-danger"
+              onClick="cancel_edited_payment({{ line[0] }})"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-9">
+        <table class="table">
+          <tbody>
+            <tr>
+              <th scope="row">Destination Pubkey</th>
+              <td>
+                <input
+                  type="text"
+                  id="pubkey"
+                  name="pubkey"
+                  placeholder="{{ line[1] }}"
+                />
+              </td>
+            </tr>
+            <tr>
+              <th scope="row">Amount in sats or USD (use x.xx for USD)</th>
+              <td>
+                <input
+                  type="text"
+                  id="amount"
+                  name="amount"
+                  placeholder="{{ line[2] }}"
+                />
+              </td>
+            </tr>
+            <tr>
+              <th scope="row">Denomination</th>
+              <td>
+                <select
+                  class="form-control"
+                  id="denomination"
+                  name="denomination"
+                >
+                  <option value="sats">sats</option>
+                  <option value="USD">USD</option>
+                </select>
+              </td>
+            </tr>
+            <tr>
+              <th scope="row">Message</th>
+              <td>
+                <input
+                  type="text"
+                  id="message"
+                  name="message"
+                  placeholder="{{ line[4] }}"
+                />
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </form>
+  </div>
+
   {% endfor %} {% endif %} {% if current_payments['weekly']|length > 0 %} {% for
   line in current_payments['weekly'] %}
   <div class="row" style="border-top: 1px solid lightgrey">
@@ -285,7 +400,7 @@ content %}
                   type="text"
                   id="pubkey"
                   name="pubkey"
-                  placeholder="Enter Destination Pubkey"
+                  placeholder="Enter destination pubkey"
                 />
               </td>
             </tr>
@@ -296,7 +411,7 @@ content %}
                   type="text"
                   id="amount"
                   name="amount"
-                  placeholder="Enter Amount"
+                  placeholder="Enter amount"
                 />
               </td>
             </tr>
@@ -318,9 +433,9 @@ content %}
               <td>
                 <input
                   type="text"
-                  id="amount"
-                  name="amount"
-                  placeholder="Enter Amount"
+                  id="messsage"
+                  name="message"
+                  placeholder="Enter message"
                 />
               </td>
             </tr>

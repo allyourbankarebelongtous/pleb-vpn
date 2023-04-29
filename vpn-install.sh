@@ -14,6 +14,7 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
 fi
 
 plebVPNConf="/mnt/hdd/mynode/pleb-vpn/pleb-vpn.conf"
+firewallConf="/usr/bin/mynode_firewall.sh"
 
 function setting() # FILE LINENUMBER NAME VALUE
 {
@@ -150,6 +151,15 @@ on() {
   sudo ufw allow in on tun0 from any to any
   # enable firewall
   sudo ufw --force enable
+  # add new rules to firewallConf
+  sectionLine=$(cat ${firewallConf} | grep -n "^\# Add firewall rules" | cut -d ":" -f1 | head -n 1)
+  insertLine=$(expr $sectionLine + 1)
+  sed -i "${insertLine}iufw allow in to ${LAN}.0/24" ${firewallConf}
+  sed -i "${insertLine}iufw allow out to ${LAN}.0/24" ${firewallConf}
+  sed -i "${insertLine}iufw allow out to ${vpnIP} port ${vpnPort} proto udp" ${firewallConf}
+  sed -i "${insertLine}iufw allow out on tun0 from any to any" ${firewallConf}
+  sed -i "${insertLine}iufw allow in on tun0 from any to any" ${firewallConf}
+  sed -i "s/ufw default allow outgoing/ufw default deny outgoing/g" ${firewallConf}
   setting ${plebVPNConf} "2" "plebVPN" "on"
   echo "OK ... plebvpn installed and configured!"
   exit 0
@@ -176,6 +186,14 @@ off() {
   sudo ufw delete allow in on tun0 from any to any
   # enable firewall
   sudo ufw --force enable
+  # add new rules to firewallConf
+  LAN=$(ip rou | grep default | cut -d " " -f3 | sed 's/^\(.*\)\.\(.*\)\.\(.*\)\.\(.*\)$/\1\.\2\.\3/g')
+  sed -i "/ufw allow in to ${LAN}\.0\/24/d" ${firewallConf}
+  sed -i "/ufw allow out to ${LAN}\.0\/24/d" ${firewallConf}
+  sed -i "/ufw allow out to ${vpnIP} port ${vpnPort} proto udp/d" ${firewallConf}
+  sed -i "/ufw allow out on tun0 from any to any/d" ${firewallConf}
+  sed -i "/ufw allow in on tun0 from any to any/d" ${firewallConf}
+  sed -i "s/ufw default deny outgoing/ufw default allow outgoing/g" ${firewallConf}
   setting ${plebVPNConf} "2" "vpnPort" "''"
   setting ${plebVPNConf} "2" "vpnIP" "''"
   setting ${plebVPNConf} "2" "plebVPN" "off"
