@@ -26,7 +26,7 @@ content %}
       <div class="row" style="margin-top: 0.5em">
         <div class="col">
           <h5>Daily Payment</h5>
-          <p><small>every night at midnight</small></p>
+          <p><small>{{ line[0] }} every night at midnight</small></p>
         </div>
       </div>
       <div class="row">
@@ -48,7 +48,7 @@ content %}
                   class="btn btn-sm"
                   onClick="send_payment({{ line[0] }})"
                 >
-                  Send
+                  Send {{ line[0] }}
                 </button>
               </li>
               <li>
@@ -58,7 +58,7 @@ content %}
                   class="btn btn-sm"
                   onClick="edit_payment({{ line[0] }})"
                 >
-                  Edit
+                  Edit {{ line[0] }}
                 </button>
               </li>
               <li>
@@ -68,7 +68,7 @@ content %}
                   class="btn btn-sm"
                   onClick="delete_payment({{ line[0] }})"
                 >
-                  Delete
+                  Delete {{ line[0] }}
                 </button>
               </li>
             </ul>
