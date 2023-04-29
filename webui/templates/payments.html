@@ -29,7 +29,8 @@ content %}
           <p><small>every night at midnight</small></p>
         </div>
       </div>
-      <div class="row">
+
+      <!--       <div class="row">
         <div class="col">
           <div class="btn-group">
             <button
@@ -52,6 +53,34 @@ content %}
               </li>
             </ul>
           </div>
+        </div>
+      </div> -->
+      <div class="row">
+        <div class="col">
+          <button
+            id="send_payment"
+            type="button"
+            class="btn btn-success"
+            onClick="send_payment({{ line[0] }})"
+          >
+            Send
+          </button>
+          <button
+            id="edit_payment"
+            type="button"
+            class="btn btn-primary"
+            onClick="edit_payment({{ line[0] }})"
+          >
+            Edit
+          </button>
+          <button
+            id="delete_payment"
+            type="button"
+            class="btn btn-danger"
+            onClick="delete_payment({{ line[0] }})"
+          >
+            Delete
+          </button>
         </div>
       </div>
     </div>
