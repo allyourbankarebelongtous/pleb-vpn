@@ -202,7 +202,6 @@ def delete_payment():
     payment_id = json.loads(request.data)
     payment_id = payment_id['payment_id']
     cmd_str = ["sudo bash /mnt/hdd/mynode/pleb-vpn/payments/managepayments.sh deletepayment " + payment_id]
-    subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True)
     result = subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True)
     # for debug purposes
     print(result.stdout, result.stderr)
@@ -216,7 +215,6 @@ def delete_payment():
 @views.route('/delete_all_payments', methods=['POST'])
 def delete_all_payments():
     cmd_str = ["sudo bash /mnt/hdd/mynode/pleb-vpn/payments/managepayments.sh deleteall 1"]
-    subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True)
     result = subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True)
     # for debug purposes
     print(result.stdout, result.stderr)
