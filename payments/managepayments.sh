@@ -71,6 +71,18 @@ newpayment() {
   local DENOMINATION="${4}"
   local message="${5}"
   node="lnd"
+  if [ "${freq}" = "daily" ]; then
+    calendarCode="*-*-*"
+  elif [ "${freq}" = "weekly" ]; then
+    calendarCode="Sun"
+  elif [ "${freq}" = "monthly" ]; then
+    calendarCode="*-*-01"
+  elif [ "${freq}" = "yearly" ]; then
+    calendarCode="*-01-01"
+  else
+    echo "error: can only send daily, weekly, monthly, or yearly, not ${freq}."
+    exit 1
+  fi
     # Generate a keysend script
   short_node_id=$(echo $NODE_ID | cut -c 1-7)
   script_name="/mnt/hdd/mynode/pleb-vpn/payments/keysends/_${short_node_id}_${freq}_${node}_keysend.sh"
@@ -99,22 +111,22 @@ newpayment() {
   if [ ${istimer} -eq 0 ]; then
     # create systemd timer and service
     echo -n "[Unit]
-  Description=Execute ${freq} payments
+Description=Execute ${freq} payments
 
-  [Service]
-  User=bitcoin
-  Group=bitcoin
-  ExecStart=/bin/bash /mnt/hdd/mynode/pleb-vpn/payments/${freq}${node}payments.sh" \
+[Service]
+User=bitcoin
+Group=bitcoin
+ExecStart=/bin/bash /mnt/hdd/mynode/pleb-vpn/payments/${freq}${node}payments.sh" \
       > /etc/systemd/system/payments-${freq}-${node}.service
     echo -n "# this file will run ${freq} to execute any ${freq} recurring payments
-  [Unit]
-  Description=Run recurring payments ${freq}
+[Unit]
+Description=Run recurring payments ${freq}
 
-  [Timer]
-  OnCalendar=${calendarCode}
+[Timer]
+OnCalendar=${calendarCode}
 
-  [Install]
-  WantedBy=timers.target" \
+[Install]
+WantedBy=timers.target" \
       > /etc/systemd/system/payments-${freq}-${node}.timer
   fi
 
