@@ -58,13 +58,13 @@ function getpaymentinfo()
 }
 
 # view payments
-if [ "$1" = "status" ]; then
+status() {
   getpaymentinfo
   exit 0
-fi
+}
 
 # create new payment
- if [ "$1" = "newpayment" ]; then
+newpayment() {
   local freq="${1}"
   local NODE_ID="${2}"
   local AMOUNT="${3}"
@@ -122,10 +122,10 @@ fi
   sudo systemctl enable payments-${freq}-${node}.timer
   sudo systemctl start payments-${freq}-${node}.timer
   exit 0
-fi
+}
 
 # delete single payment
-if [ "$1" = "deletepayment" ]; then
+deletepayment() {
   local selection="${1}"
   ispayment=$(ls /mnt/hdd/mynode/pleb-vpn/payments/keysends | grep -c keysend)
   if [ $ispayment -eq 0 ]; then
@@ -149,10 +149,10 @@ if [ "$1" = "deletepayment" ]; then
     fi
   fi
   exit 0
-fi
+}
 
 # delete all payments and systemd files
-if [ "$1" = "deleteall" ]; then
+deleteall() {
   if ! [ "$2" = "1" ]; then
     whiptail --title "Delete All Payments" --yes-button "Cancel" --no-button "Delete All" --yesno "
 Are you sure you want to delete all payments? This cannot be undone.
@@ -199,7 +199,7 @@ Are you sure you want to delete all payments? This cannot be undone.
     sudo chmod -R 755 /mnt/hdd/mynode/pleb-vpn/payments
   fi
   exit 0
-fi
+}
 
 case "${1}" in
   status) status ;;
