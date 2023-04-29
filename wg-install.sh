@@ -12,6 +12,7 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
 fi
 
 plebVPNConf="/mnt/hdd/mynode/pleb-vpn/pleb-vpn.conf"
+firewallConf="/usr/bin/mynode_firewall.sh"
 
 function setting() # FILE LINENUMBER NAME VALUE
 {
