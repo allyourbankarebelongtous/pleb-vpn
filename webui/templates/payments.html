@@ -30,7 +30,7 @@ content %}
         </div>
       </div>
 
-      <!--       <div class="row">
+      <div class="row">
         <div class="col">
           <div class="btn-group">
             <button
@@ -43,25 +43,26 @@ content %}
             </button>
             <ul class="dropdown-menu">
               <li>
-                <a onClick="send_payment({{ line[0] }})">Send</a>
+                <a onClick="send_payment('{{ line[0] }}')">Send</a>
               </li>
               <li>
-                <a onClick="edit_payment({{ line[0] }})">Edit</a>
+                <a onClick="edit_payment('{{ line[0] }}')">Edit</a>
               </li>
               <li>
-                <a onClick="delete_payment({{ line[0] }})">Delete</a>
+                <a onClick="delete_payment('{{ line[0] }}')">Delete</a>
               </li>
             </ul>
           </div>
         </div>
-      </div> -->
-      <div class="row">
+      </div>
+
+      <!-- <div class="row">
         <div class="col">
           <button
             id="send_payment{{ line[0] }}"
             type="button"
             class="btn btn-success"
-            onClick="send_payment()"
+            onClick="send_payment('{{ line[0] }}')"
           >
             Send
           </button>
@@ -69,7 +70,7 @@ content %}
             id="edit_payment{{ line[0] }}"
             type="button"
             class="btn btn-primary"
-            onClick="edit_payment({{ line[0] }})"
+            onClick="edit_payment('{{ line[0] }}')"
           >
             Edit
           </button>
@@ -77,12 +78,12 @@ content %}
             id="delete_payment{{ line[0] }}"
             type="button"
             class="btn btn-danger"
-            onClick="delete_payment({{ line[0] }})"
+            onClick="delete_payment('{{ line[0] }}')"
           >
             Delete
           </button>
         </div>
-      </div>
+      </div> -->
     </div>
     <div class="col-9">
       <table class="table">

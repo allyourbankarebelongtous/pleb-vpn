@@ -282,7 +282,7 @@ function delete_payment(payment_id) {
   }
 }
 
-function send_payment() {
+function send_payment(payment_id) {
   if (
     confirm_dialog(
       (message =
