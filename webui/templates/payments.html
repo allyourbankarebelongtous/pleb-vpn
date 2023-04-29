@@ -43,13 +43,15 @@ content %}
             </button>
             <ul class="dropdown-menu">
               <li>
-                <a onClick="send_payment('{{ line[0] }}')">Send</a>
+                <button onClick="send_payment('{{ line[0] }}')">Send</button>
               </li>
               <li>
-                <a onClick="edit_payment('{{ line[0] }}')">Edit</a>
+                <button onClick="edit_payment('{{ line[0] }}')">Edit</button>
               </li>
               <li>
-                <a onClick="delete_payment('{{ line[0] }}')">Delete</a>
+                <button onClick="delete_payment('{{ line[0] }}')">
+                  Delete
+                </button>
               </li>
             </ul>
           </div>
@@ -137,14 +139,14 @@ content %}
             <button
               type="button"
               class="btn btn-success"
-              onClick="this.form.submit()"
+              onClick="save_edited_payment('{{ line[0] }}')"
             >
               Save
             </button>
             <button
               type="button"
               class="btn btn-danger"
-              onClick="cancel_edited_payment({{ line[0] }})"
+              onClick="cancel_edited_payment('{{ line[0] }}')"
             >
               Cancel
             </button>
