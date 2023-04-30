@@ -797,7 +797,6 @@ content %}
           <tr>
             <th scope="row">Denomination</th>
             <td>
-              {% if line[3] == "sats" %}
               <select
                 class="form-control"
                 id="denomination"
@@ -806,16 +805,6 @@ content %}
                 <option value="sats" selected>sats</option>
                 <option value="USD">USD</option>
               </select>
-              {% else %}
-              <select
-                class="form-control"
-                id="denomination"
-                name="denomination"
-              >
-                <option value="sats">sats</option>
-                <option value="USD" selected>USD</option>
-              </select>
-              {% endif %}
             </td>
           </tr>
           <tr>
