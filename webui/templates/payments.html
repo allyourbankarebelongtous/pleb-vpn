@@ -34,24 +34,22 @@ content %}
         <div class="col">
           <div class="btn-group">
             <button
-              class="btn btn-secondary dropdown-toggle"
+              class="btn btn-sm dropdown-toggle"
               type="button"
               data-bs-toggle="dropdown"
               aria-expanded="false"
             >
-              Dropdown
+              Options
             </button>
             <ul class="dropdown-menu">
               <li>
-                <button onClick="send_payment('{{ line[0] }}')">Send</button>
+                <a class="" onClick="send_payment('{{ line[0] }}')">Send Now</a>
               </li>
               <li>
-                <button onClick="edit_payment('{{ line[0] }}')">Edit</button>
+                <a onClick="edit_payment('{{ line[0] }}')">Edit</a>
               </li>
               <li>
-                <button onClick="delete_payment('{{ line[0] }}')">
-                  Delete
-                </button>
+                <a onClick="delete_payment('{{ line[0] }}')"> Delete </a>
               </li>
             </ul>
           </div>
