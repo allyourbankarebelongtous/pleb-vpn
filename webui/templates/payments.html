@@ -99,9 +99,9 @@ content %}
   >
     <form method="POST" id="payment_edit_form{{ line[0] }}">
       <div class="col">
-        <div class="row">
+        <div class="row mb-12">
           <div class="col">
-            <dif class="form-group">
+            <div class="form-outline">
               <label for="amount">Enter Amount</label>
               <input
                 type="text"
@@ -109,10 +109,10 @@ content %}
                 name="amount"
                 value="{{ line[2] }}"
               />
-            </dif>
+            </div>
           </div>
           <div class="col">
-            <dif class="form-group">
+            <div class="form-outline">
               <label for="denomination">Select denomination</label>
               {% if line[3] == "sats" %}
               <select
@@ -133,10 +133,10 @@ content %}
                 <option value="USD" selected>USD</option>
               </select>
               {% endif %}
-            </dif>
+            </div>
           </div>
           <div class="col">
-            <dif class="form-group">
+            <div class="form-outline">
               <label for="frequency"
                 >How often do you want to send this payment?</label
               >
@@ -146,12 +146,12 @@ content %}
                 <option value="monthly">Monthly</option>
                 <option value="yearly">Yearly</option>
               </select>
-            </dif>
+            </div>
           </div>
         </div>
-        <div class="row">
+        <div class="row mb-12">
           <div class="col">
-            <dif class="form-group">
+            <div class="form-outline">
               <label for="pubkey">Destination pubkey</label>
               <input
                 type="text"
@@ -159,12 +159,12 @@ content %}
                 name="pubkey"
                 value="{{ line[1] }}"
               />
-            </dif>
+            </div>
           </div>
         </div>
-        <div class="row">
+        <div class="row mb-12">
           <div class="col">
-            <dif class="form-group">
+            <div class="form-outline">
               <label for="message">Message (optional)</label>
               <input
                 type="text"
@@ -172,10 +172,10 @@ content %}
                 name="message"
                 value="{{ line[4] }}"
               />
-            </dif>
+            </div>
           </div>
         </div>
-        <div class="row">
+        <div class="row mb-12">
           <div class="col text-center">
             <button
               type="button"
