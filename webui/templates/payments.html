@@ -128,7 +128,7 @@ content %}
               >How often do you want to send this payment?</label
             >
             <select class="form-control" id="frequency" name="frequency">
-              <option value="daily">Daily</option>
+              <option value="daily" selected>Daily</option>
               <option value="weekly">Weekly</option>
               <option value="monthly">Monthly</option>
               <option value="yearly">Yearly</option>
@@ -166,6 +166,7 @@ content %}
                   type="text"
                   id="pubkey"
                   name="pubkey"
+                  value="{{ line[1] }}"
                   placeholder="{{ line[1] }}"
                 />
               </td>
@@ -177,6 +178,7 @@ content %}
                   type="text"
                   id="amount"
                   name="amount"
+                  value="{{ line[2] }}"
                   placeholder="{{ line[2] }}"
                 />
               </td>
@@ -184,14 +186,25 @@ content %}
             <tr>
               <th scope="row">Denomination</th>
               <td>
+                {% if line[3] == "sats" %}
+                <select
+                  class="form-control"
+                  id="denomination"
+                  name="denomination"
+                >
+                  <option value="sats" selected>sats</option>
+                  <option value="USD">USD</option>
+                </select>
+                {% else %}
                 <select
                   class="form-control"
                   id="denomination"
                   name="denomination"
                 >
                   <option value="sats">sats</option>
-                  <option value="USD">USD</option>
+                  <option value="USD" selected>USD</option>
                 </select>
+                {% endif %}
               </td>
             </tr>
             <tr>
@@ -201,6 +214,7 @@ content %}
                   type="text"
                   id="message"
                   name="message"
+                  value="{{ line[4] }}"
                   placeholder="{{ line[4] }}"
                 />
               </td>

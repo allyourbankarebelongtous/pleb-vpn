@@ -177,37 +177,14 @@ def set_lndHybrid():
 @login_required
 def payments():
     if request.method == 'POST':
-        form_id = request.form['form_id']
-        if form_id == "edit_payment":
-            old_payments = get_payments()
-            payment_id = request.form['payment_id']
-            old_frequency = payment_id.split("_")
-            old_payment_freq = {tuple(tup[0]): tup[1:] for tup in old_payments[old_frequency]}
-            frequency = request.form['frequency']
-            if request.form['pubkey'] is not None:
-                pubkey = request.form['pubkey']
-            else:
-                pubkey = old_payment_freq['payment_id'][1]
-            if request.form['amount'] is not None:
-                amount = request.form['amount']
-            else:
-                amount = old_payment_freq['payment_id'][2]
-            denomination = request.form['denomination']
-            if request.form['message'] is not None:
-                message = request.form['message']
-            elif 3 in old_payment_freq['payment_id']:
-                message = old_payment_freq['payment_id'][4]
-            else: 
-                message = None
-        else:
-            frequency = request.form['frequency']
-            pubkey = request.form['pubkey']
-            amount = request.form['amount']
-            denomination = request.form['denomination']
-            if request.form['message'] is not None:
-                message = request.form['message']
-            else: 
-                message = None
+        frequency = request.form['frequency']
+        pubkey = request.form['pubkey']
+        amount = request.form['amount']
+        denomination = request.form['denomination']
+        if request.form['message'] is not None:
+            message = request.form['message']
+        else: 
+            message = None
         is_valid = valid_payment(frequency, pubkey, amount, denomination)
         if is_valid == "0":
             if message is not None:
