@@ -113,6 +113,8 @@ content %}
     style="border-top: 1px solid lightgrey"
   >
     <form method="POST" id="payment_edit_form{{ line[0] }}">
+      <input type="hidden" name="form_id" value="edit_payment" />
+      <input type="hidden" name="payment_id" value="{{ line[0] }}" />
       <div class="col-3">
         <div class="row" style="margin-top: 0.5em">
           <div class="col">
@@ -382,6 +384,7 @@ content %}
     </div>
   </div>
   <form method="POST">
+    <input type="hidden" name="form_id" value="new_payment" />
     <div class="row" style="border-top: 1px solid lightgrey">
       <div class="col text-center">
         <div class="row">

@@ -177,23 +177,54 @@ def set_lndHybrid():
 @login_required
 def payments():
     if request.method == 'POST':
-        frequency = request.form['frequency']
-        pubkey = request.form['pubkey']
-        amount = request.form['amount']
-        denomination = request.form['denomination']
-        if request.form['message'] is not None:
-            message = request.form['message']
-        else: 
-            message = None
-        cmd_str = ["sudo bash /mnt/hdd/mynode/pleb-vpn/payments/managepayments.sh newpayment " + frequency + " " + pubkey + " " + amount + " " + denomination + " \"" + message + "\""]
-        print(cmd_str) # for debug purposes only
-        result = subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True)
-        # for debug purposes
-        print(result.stdout, result.stderr)
-        if result.returncode == 0:
-            flash('Payment saved and scheduled!', category='success')
+        form_id = request.form['form_id']
+        if form_id == "edit_payment":
+            old_payments = get_payments()
+            payment_id = request.form['payment_id']
+            old_frequency = payment_id.split("_")
+            old_payment_freq = {tup[0]: tup[1:] for tup in old_payments[old_frequency]}
+            frequency = request.form['frequency']
+            if request.form['pubkey'] is not None:
+                pubkey = request.form['pubkey']
+            else:
+                pubkey = old_payment_freq['payment_id'][1]
+            if request.form['amount'] is not None:
+                amount = request.form['amount']
+            else:
+                amount = old_payment_freq['payment_id'][2]
+            denomination = request.form['denomination']
+            if request.form['message'] is not None:
+                message = request.form['message']
+            elif 3 in old_payment_freq['payment_id']:
+                message = old_payment_freq['payment_id'][4]
+            else: 
+                message = None
         else:
-            flash('An unknown error occured!', category='error')
+            frequency = request.form['frequency']
+            pubkey = request.form['pubkey']
+            amount = request.form['amount']
+            denomination = request.form['denomination']
+            if request.form['message'] is not None:
+                message = request.form['message']
+            else: 
+                message = None
+        is_valid = valid_payment(frequency, pubkey, amount, denomination)
+        if is_valid == "0":
+            if message is not None:
+                payment_string = frequency + " " + pubkey + " " + amount + " " + denomination + " \"" + message + "\""
+            else:
+                payment_string = frequency + " " + pubkey + " " + amount + " " + denomination
+            cmd_str = ["sudo bash /mnt/hdd/mynode/pleb-vpn/payments/managepayments.sh newpayment " + payment_string]
+            print(cmd_str) # for debug purposes only
+            result = subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True)
+            # for debug purposes
+            print(result.stdout, result.stderr)
+            if result.returncode == 0:
+                flash('Payment saved and scheduled!', category='success')
+            else:
+                    flash('An unknown error occured!', category='error')
+        else:
+            flash(is_valid, category='error')
 
     return render_template('payments.html', user=current_user, current_payments=get_payments())
 
@@ -636,3 +667,27 @@ def is_valid_ip(ip_str):
         return False
     # If all checks pass, return True
     return True
+
+def valid_payment(frequency, pubkey, amount, denomination):
+    is_valid = str(0)
+    if frequency != "daily":
+        if frequency != "weekly":
+            if frequency != "monthly":
+                if frequency != "yearly":
+                    is_valid = "Error: the frequency must be either 'daily', 'weekly', 'monthly', or 'yearly'"
+    pattern = r'^[a-zA-Z0-9]{66}$'
+    match = re.match(pattern, pubkey)
+    if not match:
+        is_valid = "Error: you did not submit a valid pubkey"
+    if denomination == "USD":
+        pattern = r'^\d*\.?\d+$'
+        match = re.match(pattern, amount)
+        if not match:
+            is_valid = "Error: you did not input a valid amount. Amount must be in the form of x.xx for USD and must only contain digits and a decimal"
+    elif denomination == "sats":
+        if not amount.isdigit():
+            is_valid = "Error: you did not input a valid amount. Amount for sats must only contain digits"
+    else:
+        is_valid = "Error: you did not input a valid denomination. Denomination must either be 'sats' or 'USD'"
+
+    return is_valid
