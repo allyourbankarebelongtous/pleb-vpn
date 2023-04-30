@@ -182,7 +182,7 @@ def payments():
             old_payments = get_payments()
             payment_id = request.form['payment_id']
             old_frequency = payment_id.split("_")
-            old_payment_freq = {tup[0]: tup[1:] for tup in old_payments[old_frequency]}
+            old_payment_freq = {tuple(tup[0]): tup[1:] for tup in old_payments[old_frequency]}
             frequency = request.form['frequency']
             if request.form['pubkey'] is not None:
                 pubkey = request.form['pubkey']
