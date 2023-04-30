@@ -98,70 +98,7 @@ content %}
     style="border-top: 1px solid lightgrey"
   >
     <form method="POST" id="payment_edit_form{{ line[0] }}">
-      <div class="col-9">
-        <table class="table">
-          <tbody>
-            <tr>
-              <th scope="row">Destination Pubkey</th>
-              <td>
-                <input
-                  type="text"
-                  id="pubkey"
-                  name="pubkey"
-                  value="{{ line[1] }}"
-                />
-              </td>
-            </tr>
-            <tr>
-              <th scope="row">Amount in sats or USD (use x.xx for USD)</th>
-              <td>
-                <input
-                  type="text"
-                  id="amount"
-                  name="amount"
-                  value="{{ line[2] }}"
-                />
-              </td>
-            </tr>
-            <tr>
-              <th scope="row">Denomination</th>
-              <td>
-                {% if line[3] == "sats" %}
-                <select
-                  class="form-control"
-                  id="denomination"
-                  name="denomination"
-                >
-                  <option value="sats" selected>sats</option>
-                  <option value="USD">USD</option>
-                </select>
-                {% else %}
-                <select
-                  class="form-control"
-                  id="denomination"
-                  name="denomination"
-                >
-                  <option value="sats">sats</option>
-                  <option value="USD" selected>USD</option>
-                </select>
-                {% endif %}
-              </td>
-            </tr>
-            <tr>
-              <th scope="row">Message</th>
-              <td>
-                <input
-                  type="text"
-                  id="message"
-                  name="message"
-                  value="{{ line[4] }}"
-                />
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-      <div class="col">
+      <div class="col-3">
         <div class="row" style="margin-top: 0.5em">
           <div class="col">
             <h5>Daily Payment</h5>
@@ -200,6 +137,70 @@ content %}
             </button>
           </div>
         </div>
+      </div>
+
+      <div class="col-9">
+        <table class="table">
+          <tbody>
+            <tr>
+              <th scope="row">Destination Pubkey</th>
+              <td>
+                <input
+                  type="text"
+                  id="pubkey"
+                  name="pubkey"
+                  value="{{ line[1] }}"
+                />
+              </td>
+            </tr>
+            <tr>
+              <th scope="row">Amount in sats or USD</th>
+              <td>
+                <input
+                  type="text"
+                  id="amount"
+                  name="amount"
+                  value="{{ line[2] }}"
+                />
+              </td>
+            </tr>
+            <tr>
+              <th scope="row">Denomination</th>
+              <td>
+                {% if line[3] == "sats" %}
+                <select
+                  class="form-control"
+                  id="denomination"
+                  name="denomination"
+                >
+                  <option value="sats" selected>sats</option>
+                  <option value="USD">USD</option>
+                </select>
+                {% else %}
+                <select
+                  class="form-control"
+                  id="denomination"
+                  name="denomination"
+                >
+                  <option value="sats">sats</option>
+                  <option value="USD" selected>USD</option>
+                </select>
+                {% endif %}
+              </td>
+            </tr>
+            <tr>
+              <th scope="row">Message (optional)</th>
+              <td>
+                <input
+                  type="text"
+                  id="message"
+                  name="message"
+                  value="{{ line[4] }}"
+                />
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </form>
   </div>
