@@ -43,18 +43,25 @@ content %}
             </button>
             <ul class="dropdown-menu">
               <li>
-                <a class="dropdown-item" onClick="send_payment('{{ line[0] }}')"
+                <a
+                  class="dropdown-item"
+                  href="#"
+                  onClick="send_payment('{{ line[0] }}')"
                   >Send Now</a
                 >
               </li>
               <li>
-                <a class="dropdown-item" onClick="edit_payment('{{ line[0] }}')"
+                <a
+                  class="dropdown-item"
+                  href="#"
+                  onClick="edit_payment('{{ line[0] }}')"
                   >Edit</a
                 >
               </li>
               <li>
                 <a
                   class="dropdown-item"
+                  href="#"
                   onClick="delete_payment('{{ line[0] }}')"
                 >
                   Delete
@@ -64,35 +71,6 @@ content %}
           </div>
         </div>
       </div>
-
-      <!-- <div class="row">
-        <div class="col">
-          <button
-            id="send_payment{{ line[0] }}"
-            type="button"
-            class="btn btn-success"
-            onClick="send_payment('{{ line[0] }}')"
-          >
-            Send
-          </button>
-          <button
-            id="edit_payment{{ line[0] }}"
-            type="button"
-            class="btn btn-primary"
-            onClick="edit_payment('{{ line[0] }}')"
-          >
-            Edit
-          </button>
-          <button
-            id="delete_payment{{ line[0] }}"
-            type="button"
-            class="btn btn-danger"
-            onClick="delete_payment('{{ line[0] }}')"
-          >
-            Delete
-          </button>
-        </div>
-      </div> -->
     </div>
     <div class="col-9">
       <table class="table">
@@ -120,8 +98,6 @@ content %}
     style="border-top: 1px solid lightgrey"
   >
     <form method="POST" id="payment_edit_form{{ line[0] }}">
-      <input type="hidden" name="form_id" value="edit_payment" />
-      <input type="hidden" name="payment_id" value="{{ line[0] }}" />
       <div class="col-3">
         <div class="row" style="margin-top: 0.5em">
           <div class="col">
@@ -405,7 +381,6 @@ content %}
     </div>
   </div>
   <form method="POST">
-    <input type="hidden" name="form_id" value="new_payment" />
     <div class="row" style="border-top: 1px solid lightgrey">
       <div class="col text-center">
         <div class="row">
