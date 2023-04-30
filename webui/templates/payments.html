@@ -43,13 +43,22 @@ content %}
             </button>
             <ul class="dropdown-menu">
               <li>
-                <a class="" onClick="send_payment('{{ line[0] }}')">Send Now</a>
+                <a class="dropdown-item" onClick="send_payment('{{ line[0] }}')"
+                  >Send Now</a
+                >
               </li>
               <li>
-                <a onClick="edit_payment('{{ line[0] }}')">Edit</a>
+                <a class="dropdown-item" onClick="edit_payment('{{ line[0] }}')"
+                  >Edit</a
+                >
               </li>
               <li>
-                <a onClick="delete_payment('{{ line[0] }}')"> Delete </a>
+                <a
+                  class="dropdown-item"
+                  onClick="delete_payment('{{ line[0] }}')"
+                >
+                  Delete
+                </a>
               </li>
             </ul>
           </div>
