@@ -98,47 +98,6 @@ content %}
     style="border-top: 1px solid lightgrey"
   >
     <form method="POST" id="payment_edit_form{{ line[0] }}">
-      <div class="col-3">
-        <div class="row" style="margin-top: 0.5em">
-          <div class="col">
-            <h5>Daily Payment</h5>
-            <p><small>every night at midnight</small></p>
-          </div>
-        </div>
-        <div class="row">
-          <div class="col">
-            <label for="frequency"
-              >How often do you want to send this payment?</label
-            >
-            <select class="form-control" id="frequency" name="frequency">
-              <option value="daily" selected>Daily</option>
-              <option value="weekly">Weekly</option>
-              <option value="monthly">Monthly</option>
-              <option value="yearly">Yearly</option>
-            </select>
-          </div>
-        </div>
-        <br />
-        <div class="row">
-          <div class="col text-center">
-            <button
-              type="button"
-              class="btn btn-success"
-              onClick="save_edited_payment('{{ line[0] }}')"
-            >
-              Save
-            </button>
-            <button
-              type="button"
-              class="btn btn-danger"
-              onClick="cancel_edited_payment('{{ line[0] }}')"
-            >
-              Cancel
-            </button>
-          </div>
-        </div>
-      </div>
-
       <div class="col-9">
         <table class="table">
           <tbody>
@@ -201,6 +160,46 @@ content %}
             </tr>
           </tbody>
         </table>
+      </div>
+      <div class="col">
+        <div class="row" style="margin-top: 0.5em">
+          <div class="col">
+            <h5>Daily Payment</h5>
+            <p><small>every night at midnight</small></p>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col">
+            <label for="frequency"
+              >How often do you want to send this payment?</label
+            >
+            <select class="form-control" id="frequency" name="frequency">
+              <option value="daily" selected>Daily</option>
+              <option value="weekly">Weekly</option>
+              <option value="monthly">Monthly</option>
+              <option value="yearly">Yearly</option>
+            </select>
+          </div>
+        </div>
+        <br />
+        <div class="row">
+          <div class="col text-center">
+            <button
+              type="button"
+              class="btn btn-success"
+              onClick="save_edited_payment('{{ line[0] }}')"
+            >
+              Save
+            </button>
+            <button
+              type="button"
+              class="btn btn-danger"
+              onClick="cancel_edited_payment('{{ line[0] }}')"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
       </div>
     </form>
   </div>
