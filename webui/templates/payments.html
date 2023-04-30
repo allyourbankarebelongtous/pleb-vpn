@@ -99,64 +99,103 @@ content %}
   >
     <form method="POST" id="payment_edit_form{{ line[0] }}">
       <div class="col">
-        <dif class="form-group">
-          <label for="amount">Enter Amount</label>
-          <input type="text" id="amount" name="amount" value="{{ line[2] }}" />
-        </dif>
-        <dif class="form-group">
-          <label for="denomination">Select denomination</label>
-          {% if line[3] == "sats" %}
-          <select class="form-control" id="denomination" name="denomination">
-            <option value="sats" selected>sats</option>
-            <option value="USD">USD</option>
-          </select>
-          {% else %}
-          <select class="form-control" id="denomination" name="denomination">
-            <option value="sats">sats</option>
-            <option value="USD" selected>USD</option>
-          </select>
-          {% endif %}
-        </dif>
-        <dif class="form-group">
-          <label for="frequency"
-            >How often do you want to send this payment?</label
-          >
-          <select class="form-control" id="frequency" name="frequency">
-            <option value="daily" selected>Daily</option>
-            <option value="weekly">Weekly</option>
-            <option value="monthly">Monthly</option>
-            <option value="yearly">Yearly</option>
-          </select>
-        </dif>
-        <dif class="form-group">
-          <label for="pubkey">Destination pubkey</label>
-          <input type="text" id="pubkey" name="pubkey" value="{{ line[1] }}" />
-        </dif>
-        <dif class="form-group">
-          <label for="message">Message (optional)</label>
-          <input
-            type="text"
-            id="message"
-            name="message"
-            value="{{ line[4] }}"
-          />
-        </dif>
-        <button
-          type="button"
-          class="btn btn-success"
-          onClick="save_edited_payment('{{ line[0] }}')"
-        >
-          Save Payment
-        </button>
-        <button
-          type="button"
-          class="btn btn-danger"
-          onClick="cancel_edited_payment('{{ line[0] }}')"
-        >
-          Cancel
-        </button>
+        <div class="row">
+          <div class="col">
+            <dif class="form-group">
+              <label for="amount">Enter Amount</label>
+              <input
+                type="text"
+                id="amount"
+                name="amount"
+                value="{{ line[2] }}"
+              />
+            </dif>
+          </div>
+          <div class="col">
+            <dif class="form-group">
+              <label for="denomination">Select denomination</label>
+              {% if line[3] == "sats" %}
+              <select
+                class="form-control"
+                id="denomination"
+                name="denomination"
+              >
+                <option value="sats" selected>sats</option>
+                <option value="USD">USD</option>
+              </select>
+              {% else %}
+              <select
+                class="form-control"
+                id="denomination"
+                name="denomination"
+              >
+                <option value="sats">sats</option>
+                <option value="USD" selected>USD</option>
+              </select>
+              {% endif %}
+            </dif>
+          </div>
+          <div class="col">
+            <dif class="form-group">
+              <label for="frequency"
+                >How often do you want to send this payment?</label
+              >
+              <select class="form-control" id="frequency" name="frequency">
+                <option value="daily" selected>Daily</option>
+                <option value="weekly">Weekly</option>
+                <option value="monthly">Monthly</option>
+                <option value="yearly">Yearly</option>
+              </select>
+            </dif>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col">
+            <dif class="form-group">
+              <label for="pubkey">Destination pubkey</label>
+              <input
+                type="text"
+                id="pubkey"
+                name="pubkey"
+                value="{{ line[1] }}"
+              />
+            </dif>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col">
+            <dif class="form-group">
+              <label for="message">Message (optional)</label>
+              <input
+                type="text"
+                id="message"
+                name="message"
+                value="{{ line[4] }}"
+              />
+            </dif>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col text-center">
+            <button
+              type="button"
+              class="btn btn-success"
+              onClick="save_edited_payment('{{ line[0] }}')"
+            >
+              Save Payment
+            </button>
+          </div>
+          <div class="col text-center">
+            <button
+              type="button"
+              class="btn btn-danger"
+              onClick="cancel_edited_payment('{{ line[0] }}')"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
       </div>
-
       <!--      <div class="col-3">
         <div class="row" style="margin-top: 0.5em">
           <div class="col">
