@@ -102,6 +102,17 @@ content %}
         <table class="table">
           <tbody>
             <tr>
+              <th scope="row">How often do you want to send this payment?</th>
+              <td>
+                <select class="form-control" id="frequency" name="frequency">
+                  <option value="daily" selected>Daily</option>
+                  <option value="weekly">Weekly</option>
+                  <option value="monthly">Monthly</option>
+                  <option value="yearly">Yearly</option>
+                </select>
+              </td>
+            </tr>
+            <tr>
               <th scope="row">Destination Pubkey</th>
               <td>
                 <input
@@ -162,17 +173,6 @@ content %}
         </table>
       </div>
       <div class="row" style="margin-top: 0.5em">
-        <div class="col">
-          <label for="frequency"
-            >How often do you want to send this payment?</label
-          >
-          <select class="form-control" id="frequency" name="frequency">
-            <option value="daily" selected>Daily</option>
-            <option value="weekly">Weekly</option>
-            <option value="monthly">Monthly</option>
-            <option value="yearly">Yearly</option>
-          </select>
-        </div>
         <div class="col text-center">
           <button
             type="button"
