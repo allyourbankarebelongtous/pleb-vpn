@@ -2,10 +2,11 @@ from flask import Blueprint, render_template, request, flash, jsonify, redirect,
 from flask_login import login_required, current_user
 from werkzeug.utils import secure_filename
 from socket_io import socketio
+from datetime import datetime, timedelta
 # from PIL import Image
 from .models import User
 from . import db
-import json, os, subprocess, time, pexpect, random, qrcode, io, base64, shutil, re
+import json, os, subprocess, time, pexpect, random, qrcode, io, base64, shutil, re, datetime
 
 views = Blueprint('views', __name__)
 
@@ -486,6 +487,30 @@ def get_wireguard_status():
 def get_payments():
     # get current payments
     current_payments = {}
+    # today = datetime.now()
+    # yesterday = datetime.now() - timedelta(days=1)
+    # sunday = today - datetime.timedelta(days=today.weekday())
+    # saturday = sunday - timedelta(days=1)
+    # first_of_month = datetime(today.year, today.month, 1)
+    # last_of_month = first_of_month - timedelta(days=1)
+    # first_of_year = datetime(today.year, 1, 1)
+    # last_of_year = first_of_year - timedelta(days=1)
+    # today = datetime(today.year, today.month, today.day, 1, 0, 0)
+    # yesterday = datetime(yesterday.year, yesterday.month, yesterday.day, 23, 0, 0)
+    # sunday = datetime(sunday.year, sunday.month, sunday.day, 1, 0, 0)
+    # saturday = datetime(saturday.year, saturday.month, saturday.day, 23, 0, 0)
+    # first_of_month = datetime(first_of_month.year, first_of_month.month, first_of_month.day, 1, 0, 0)
+    # last_of_month = datetime(last_of_month.year, last_of_month.month, last_of_month.day, 23, 0, 0)
+    # first_of_year = datetime(first_of_year.year, first_of_year.month, first_of_year.day, 1, 0, 0)
+    # last_of_year = datetime(last_of_year.year, last_of_year.month, last_of_year.day, 23, 0, 0)
+    # today = today.strftime("%Y-%m-%d %H:%M:%S")
+    # yesterday = yesterday.strftime("%Y-%m-%d %H:%M:%S")
+    # sunday = sunday.strftime("%Y-%m-%d %H:%M:%S")
+    # saturday = saturday.strftime("%Y-%m-%d %H:%M:%S")
+    # first_of_month = first_of_month.strftime("%Y-%m-%d %H:%M:%S")
+    # last_of_month = last_of_month.strftime("%Y-%m-%d %H:%M:%S")
+    # first_of_year = first_of_year.strftime("%Y-%m-%d %H:%M:%S")
+    # last_of_year = last_of_year.strftime("%Y-%m-%d %H:%M:%S")
     cmd_str = ["sudo bash /mnt/hdd/mynode/pleb-vpn/payments/managepayments.sh status"]
     subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True)
     with open(os.path.abspath('./payments/current_payments.tmp')) as payments:
@@ -505,6 +530,22 @@ def get_payments():
                     message = ""
                 if category not in current_payments:
                     current_payments[category] = []
+                # if category == 'daily':
+                #     start_date = "start=$(date -d '" + yesterday + "' +%s); "
+                #     end_date = "end=$(date -d '" + today + "' +%s); "
+                # elif category == 'weekly':
+                #     start_date = "start=$(date -d '" + saturday + "' +%s); "
+                #     end_date = "end=$(date -d '" + sunday + "' +%s); "
+                # elif category == 'monthly':
+                #     start_date = "start=$(date -d '" + last_of_month + "' +%s); "
+                #     end_date = "end=$(date -d '" + first_of_month + "' +%s); "
+                # elif category == 'yearly':
+                #     start_date = "start=$(date -d '" + last_of_year + "' +%s); "
+                #     end_date = "end=$(date -d '" + first_of_year + "' +%s); "
+                # else:
+                #     start_date = "error"
+                #     end_date = "error"
+                
                 current_payments[category].append((id, pubkey, amount, denomination, message))
             except IndexError:
                 print("Error: Not enough elements in line_parts for line: ", line)
