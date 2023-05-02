@@ -14,6 +14,7 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
 fi
 
 plebVPNConf="/home/admin/pleb-vpn/pleb-vpn.conf"
+BACKTITLE="Pleb-VPN"
 
 function setting() # FILE LINENUMBER NAME VALUE
 {
@@ -108,6 +109,20 @@ ${message}
   fi
 }
 
+auto_connect() {
+  default_host="https://192.168.1.212:8000/"
+  #default_host="https://satoshi1.plebvpn.xyz/"
+  MENU="Enter the IP:port or hostname for the PlebVPN server you'd like to connect to. If unsure, use the default."
+  TITLE="Connect to PlebVPN"
+  WIDTH=66
+  HEIGHT=10
+  chosen_host=$(dialog --backtitle "$BACKTITLE" --title "$TITLE" --inputbox "$MENU " $HEIGHT $WIDTH $default_host 2>&1 > /dev/tty)
+  echo "Attempting to connect to $chosen_host.."
+  pushd plebvpn_client || exit
+    python3 -m src --action create_account --server $chosen_host
+  popd || exit
+}
+
 on() {
   # install and configure openvpn
   source ${plebVPNConf}
@@ -142,48 +157,80 @@ on() {
     # get new conf file
     # get local ip
     source <(/home/admin/config.scripts/internet.sh status local)
+
+    # BASIC MENU INFO
+    WIDTH=80
+    TITLE="Install OpenVPN Credentials"
+    MENU="Choose one of the following options:"
+    OPTIONS=()
+
     # upload plebvpn.conf
-    filename=""
-    while [ "${filename}" = "" ]
-      do
-        clear
-        echo "********************************"
-        echo "* UPLOAD THE PLEBVPN.CONF FILE *"
-        echo "********************************"
-        echo "If you are using the paid version of pleb-vpn, obtain an openvpn"
-        echo "configuration file called plebvpn.conf from allyourbankarebelongtous."
-        echo "You can obtain this by contacting @allyourbankarebelongtous on Telegram."
-        echo
-        echo "If you have a plebvpn.conf file, or if you are using your own openvpn setup"
-        echo "upload your configuration file. MAKE SURE IT IS NAMED plebvpn.conf!"
-        echo
-        echo "To upload, open a new terminal on your laptop,"
-        echo "change into the directory where your plebvpn.conf file is and"
-        echo "COPY, PASTE AND EXECUTE THE FOLLOWING COMMAND:"
-        echo "scp -r plebvpn.conf admin@${localip}:/home/admin/"
-        echo
-        echo "Use your password A to authenticate file transfer."
-        echo "PRESS ENTER when upload is done"
-        read key
-        # check to see if upload was successful
-        isuploaded=$(sudo ls /home/admin/ | grep -c plebvpn.conf)
-        if ! [ $isuploaded -eq 0 ]; then
-          filename="plebvpn.conf"
-          echo "OK - File found: ${filename}"
-          echo "PRESS ENTER to continue."
-          read key
-        else
-          echo "# WARNING #"
-          echo "There was no plebvpn.conf found in /home/admin/"
-          echo "PRESS ENTER to continue & retry ... or 'x' + ENTER to cancel"
-          read keyRetry
-        fi
-        if [ "${keyRetry}" == "x" ] || [ "${keyRetry}" == "X" ] || [ "${keyRetry}" == "'x'" ]; then
-          # create no result file and exit
-          echo "# USER CANCEL"
-          exit 1
-        fi
-    done
+    OPTIONS+=(AUTOMATIC "Automatically connect to a server running PlebVPN (Recommended)")
+    OPTIONS+=(MANUAL "Manually install openvpn credentials")
+
+    # display menu
+    CHOICE_HEIGHT=$(("${#OPTIONS[@]}/2+1"))
+    HEIGHT=$((CHOICE_HEIGHT+6))
+    CHOICE=$(dialog --clear \
+                    --backtitle "$BACKTITLE" \
+                    --title "$TITLE" \
+                    --ok-label "Select" \
+                    --cancel-label "Main menu" \
+                    --menu "$MENU "  \
+                    $HEIGHT $WIDTH $CHOICE_HEIGHT \
+                    "${OPTIONS[@]}" \
+                    2>&1 >/dev/tty)
+
+    case $CHOICE in
+      AUTOMATIC)
+        auto_connect
+        ;;
+      MANUAL)
+        filename=""
+        while [ "${filename}" = "" ]
+          do
+            clear
+            echo "********************************"
+            echo "* UPLOAD THE PLEBVPN.CONF FILE *"
+            echo "********************************"
+            echo "If you are using the paid version of pleb-vpn, obtain an openvpn"
+            echo "configuration file called plebvpn.conf from allyourbankarebelongtous."
+            echo "You can obtain this by contacting @allyourbankarebelongtous on Telegram."
+            echo
+            echo "If you have a plebvpn.conf file, or if you are using your own openvpn setup"
+            echo "upload your configuration file. MAKE SURE IT IS NAMED plebvpn.conf!"
+            echo
+            echo "To upload, open a new terminal on your laptop,"
+            echo "change into the directory where your plebvpn.conf file is and"
+            echo "COPY, PASTE AND EXECUTE THE FOLLOWING COMMAND:"
+            echo "scp -r plebvpn.conf admin@${localip}:/home/admin/"
+            echo
+            echo "Use your password A to authenticate file transfer."
+            echo "PRESS ENTER when upload is done"
+            read key
+            # check to see if upload was successful
+            isuploaded=$(sudo ls /home/admin/ | grep -c plebvpn.conf)
+            if ! [ $isuploaded -eq 0 ]; then
+              filename="plebvpn.conf"
+              echo "OK - File found: ${filename}"
+              echo "PRESS ENTER to continue."
+              read key
+            else
+              echo "# WARNING #"
+              echo "There was no plebvpn.conf found in /home/admin/"
+              echo "PRESS ENTER to continue & retry ... or 'x' + ENTER to cancel"
+              read keyRetry
+            fi
+            if [ "${keyRetry}" == "x" ] || [ "${keyRetry}" == "X" ] || [ "${keyRetry}" == "'x'" ]; then
+              # create no result file and exit
+              echo "# USER CANCEL"
+              exit 1
+            fi
+        done
+        ;;
+      esac
+
+    exit 0  # rm when done testing
     # move plebvpn.conf
     sudo mkdir /mnt/hdd/app-data/pleb-vpn/openvpn
     sudo mv /home/admin/plebvpn.conf /mnt/hdd/app-data/pleb-vpn/openvpn/plebvpn.conf
