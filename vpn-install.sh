@@ -111,15 +111,30 @@ ${message}
 
 auto_connect() {
   default_host="https://192.168.1.212:8000/"
-  #default_host="https://satoshi1.plebvpn.xyz/"
+  #default_host="https://satoshi1.plebvpn.com/"
   MENU="Enter the IP:port or hostname for the PlebVPN server you'd like to connect to. If unsure, use the default."
   TITLE="Connect to PlebVPN"
   WIDTH=66
   HEIGHT=10
   chosen_host=$(dialog --backtitle "$BACKTITLE" --title "$TITLE" --inputbox "$MENU " $HEIGHT $WIDTH $default_host 2>&1 > /dev/tty)
   echo "Attempting to connect to $chosen_host.."
-  pushd plebvpn_client || exit
-    python3 -m src --action create_account --server $chosen_host
+  pushd pleb-vpn/plebvpn_client || exit
+    output=$(python3 -m src --action create_account --server "$chosen_host" 2>&1 >/dev/tty)
+    err_code=$?
+    if [ $err_code -ne 0 ]; then
+      # See plebvpn_common/types.py for error codes
+      case $err_code in
+      2) message="Could not negotiate an LND port with the server" ;;
+      3) message="Could not connect to the server $chosen_host" ;;
+      5) message="Could not generate a new account, username already exists" ;;
+      *) message="$output" ;;
+      esac
+
+      dialog --clear --backtitle PlebVPN --title "There was an error connecting to PlebVPN" --msgbox "$message" 0 0
+      echo $err_code
+      exit 1
+    fi
+
   popd || exit
 }
 
@@ -230,7 +245,6 @@ on() {
         ;;
       esac
 
-    exit 0  # rm when done testing
     # move plebvpn.conf
     sudo mkdir /mnt/hdd/app-data/pleb-vpn/openvpn
     sudo mv /home/admin/plebvpn.conf /mnt/hdd/app-data/pleb-vpn/openvpn/plebvpn.conf
