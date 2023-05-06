@@ -182,7 +182,7 @@ def payments():
         pubkey = request.form['pubkey']
         amount = request.form['amount']
         denomination = request.form['denomination']
-        if request.form['old_payment_id']:
+        if 'old_payment_id' in request.form:
             old_payment_id = request.form['old_payment_id']
         else:
             old_payment_id = None
