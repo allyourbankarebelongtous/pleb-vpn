@@ -31,7 +31,7 @@ def get_price_at(timestamp="now"):
 def send_to_node(node, sats, message):
     sats = str(int(sats))
     logging.info("Sending {0} sats to {1}".format(sats, node))
-    cmd = ['lncli', 'sendpayment', '--dest='+node, '--amt='+sats]
+    cmd = ['lncli', 'sendpayment', '--fee_limit 500', '--dest='+node, '--amt='+sats]
 
     # Add keysend message, if available
     if message is not None:
