@@ -182,12 +182,19 @@ def payments():
         pubkey = request.form['pubkey']
         amount = request.form['amount']
         denomination = request.form['denomination']
+        if request.form['old_payment_id']:
+            old_payment_id = request.form['old_payment_id']
+        else:
+            old_payment_id = None
         if request.form['message'] is not None:
             message = request.form['message']
-        else: 
+        else:
             message = None
         is_valid = valid_payment(frequency, pubkey, amount, denomination)
         if is_valid == "0":
+            if old_payment_id is not None:
+                cmd_str = ["sudo bash /mnt/hdd/mynode/pleb-vpn/payments/managepayments.sh deletepayment " + old_payment_id]
+                result = subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True)
             if message is not None:
                 payment_string = frequency + " " + pubkey + " " + amount + " " + denomination + " \"" + message + "\""
             else:
@@ -698,7 +705,7 @@ def valid_payment(frequency, pubkey, amount, denomination):
     if not match:
         is_valid = "Error: you did not submit a valid pubkey"
     if denomination == "USD":
-        pattern = r'^\d*\.?\d+$'
+        pattern = r'^\d+\.\d{2}$'
         match = re.match(pattern, amount)
         if not match:
             is_valid = "Error: you did not input a valid amount. Amount must be in the form of x.xx for USD and must only contain digits and a decimal"
