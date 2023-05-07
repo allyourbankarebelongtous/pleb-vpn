@@ -173,13 +173,6 @@ echo "Checking and installing requirements..."
   GATEWAY=$(ip r | grep default | cut -d " " -f3)
 
   # first check for and remove old names from prior starts
-  ip_nat_handles=$(nft -a list table ip nat | grep "meta cgroup 1114129 counter" | sed "s/.*handle //")
-  while [ $(nft list table ip nat | grep -c "meta cgroup 1114129 counter") -gt 0 ]
-  do
-    ruleNumber=$(nft list table ip nat | grep -c "meta cgroup 1114129 counter")
-    ip_nat_handle=$(echo "${ip_nat_handles}" | sed -n ${ruleNumber}p)
-    nft delete rule ip nat POSTROUTING handle ${ip_nat_handle}
-  done
   while [ $(nft list tables | grep -c mangle) -gt 0 ]
   do
     nft delete table ip mangle
@@ -252,6 +245,8 @@ StartLimitBurst=5
 Type=oneshot
 RemainAfterExit=yes
 ExecStart=/bin/bash /mnt/hdd/mynode/pleb-vpn/split-tunnel/create-cgroup.sh
+User=root
+Group=root
 [Install]
 WantedBy=multi-user.target
 " | tee /etc/systemd/system/pleb-vpn-create-cgroup.service
@@ -272,7 +267,7 @@ After=pleb-vpn-create-cgroup.service
   echo '#!/bin/bash
 
 # adds tor to cgroup for split-tunneling
-tor_pid=$(pgrep -x tor)
+tor_pid=$(pgrep tor)
 cgclassify -g net_cls:novpn $tor_pid
 ' | tee /mnt/hdd/mynode/pleb-vpn/split-tunnel/tor-split-tunnel.sh
   chmod 755 -R /mnt/hdd/mynode/pleb-vpn/split-tunnel
@@ -289,6 +284,8 @@ After=tor@default.service
 [Service]
 Type=oneshot
 ExecStart=/bin/bash /mnt/hdd/mynode/pleb-vpn/split-tunnel/tor-split-tunnel.sh
+User=root
+Group=root
 [Install]
 WantedBy=multi-user.target
 " | tee /etc/systemd/system/pleb-vpn-tor-split-tunnel.service
@@ -315,13 +312,6 @@ OIFNAME=$(ip r | grep default | cut -d " " -f5)
 GATEWAY=$(ip r | grep default | cut -d " " -f3)
 
 # first check for and remove old names from prior starts
-ip_nat_handles=$(nft -a list table ip nat | grep "meta cgroup 1114129 counter" | sed "s/.*handle //")
-while [ $(nft list table ip nat | grep -c "meta cgroup 1114129 counter") -gt 0 ]
-do
-  ruleNumber=$(nft list table ip nat | grep -c "meta cgroup 1114129 counter")
-  ip_nat_handle=$(echo "${ip_nat_handles}" | sed -n ${ruleNumber}p)
-  nft delete rule ip nat POSTROUTING handle ${ip_nat_handle}
-done
 while [ $(nft list tables | grep -c nat) -gt 0 ]
 do
   nft delete table ip nat
@@ -378,6 +368,8 @@ After=pleb-vpn-tor-split-tunnel.service
 [Service]
 Type=oneshot
 ExecStart=/bin/bash /mnt/hdd/mynode/pleb-vpn/split-tunnel/nftables-config.sh
+User=root
+Group=root
 [Install]
 WantedBy=multi-user.target
 " | tee /etc/systemd/system/pleb-vpn-nftables-config.service
