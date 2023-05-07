@@ -478,13 +478,6 @@ off() {
   GATEWAY=$(ip r | grep default | cut -d " " -f3)
 
   # first check for and remove old names from prior starts
-  ip_nat_handles=$(nft -a list table ip nat | grep "meta cgroup 1114129 counter" | sed "s/.*handle //")
-  while [ $(nft list table ip nat | grep -c "meta cgroup 1114129 counter") -gt 0 ]
-  do
-    ruleNumber=$(nft list table ip nat | grep -c "meta cgroup 1114129 counter")
-    ip_nat_handle=$(echo "${ip_nat_handles}" | sed -n ${ruleNumber}p)
-    nft delete rule ip nat POSTROUTING handle ${ip_nat_handle}
-  done
   while [ $(nft list tables | grep -c mangle) -gt 0 ]
   do
     nft delete table ip mangle
