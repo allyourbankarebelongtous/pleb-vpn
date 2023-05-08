@@ -267,7 +267,7 @@ After=pleb-vpn-create-cgroup.service
   echo '#!/bin/bash
 
 # adds tor to cgroup for split-tunneling
-tor_pid=$(pgrep tor)
+tor_pid=$(pgrep -x tor)
 cgclassify -g net_cls:novpn $tor_pid
 ' | tee /mnt/hdd/mynode/pleb-vpn/split-tunnel/tor-split-tunnel.sh
   chmod 755 -R /mnt/hdd/mynode/pleb-vpn/split-tunnel
@@ -350,8 +350,8 @@ nft add rule ip nat POSTROUTING oifname ${OIFNAME} meta cgroup 1114129 counter m
 nft add table ip mangle
 nft add chain ip mangle markit "{type route hook output priority filter; policy accept;}"
 nft add rule ip mangle markit meta cgroup 1114129 counter meta mark set 0xb
-nft add rule inet filter input meta cgroup 1114129 counter accept
-nft add rule inet filter output meta cgroup 1114129 counter accept
+nft add rule inet filter input meta cgroup 1114129 counter return
+nft add rule inet filter output meta cgroup 1114129 counter return
 ip route add default via ${GATEWAY} table novpn
 ip rule add fwmark 11 table novpn
 ' | tee /mnt/hdd/mynode/pleb-vpn/split-tunnel/nftables-config.sh
