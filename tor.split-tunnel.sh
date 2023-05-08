@@ -168,32 +168,25 @@ echo "Checking and installing requirements..."
 
   # clean rules from failed install attempts
   echo "cleaning ip rules to prevent duplicate rules"
-
   OIFNAME=$(ip r | grep default | cut -d " " -f5)
   GATEWAY=$(ip r | grep default | cut -d " " -f3)
 
   # first check for and remove old names from prior starts
-  while [ $(nft list tables | grep -c mangle) -gt 0 ]
-  do
-    nft delete table ip mangle
-  done
   while [ $(nft list tables | grep -c nat) -gt 0 ]
   do
     nft delete table ip nat
   done
-  ip_filter_input_handles=$(nft -a list chain inet filter input | grep "meta cgroup 1114129 counter" | sed "s/.*handle //")
-  while [ $(nft list chain inet filter input | grep -c "meta cgroup 1114129 counter") -gt 0 ]
+  while [ $(nft list tables | grep -c mangle) -gt 0 ]
   do
-    ruleNumber=$(nft list chain inet filter input | grep -c "meta cgroup 1114129 counter")
-    ip_filter_input_handle=$(echo "${ip_filter_input_handles}" | sed -n ${ruleNumber}p)
-    nft delete rule inet filter input handle ${ip_filter_input_handle}
+    nft delete table ip mangle
   done
-  ip_filter_output_handles=$(nft -a list chain inet filter output | grep "meta cgroup 1114129 counter" | sed "s/.*handle //")
-  while [ $(nft list chain inet filter output | grep -c "meta cgroup 1114129 counter") -gt 0 ]
+  while [ $(nft list table inet filter | grep -c pre-input) -gt 0 ]
   do
-    ruleNumber=$(nft list chain inet filter output | grep -c "meta cgroup 1114129 counter")
-    ip_filter_output_handle=$(echo "${ip_filter_output_handles}" | sed -n ${ruleNumber}p)
-    nft delete rule inet filter output handle ${ip_filter_output_handle}
+    nft delete chain inet filter pre-input
+  done
+  while [ $(nft list table inet filter | grep -c pre-output) -gt 0 ]
+  do
+    nft delete chain inet filter pre-output
   done
   while [ $(ip rule | grep -c "fwmark 0xb lookup novpn") -gt 0 ]
   do
@@ -320,19 +313,13 @@ while [ $(nft list tables | grep -c mangle) -gt 0 ]
 do
   nft delete table ip mangle
 done
-ip_filter_input_handles=$(nft -a list chain inet filter input | grep "meta cgroup 1114129 counter" | sed "s/.*handle //")
-while [ $(nft list chain inet filter input | grep -c "meta cgroup 1114129 counter") -gt 0 ]
+while [ $(nft list table inet filter | grep -c pre-input) -gt 0 ]
 do
-  ruleNumber=$(nft list chain inet filter input | grep -c "meta cgroup 1114129 counter")
-  ip_filter_input_handle=$(echo "${ip_filter_input_handles}" | sed -n ${ruleNumber}p)
-  nft delete rule inet filter input handle ${ip_filter_input_handle}
+  nft delete chain inet filter pre-input
 done
-ip_filter_output_handles=$(nft -a list chain inet filter output | grep "meta cgroup 1114129 counter" | sed "s/.*handle //")
-while [ $(nft list chain inet filter output | grep -c "meta cgroup 1114129 counter") -gt 0 ]
+while [ $(nft list table inet filter | grep -c pre-output) -gt 0 ]
 do
-  ruleNumber=$(nft list chain inet filter output | grep -c "meta cgroup 1114129 counter")
-  ip_filter_output_handle=$(echo "${ip_filter_output_handles}" | sed -n ${ruleNumber}p)
-  nft delete rule inet filter output handle ${ip_filter_output_handle}
+  nft delete chain inet filter pre-output
 done
 while [ $(ip rule | grep -c "fwmark 0xb lookup novpn") -gt 0 ]
 do
@@ -350,8 +337,10 @@ nft add rule ip nat POSTROUTING oifname ${OIFNAME} meta cgroup 1114129 counter m
 nft add table ip mangle
 nft add chain ip mangle markit "{type route hook output priority filter; policy accept;}"
 nft add rule ip mangle markit meta cgroup 1114129 counter meta mark set 0xb
-nft add rule inet filter input meta cgroup 1114129 counter return
-nft add rule inet filter output meta cgroup 1114129 counter return
+nft add chain inet filter pre-input "{type filter hook input priority -1; policy accept;}"
+nft add chain inet filter pre-output "{type filter hook output priority -1; policy accept;}"
+nft add rule inet filter pre-input meta cgroup 1114129 counter return
+nft add rule inet filter pre-output meta cgroup 1114129 counter return
 ip route add default via ${GATEWAY} table novpn
 ip rule add fwmark 11 table novpn
 ' | tee /mnt/hdd/mynode/pleb-vpn/split-tunnel/nftables-config.sh
@@ -478,27 +467,21 @@ off() {
   GATEWAY=$(ip r | grep default | cut -d " " -f3)
 
   # first check for and remove old names from prior starts
-  while [ $(nft list tables | grep -c mangle) -gt 0 ]
-  do
-    nft delete table ip mangle
-  done
   while [ $(nft list tables | grep -c nat) -gt 0 ]
   do
     nft delete table ip nat
   done
-  ip_filter_input_handles=$(nft -a list chain inet filter input | grep "meta cgroup 1114129 counter" | sed "s/.*handle //")
-  while [ $(nft list chain inet filter input | grep -c "meta cgroup 1114129 counter") -gt 0 ]
+  while [ $(nft list tables | grep -c mangle) -gt 0 ]
   do
-    ruleNumber=$(nft list chain inet filter input | grep -c "meta cgroup 1114129 counter")
-    ip_filter_input_handle=$(echo "${ip_filter_input_handles}" | sed -n ${ruleNumber}p)
-    nft delete rule inet filter input handle ${ip_filter_input_handle}
+    nft delete table ip mangle
   done
-  ip_filter_output_handles=$(nft -a list chain inet filter output | grep "meta cgroup 1114129 counter" | sed "s/.*handle //")
-  while [ $(nft list chain inet filter output | grep -c "meta cgroup 1114129 counter") -gt 0 ]
+  while [ $(nft list table inet filter | grep -c pre-input) -gt 0 ]
   do
-    ruleNumber=$(nft list chain inet filter output | grep -c "meta cgroup 1114129 counter")
-    ip_filter_output_handle=$(echo "${ip_filter_output_handles}" | sed -n ${ruleNumber}p)
-    nft delete rule inet filter output handle ${ip_filter_output_handle}
+    nft delete chain inet filter pre-input
+  done
+  while [ $(nft list table inet filter | grep -c pre-output) -gt 0 ]
+  do
+    nft delete chain inet filter pre-output
   done
   while [ $(ip rule | grep -c "fwmark 0xb lookup novpn") -gt 0 ]
   do
@@ -508,6 +491,7 @@ off() {
   do
     ip rou del from all table novpn default via ${GATEWAY}
   done
+
 
   # remove routing table
   rm /etc/iproute2/rt_tables.d/novpn-route.conf
