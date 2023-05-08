@@ -337,8 +337,8 @@ nft add rule ip nat POSTROUTING oifname ${OIFNAME} meta cgroup 1114129 counter m
 nft add table ip mangle
 nft add chain ip mangle markit "{type route hook output priority filter; policy accept;}"
 nft add rule ip mangle markit meta cgroup 1114129 counter meta mark set 0xb
-nft add chain inet filter pre-input "{type filter hook input priority -1; policy accept;}"
-nft add chain inet filter pre-output "{type filter hook output priority -1; policy accept;}"
+nft add chain inet filter pre-input "{type filter hook input priority 100; policy accept;}"
+nft add chain inet filter pre-output "{type filter hook output priority 100; policy accept;}"
 nft add rule inet filter pre-input meta cgroup 1114129 counter return
 nft add rule inet filter pre-output meta cgroup 1114129 counter return
 ip route add default via ${GATEWAY} table novpn
