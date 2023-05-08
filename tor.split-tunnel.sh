@@ -352,7 +352,6 @@ ip rule add fwmark 11 table novpn
   echo "Create nftables-config systemd service..."
   echo "[Unit]
 Description=Configure nftables for split-tunnel process
-Wants=mynode.service
 After=mynode.service
 [Service]
 Type=oneshot
