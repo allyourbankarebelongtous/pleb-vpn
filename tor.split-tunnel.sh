@@ -341,6 +341,9 @@ nft add chain inet filter input "{type filter hook input priority -1; policy acc
 nft add chain inet filter output "{type filter hook output priority -1; policy accept;}"
 nft add rule inet filter input meta cgroup 1114129 counter accept
 nft add rule inet filter output meta cgroup 1114129 counter accept
+iptables -A INPUT -m mark --mark 0xb -j ACCEPT
+iptables -A OUTPUT -m mark --mark 0xb -j ACCEPT
+iptables -A FORWARD -m mark --mark 0xb -j ACCEPT
 ip route add default via ${GATEWAY} table novpn
 ip rule add fwmark 11 table novpn
 ' | tee /mnt/hdd/mynode/pleb-vpn/split-tunnel/nftables-config.sh
