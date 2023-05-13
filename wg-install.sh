@@ -226,7 +226,7 @@ PrivateKey = ${client1PrivateKey}
 
 [Peer]
 PublicKey = ${serverPublicKey}
-Endpoint = ${vpnIP}:${wgport}
+Endpoint = ${vpnip}:${wgport}
 AllowedIPs = ${wglan}.0/24, ${LAN}.0/24
 " | sudo tee /etc/wireguard/clients/client1.conf
     echo "[Interface]
@@ -235,7 +235,7 @@ PrivateKey = ${client2PrivateKey}
 
 [Peer]
 PublicKey = ${serverPublicKey}
-Endpoint = ${vpnIP}:${wgport}
+Endpoint = ${vpnip}:${wgport}
 AllowedIPs = ${wglan}.0/24, ${LAN}.0/24
 " | sudo tee /etc/wireguard/clients/client2.conf
     echo "[Interface]
@@ -244,7 +244,7 @@ PrivateKey = ${client3PrivateKey}
 
 [Peer]
 PublicKey = ${serverPublicKey}
-Endpoint = ${vpnIP}:${wgport}
+Endpoint = ${vpnip}:${wgport}
 AllowedIPs = ${wglan}.0/24, ${LAN}.0/24
 " | sudo tee /etc/wireguard/clients/client3.conf
 
