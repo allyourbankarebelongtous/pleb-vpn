@@ -226,15 +226,15 @@ echo "Checking and installing requirements..."
   done
   while [ $(iptables -L INPUT | grep -c "0xb") -gt 0 ]
   do
-    iptables -D INPUT -m mark --mark 0xb -j accept
+    iptables -D INPUT -m mark --mark 0xb -j ACCEPT
   done
   while [ $(iptables -L FORWARD | grep -c "0xb") -gt 0 ]
   do
-    iptables -D FORWARD -m mark --mark 0xb -j accept
+    iptables -D FORWARD -m mark --mark 0xb -j ACCEPT
   done
   while [ $(iptables -L OUTPUT | grep -c "0xb") -gt 0 ]
   do
-    iptables -D OUTPUT -m mark --mark 0xb -j accept
+    iptables -D OUTPUT -m mark --mark 0xb -j ACCEPT
   done
   while [ $(ip rule | grep -c "fwmark 0xb lookup novpn") -gt 0 ]
   do
@@ -371,15 +371,15 @@ do
 done
 while [ $(iptables -L INPUT | grep -c "0xb") -gt 0 ]
 do
-  iptables -D INPUT -m mark --mark 0xb -j accept
+  iptables -D INPUT -m mark --mark 0xb -j ACCEPT
 done
 while [ $(iptables -L FORWARD | grep -c "0xb") -gt 0 ]
 do
-  iptables -D FORWARD -m mark --mark 0xb -j accept
+  iptables -D FORWARD -m mark --mark 0xb -j ACCEPT
 done
 while [ $(iptables -L OUTPUT | grep -c "0xb") -gt 0 ]
 do
-  iptables -D OUTPUT -m mark --mark 0xb -j accept
+  iptables -D OUTPUT -m mark --mark 0xb -j ACCEPT
 done
 while [ $(ip rule | grep -c "fwmark 0xb lookup novpn") -gt 0 ]
 do
