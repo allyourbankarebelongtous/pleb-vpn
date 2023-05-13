@@ -78,7 +78,7 @@ message=${message}" | tee /mnt/hdd/mynode/pleb-vpn/wireguard_status.tmp
       clientIPs=$(sudo cat /etc/wireguard/wg0.conf | grep AllowedIPs | cut -d " " -f3 | cut -d "/" -f1)
       clientIPselect=($clientIPs)
     fi
-    if [ "${wgIP}" = "${checkwgIP}" ]; then
+    if [ "${wgip}" = "${checkwgIP}" ]; then
       isrunning="yes"
     else
       isrunning="no"
@@ -95,7 +95,7 @@ message=${message}" | tee /mnt/hdd/mynode/pleb-vpn/wireguard_status.tmp
 operating=${isrunning}
 service_installed=${serviceExists}
 config_file_found=${isConfig}
-server_IP=${wgIP}
+server_IP=${wgip}
 client1_IP=${clientIPselect[0]}
 client2_IP=${clientIPselect[1]}
 client3_IP=${clientIPselect[2]}
@@ -151,7 +151,7 @@ on() {
   local new_config="${1}"
 
   # check if plebvpn is on
-  if ! [ "${plebVPN}" = "on" ]; then
+  if ! [ "${plebvpn}" = "on" ]; then
     echo "error: turn on plebvpn before enabling wireguard"
     exit 1
   fi
@@ -185,23 +185,23 @@ on() {
     sudo wg genkey | sudo tee /etc/wireguard/client3_private_key | wg pubkey > /etc/wireguard/client3_public_key
     client3PrivateKey=$(sudo cat /etc/wireguard/client3_private_key)
     client3PublicKey=$(sudo cat /etc/wireguard/client3_public_key)
-    wgLAN=$(echo "${wgIP}" | sed 's/^\(.*\)\.\(.*\)\.\(.*\)\.\(.*\)$/\1\.\2\.\3/')
-    serverHost=$(echo "${wgIP}" | cut -d "." -f4)
+    wglan=$(echo "${wgip}" | sed 's/^\(.*\)\.\(.*\)\.\(.*\)\.\(.*\)$/\1\.\2\.\3/')
+    serverHost=$(echo "${wgip}" | cut -d "." -f4)
     client1Host=$(expr $serverHost + 1)
     client2Host=$(expr $serverHost + 2)
     client3Host=$(expr $serverHost + 3)
-    client1ip=$(echo "${wgLAN}.${client1Host}")
-    client2ip=$(echo "${wgLAN}.${client2Host}")
-    client3ip=$(echo "${wgLAN}.${client3Host}")
+    client1ip=$(echo "${wglan}.${client1Host}")
+    client2ip=$(echo "${wglan}.${client2Host}")
+    client3ip=$(echo "${wglan}.${client3Host}")
     internet_controller=$(ip rou | grep default | cut -d " " -f5)
     LAN=$(ip rou | grep default | cut -d " " -f3 | sed 's/^\(.*\)\.\(.*\)\.\(.*\)\.\(.*\)$/\1\.\2\.\3/g')
     # add wireguard LAN to pleb-vpn.conf 
-    setting ${plebVPNConf} "2" "wgLAN" "'${wgLAN}'"
+    setting ${plebVPNConf} "2" "wglan" "'${wglan}'"
     # create config files
     echo "[Interface]
-Address = ${wgIP}/24
+Address = ${wgip}/24
 PrivateKey = ${serverPrivateKey}
-ListenPort = ${wgPort}
+ListenPort = ${wgport}
 
 PostUp = iptables -A FORWARD -i %i -j ACCEPT; iptables -t nat -A POSTROUTING -o ${internet_controller} -j MASQUERADE
 PostDown = iptables -D FORWARD -i %i -j ACCEPT; iptables -t nat -D POSTROUTING -o ${internet_controller} -j MASQUERADE
@@ -226,8 +226,8 @@ PrivateKey = ${client1PrivateKey}
 
 [Peer]
 PublicKey = ${serverPublicKey}
-Endpoint = ${vpnIP}:${wgPort}
-AllowedIPs = ${wgLAN}.0/24, ${LAN}.0/24
+Endpoint = ${vpnIP}:${wgport}
+AllowedIPs = ${wglan}.0/24, ${LAN}.0/24
 " | sudo tee /etc/wireguard/clients/client1.conf
     echo "[Interface]
 Address = ${client2ip}/32
@@ -235,8 +235,8 @@ PrivateKey = ${client2PrivateKey}
 
 [Peer]
 PublicKey = ${serverPublicKey}
-Endpoint = ${vpnIP}:${wgPort}
-AllowedIPs = ${wgLAN}.0/24, ${LAN}.0/24
+Endpoint = ${vpnIP}:${wgport}
+AllowedIPs = ${wglan}.0/24, ${LAN}.0/24
 " | sudo tee /etc/wireguard/clients/client2.conf
     echo "[Interface]
 Address = ${client3ip}/32
@@ -244,8 +244,8 @@ PrivateKey = ${client3PrivateKey}
 
 [Peer]
 PublicKey = ${serverPublicKey}
-Endpoint = ${vpnIP}:${wgPort}
-AllowedIPs = ${wgLAN}.0/24, ${LAN}.0/24
+Endpoint = ${vpnIP}:${wgport}
+AllowedIPs = ${wglan}.0/24, ${LAN}.0/24
 " | sudo tee /etc/wireguard/clients/client3.conf
 
     # copy keys and config
@@ -255,29 +255,29 @@ AllowedIPs = ${wgLAN}.0/24, ${LAN}.0/24
     sudo chmod -R 755 /mnt/hdd/mynode/pleb-vpn/wireguard
   else
     # update pleb-vpn.conf
-    wgIP=$(cat /mnt/hdd/mynode/pleb-vpn/wireguard/wg0.conf | grep Address | sed 's/^.* = //' | sed 's/^\(.*\)\/\(.*\)$/\1/')
-    wgLAN=$(echo "${wgIP}" | sed 's/^\(.*\)\.\(.*\)\.\(.*\)\.\(.*\)$/\1\.\2\.\3/')
-    wgPort=$(cat /mnt/hdd/mynode/pleb-vpn/wireguard/wg0.conf | grep ListenPort | sed 's/^.* = //')
-    setting ${plebVPNConf} "2" "wgPort" "'${wgPort}'"
-    setting ${plebVPNConf} "2" "wgLAN" "'${wgLAN}'"
-    setting ${plebVPNConf} "2" "wgIP" "'${wgIP}'"
+    wgip=$(cat /mnt/hdd/mynode/pleb-vpn/wireguard/wg0.conf | grep Address | sed 's/^.* = //' | sed 's/^\(.*\)\/\(.*\)$/\1/')
+    wglan=$(echo "${wgip}" | sed 's/^\(.*\)\.\(.*\)\.\(.*\)\.\(.*\)$/\1\.\2\.\3/')
+    wgport=$(cat /mnt/hdd/mynode/pleb-vpn/wireguard/wg0.conf | grep ListenPort | sed 's/^.* = //')
+    setting ${plebVPNConf} "2" "wgport" "'${wgport}'"
+    setting ${plebVPNConf} "2" "wglan" "'${wglan}'"
+    setting ${plebVPNConf} "2" "wgip" "'${wgip}'"
     # copy keys and config  
     sudo cp -p -r /mnt/hdd/mynode/pleb-vpn/wireguard/ /etc/
   fi
   # open firewall ports
-  sudo ufw allow ${wgPort}/udp comment "wireguard port"
+  sudo ufw allow ${wgport}/udp comment "wireguard port"
   sudo ufw allow out on wg0 from any to any
   sudo ufw allow in on wg0 from any to any
-  sudo ufw allow in to ${wgLAN}.0/24
-  sudo ufw allow out to ${wgLAN}.0/24
+  sudo ufw allow in to ${wglan}.0/24
+  sudo ufw allow out to ${wglan}.0/24
   # add new rules to firewallConf
   sectionLine=$(cat ${firewallConf} | grep -n "^\# Add firewall rules" | cut -d ":" -f1 | head -n 1)
   insertLine=$(expr $sectionLine + 1)
-  sed -i "${insertLine}iufw allow ${wgPort}/udp comment 'wireguard port'" ${firewallConf}
+  sed -i "${insertLine}iufw allow ${wgport}/udp comment 'wireguard port'" ${firewallConf}
   sed -i "${insertLine}iufw allow out on wg0 from any to any" ${firewallConf}
   sed -i "${insertLine}iufw allow in on wg0 from any to any" ${firewallConf}
-  sed -i "${insertLine}iufw allow in to ${wgLAN}.0/24" ${firewallConf}
-  sed -i "${insertLine}iufw allow out to ${wgLAN}.0/24" ${firewallConf}
+  sed -i "${insertLine}iufw allow in to ${wglan}.0/24" ${firewallConf}
+  sed -i "${insertLine}iufw allow out to ${wglan}.0/24" ${firewallConf}
   # enable ip forward
   sudo sed -i '/net.ipv4.ip_forward/ s/#//' /etc/sysctl.conf
   # enable systemd and fix permissions
@@ -305,17 +305,17 @@ off() {
   # uninstall wireguard
   sudo apt purge -y wireguard
   # close firewall ports
-  sudo ufw delete allow ${wgPort}/udp
+  sudo ufw delete allow ${wgport}/udp
   sudo ufw delete allow out on wg0 from any to any
   sudo ufw delete allow in on wg0 from any to any
-  sudo ufw delete allow in to ${wgLAN}.0/24
-  sudo ufw delete allow out to ${wgLAN}.0/24
+  sudo ufw delete allow in to ${wglan}.0/24
+  sudo ufw delete allow out to ${wglan}.0/24
   # remove from firewallConf
-  sed -i "/ufw allow ${wgPort}.*/d" ${firewallConf}
+  sed -i "/ufw allow ${wgport}.*/d" ${firewallConf}
   sed -i "/ufw allow out on wg0 from any to any/d" ${firewallConf}
   sed -i "/ufw allow in on wg0 from any to any/d" ${firewallConf}
-  sed -i "/ufw allow in to ${wgLAN}\.0\/24/d" ${firewallConf}
-  sed -i "/ufw allow out to ${wgLAN}\.0\/24/d" ${firewallConf}
+  sed -i "/ufw allow in to ${wglan}\.0\/24/d" ${firewallConf}
+  sed -i "/ufw allow out to ${wglan}\.0\/24/d" ${firewallConf}
   # set wireguard off in pleb-vpn.conf
   setting ${plebVPNConf} "2" "wireguard" "off"
   exit 0

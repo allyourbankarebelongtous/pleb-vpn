@@ -57,7 +57,7 @@ status() {
   else
     address0Type="torv3"
   fi
-  if [ "${lndHybrid}" = "on" ]; then
+  if [ "${lndhybrid}" = "on" ]; then
     address1=$(sudo -u bitcoin lncli getinfo | jq .uris[1] | sed 's/\"//g' | cut -d "@" -f2)
     istor=$(echo "${address1}" | grep -c onion)
     isv6=$(echo "${address1}" | grep -c :)
@@ -91,11 +91,11 @@ on() {
   source ${plebVPNConf}
 
   local isRestore="${1}"
-  local newlnPort="${2}"
-  echo "New Ln Port: ${newlnPort}"
+  local newlnport="${2}"
+  echo "New Ln Port: ${newlnport}"
 
   # check if plebvpn is on
-  if ! [ "${plebVPN}" = "on" ]; then
+  if ! [ "${plebvpn}" = "on" ]; then
     echo "error: turn on plebvpn before enabling hybrid mode"
     exit 1
   fi
@@ -107,11 +107,11 @@ on() {
   fi 
   # get LND port
   # check to see if new lnd port passed as argument
-  if [ ! -z "${newlnPort}" ]; then
-    lnPort="${newlnPort}"
-    setting ${plebVPNConf} "2" "lnPort" "'${newlnPort}'"
+  if [ ! -z "${newlnport}" ]; then
+    lnport="${newlnport}"
+    setting ${plebVPNConf} "2" "lnport" "'${newlnport}'"
   fi
-  if [ ! -z "${lnPort}" ]; then
+  if [ ! -z "${lnport}" ]; then
     # skip if restoring
     if [ ! "${isRestore}" = "1" ]; then
       echo "error: need a port to enable hybrid mode"
@@ -128,12 +128,12 @@ on() {
   fi
 
   # configure firewall
-  if ! [ "${lnPort}" = "9735" ]; then
-    sudo ufw allow ${lnPort} comment "LND Port"
+  if ! [ "${lnport}" = "9735" ]; then
+    sudo ufw allow ${lnport} comment "LND Port"
     # add new rules to firewallConf
     sectionLine=$(cat ${firewallConf} | grep -n "^\# Add firewall rules" | cut -d ":" -f1 | head -n 1)
     insertLine=$(expr $sectionLine + 1)
-    sed -i "${insertLine}iufw allow ${lnPort} comment 'LND Port'" ${firewallConf}
+    sed -i "${insertLine}iufw allow ${lnport} comment 'LND Port'" ${firewallConf}
   fi
 
   # edit lnd.conf
@@ -146,7 +146,7 @@ on() {
   sudo cp -p ${lndConfFile} ${lndCustomConf}
   # Application Options 
   sectionName="Application Options"
-  publicIP="${vpnIP}"
+  publicIP="${vpnip}"
   echo "# [${sectionName}] config ..."
   sectionLine=$(cat ${lndCustomConf} | grep -n "^\[${sectionName}\]" | cut -d ":" -f1 | head -n 1)
   echo "# sectionLine(${sectionLine})"
@@ -160,8 +160,8 @@ on() {
   " | sudo tee -a ${lndCustomConf}
   fi
   echo "# sectionLine(${sectionLine})"
-  setting ${lndCustomConf} ${insertLine} "externalip" "${publicIP}:${lnPort}"
-  setting ${lndCustomConf} ${insertLine} "listen" "0.0.0.0:${lnPort}"
+  setting ${lndCustomConf} ${insertLine} "externalip" "${publicIP}:${lnport}"
+  setting ${lndCustomConf} ${insertLine} "listen" "0.0.0.0:${lnport}"
 
   # tor
   sectionName="Tor"
@@ -184,7 +184,7 @@ on() {
   sudo systemctl restart lnd 
 
   # set lnd-hybrid on in pleb-vpn.conf
-  setting ${plebVPNConf} "2" "lndHybrid" "on"
+  setting ${plebVPNConf} "2" "lndhybrid" "on"
   exit 0
 }
 
@@ -193,10 +193,10 @@ off() {
   source ${plebVPNConf}
 
   # configure firewall
-  if ! [ "${lnPort}" = "9735" ]; then
-    sudo ufw delete allow ${lnPort}
+  if ! [ "${lnport}" = "9735" ]; then
+    sudo ufw delete allow ${lnport}
     # remove from firewallConf
-    sed -i "/ufw allow ${lnPort}.*/d" ${firewallConf}
+    sed -i "/ufw allow ${lnport}.*/d" ${firewallConf}
   fi
 
   # remove lndCustomConf
@@ -243,7 +243,7 @@ off() {
   # restart lnd
   sudo systemctl restart lnd 
   # set lnd-hybrid off in pleb-vpn.conf
-  setting ${plebVPNConf} "2" "lndHybrid" "off"
+  setting ${plebVPNConf} "2" "lndhybrid" "off"
   exit 0
 }
 

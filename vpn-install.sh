@@ -43,7 +43,7 @@ status() {
   else
     isConfig="yes"
   fi
-  if [ "${plebVPN}" = "off" ]; then
+  if [ "${plebvpn}" = "off" ]; then
     message="Pleb-VPN is not installed. Install Pleb-VPN by selecting Pleb-VPN from the Services Menu above."
     echo "vpn_operating=no
 config_exists=${isConfig}
@@ -52,7 +52,7 @@ message='${message}'" | tee /mnt/hdd/mynode/pleb-vpn/pleb-vpn_status.tmp
   else
     currentIP=$(curl https://api.ipify.org)
     sleep 1
-    if ! [ "${currentIP}" = "${vpnIP}" ]; then
+    if ! [ "${currentIP}" = "${vpnip}" ]; then
       vpnWorking="no"
       message="ERROR: your current IP does not match your vpnIP"
     else
@@ -77,13 +77,13 @@ Otherwise you may leak your home IP if VPN drops."
       message="ERROR: your firewall is not configured properly (must allow in/out on tun0).
 Otherwise you will not be able to send or receive with VPN on."
     fi
-    firewallallowout=$(sudo ufw status verbose | grep "${vpnIP} ${vpnPort}" | grep -c "ALLOW OUT")
+    firewallallowout=$(sudo ufw status verbose | grep "${vpnip} ${vpnport}" | grep -c "ALLOW OUT")
     if [ ${firewallallowout} -eq 1 ]; then
       firewallallowout="yes"
     else
       firewallallowout="no"
       firewallOK="no"
-      message="ERROR: your firewall is not configured properly (must allow out on ${vpnIP} ${vpnPort}/udp).
+      message="ERROR: your firewall is not configured properly (must allow out on ${vpnip} ${vpnport}/udp).
 Otherwise your VPN will not reach the server and connect."
     fi
     serviceExists=$(ls /etc/systemd/system/multi-user.target.wants/ | grep -c openvpn@plebvpn.service)
@@ -110,10 +110,10 @@ on() {
   sudo apt-get -y install openvpn
 
   # get vpnIP for pleb-vpn.conf
-  vpnIP=$(cat /mnt/hdd/mynode/pleb-vpn/openvpn/plebvpn.conf | grep remote | sed 's/remote-.*$//g' | cut -d " " -f2)
-  vpnPort=$(cat /mnt/hdd/mynode/pleb-vpn/openvpn/plebvpn.conf | grep remote | sed 's/remote-.*$//g' | cut -d " " -f3)
-  setting ${plebVPNConf} "2" "vpnPort" "'${vpnPort}'"
-  setting ${plebVPNConf} "2" "vpnIP" "'${vpnIP}'"
+  vpnip=$(cat /mnt/hdd/mynode/pleb-vpn/openvpn/plebvpn.conf | grep remote | sed 's/remote-.*$//g' | cut -d " " -f2)
+  vpnport=$(cat /mnt/hdd/mynode/pleb-vpn/openvpn/plebvpn.conf | grep remote | sed 's/remote-.*$//g' | cut -d " " -f3)
+  setting ${plebVPNConf} "2" "vpnport" "'${vpnport}'"
+  setting ${plebVPNConf} "2" "vpnip" "'${vpnip}'"
   # copy plebvpn.conf to /etc/openvpn
   sudo cp -p /mnt/hdd/mynode/pleb-vpn/openvpn/plebvpn.conf /etc/openvpn/
   # fix permissions
@@ -126,7 +126,7 @@ on() {
   sleep 10
   currentIP=$(curl https://api.ipify.org)
   sleep 10
-  if ! [ "${currentIP}" = "${vpnIP}" ]; then
+  if ! [ "${currentIP}" = "${vpnip}" ]; then
     echo "error: vpn not working"
     echo "your current IP is not your vpn IP"
     exit 1
@@ -145,7 +145,7 @@ on() {
   sudo ufw default deny outgoing
   sudo ufw default deny incoming
   # allow out on openvpn
-  sudo ufw allow out to ${vpnIP} port ${vpnPort} proto udp
+  sudo ufw allow out to ${vpnip} port ${vpnport} proto udp
   # force traffic to use openvpn
   sudo ufw allow out on tun0 from any to any
   sudo ufw allow in on tun0 from any to any
@@ -156,11 +156,11 @@ on() {
   insertLine=$(expr $sectionLine + 1)
   sed -i "${insertLine}iufw allow in to ${LAN}.0/24" ${firewallConf}
   sed -i "${insertLine}iufw allow out to ${LAN}.0/24" ${firewallConf}
-  sed -i "${insertLine}iufw allow out to ${vpnIP} port ${vpnPort} proto udp" ${firewallConf}
+  sed -i "${insertLine}iufw allow out to ${vpnip} port ${vpnport} proto udp" ${firewallConf}
   sed -i "${insertLine}iufw allow out on tun0 from any to any" ${firewallConf}
   sed -i "${insertLine}iufw allow in on tun0 from any to any" ${firewallConf}
   sed -i "s/ufw default allow outgoing/ufw default deny outgoing/g" ${firewallConf}
-  setting ${plebVPNConf} "2" "plebVPN" "on"
+  setting ${plebVPNConf} "2" "plebvpn" "on"
   echo "OK ... plebvpn installed and configured!"
   exit 0
 }
@@ -180,7 +180,7 @@ off() {
   sudo ufw default allow outgoing
   sudo ufw default deny incoming
   # remove openvpn rule
-  sudo ufw delete allow out to ${vpnIP} port ${vpnPort} proto udp
+  sudo ufw delete allow out to ${vpnip} port ${vpnport} proto udp
   # delete force traffic to use openvpn
   sudo ufw delete allow out on tun0 from any to any
   sudo ufw delete allow in on tun0 from any to any
@@ -190,13 +190,13 @@ off() {
   LAN=$(ip rou | grep default | cut -d " " -f3 | sed 's/^\(.*\)\.\(.*\)\.\(.*\)\.\(.*\)$/\1\.\2\.\3/g')
   sed -i "/ufw allow in to ${LAN}\.0\/24/d" ${firewallConf}
   sed -i "/ufw allow out to ${LAN}\.0\/24/d" ${firewallConf}
-  sed -i "/ufw allow out to ${vpnIP} port ${vpnPort} proto udp/d" ${firewallConf}
+  sed -i "/ufw allow out to ${vpnip} port ${vpnport} proto udp/d" ${firewallConf}
   sed -i "/ufw allow out on tun0 from any to any/d" ${firewallConf}
   sed -i "/ufw allow in on tun0 from any to any/d" ${firewallConf}
   sed -i "s/ufw default deny outgoing/ufw default allow outgoing/g" ${firewallConf}
-  setting ${plebVPNConf} "2" "vpnPort" "''"
-  setting ${plebVPNConf} "2" "vpnIP" "''"
-  setting ${plebVPNConf} "2" "plebVPN" "off"
+  setting ${plebVPNConf} "2" "vpnport" "''"
+  setting ${plebVPNConf} "2" "vpnip" "''"
+  setting ${plebVPNConf} "2" "plebvpn" "off"
   exit 0
 }
 

@@ -36,7 +36,7 @@ status() {
 deactivate the VPN to see if tor can connect without the VPN operational. This test can take some time. 
 A failure of this test does not necessarily indicate that split-tunneling is not active, it could be 
 that tor is down or having issues."
-  if [ ! "${torSplitTunnel}" = "on" ]; then
+  if [ ! "${torsplittunnel}" = "on" ]; then
     message="Tor Split-Tunnel service is off by config. Use menu to configure tor split-tunneling."
     echo "message=${message}" | tee /mnt/hdd/mynode/pleb-vpn/split-tunnel_status.tmp
     exit 0
@@ -491,7 +491,7 @@ WantedBy=multi-user.target
   fi
   echo "tor split-tunneling enabled!"
   sleep 2
-  setting ${plebVPNConf} "2" "torSplitTunnel" "on"
+  setting ${plebVPNConf} "2" "torsplittunnel" "on"
   exit 0
 }
 
@@ -635,7 +635,7 @@ off() {
     echo "tor split-tunneling is disabled and removed"
     sleep 2
   fi
-  setting ${plebVPNConf} "2" "torSplitTunnel" "off"
+  setting ${plebVPNConf} "2" "torsplittunnel" "off"
   exit 0
 }
 
