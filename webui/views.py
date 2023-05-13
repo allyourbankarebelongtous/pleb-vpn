@@ -14,6 +14,7 @@ views = Blueprint('views', __name__)
 ALLOWED_EXTENSIONS = {'conf'}
 PLEBVPN_CONF_UPLOAD_FOLDER = '/mnt/hdd/mynode/pleb-vpn/openvpn'
 conf_file_location = '/mnt/hdd/mynode/pleb-vpn/pleb-vpn.conf'
+conf_file = config.PlebConfig(conf_file_location)
 plebVPN_status = {}
 lnd_hybrid_status = {}
 wireguard_status = {}
@@ -137,7 +138,7 @@ def lnd_hybrid():
             elif len(lnPort) != 4:
                 flash('Error! LND Hybrid Port must be four numbers (example: 9739)', category='error')
             else:
-                conf_file_location.set_option('lnport', lnPort)
+                conf_file.set_option('lnport', lnPort)
                 flash('Received new LND Port: ' + lnPort, category='success') 
 
     return render_template('lnd-hybrid.html', user=current_user, setting=get_conf())
@@ -277,7 +278,7 @@ def wireguard():
             elif len(wgPort) != 4:
                 flash('Error! Wireguard Port must be four numbers (example: 9739)', category='error')
             else:
-                conf_file_location.set_option('wgport', wgPort)
+                conf_file.set_option('wgport', wgPort)
                 flash('Received new Wireguard Port: ' + wgPort, category='success') 
 
     return render_template('wireguard.html', user=current_user, setting=get_conf())
@@ -345,7 +346,7 @@ def set_wireguard():
                         print(new_wgIP) # for debug purposes only
                         if is_valid_ip(new_wgIP):
                             break
-                    conf_file_location.set_option('wgip', new_wgIP)
+                    conf_file.set_option('wgip', new_wgIP)
                     cmd_str = ["sudo /mnt/hdd/mynode/pleb-vpn/wg-install.sh on 1"]
                 else:
                     if os.path.isfile('/mnt/hdd/mynode/pleb-vpn/wireguard/wg0.conf'):
@@ -375,9 +376,9 @@ def delete_wireguard_conf():
         if user.id == current_user.id:
             if os.path.exists('/mnt/hdd/mynode/pleb-vpn/wireguard'):
                 shutil.rmtree('/mnt/hdd/mynode/pleb-vpn/wireguard')
-            conf_file_location.set_option('wgip', '')
-            conf_file_location.set_option('wglan', '')
-            conf_file_location.set_option('wgport', '')
+            conf_file.set_option('wgip', '')
+            conf_file.set_option('wglan', '')
+            conf_file.set_option('wgport', '')
 
     return jsonify({})
 
