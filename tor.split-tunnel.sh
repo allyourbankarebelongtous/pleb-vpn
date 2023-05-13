@@ -89,7 +89,7 @@ that tor is down or having issues."
       sleep 5
       if ! [ "${currentIP}" = "${vpnIP}" ]; then
         vpnWorking="no"
-        message="ERROR: your current IP does not match your vpnIP"
+        message="error...your current IP does not match your vpnIP"
       else
         vpnWorking="yes"
       fi 
@@ -100,25 +100,60 @@ firewall_ok=${firewallOK}
 message=${message}" | tee /mnt/hdd/mynode/pleb-vpn/split-tunnel_status.tmp
       exit 0
     else
-      echo "Checking ip rules"
-      echo "Checking ip routes"
-      echo "Checking cgroup config"
-      echo "Checking tor..."
-      vpnTorIP=$(torify curl http://api.ipify.org)
-      if [ ! "${VPNtorIP}" = "" ]; then
-        tor_ok="yes"
-      else
-        tor_ok="no"
+      message="Tor Split-Tunnel service is working normally"
+      echo "Checking ip tables"
+      nftableStatus="OK"
+      if ! [ $(nft list chain inet filter input | grep -c "meta cgroup 1114129") -eq 1 ]; then
+        nftableStatus="missing nft rules"
+        message="Tor Split-Tunnel service is incorrectly configured"
       fi
-      echo "Checking connection over clearnet with VPN on..."
-      currentIP=$(curl https://api.ipify.org)
-      sleep 5
-      if ! [ "${currentIP}" = "${vpnIP}" ]; then
-        vpnWorking="no"
-        message="ERROR: your current IP does not match your vpnIP"
-      else
-        vpnWorking="yes"
-      fi 
+      if ! [ $(nft list chain inet filter output | grep -c "meta cgroup 1114129") -eq 1 ]; then
+        nftableStatus="missing nft rules"
+        message="Tor Split-Tunnel service is incorrectly configured"
+      fi
+      if ! [ $(nft list chain ip nat POSTROUTING | grep -c "meta cgroup 1114129") -eq 1 ]; then
+        nftableStatus="missing nft rules"
+        message="Tor Split-Tunnel service is incorrectly configured"
+      fi
+      if ! [ $(nft list chain ip mangle markit | grep -c "meta cgroup 1114129") -eq 1 ]; then
+        nftableStatus="missing nft rules"
+        message="Tor Split-Tunnel service is incorrectly configured"
+      fi
+      iptableStatus="OK"
+      if ! [ $(iptables -L INPUT | grep -c "0xb") -eq 1 ]; then
+        iptableStatus="missing iptable rules"
+        message="Tor Split-Tunnel service is incorrectly configured"
+      fi
+      if ! [ $(iptables -L FORWARD | grep -c "0xb") -eq 1 ]; then
+        iptableStatus="missing iptable rules"
+        message="Tor Split-Tunnel service is incorrectly configured"
+      fi
+      if ! [ $(iptables -L OUTPUT | grep -c "0xb") -eq 1 ]; then
+        iptableStatus="missing iptable rules"
+        message="Tor Split-Tunnel service is incorrectly configured"
+      fi
+      echo "Checking ip route"
+      OIFNAME=$(ip r | grep default | cut -d " " -f5)
+      GATEWAY=$(ip r | grep default | cut -d " " -f3)
+      iprouteStatus="OK"
+      if ! [ $(ip rou show table novpn | grep -c "default via ${GATEWAY} dev ${OIFNAME}") -eq 1 ]; then
+        iprouteStatus="missing ip route"
+        message="Tor Split-Tunnel service is incorrectly configured"
+      fi
+      echo "Checking cgroup config"
+      cgroup_tasks=$(cat /sys/fs/cgroup/net_cls/novpn/tasks)
+      tor_tasks=$(pgrep -x tor)
+      cgroupStatus="OK"
+      if ! [ "${cgroup_tasks}" = "${tor_tasks}" ]; then
+        cgroupStatus="bad cgroup config"
+        message="Tor Split-Tunnel service is incorrectly configured"
+      fi
+      echo "nftableStatus=${nftableStatus}
+iptableStatus=${iptableStatus}
+iprouteStatus=${iprouteStatus}
+cgroupStatus=${cgroupStatus}
+message=${message}" | tee /mnt/hdd/mynode/pleb-vpn/split-tunnel_status.tmp
+      exit 0
     fi
   fi
 }
@@ -126,6 +161,7 @@ message=${message}" | tee /mnt/hdd/mynode/pleb-vpn/split-tunnel_status.tmp
 on() {
   # configure tor to skip pleb-vpn for redundancy
   source ${plebVPNConf}
+  local skipTest="${1}"
 
   # install dependencies
 echo "Checking and installing requirements..."
@@ -187,6 +223,18 @@ echo "Checking and installing requirements..."
   while [ $(nft list table inet filter | grep -c output) -gt 0 ]
   do
     nft delete chain inet filter output
+  done
+  while [ $(iptables -L INPUT | grep -c "0xb") -gt 0 ]
+  do
+    iptables -D INPUT -m mark --mark 0xb -j accept
+  done
+  while [ $(iptables -L FORWARD | grep -c "0xb") -gt 0 ]
+  do
+    iptables -D FORWARD -m mark --mark 0xb -j accept
+  done
+  while [ $(iptables -L OUTPUT | grep -c "0xb") -gt 0 ]
+  do
+    iptables -D OUTPUT -m mark --mark 0xb -j accept
   done
   while [ $(ip rule | grep -c "fwmark 0xb lookup novpn") -gt 0 ]
   do
@@ -321,6 +369,18 @@ while [ $(nft list table inet filter | grep -c output) -gt 0 ]
 do
   nft delete chain inet filter output
 done
+while [ $(iptables -L INPUT | grep -c "0xb") -gt 0 ]
+do
+  iptables -D INPUT -m mark --mark 0xb -j accept
+done
+while [ $(iptables -L FORWARD | grep -c "0xb") -gt 0 ]
+do
+  iptables -D FORWARD -m mark --mark 0xb -j accept
+done
+while [ $(iptables -L OUTPUT | grep -c "0xb") -gt 0 ]
+do
+  iptables -D OUTPUT -m mark --mark 0xb -j accept
+done
 while [ $(ip rule | grep -c "fwmark 0xb lookup novpn") -gt 0 ]
 do
   ip rule del from all table novpn fwmark 11
@@ -382,51 +442,53 @@ WantedBy=multi-user.target
   systemctl start pleb-vpn-tor-split-tunnel.timer
 
   # check configuration
-  echo "OK...tor is configured. Wait 2 minutes for tor to start..."
-  sleep 60
-  echo "wait 1 minute for tor to start..."
-  sleep 60
-  echo "checking configuration"
-  echo "stop vpn"
-  systemctl stop openvpn@plebvpn
-  echo "vpn stopped"
-  echo "checking firewall"
-  currentIP=$(curl https://api.ipify.org)
-  echo "current IP = (${currentIP})...should be blank"
-  if [ "${currentIP}" = "" ]; then
-    echo "firewall config ok"
-  else 
-    echo "error...firewall not configured. Clearnet accessible when VPN is off. Uninstall and re-install pleb-vpn"
-    systemctl start openvpn@plebvpn
-    exit 1
-  fi
-  echo "Checking connection over tor with VPN off (takes some time, likely multiple tries)..."
-  echo "Will attempt a connection up to 10 times before giving up..."
-  inc=1
-  while [ $inc -le 10 ]
-  do
-    echo "attempt number ${inc}"
-    torIP=$(torify curl http://api.ipify.org)
-    echo "tor IP = (${torIP})...should not be blank, should not be your home IP, and should not be your VPN IP."
-    if [ ! "${torIP}" = "" ]; then
-      inc=11
-    else
-      ((inc++))
+  if ! [ "${skipTest}" = "1" ]; then
+    echo "OK...tor is configured. Wait 2 minutes for tor to start..."
+    sleep 60
+    echo "wait 1 minute for tor to start..."
+    sleep 60
+    echo "checking configuration"
+    echo "stop vpn"
+    systemctl stop openvpn@plebvpn
+    echo "vpn stopped"
+    echo "checking firewall"
+    currentIP=$(curl https://api.ipify.org)
+    echo "current IP = (${currentIP})...should be blank"
+    if [ "${currentIP}" = "" ]; then
+      echo "firewall config ok"
+    else 
+      echo "error...firewall not configured. Clearnet accessible when VPN is off. Uninstall and re-install pleb-vpn"
+      systemctl start openvpn@plebvpn
+      exit 1
     fi
-  done
-  if [ ! "${torIP}" = "" ]; then
-    echo "tor split-tunnel successful"
-  else 
-    echo "error...unable to connect over tor when VPN is down. It's possible that it needs more time to establish a connection. 
-Try checking the status using STATUS menu later. If unable to connect, uninstall and re-install Tor Split-Tunnel."
+    echo "Checking connection over tor with VPN off (takes some time, likely multiple tries)..."
+    echo "Will attempt a connection up to 10 times before giving up..."
+    inc=1
+    while [ $inc -le 10 ]
+    do
+      echo "attempt number ${inc}"
+      torIP=$(torify curl http://api.ipify.org)
+      echo "tor IP = (${torIP})...should not be blank, should not be your home IP, and should not be your VPN IP."
+      if [ ! "${torIP}" = "" ]; then
+        inc=11
+      else
+        ((inc++))
+      fi
+    done
+    if [ ! "${torIP}" = "" ]; then
+      echo "tor split-tunnel successful"
+    else 
+      echo "error...unable to connect over tor when VPN is down. It's possible that it needs more time to establish a connection. 
+  Try checking the status using STATUS menu later. If unable to connect, uninstall and re-install Tor Split-Tunnel."
+    fi
+    sleep 2
+    echo "restarting vpn"
+    systemctl start openvpn@plebvpn
+    sleep 2
+    echo "checking vpn IP"
+    currentIP=$(curl https://api.ipify.org)
+    echo "current IP = (${currentIP})...should be ${vpnIP}"
   fi
-  sleep 2
-  echo "restarting vpn"
-  systemctl start openvpn@plebvpn
-  sleep 2
-  echo "checking vpn IP"
-  currentIP=$(curl https://api.ipify.org)
-  echo "current IP = (${currentIP})...should be ${vpnIP}"
   echo "tor split-tunneling enabled!"
   sleep 2
   setting ${plebVPNConf} "2" "torSplitTunnel" "on"
