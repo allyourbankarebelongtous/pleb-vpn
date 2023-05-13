@@ -88,7 +88,7 @@ def set_plebVPN():
     user = User.query.get(userId)
     if user:
         if user.id == current_user.id:
-            if setting['plebVPN'] == 'on':
+            if setting['plebvpn'] == 'on':
                 cmd_str = ["sudo /mnt/hdd/mynode/pleb-vpn/vpn-install.sh off"]
                 result = subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True)
                 # for debug purposes
@@ -153,7 +153,7 @@ def set_lndHybrid():
     user = User.query.get(userId)
     if user:
         if user.id == current_user.id:
-            if setting['lndHybrid'] == 'on':
+            if setting['lndhybrid'] == 'on':
                 cmd_str = ["sudo /mnt/hdd/mynode/pleb-vpn/lnd-hybrid.sh off"]
                 result = subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True)
                 # for debug purposes
@@ -342,7 +342,7 @@ def set_wireguard():
                     flash('An unknown error occured!', category='error')
             else:
                 # check if no wireguard IP in pleb-vpn.conf, and if not, generate one
-                if not is_valid_ip(setting['wgIP']):
+                if not is_valid_ip(setting['wgip']):
                     while True:
                         new_wgIP = '10.' + str(random.randint(0, 255)) + '.' + str(random.randint(0, 255)) + '.' + str(random.randint(0, 252))
                         print(new_wgIP) # for debug purposes only
@@ -665,7 +665,7 @@ def allowed_file(filename):
 def is_valid_ip(ip_str):
     setting = get_conf()
     # check that the IP does not match our local IP
-    if setting['LAN'] in ip_str:
+    if setting['lan'] in ip_str:
         return False
     # Split the IP address into four parts
     parts = ip_str.split('.')
