@@ -180,13 +180,13 @@ echo "Checking and installing requirements..."
   do
     nft delete table ip mangle
   done
-  while [ $(nft list table inet filter | grep -c pre-input) -gt 0 ]
+  while [ $(nft list table inet filter | grep -c input) -gt 0 ]
   do
-    nft delete chain inet filter pre-input
+    nft delete chain inet filter input
   done
-  while [ $(nft list table inet filter | grep -c pre-output) -gt 0 ]
+  while [ $(nft list table inet filter | grep -c output) -gt 0 ]
   do
-    nft delete chain inet filter pre-output
+    nft delete chain inet filter output
   done
   while [ $(ip rule | grep -c "fwmark 0xb lookup novpn") -gt 0 ]
   do
@@ -313,13 +313,13 @@ while [ $(nft list tables | grep -c mangle) -gt 0 ]
 do
   nft delete table ip mangle
 done
-while [ $(nft list table inet filter | grep -c pre-input) -gt 0 ]
+while [ $(nft list table inet filter | grep -c input) -gt 0 ]
 do
-  nft delete chain inet filter pre-input
+  nft delete chain inet filter input
 done
-while [ $(nft list table inet filter | grep -c pre-output) -gt 0 ]
+while [ $(nft list table inet filter | grep -c output) -gt 0 ]
 do
-  nft delete chain inet filter pre-output
+  nft delete chain inet filter output
 done
 while [ $(ip rule | grep -c "fwmark 0xb lookup novpn") -gt 0 ]
 do
@@ -337,10 +337,10 @@ nft add rule ip nat POSTROUTING oifname ${OIFNAME} meta cgroup 1114129 counter m
 nft add table ip mangle
 nft add chain ip mangle markit "{type route hook output priority filter; policy accept;}"
 nft add rule ip mangle markit meta cgroup 1114129 counter meta mark set 0xb
-nft add chain inet filter pre-input "{type filter hook input priority 100; policy accept;}"
-nft add chain inet filter pre-output "{type filter hook output priority 100; policy accept;}"
-nft add rule inet filter pre-input meta cgroup 1114129 counter return
-nft add rule inet filter pre-output meta cgroup 1114129 counter return
+nft add chain inet filter input "{type filter hook input priority 100; policy accept;}"
+nft add chain inet filter output "{type filter hook output priority 100; policy accept;}"
+nft add rule inet filter input meta cgroup 1114129 counter accept
+nft add rule inet filter output meta cgroup 1114129 counter accept
 ip route add default via ${GATEWAY} table novpn
 ip rule add fwmark 11 table novpn
 ' | tee /mnt/hdd/mynode/pleb-vpn/split-tunnel/nftables-config.sh
@@ -352,13 +352,13 @@ ip rule add fwmark 11 table novpn
   echo "Create nftables-config systemd service..."
   echo "[Unit]
 Description=Configure nftables for split-tunnel process
-After=mynode.service
+After=network.service
 [Service]
-Type=oneshot
 ExecStart=/bin/bash /mnt/hdd/mynode/pleb-vpn/split-tunnel/nftables-config.sh
 User=root
 Group=root
 Restart=on-failure
+RestartSec=5s
 [Install]
 WantedBy=multi-user.target
 " | tee /etc/systemd/system/pleb-vpn-nftables-config.service
