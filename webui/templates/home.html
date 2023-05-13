@@ -68,24 +68,24 @@
             <tbody>
               <tr>
                 <th scope="row">Pleb-VPN Status</th>
-                <td>{{ setting['plebVPN'] }}</td>
+                <td>{{ setting['plebvpn'] }}</td>
               </tr>
               <tr>
                 <th scope="row">Pleb-VPN Operating</th>
                 <td>{{ plebVPN_status['vpn_operating'] }}</td>
               </tr>
-              {% if setting['plebVPN'] == "on" %}
+              {% if setting['plebvpn'] == "on" %}
               <tr>
                 <th scope="row">Current IP</th>
                 <td>{{ plebVPN_status['current_ip'] }}</td>
               </tr>
               <tr>
                 <th scope="row">Pleb-VPN IP</th>
-                <td>{{ setting['vpnIP'] }}</td>
+                <td>{{ setting['vpnip'] }}</td>
               </tr>
               <tr>
                 <th scope="row">Pleb-VPN Port for VPS</th>
-                <td>{{ setting['vpnPort'] }}</td>
+                <td>{{ setting['vpnport'] }}</td>
               </tr>
               <tr>
                 <th scope="row">Firewall Config OK</th>
@@ -129,11 +129,11 @@
               </tr>
               <tr>
                 <th scope="row">LND Hybrid Status</th>
-                <td>{{ setting['lndHybrid'] }}</td>
+                <td>{{ setting['lndhybrid'] }}</td>
               </tr>
               <tr>
                 <th scope="row">LND Hybrid Port</th>
-                <td>{{ setting['lnPort'] }}</td>
+                <td>{{ setting['lnport'] }}</td>
               </tr>
               <tr>
                 {% if lnd_hybrid_status['address0Type'] == 'torv3' %}
@@ -143,7 +143,7 @@
                 {% endif %}
                 <td>{{ lnd_hybrid_status['address0'] }}</td>
               </tr>
-              {% if setting['lndHybrid'] == "on" %}
+              {% if setting['lndhybrid'] == "on" %}
               <tr>
                 {% if lnd_hybrid_status['address1Type'] == 'torv3' %}
                 <th scope="row">LND Tor Address</th>
@@ -189,10 +189,10 @@
                 <th scope="row">Wireguard Status</th>
                 <td>{{ setting['wireguard'] }}</td>
               </tr>
-              {% if setting['wgPort'] != "" %}
+              {% if setting['wgport'] != "" %}
               <tr>
                 <th scope="row">Wireguard Port</th>
-                <td>{{ setting['wgPort'] }}</td>
+                <td>{{ setting['wgport'] }}</td>
               </tr>
               {% endif %}
               <tr>
