@@ -8,7 +8,7 @@ content %}
   </div>
 </div>
 <br />
-{% if setting['lndHybrid'] == "on" or setting['wireguard'] == "on" %}
+{% if setting['lndhybrid'] == "on" or setting['wireguard'] == "on" %}
 <div class="container">
   <div class="row">
     <div class="col">
@@ -35,7 +35,7 @@ content %}
         <tbody>
           <tr>
             <th scope="row">LND Hybrid Status</th>
-            <td>{{ setting['lndHybrid'] }}</td>
+            <td>{{ setting['lndhybrid'] }}</td>
           </tr>
           <tr>
             <th scope="row">Wireguard Status</th>
@@ -46,7 +46,7 @@ content %}
     </div>
   </div>
 </div>
-{% else %} {% if setting['plebVPN'] != "on" %} {% if
+{% else %} {% if setting['plebvpn'] != "on" %} {% if
 plebVPN_status['config_exists'] != "yes" %}
 <div class="container">
   <div class="row">
