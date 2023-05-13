@@ -3,6 +3,7 @@ from flask_login import login_required, current_user
 from werkzeug.utils import secure_filename
 from socket_io import socketio
 from datetime import datetime, timedelta
+from plebvpn_common import config
 # from PIL import Image
 from .models import User
 from . import db
@@ -136,8 +137,7 @@ def lnd_hybrid():
             elif len(lnPort) != 4:
                 flash('Error! LND Hybrid Port must be four numbers (example: 9739)', category='error')
             else:
-                lnPort = "'" + lnPort + "'"
-                set_conf('lnPort', lnPort)
+                conf_file_location.set_option('lnport', lnPort)
                 flash('Received new LND Port: ' + lnPort, category='success') 
 
     return render_template('lnd-hybrid.html', user=current_user, setting=get_conf())
@@ -277,8 +277,7 @@ def wireguard():
             elif len(wgPort) != 4:
                 flash('Error! Wireguard Port must be four numbers (example: 9739)', category='error')
             else:
-                wgPort = "'" + wgPort + "'"
-                set_conf('wgPort', wgPort)
+                conf_file_location.set_option('wgport', wgPort)
                 flash('Received new Wireguard Port: ' + wgPort, category='success') 
 
     return render_template('wireguard.html', user=current_user, setting=get_conf())
@@ -346,8 +345,7 @@ def set_wireguard():
                         print(new_wgIP) # for debug purposes only
                         if is_valid_ip(new_wgIP):
                             break
-                    new_wgIP = "'" + new_wgIP + "'"
-                    set_conf('wgIP', new_wgIP)
+                    conf_file_location.set_option('wgip', new_wgIP)
                     cmd_str = ["sudo /mnt/hdd/mynode/pleb-vpn/wg-install.sh on 1"]
                 else:
                     if os.path.isfile('/mnt/hdd/mynode/pleb-vpn/wireguard/wg0.conf'):
@@ -377,9 +375,9 @@ def delete_wireguard_conf():
         if user.id == current_user.id:
             if os.path.exists('/mnt/hdd/mynode/pleb-vpn/wireguard'):
                 shutil.rmtree('/mnt/hdd/mynode/pleb-vpn/wireguard')
-            set_conf('wgIP', '')
-            set_conf('wgLAN', '')
-            set_conf('wgPort', '')
+            conf_file_location.set_option('wgip', '')
+            conf_file_location.set_option('wglan', '')
+            conf_file_location.set_option('wgport', '')
 
     return jsonify({})
 
@@ -434,14 +432,6 @@ def update_scripts():
 
     print('before returning, message = ', message, 'category = ', category) # for debug purposes only
     socketio.emit('update_complete', {'message': message, 'category': category})
-
-def set_conf(name, value):
-    setting = get_conf()
-    if not setting[name]:
-        cmd_str = ["sed", "-i", "2i" + name + "=", conf_file_location]
-        subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
-    cmd_str = ["sed", "-i", "s:^" + name + "=.*:" + name + "=" + value + ":g", conf_file_location]
-    subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
 
 def get_conf():
     setting = {}
