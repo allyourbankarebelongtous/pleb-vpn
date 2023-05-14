@@ -63,7 +63,7 @@ status() {
     if [ -d "/mnt/hdd/mynode/pleb-vpn/wireguard" ]; then
       isConfig=$(sudo ls /mnt/hdd/mynode/pleb-vpn/wireguard | grep -c wg0.conf)
     else
-      isConfig=0
+      isConfig="0"
     fi
     if [ ${isConfig} -eq 0 ]; then
       isConfig="no"
