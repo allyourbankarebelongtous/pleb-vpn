@@ -39,7 +39,7 @@ function setting() # FILE LINENUMBER NAME VALUE
 }
 
 on() {
-  if [ "${nodetype}" = "raspiblitz" ];
+  if [ "${nodetype}" = "raspiblitz" ]; then
     source /mnt/hdd/raspiblitz.conf
   fi
   local keepExisting="${1}"
