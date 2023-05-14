@@ -51,7 +51,9 @@ function validWgIP() {
 }
 
 status() {
-  source ${plebVPNConf}
+  config=<$(${plebVPNConf})
+  config="${config#*$'\n'}"
+  eval "$config"
   message="Wireguard installed, configured, and operating as expected"
   if [ "${wireguard}" = "off" ]; then
     message="Wireguard not installed. Install wireguard in the services menu."
@@ -147,7 +149,9 @@ download all three config files by chosing 'Download'" 12 80
 
 on() {
   # install and configure wireguard
-  source ${plebVPNConf}
+  config=<$(${plebVPNConf})
+  config="${config#*$'\n'}"
+  eval "$config"
   local new_config="${1}"
 
   # check if plebvpn is on
@@ -297,7 +301,9 @@ AllowedIPs = ${wglan}.0/24, ${LAN}.0/24
 
 off() {
   # uninstall wireguard
-  source ${plebVPNConf}
+  config=<$(${plebVPNConf})
+  config="${config#*$'\n'}"
+  eval "$config"
 
   # disable service
   sudo systemctl disable wg-quick@wg0
