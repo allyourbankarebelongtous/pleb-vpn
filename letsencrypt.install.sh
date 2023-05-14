@@ -99,6 +99,10 @@ Are you ready to continue?
     sudo mkdir ${homedir}/letsencrypt
     sudo wget https://github.com/joohoi/acme-dns-certbot-joohoi/raw/master/acme-dns-auth.py
     sudo mv acme-dns-auth.py ${homedir}/letsencrypt
+    if [ "${nodetype}" = "mynode" ]; then
+      # force script to use python3
+      sed -i 's/env python/env python3/' ${homedir}/letsencrypt/acme-dns-auth.py
+    fi
     sudo cp ${homedir}/letsencrypt/acme-dns-auth.py /etc/letsencrypt/
     sudo chmod 755 /etc/letsencrypt/acme-dns-auth.py
 
@@ -249,10 +253,6 @@ Contact allyourbankarebelongtous with any questions or issues.
 " 19 100
     fi
     # get certs
-    if [ "${nodetype}" = "mynode" ]; then
-      # install auth hook dependency
-      /usr/bin/env python -m pip install requests
-    fi
     if [ ! "${letsencryptdomain2}" = "" ]; then
       sudo certbot certonly --manual --manual-auth-hook /etc/letsencrypt/acme-dns-auth.py --preferred-challenges dns --register-unsafely-without-email --agree-tos --debug-challenges -d ${letsencryptdomain1} -d ${letsencryptdomain2}
     else
