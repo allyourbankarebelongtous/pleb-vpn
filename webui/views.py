@@ -43,7 +43,6 @@ def home():
                            plebVPN_status=plebVPN_status, 
                            lnd_hybrid_status=lnd_hybrid_status,
                            wireguard_status=wireguard_status,
-                           torsplittunnel_status=torsplittunnel_status
                            update_available=update_available)
 
 @views.route('/refresh_plebVPN_data', methods=['POST'])
