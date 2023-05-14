@@ -251,7 +251,7 @@ Contact allyourbankarebelongtous with any questions or issues.
     # get certs
     if [ "${nodetype}" = "mynode" ]; then
       # install auth hook dependency
-      /usr/bin/env pip install requests
+      /usr/bin/env python -m pip install requests
     fi
     if [ ! "${letsencryptdomain2}" = "" ]; then
       sudo certbot certonly --manual --manual-auth-hook /etc/letsencrypt/acme-dns-auth.py --preferred-challenges dns --register-unsafely-without-email --agree-tos --debug-challenges -d ${letsencryptdomain1} -d ${letsencryptdomain2}
