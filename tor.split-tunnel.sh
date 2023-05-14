@@ -10,6 +10,10 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
 fi
 
 plebVPNConf="/mnt/hdd/mynode/pleb-vpn/pleb-vpn.conf"
+plebVPNTempConf="/mnt/hdd/mynode/pleb-vpn/pleb-vpn.conf.tmp"
+sed '1d' $plebVPNConf > $plebVPNTempConf
+source ${plebVPNTempConf}
+sudo rm ${plebVPNTempConf}
 
 function setting() # FILE LINENUMBER NAME VALUE
 {
@@ -29,7 +33,6 @@ function setting() # FILE LINENUMBER NAME VALUE
 }
 
 status() {
-  source ${plebVPNConf}
   local check_config="${1}"
   echo "NOTE: If you interrupt this test (Ctrl + C) then you should make sure your VPN is active with 
 'sudo systemctl start openvpn@plebvpn' before resuming operations. This test will temporarily 
@@ -78,7 +81,7 @@ that tor is down or having issues."
         torSplitTunnelOK="yes"
       else 
         message="error...unable to connect over tor when VPN is down. It's possible that it needs more time to establish a connection. 
-  Try checking the status using STATUS menu later. If unable to connect, uninstall and re-install Tor Split-Tunnel."
+Try checking the status using STATUS menu later. If unable to connect, uninstall and re-install Tor Split-Tunnel."
         torSplitTunnelOK="no"
       fi
       echo "Restarting VPN"
@@ -87,7 +90,7 @@ that tor is down or having issues."
       echo "Checking connection over clearnet with VPN on..."
       currentIP=$(curl https://api.ipify.org)
       sleep 5
-      if ! [ "${currentIP}" = "${vpnIP}" ]; then
+      if ! [ "${currentIP}" = "${vpnip}" ]; then
         vpnWorking="no"
         message="error...your current IP does not match your vpnIP"
       else
@@ -160,7 +163,6 @@ message=${message}" | tee /mnt/hdd/mynode/pleb-vpn/split-tunnel_status.tmp
 
 on() {
   # configure tor to skip pleb-vpn for redundancy
-  source ${plebVPNConf}
   local skipTest="${1}"
 
   # install dependencies
@@ -497,7 +499,6 @@ WantedBy=multi-user.target
 
 off() {
   # remove tor split-tunneling process
-  source ${plebVPNConf}
   local skipTest="${1}"
 
   # remove services

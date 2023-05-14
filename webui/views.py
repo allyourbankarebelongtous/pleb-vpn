@@ -335,7 +335,7 @@ def set_wireguard():
                 result = subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True)
                 # for debug purposes
                 print(result.stdout, result.stderr)
-                get_plebVPN_status()
+                get_wireguard_status()
                 if result.returncode == 0:
                     flash('Wireguard disabled.', category='success')
                 else:
@@ -359,7 +359,7 @@ def set_wireguard():
                 result = subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True)
                 # for debug purposes
                 print(result.stdout, result.stderr)
-                get_plebVPN_status()
+                get_wireguard_status()
                 if result.returncode == 0:
                     flash('Wireguard private LAN enabled!', category='success')
                 elif result.returncode == 10:
