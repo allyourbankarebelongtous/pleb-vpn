@@ -15,6 +15,10 @@ firewallConf="/usr/bin/mynode_firewall.sh"
 lndConfFile="/mnt/hdd/mynode/lnd/lnd.conf"
 lndCustomConf="/mnt/hdd/mynode/settings/lnd_custom.conf"
 lndCustomConfOld="/mnt/hdd/mynode/settings/lnd_custom_old.conf"
+plebVPNTempConf="/mnt/hdd/mynode/pleb-vpn/pleb-vpn.conf.tmp"
+sed '1d' $plebVPNConf > $plebVPNTempConf
+source ${plebVPNTempConf}
+sudo rm ${plebVPNTempConf}
 
 function setting() # FILE LINENUMBER NAME VALUE
 {
@@ -42,7 +46,6 @@ function setting() # FILE LINENUMBER NAME VALUE
 }
 
 status() {
-  source ${plebVPNConf}
   nodeName=$(sudo -u bitcoin lncli getinfo | jq .alias | sed 's/\"//g')
   nodeID=$(sudo -u bitcoin lncli getinfo | jq .identity_pubkey | sed 's/\"//g')
   address0=$(sudo -u bitcoin lncli getinfo | jq .uris[0] | sed 's/\"//g' | cut -d "@" -f2)
@@ -87,8 +90,7 @@ address0Type='${address0Type}'" | tee /mnt/hdd/mynode/pleb-vpn/lnd_hybrid_status
 }
 
 on() {
-  # enable hybrid mode 
-  source ${plebVPNConf}
+  # enable hybrid mode
 
   local isRestore="${1}"
   local newlnport="${2}"
@@ -189,8 +191,7 @@ on() {
 }
 
 off() {
-  # disable hybrid mode 
-  source ${plebVPNConf}
+  # disable hybrid mode
 
   # configure firewall
   if ! [ "${lnport}" = "9735" ]; then

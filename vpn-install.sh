@@ -15,6 +15,10 @@ fi
 
 plebVPNConf="/mnt/hdd/mynode/pleb-vpn/pleb-vpn.conf"
 firewallConf="/usr/bin/mynode_firewall.sh"
+plebVPNTempConf="/mnt/hdd/mynode/pleb-vpn/pleb-vpn.conf.tmp"
+sed '1d' $plebVPNConf > $plebVPNTempConf
+source ${plebVPNTempConf}
+sudo rm ${plebVPNTempConf}
 
 function setting() # FILE LINENUMBER NAME VALUE
 {
@@ -34,7 +38,6 @@ function setting() # FILE LINENUMBER NAME VALUE
 }
 
 status() {
-  source ${plebVPNConf}
 
   isConfig=$(ls /mnt/hdd/mynode/pleb-vpn/openvpn/ | grep -c plebvpn.conf)
   message="Pleb-VPN is installed, configured, and operating as expected"
@@ -104,7 +107,6 @@ message='${message}'" | tee /mnt/hdd/mynode/pleb-vpn/pleb-vpn_status.tmp
 
 on() {
   # install and configure openvpn
-  source ${plebVPNConf}
 
   # install openvpn
   sudo apt-get -y install openvpn
@@ -167,7 +169,6 @@ on() {
 
 off() {
   # remove and uninstall openvpn
-  source ${plebVPNConf}
 
   # uninstall openvpn
   sudo apt-get -y purge openvpn 
