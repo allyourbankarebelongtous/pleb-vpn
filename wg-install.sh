@@ -12,7 +12,13 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
 fi
 
 plebVPNConf="/mnt/hdd/mynode/pleb-vpn/pleb-vpn.conf"
+sed '1d' $plebVPNConf > pleb-vpn.conf.tmp
+plebVPNConf="/mnt/hdd/mynode/pleb-vpn/pleb-vpn.conf.tmp"
+source ${plebVPNConf}
+sudo rm ${plebVPNConf}
 firewallConf="/usr/bin/mynode_firewall.sh"
+
+
 
 function setting() # FILE LINENUMBER NAME VALUE
 {
@@ -51,7 +57,6 @@ function validWgIP() {
 }
 
 status() {
-  source ${plebVPNConf}
   message="Wireguard installed, configured, and operating as expected"
   if [ "${wireguard}" = "off" ]; then
     message="Wireguard not installed. Install wireguard in the services menu."
@@ -147,7 +152,6 @@ download all three config files by chosing 'Download'" 12 80
 
 on() {
   # install and configure wireguard
-  source ${plebVPNConf}
   local new_config="${1}"
 
   # check if plebvpn is on
@@ -297,7 +301,6 @@ AllowedIPs = ${wglan}.0/24, ${LAN}.0/24
 
 off() {
   # uninstall wireguard
-  source ${plebVPNConf}
 
   # disable service
   sudo systemctl disable wg-quick@wg0
