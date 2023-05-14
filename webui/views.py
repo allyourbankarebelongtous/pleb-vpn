@@ -394,7 +394,7 @@ def torsplittunnel():
     if torsplittunnel_status == {}:
         get_torsplittunnel_status()
 
-    return render_template('tor-split-tunnel.html', user=current_user, setting=get_conf, torsplittunnel_status=torsplittunnel_status)
+    return render_template('tor-split-tunnel.html', user=current_user, setting=get_conf(), torsplittunnel_status=torsplittunnel_status)
 
 @views.route('/set_torsplittunnel', methods=['POST'])
 def set_torsplittunnel():
