@@ -623,12 +623,12 @@ def get_torsplittunnel_test_status():
             torsplittunnel_test_status = {}
             cmd_str = ["sudo /mnt/hdd/mynode/pleb-vpn/tor.split-tunnel.sh status 1"]
             subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True)
-            with open(os.path.abspath('./split-tunnel_status.tmp')) as status:
+            with open(os.path.abspath('./split-tunnel_test_status.tmp')) as status:
                 for line in status:
                     if "=" in line:
                         name, value = line.split("=")
                         torsplittunnel_test_status[name] = str(value).rstrip().strip('\'\'')
-            os.remove(os.path.abspath('./split-tunnel_status.tmp'))
+            os.remove(os.path.abspath('./split-tunnel_test_status.tmp'))
 
     return jsonify({})
 
