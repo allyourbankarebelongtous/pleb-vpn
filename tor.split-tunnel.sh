@@ -100,12 +100,12 @@ Try checking the status using STATUS menu later. If unable to connect, uninstall
 split_tunnel_working=${torSplitTunnelOK}
 current_ip=${currentIP}
 firewall_ok=${firewallOK}
-message=${message}" | tee /mnt/hdd/mynode/pleb-vpn/split-tunnel_status.tmp
+message=${message}" | tee /mnt/hdd/mynode/pleb-vpn/split-tunnel_test_status.tmp
       exit 0
     else
       message="Tor Split-Tunnel service is working normally"
       echo "Checking ip tables"
-      nftableStatus="OK"
+      nftableStatus="ok"
       if ! [ $(nft list chain inet filter input | grep -c "meta cgroup 1114129") -eq 1 ]; then
         nftableStatus="missing nft rules"
         message="Tor Split-Tunnel service is incorrectly configured"
@@ -122,7 +122,7 @@ message=${message}" | tee /mnt/hdd/mynode/pleb-vpn/split-tunnel_status.tmp
         nftableStatus="missing nft rules"
         message="Tor Split-Tunnel service is incorrectly configured"
       fi
-      iptableStatus="OK"
+      iptableStatus="ok"
       if ! [ $(iptables -L INPUT | grep -c "0xb") -eq 1 ]; then
         iptableStatus="missing iptable rules"
         message="Tor Split-Tunnel service is incorrectly configured"
@@ -138,7 +138,7 @@ message=${message}" | tee /mnt/hdd/mynode/pleb-vpn/split-tunnel_status.tmp
       echo "Checking ip route"
       OIFNAME=$(ip r | grep default | cut -d " " -f5)
       GATEWAY=$(ip r | grep default | cut -d " " -f3)
-      iprouteStatus="OK"
+      iprouteStatus="ok"
       if ! [ $(ip rou show table novpn | grep -c "default via ${GATEWAY} dev ${OIFNAME}") -eq 1 ]; then
         iprouteStatus="missing ip route"
         message="Tor Split-Tunnel service is incorrectly configured"
@@ -146,7 +146,7 @@ message=${message}" | tee /mnt/hdd/mynode/pleb-vpn/split-tunnel_status.tmp
       echo "Checking cgroup config"
       cgroup_tasks=$(cat /sys/fs/cgroup/net_cls/novpn/tasks)
       tor_tasks=$(pgrep -x tor)
-      cgroupStatus="OK"
+      cgroupStatus="ok"
       if ! [ "${cgroup_tasks}" = "${tor_tasks}" ]; then
         cgroupStatus="bad cgroup config"
         message="Tor Split-Tunnel service is incorrectly configured"
