@@ -101,17 +101,73 @@ block content %}
         </table>
       </div>
     </div>
-    {% if setting['wireguard'] == "on" %}
+  </div>
+</div>
+
+<div class="container">
+  {% if torsplittunnel_test_status['message'] != null %}
+  <div class="row">
+    <div class="col text-center" style="border-top: 1px solid lightgrey">
+      <h7 align="center">{{ torsplittunnel_test_status['message'] }}</h7>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col" style="border-top: 1px solid lightgrey">
+      <table class="table">
+        <thead>
+          <tr>
+            <th scope="col">Setting</th>
+            <th scope="col">Value</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th scope="row">VPN Operating</th>
+            <td>{{ torsplittunnel_test_status['vpn_operating'] }}</td>
+          </tr>
+          <tr>
+            <th scope="row">split-tunnel working</th>
+            <td>{{ torsplittunnel_test_status['split_tunnel_working'] }}</td>
+          </tr>
+          <tr>
+            <th scope="row">Firewall config ok</th>
+            <td>{{ torsplittunnel_test_status['firewall_ok'] }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  {% endif%}
+  <form method="POST">
     <div class="row">
-      <div class="col text-center">
-        <p>
-          Use the Wireguard page in the settings menu to download client config
-          files or qr codes.
-        </p>
+      <div class="col">
+        <p>Test tor split-tunneling config</p>
+      </div>
+      <div class="col">
+        <button
+          id="test"
+          type="button"
+          class="btn btn-primary"
+          onClick="test_torsplittunnel({{ current_user.id }})"
+        >
+          Test
+        </button>
+        <button
+          id="test_loading"
+          class="btn btn-primary d-none"
+          type="button"
+          disabled
+        >
+          <span
+            class="spinner-grow spinner-grow-sm"
+            role="status"
+            aria-hidden="true"
+          ></span>
+          Loading...
+        </button>
       </div>
     </div>
-    {% endif %}
-  </div>
+  </form>
 </div>
 
 <div class="container">

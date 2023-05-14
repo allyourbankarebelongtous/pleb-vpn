@@ -312,6 +312,38 @@ function settorsplittunnel_off(userId) {
   }
 }
 
+function test_torsplittunnel(userId) {
+  if (
+    confirm_dialog(
+      (message =
+        "This test will temporarily deactivate the VPN to see if tor can connect without the VPN operational. This test can take up to 10 minutes. A failure of this test does not necessarily indicate that split-tunneling is not active, it could be that tor is down or having issues. Are you sure you want to test tor split-tunneling?")
+    ) == true
+  ) {
+    var testBtn = document.getElementById("test");
+    if (testBtn !== null) {
+      testBtn.classList.add("d-none");
+    }
+    var testLoading = document.getElementById("test_loading");
+    if (testLoading !== null) {
+      testLoading.classList.remove("d-none");
+    }
+    fetch("/get_torsplittunnel_test_status", {
+      method: "POST",
+      body: JSON.stringify({ userId: userId }),
+    }).then((_res) => {
+      var testBtn = document.getElementById("test");
+      if (testBtn !== null) {
+        testBtn.classList.remove("d-none");
+      }
+      var testLoading = document.getElementById("test_loading");
+      if (testLoading !== null) {
+        testLoading.classList.add("d-none");
+      }
+      window.location.href = "/torsplittunnel";
+    });
+  }
+}
+
 function delete_all_payments(userId) {
   if (
     confirm_dialog(

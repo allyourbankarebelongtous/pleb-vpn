@@ -19,6 +19,7 @@ plebVPN_status = {}
 lnd_hybrid_status = {}
 wireguard_status = {}
 torsplittunnel_status = {}
+torsplittunnel_test_status = {}
 user_input = None
 enter_input = False
 update_available = False
@@ -394,7 +395,7 @@ def torsplittunnel():
     if torsplittunnel_status == {}:
         get_torsplittunnel_status()
 
-    return render_template('tor-split-tunnel.html', user=current_user, setting=get_conf(), torsplittunnel_status=torsplittunnel_status)
+    return render_template('tor-split-tunnel.html', user=current_user, setting=get_conf(), torsplittunnel_status=torsplittunnel_status, torsplittunnel_test_status=torsplittunnel_test_status)
 
 @views.route('/set_torsplittunnel', methods=['POST'])
 def set_torsplittunnel():
@@ -598,7 +599,7 @@ def get_payments():
     return current_payments
 
 def get_torsplittunnel_status():
-    # get status of wireguard service
+    # get status of tor split-tunnel service
     global torsplittunnel_status
     torsplittunnel_status = {}
     cmd_str = ["sudo /mnt/hdd/mynode/pleb-vpn/tor.split-tunnel.sh status"]
@@ -609,6 +610,27 @@ def get_torsplittunnel_status():
                 name, value = line.split("=")
                 torsplittunnel_status[name] = str(value).rstrip().strip('\'\'')
     os.remove(os.path.abspath('./split-tunnel_status.tmp'))
+
+@views.route('/get_torsplittunnel_test_status', methods=['POST'])
+def get_torsplittunnel_test_status():
+    # test status of tor split-tunnel service
+    user = json.loads(request.data)
+    userId = user['userId']
+    user = User.query.get(userId)
+    if user:
+        if user.id == current_user.id:
+            global torsplittunnel_test_status
+            torsplittunnel_test_status = {}
+            cmd_str = ["sudo /mnt/hdd/mynode/pleb-vpn/tor.split-tunnel.sh status 1"]
+            subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True)
+            with open(os.path.abspath('./split-tunnel_status.tmp')) as status:
+                for line in status:
+                    if "=" in line:
+                        name, value = line.split("=")
+                        torsplittunnel_test_status[name] = str(value).rstrip().strip('\'\'')
+            os.remove(os.path.abspath('./split-tunnel_status.tmp'))
+
+    return jsonify({})
 
 @socketio.on('user_input')
 def set_user_input(input):
