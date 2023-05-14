@@ -607,7 +607,7 @@ def get_torsplittunnel_status():
         for line in status:
             if "=" in line:
                 name, value = line.split("=")
-                wireguard_status[name] = str(value).rstrip().strip('\'\'')
+                torsplittunnel_status[name] = str(value).rstrip().strip('\'\'')
     os.remove(os.path.abspath('./split-tunnel_status.tmp'))
 
 @socketio.on('user_input')
