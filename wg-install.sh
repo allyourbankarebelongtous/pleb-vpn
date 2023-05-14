@@ -69,10 +69,10 @@ status() {
       isConfig="no"
     else
       isConfig="yes"
+    fi
     echo "installed=no
 config_file_found=${isConfig}
 message=${message}" | tee /mnt/hdd/mynode/pleb-vpn/wireguard_status.tmp
-    fi
   else
     checkwgIP=$(ip addr | grep wg0 | grep inet | cut -d " " -f6 | cut -d "/" -f1)
     isConfig=$(sudo ls /etc/wireguard | grep -c wg0.conf)
