@@ -1,0 +1,149 @@
+{% extends "base.html" %} {% block title %}tor Split-Tunnel{% endblock %} {%
+block content %}
+<div class="container text-center">
+  <div class="row">
+    <div class="col">
+      <h3>tor split-tunneling</h3>
+    </div>
+  </div>
+</div>
+<br />
+{% if setting['plebvpn'] != "on" %}
+<div class="container">
+  <div class="row">
+    <div class="col">
+      <h5 align="center">Pleb-VPN is not connected. Enable Plev-VPN first!</h5>
+    </div>
+  </div>
+</div>
+{% else %} {% if setting['torsplittunnel'] != "on" %}
+<div class="container">
+  <form method="POST">
+    <div class="row">
+      <div class="col">
+        <p>Enable tor split-tunneling for redundency in case VPN goes down</p>
+      </div>
+      <div class="col">
+        <button
+          id="activate"
+          type="button"
+          class="btn btn-success"
+          onClick="settorsplittunnel_on({{ current_user.id }})"
+        >
+          Activate
+        </button>
+        <button
+          id="activate_loading"
+          class="btn btn-success d-none"
+          type="button"
+          disabled
+        >
+          <span
+            class="spinner-grow spinner-grow-sm"
+            role="status"
+            aria-hidden="true"
+          ></span>
+          Loading...
+        </button>
+      </div>
+    </div>
+  </form>
+</div>
+{% else %}
+
+<div class="row">
+  <div class="col">
+    <div class="row">
+      <div class="col">
+        <h2 align="center">tor split-tunnel Status</h2>
+      </div>
+    </div>
+
+    {% if torsplittunnel_status['message'] != null %}
+    <div class="row">
+      <div class="col text-center" style="border-top: 1px solid lightgrey">
+        <h7 align="center">{{ torsplittunnel_status['message'] }}</h7>
+      </div>
+    </div>
+    {% endif %}
+
+    <div class="row">
+      <div class="col" style="border-top: 1px solid lightgrey">
+        <table class="table">
+          <thead>
+            <tr>
+              <th scope="col">Setting</th>
+              <th scope="col">Value</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th scope="row">tor split-tunnel status</th>
+              <td>{{ setting['torsplittunnel'] }}</td>
+            </tr>
+            <tr>
+              <th scope="row">nftables config status</th>
+              <td>{{ torsplittunnel_status['nftableStatus'] }}</td>
+            </tr>
+            <tr>
+              <th scope="row">iptables config status</th>
+              <td>{{ torsplittunnel_status['iptableStatus'] }}</td>
+            </tr>
+            <tr>
+              <th scope="row">ip route config status</th>
+              <td>{{ torsplittunnel_status['iprouteStatus'] }}</td>
+            </tr>
+            <tr>
+              <th scope="row">cgroup config status</th>
+              <td>{{ torsplittunnel_status['cgroupStatus'] }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    {% if setting['wireguard'] == "on" %}
+    <div class="row">
+      <div class="col text-center">
+        <p>
+          Use the Wireguard page in the settings menu to download client config
+          files or qr codes.
+        </p>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+<div class="container">
+  <form method="POST">
+    <div class="row">
+      <div class="col">
+        <p>Disable tor split-tunneling</p>
+      </div>
+      <div class="col">
+        <button
+          id="deactivate"
+          type="button"
+          class="btn btn-danger"
+          onClick="settorsplittunnel_off({{ current_user.id }})"
+        >
+          Activate
+        </button>
+        <button
+          id="deactivate_loading"
+          class="btn btn-danger d-none"
+          type="button"
+          disabled
+        >
+          <span
+            class="spinner-grow spinner-grow-sm"
+            role="status"
+            aria-hidden="true"
+          ></span>
+          Loading...
+        </button>
+      </div>
+    </div>
+  </form>
+</div>
+{% endif %} {% endif %} {% endblock %}

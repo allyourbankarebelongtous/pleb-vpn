@@ -641,7 +641,7 @@ off() {
 }
 
 case "${1}" in
-  on) on ;;
+  on) on "${2}" ;;
   off) off "${2}" ;;
   status) status "${2}" ;;
 esac

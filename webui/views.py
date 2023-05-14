@@ -18,6 +18,7 @@ conf_file = config.PlebConfig(conf_file_location)
 plebVPN_status = {}
 lnd_hybrid_status = {}
 wireguard_status = {}
+torsplittunnel_status = {}
 user_input = None
 enter_input = False
 update_available = False
@@ -42,6 +43,7 @@ def home():
                            plebVPN_status=plebVPN_status, 
                            lnd_hybrid_status=lnd_hybrid_status,
                            wireguard_status=wireguard_status,
+                           torsplittunnel_status=torsplittunnel_status
                            update_available=update_available)
 
 @views.route('/refresh_plebVPN_data', methods=['POST'])
@@ -386,6 +388,47 @@ def delete_wireguard_conf():
 
     return jsonify({})
 
+@views.route('/torsplittunnel', methods=['GET'])
+@login_required
+def torsplittunnel():
+    # tor split-tunneling
+    if torsplittunnel_status == {}:
+        get_torsplittunnel_status()
+
+    return render_template('tor-split-tunnel.html', user=current_user, setting=get_conf, torsplittunnel_status=torsplittunnel_status())
+
+@views.route('/set_torsplittunnel', methods=['POST'])
+def set_torsplittunnel():
+    # turns tor split-tunneling on or off
+    setting = get_conf()
+    user = json.loads(request.data)
+    userId = user['userId']
+    user = User.query.get(userId)
+    if user:
+        if user.id == current_user.id:
+            if setting['torsplittunnel'] == 'on':
+                cmd_str = ["sudo /mnt/hdd/mynode/pleb-vpn/tor.split-tunnel.sh off 1"]
+                result = subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True)
+                # for debug purposes
+                print(result.stdout, result.stderr)
+                get_torsplittunnel_status()
+                if result.returncode == 0:
+                    flash('tor split-tunneling disabled.', category='success')
+                else:
+                    flash('An unknown error occured!', category='error')
+            else:
+                cmd_str = ["sudo /mnt/hdd/mynode/pleb-vpn/tor.split-tunnel.sh on 1"]
+                result = subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True)
+                # for debug purposes
+                print(result.stdout, result.stderr)
+                get_torsplittunnel_status()
+                if result.returncode == 0:
+                    flash('tor split-tunneling enabled!', category='success')
+                else:
+                    flash('An unknown error occured!', category='error')
+
+    return jsonify({})
+
 @views.route('/test-scripts', methods=['GET'])
 @login_required
 def test_scripts():
@@ -554,6 +597,19 @@ def get_payments():
 
     os.remove(os.path.abspath('./payments/current_payments.tmp'))
     return current_payments
+
+def get_torsplittunnel_status():
+    # get status of wireguard service
+    global torsplittunnel_status
+    torsplittunnel_status = {}
+    cmd_str = ["sudo /mnt/hdd/mynode/pleb-vpn/tor.split-tunnel.sh status"]
+    subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True)
+    with open(os.path.abspath('./split-tunnel_status.tmp')) as status:
+        for line in status:
+            if "=" in line:
+                name, value = line.split("=")
+                wireguard_status[name] = str(value).rstrip().strip('\'\'')
+    os.remove(os.path.abspath('./split-tunnel_status.tmp'))
 
 @socketio.on('user_input')
 def set_user_input(input):

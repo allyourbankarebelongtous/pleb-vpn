@@ -250,6 +250,68 @@ function download_file(filename) {
   xhr.send();
 }
 
+function settorsplittunnel_on(userId) {
+  if (
+    confirm_dialog(
+      (message = "Are you sure you want to enable tor split-tunneling?")
+    ) == true
+  ) {
+    var activateBtn = document.getElementById("activate");
+    if (activateBtn !== null) {
+      activateBtn.classList.add("d-none");
+    }
+    var activateLoading = document.getElementById("activate_loading");
+    if (activateLoading !== null) {
+      activateLoading.classList.remove("d-none");
+    }
+    fetch("/set_torsplittunnel", {
+      method: "POST",
+      body: JSON.stringify({ userId: userId }),
+    }).then((_res) => {
+      var activateBtn = document.getElementById("activate");
+      if (activateBtn !== null) {
+        activateBtn.classList.remove("d-none");
+      }
+      var activateLoading = document.getElementById("activate_loading");
+      if (activateLoading !== null) {
+        activateLoading.classList.add("d-none");
+      }
+      window.location.href = "/torsplittunnel";
+    });
+  }
+}
+
+function settorsplittunnel_off(userId) {
+  if (
+    confirm_dialog(
+      (message = "Are you sure you want to disable tor split-tunneling?")
+    ) == true
+  ) {
+    var deactivateBtn = document.getElementById("deactivate");
+    if (deactivateBtn !== null) {
+      deactivateBtn.classList.add("d-none");
+    }
+    var deactivateLoading = document.getElementById("deactivate_loading");
+    if (deactivateLoading !== null) {
+      deactivateLoading.classList.remove("d-none");
+    }
+    fetch("/set_torsplittunnel", {
+      method: "POST",
+      body: JSON.stringify({ userId: userId }),
+    }).then((_res) => {
+      var deactivateBtn = document.getElementById("deactivate");
+      if (deactivateBtn !== null) {
+        deactivateBtn.classList.remove("d-none");
+      }
+      var deactivateLoading = document.getElementById("deactivate_loading");
+      if (deactivateLoading !== null) {
+        deactivateLoading.classList.add("d-none");
+      }
+      window.location.href = "/torsplittunnel";
+    });
+  }
+}
+
 function delete_all_payments(userId) {
   if (
     confirm_dialog(
