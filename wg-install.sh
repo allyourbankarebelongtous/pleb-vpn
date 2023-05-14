@@ -60,7 +60,11 @@ status() {
   message="Wireguard installed, configured, and operating as expected"
   if [ "${wireguard}" = "off" ]; then
     message="Wireguard not installed. Install wireguard in the services menu."
-    isConfig=$(sudo ls /mnt/hdd/mynode/pleb-vpn/wireguard | grep -c wg0.conf)
+    if [ -d "/mnt/hdd/mynode/pleb-vpn/wireguard" ]; then
+      isConfig=$(sudo ls /mnt/hdd/mynode/pleb-vpn/wireguard | grep -c wg0.conf)
+    else
+      isConfig=0
+    fi
     if [ ${isConfig} -eq 0 ]; then
       isConfig="no"
     else
