@@ -250,9 +250,9 @@ Contact allyourbankarebelongtous with any questions or issues.
     fi
     # get certs
     if [ ! "${letsencryptdomain2}" = "" ]; then
-      sudo certbot certonly --manual --manual-auth-hook /etc/letsencrypt/acme-dns-auth.py --preferred-challenges dns --register-unsafely-without-email --debug-challenges -d ${letsencryptdomain1} -d ${letsencryptdomain2}
+      sudo certbot certonly --manual --manual-auth-hook /etc/letsencrypt/acme-dns-auth.py --preferred-challenges dns --register-unsafely-without-email --agree-tos --debug-challenges -d ${letsencryptdomain1} -d ${letsencryptdomain2}
     else
-      sudo certbot certonly --manual --manual-auth-hook /etc/letsencrypt/acme-dns-auth.py --preferred-challenges dns --register-unsafely-without-email --debug-challenges -d ${letsencryptdomain1}
+      sudo certbot certonly --manual --manual-auth-hook /etc/letsencrypt/acme-dns-auth.py --preferred-challenges dns --register-unsafely-without-email --agree-tos --debug-challenges -d ${letsencryptdomain1}
     fi
     sleep 5
 
@@ -402,9 +402,9 @@ Is the information correct?
 
     # get certs
     if [ ! "${letsencryptdomain2}" = "" ]; then
-      sudo certbot certonly --noninteractive --agree-tos --manual --manual-auth-hook /etc/letsencrypt/acme-dns-auth.py --preferred-challenges dns --register-unsafely-without-email -d ${letsencryptdomain1} -d ${letsencryptdomain2}
+      sudo certbot certonly --noninteractive --agree-tos --manual --manual-auth-hook /etc/letsencrypt/acme-dns-auth.py --preferred-challenges dns --register-unsafely-without-email --agree-tos -d ${letsencryptdomain1} -d ${letsencryptdomain2}
     else
-      sudo certbot certonly --noninteractive --agree-tos --manual --manual-auth-hook /etc/letsencrypt/acme-dns-auth.py --preferred-challenges dns --register-unsafely-without-email -d ${letsencryptdomain1}
+      sudo certbot certonly --noninteractive --agree-tos --manual --manual-auth-hook /etc/letsencrypt/acme-dns-auth.py --preferred-challenges dns --register-unsafely-without-email --agree-tos -d ${letsencryptdomain1}
     fi
 
     # link certs to /mnt/hdd/app-data/pleb-vpn/letsencrypt
@@ -473,7 +473,6 @@ ssl_certificate_key ${homedir}/letsencrypt/tls.key;
 }
 
 off() {
-  source ${plebVPNConf}
   if [ "${nodetype}" = "raspiblitz" ]; then
     source /mnt/hdd/raspiblitz.conf
   fi
