@@ -12,7 +12,7 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
 fi
 
 plebVPNConf="/mnt/hdd/mynode/pleb-vpn/pleb-vpn.conf"
-sed '1d' $plebVPNConf > pleb-vpn.conf.tmp
+sed '1d' $plebVPNConf > /mnt/hdd/mynode/pleb-vpn/pleb-vpn.conf.tmp
 plebVPNConf="/mnt/hdd/mynode/pleb-vpn/pleb-vpn.conf.tmp"
 source ${plebVPNConf}
 sudo rm ${plebVPNConf}
