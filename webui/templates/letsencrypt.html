@@ -1,0 +1,107 @@
+{% extends "base.html" %} {% block title %}Test Scripts{% endblock %} {% block
+content %}
+<div class="container text-center">
+  <div class="row">
+    <div class="col">
+      <h3>LetsEncrypt SSL for BTCPay/LNBits</h3>
+    </div>
+  </div>
+</div>
+<br />
+{% if setting['plebvpn'] != "on" %}
+<div class="container">
+  <div class="row">
+    <div class="col">
+      <h5 align="center">Pleb-VPN is not connected. Enable Plev-VPN first!</h5>
+    </div>
+  </div>
+</div>
+{% else %} {% if setting['letsencrypt_ssl'] != "on" %}
+<div class="container">
+  <div class="row">
+    <div class="col">
+      <p>
+        Input your desired domain(s) and select the service(s) you wish to
+        enable ssl/https for.
+      </p>
+    </div>
+  </div>
+  <form id="set_letsencrypt_on">
+    <div class="row">
+      <div class="col" style="border-top: 1px solid lightgrey">
+        <table>
+          <thead>
+            <tr>
+              <th scope="col">Service</th>
+              <th scope="col">Domain</th>
+              <th scope="col">Enable?</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th scope="row">BTCPayServer</th>
+              <td>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="btcpaydomain"
+                  name="btcpaydomain"
+                  placeholder="Enter BTCPayServer Domain"
+                />
+              </td>
+              <td>
+                <input
+                  class="form-check-input"
+                  type="checkbox"
+                  role="switch"
+                  id="letsencryptbtcpay"
+                />
+              </td>
+            </tr>
+            <tr>
+              <th scope="row">LNBits</th>
+              <td>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="lnbitsdomain"
+                  name="lnbitsdomain"
+                  placeholder="Enter LNBits Domain"
+                />
+              </td>
+              <td>
+                <input
+                  class="form-check-input"
+                  type="checkbox"
+                  role="switch"
+                  id="letsencryptlnbits"
+                />
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="row" style="margin-top: 0.5em">
+      <div class="col text-center">
+        <button id="enable_letsencrypt" type="button" class="btn btn-success">
+          Get Certs
+        </button>
+      </div>
+    </div>
+  </form>
+</div>
+<script>
+  var socket = io.connect("http://" + document.domain + ":" + location.port);
+  function setLetsencrypt(event) {
+    event.preventDefault();
+    var formData = {
+      btcpaydomain: $("#btcpaydomain").val(),
+      lnbitsdomain: $("#lnbitsdomain").val(),
+      letsencryptbtcpay: $("#letsencryptbtcpay").is(":checked"),
+      letsencryptlnbits: $("#letsencryptlnbits").is(":checked"),
+    };
+    socket.emit("set_letsencrypt_on", formData);
+  }
+  $("#set_letsencrypt_on").submit(setLetsencrypt);
+</script>
