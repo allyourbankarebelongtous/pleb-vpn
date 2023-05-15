@@ -301,15 +301,44 @@ ssl_certificate ${homedir}/letsencrypt/tls.cert;
 ssl_certificate_key ${homedir}/letsencrypt/tls.key;
 " | sudo tee /etc/nginx/mynode/mynode_ssl_cert_key_letsencrypt.conf
 
-      # fix btcpay_ssl.conf
-      if [ "${letsencryptbtcpay}" = "on" ]; then
-        sudo sed -i 's/mynode_ssl_cert_key.conf/mynode_ssl_cert_key_letsencrypt.conf/' /etc/nginx/sites-enabled/https_btcpayserver.conf
-      fi
+      # first create and enable systemd service to check for any changes to localip and update the nginx conf file with the new ip address
+      echo "#!/bin/bash
 
-      # fix lnbits_ssl.conf
-      if [ "${letsencryptlnbits}" = "on" ]; then
-        sudo sed -i 's/mynode_ssl_cert_key.conf/mynode_ssl_cert_key_letsencrypt.conf/' /etc/nginx/sites-enabled/https_lnbits.conf
-      fi
+sed '1d' /mnt/hdd/mynode/pleb-vpn/pleb-vpn.conf > /mnt/hdd/mynode/pleb-vpn/pleb-vpn.conf.tmp
+source /mnt/hdd/mynode/pleb-vpn/pleb-vpn.conf.tmp
+sudo rm /mnt/hdd/mynode/pleb-vpn/pleb-vpn.conf.tmp
+
+localip=\$(hostname -I | awk '{print \$1}')
+if [ \"\${letsencryptbtcpay}\" = \"on\" ]; then
+  sed -i \"s/\(proxy_pass http:\/\/\).*/\1\${localip}:49392;/\" /etc/nginx/sites-enabled/https_btcpayserver.conf
+  sed -i 's/mynode_ssl_cert_key.conf/mynode_ssl_cert_key_letsencrypt.conf/' /etc/nginx/sites-enabled/https_btcpayserver.conf
+fi
+if [ \"\${letsencryptlnbits}\" = \"on\" ]; then
+  sed -i \"s/\(proxy_pass http:\/\/\).*/\1\${localip}:49392;/\" /etc/nginx/sites-enabled/https_lnbits.conf
+  sed -i 's/mynode_ssl_cert_key.conf/mynode_ssl_cert_key_letsencrypt.conf/' /etc/nginx/sites-enabled/https_lnbits.conf
+fi
+
+systemctl reload nginx
+" | sudo tee /mnt/hdd/mynode/pleb-vpn/letsencrypt/set_nginx_localip.sh
+      sudo chown admin:admin /mnt/hdd/mynode/pleb-vpn/letsencrypt/set_nginx_localip.sh
+      sudo chmod 755 /mnt/hdd/mynode/pleb-vpn/letsencrypt/set_nginx_localip.sh
+
+      echo "[Unit]
+Description=Add localip to nginx btcpayserver and lnbits for ssl proxy
+After=network.service
+[Service]
+ExecStart=/bin/bash /mnt/hdd/mynode/pleb-vpn/letsencrypt/set_nginx_localip.sh
+User=root
+Group=root
+Restart=on-failure
+RestartSec=5s
+[Install]
+WantedBy=multi-user.target
+" | sudo tee /etc/systemd/system/pleb-vpn-letsencrypt-config.service
+
+      # Enable and run once
+      sudo systemctl enable pleb-vpn-letsencrypt-config.service
+      sudo systemctl start pleb-vpn-letsencrypt-config.service
     fi
 
     # reload nginx
@@ -445,15 +474,44 @@ ssl_certificate ${homedir}/letsencrypt/tls.cert;
 ssl_certificate_key ${homedir}/letsencrypt/tls.key;
 " | sudo tee /etc/nginx/mynode/mynode_ssl_cert_key_letsencrypt.conf
 
-      # fix btcpay_ssl.conf
-      if [ "${letsencryptbtcpay}" = "on" ]; then
-        sudo sed -i 's/mynode_ssl_cert_key.conf/mynode_ssl_cert_key_letsencrypt.conf/' /etc/nginx/sites-enabled/https_btcpayserver.conf
-      fi
+      # first create and enable systemd service to check for any changes to localip and update the nginx conf file with the new ip address
+      echo "#!/bin/bash
 
-      # fix lnbits_ssl.conf
-      if [ "${letsencryptlnbits}" = "on" ]; then
-        sudo sed -i 's/mynode_ssl_cert_key.conf/mynode_ssl_cert_key_letsencrypt.conf/' /etc/nginx/sites-enabled/https_lnbits.conf
-      fi
+sed '1d' /mnt/hdd/mynode/pleb-vpn/pleb-vpn.conf > /mnt/hdd/mynode/pleb-vpn/pleb-vpn.conf.tmp
+source /mnt/hdd/mynode/pleb-vpn/pleb-vpn.conf.tmp
+sudo rm /mnt/hdd/mynode/pleb-vpn/pleb-vpn.conf.tmp
+
+localip=\$(hostname -I | awk '{print \$1}')
+if [ \"\${letsencryptbtcpay}\" = \"on\" ]; then
+  sed -i \"s/\(proxy_pass http:\/\/\).*/\1\${localip}:49392;/\" /etc/nginx/sites-enabled/https_btcpayserver.conf
+  sed -i 's/mynode_ssl_cert_key.conf/mynode_ssl_cert_key_letsencrypt.conf/' /etc/nginx/sites-enabled/https_btcpayserver.conf
+fi
+if [ \"\${letsencryptlnbits}\" = \"on\" ]; then
+  sed -i \"s/\(proxy_pass http:\/\/\).*/\1\${localip}:49392;/\" /etc/nginx/sites-enabled/https_lnbits.conf
+  sed -i 's/mynode_ssl_cert_key.conf/mynode_ssl_cert_key_letsencrypt.conf/' /etc/nginx/sites-enabled/https_lnbits.conf
+fi
+
+systemctl reload nginx
+" | sudo tee /mnt/hdd/mynode/pleb-vpn/letsencrypt/set_nginx_localip.sh
+      sudo chown admin:admin /mnt/hdd/mynode/pleb-vpn/letsencrypt/set_nginx_localip.sh
+      sudo chmod 755 /mnt/hdd/mynode/pleb-vpn/letsencrypt/set_nginx_localip.sh
+
+      echo "[Unit]
+Description=Add localip to nginx btcpayserver and lnbits for ssl proxy
+After=network.service
+[Service]
+ExecStart=/bin/bash /mnt/hdd/mynode/pleb-vpn/letsencrypt/set_nginx_localip.sh
+User=root
+Group=root
+Restart=on-failure
+RestartSec=5s
+[Install]
+WantedBy=multi-user.target
+" | sudo tee /etc/systemd/system/pleb-vpn-letsencrypt-config.service
+
+      # Enable and run once
+      sudo systemctl enable pleb-vpn-letsencrypt-config.service
+      sudo systemctl start pleb-vpn-letsencrypt-config.service
     fi
 
     # reload nginx
@@ -485,22 +543,19 @@ off() {
 
   if [ "${nodetype}" = "raspiblitz" ]; then
     sudo rm /etc/nginx/snippets/ssl-certificate-app-data-letsencrypt.conf
-    if [ "${letsencryptbtcpay}" = "on" ]; then
-      sudo sed -i 's/ssl-certificate-app-data-letsencrypt.conf/ssl-certificate-app-data.conf/' /etc/nginx/sites-available/btcpay_ssl.conf
-      sudo sed -i 's/ssl-certificate-app-data-letsencrypt.conf/ssl-certificate-app-data.conf/' /home/admin/assets/nginx/sites-available/btcpay_ssl.conf
-    fi
-    if [ "${letsencryptlnbits}" = "on" ]; then
-      sudo sed -i 's/ssl-certificate-app-data-letsencrypt.conf/ssl-certificate-app-data.conf/' /etc/nginx/sites-available/lnbits_ssl.conf
-      sudo sed -i 's/ssl-certificate-app-data-letsencrypt.conf/ssl-certificate-app-data.conf/' /home/admin/assets/nginx/sites-available/lnbits_ssl.conf
-    fi
+    sudo sed -i 's/ssl-certificate-app-data-letsencrypt.conf/ssl-certificate-app-data.conf/' /etc/nginx/sites-available/btcpay_ssl.conf
+    sudo sed -i 's/ssl-certificate-app-data-letsencrypt.conf/ssl-certificate-app-data.conf/' /home/admin/assets/nginx/sites-available/btcpay_ssl.conf
+    sudo sed -i 's/ssl-certificate-app-data-letsencrypt.conf/ssl-certificate-app-data.conf/' /etc/nginx/sites-available/lnbits_ssl.conf
+    sudo sed -i 's/ssl-certificate-app-data-letsencrypt.conf/ssl-certificate-app-data.conf/' /home/admin/assets/nginx/sites-available/lnbits_ssl.conf
   elif [ "${nodetype}" = "mynode" ]; then
     sudo rm /etc/nginx/mynode/mynode_ssl_cert_key_letsencrypt.conf
-    if [ "${letsencryptbtcpay}" = "on" ]; then
-      sudo sed -i 's/mynode_ssl_cert_key_letsencrypt.conf/mynode_ssl_cert_key.conf/' /etc/nginx/sites-enabled/https_btcpayserver.conf
-    fi
-    if [ "${letsencryptlnbits}" = "on" ]; then
-      sudo sed -i 's/mynode_ssl_cert_key_letsencrypt.conf/mynode_ssl_cert_key.conf/' /etc/nginx/sites-enabled/https_lnbits.conf
-    fi
+    sudo systemctl disable pleb-vpn-letsencrypt-config.service
+    sudo rm /mnt/hdd/mynode/pleb-vpn/letsencrypt/set_nginx_localip.sh
+    sudo rm /etc/systemd/system/pleb-vpn-letsencrypt-config.service
+    sudo sed -i "s/\(proxy_pass http:\/\/\).*/\1127.0.0.1:49392;/" /etc/nginx/sites-enabled/https_btcpayserver.conf
+    sudo sed -i 's/mynode_ssl_cert_key_letsencrypt.conf/mynode_ssl_cert_key.conf/' /etc/nginx/sites-enabled/https_btcpayserver.conf
+    sudo sed -i "s/\(proxy_pass http:\/\/\).*/\1127.0.0.1:49392;/" /etc/nginx/sites-enabled/https_lnbits.conf
+    sudo sed -i 's/mynode_ssl_cert_key_letsencrypt.conf/mynode_ssl_cert_key.conf/' /etc/nginx/sites-enabled/https_lnbits.conf
   fi
 
   # reload nginx
