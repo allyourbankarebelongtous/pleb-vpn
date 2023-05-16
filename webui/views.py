@@ -7,7 +7,7 @@ from plebvpn_common import config
 # from PIL import Image
 from .models import User
 from . import db
-import json, os, subprocess, time, pexpect, random, qrcode, io, base64, shutil, re, datetime
+import json, os, subprocess, time, pexpect, random, qrcode, io, base64, shutil, re, datetime, socket
 
 views = Blueprint('views', __name__)
 
@@ -429,58 +429,6 @@ def set_torsplittunnel():
 
     return jsonify({})
 
-@views.route('/test-scripts', methods=['GET'])
-@login_required
-def test_scripts():
-    message = request.args.get('message')
-    category = request.args.get('category')
-
-    if message is not None:
-        print('flashing message: ', message) # for debug purposes only
-        flash(message, category=category)
-
-    return render_template('test-scripts.html', user=current_user)
-
-@socketio.on('start_process')
-def start_process(data):
-
-    cmd_str = str(data)
-    exit_code = run_cmd(cmd_str, False, False)
-    print('Back on start_process, the exit code received from run_cmd(cmd_str) is: ', exit_code)
-    if exit_code == 0:
-        message = 'Script exited successfully!'
-        category = 'success'
-    elif exit_code == 42069:
-        message = 'Script exited with unknown status.'
-        category = 'info'
-    else:
-        message = 'Script exited with an error.'
-        category = 'error'
-
-    print('before returning, message = ', message, 'category = ', category) # for debug purposes only
-    socketio.emit('process_complete', {'message': message, 'category': category})
-
-@socketio.on('update_scripts')
-def update_scripts():
-    global update_available
-    # update pleb-vpn (not for production)
-    cmd_str = "/mnt/hdd/mynode/pleb-vpn/pleb-vpn.install.sh update"
-    exit_code = run_cmd(cmd_str, False, False)
-    if exit_code == 0:
-        message = 'Pleb-VPN update successful! Click restart to restart Pleb-VPN webui.'
-        category = 'success'
-        update_available = True
-    elif exit_code == int(42069):
-        message = 'Script exited with unknown status. Click restart to restart Pleb-VPN webui.'
-        category = 'info'
-        update_available = True
-    else:
-        message = 'Pleb-VPN update unsuccessful. Check your internet connection and try again.'
-        category = 'error'
-
-    print('before returning, message = ', message, 'category = ', category) # for debug purposes only
-    socketio.emit('update_complete', {'message': message, 'category': category})
-
 def get_conf():
     setting = {}
     with open(os.path.abspath('./pleb-vpn.conf')) as conf:
@@ -632,17 +580,63 @@ def get_torsplittunnel_test_status():
 
     return jsonify({})
 
+@views.route('/test-scripts', methods=['GET'])
+@login_required
+def test_scripts():
+    message = request.args.get('message')
+    category = request.args.get('category')
+
+    if message is not None:
+        print('flashing message: ', message) # for debug purposes only
+        flash(message, category=category)
+
+    return render_template('test-scripts.html', user=current_user)
+
+@socketio.on('start_process')
+def start_process(data):
+
+    cmd_str = str(data)
+    exit_code = run_cmd(cmd_str, False, False)
+    print('Back on start_process, the exit code received from run_cmd(cmd_str) is: ', exit_code)
+    if exit_code == 0:
+        message = 'Script exited successfully!'
+        category = 'success'
+    elif exit_code == 42069:
+        message = 'Script exited with unknown status.'
+        category = 'info'
+    else:
+        message = 'Script exited with an error.'
+        category = 'error'
+
+    print('before returning, message = ', message, 'category = ', category) # for debug purposes only
+    socketio.emit('process_complete', {'message': message, 'category': category})
+
+@socketio.on('update_scripts')
+def update_scripts():
+    global update_available
+    # update pleb-vpn (not for production)
+    cmd_str = "/mnt/hdd/mynode/pleb-vpn/pleb-vpn.install.sh update"
+    exit_code = run_cmd(cmd_str, False, False)
+    if exit_code == 0:
+        message = 'Pleb-VPN update successful! Click restart to restart Pleb-VPN webui.'
+        category = 'success'
+        update_available = True
+    elif exit_code == int(42069):
+        message = 'Script exited with unknown status. Click restart to restart Pleb-VPN webui.'
+        category = 'info'
+        update_available = True
+    else:
+        message = 'Pleb-VPN update unsuccessful. Check your internet connection and try again.'
+        category = 'error'
+
+    print('before returning, message = ', message, 'category = ', category) # for debug purposes only
+    socketio.emit('update_complete', {'message': message, 'category': category})
+
 @socketio.on('user_input')
 def set_user_input(input):
     global user_input
     user_input = input
     print("set_user_input: ", user_input) # debug purposes only
-
-@socketio.on('enter_input')
-def set_enter_input():
-    global enter_input
-    enter_input = True
-    print("set_enter_input: !ENTER!", enter_input) # debug purposes only
 
 @socketio.on('start_reboot')
 def start_reboot():
@@ -734,6 +728,187 @@ def run_cmd(cmd_str, suppress_output = True, suppress_input = True):
     child.close()
     
     return exit_code
+
+@views.route('/letsencrypt', methods=['GET'])
+@login_required
+def letsencrypt():
+    message = request.args.get('message')
+    category = request.args.get('category')
+
+    if message is not None:
+        print('flashing message: ', message) # for debug purposes only
+        flash(message, category=category)
+
+    return render_template('letsencrypt.html', user=current_user, setting=get_conf())
+
+@socketio.on('set_letsencrypt_on')
+def set_letsencrypt_on(formData):
+    setting=get_conf()
+    # get ssl certs
+    btcpaydomain = formData['btcpaydomain']
+    lnbitsdomain = formData['lnbitsdomain']
+    btcpay = formData['letsencryptbtcpay']
+    lnbits = formData['letsencryptlnbits']
+    letsencryptbtcpay = "off"
+    letsencryptlnbits = "off"
+    if btcpay:
+        ipaddress1 = check_domain(btcpaydomain)
+        if ipaddress1 != setting['vpnip']:
+            message = 'BTCPayServer domain is not a valid domain or does not point to your node public IP.'
+            category = 'error'
+            socketio.emit("letsencrypt_set_on", {'message': message, 'category': category})
+            return
+        else:
+            letsencryptbtcpay = "on"
+            letsencryptdomain1 = btcpaydomain
+            letsencryptdomain2 = ""
+    if lnbits:
+        ipaddress2 = check_domain(lnbitsdomain)
+        if ipaddress2 != setting['vpnip']:
+            message = 'LNBits domain is not a valid domain or does not point to your node public IP.'
+            category = 'error'
+            socketio.emit("letsencrypt_set_on", {'message': message, 'category': category})
+            return
+        else:
+            letsencryptlnbits = "on"
+            if btcpay:
+                letsencryptdomain2 = lnbitsdomain
+            else:
+                letsencryptdomain1 = lnbitsdomain
+                letsencryptdomain2 = ""
+    cmd_str = "/mnt/hdd/mynode/pleb-vpn/letsencrypt.install.sh on 0 0 1 " + letsencryptbtcpay + " " + letsencryptlnbits + " " + letsencryptdomain1 + " " + letsencryptdomain2
+    exit_code = get_certs(cmd_str, False, False)
+    if exit_code == 0:
+        message = 'LetsEncrypt certificates installed!'
+        category = 'success'
+    elif exit_code == int(42069):
+        message = 'Script exited with unknown status.'
+        category = 'info'
+    else:
+        message = 'LetsEncrypt certificate install unsuccessful. Please check your domain name(s) and try again, ensuring you enter the CNAME record correctly.'
+        category = 'error'
+    socketio.emit('letsencrypt_set_on', {'message': message, 'category': category})
+
+@socketio.on('set_letsencrypt_off')
+def set_letsencrypt_off():
+    cmd_str = ["/mnt/hdd/mynode/pleb-vpn/letsencrypt.install.sh off"]
+    result = subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True)
+    # for debug purposes
+    print(result.stdout, result.stderr)
+    if result.returncode == 0:
+        message = 'LetsEncrypt certificates deleted, origninal config restored.'
+        category = 'success'
+    else:
+        message = 'An unknown error occured!'
+        category = 'error'
+    socketio.emit('letsencrypt_set_off', {'message': message, 'category': category})
+
+def get_certs(cmd_str, suppress_output = True, suppress_input = True):
+    global enter_input
+    end_script = False
+    capture_output = False
+    CNAME_Challenge = ""
+    child = pexpect.spawn('/bin/bash')
+    try:
+        child.expect(['\r\n', pexpect.EOF, pexpect.TIMEOUT], timeout=0.1)
+        output = child.before.decode('utf-8')
+        cmd_line = output.strip()
+        print('cmd_line: ', cmd_line) # for debug purposes only
+        if output: # for debug purposes only
+            print('first output: ', output.strip()) # for debug purposes only
+    except pexpect.TIMEOUT:
+        pass
+    child.sendline(cmd_str)
+    try:
+        child.expect(['\r\n', pexpect.EOF, pexpect.TIMEOUT], timeout=0.1)
+        output1 = child.before.decode('utf-8')
+        output1 = output1.replace(cmd_line, '')
+        if output1 != output: 
+            output = output1
+            print(output.strip()) # for debug purposes only
+    except pexpect.TIMEOUT:
+        pass
+    while True:
+        try:
+            child.expect(['\r\n', pexpect.EOF, pexpect.TIMEOUT], timeout=0.1)
+            output1 = child.before.decode('utf-8')
+            if cmd_line in output1:
+                end_script = True
+            if "Output from acme-dns-auth.py" in output1:
+                capture_output = True
+            if "Press Enter to Continue" in output1:
+                if CNAME_Challenge:
+                    socketio.emit('CNAMEoutput', CNAME_Challenge)
+                    CNAME_Challenge = ""
+            if output1 != output: 
+                output = output1
+                if suppress_output == False:
+                    if capture_output:
+                        if CNAME_Challenge:
+                            CNAME_Challenge += "\n"
+                        CNAME_Challenge += output
+                        if "Waiting for verification..." in output:
+                            capture_output = False
+                    print(output.strip().replace(cmd_line, '')) # for debug purposes only
+        except pexpect.TIMEOUT:
+            pass
+        if not suppress_input:
+            if "(Y)es/(N)o:" in output:
+                print("Sending to terminal: Y") # for debut only
+                child.sendline("Y")
+            if enter_input is True:
+                print("Sending ENTER to terminal") # for debug purposes only
+                child.sendline('')
+                enter_input = False
+        if child.eof() or end_script:
+            break
+    time.sleep(0.1)
+    child.sendline('echo "exit_code=$?"')
+    # Wait for the command to complete and capture the output
+    try:
+        child.expect(['\r\n', pexpect.EOF, pexpect.TIMEOUT], timeout=0.1)
+    except pexpect.TIMEOUT:
+        pass
+    try:
+        child.expect(['\r\n', pexpect.EOF, pexpect.TIMEOUT], timeout=0.1)
+    except pexpect.TIMEOUT:
+        pass
+    output = child.before.decode('utf-8')
+    # Parse the output to extract the $? value
+    print('Exit code command result: ', output.strip().replace(cmd_line, '')) # for debug purposes only
+    if output.strip().replace(cmd_line, '').startswith("exit_code="):
+        exit_code = int(output.strip().replace(cmd_line, '').split("=")[-1])
+    else:
+        exit_code = int(42069)
+    print('Exit code = ', exit_code) # for debug purposes only
+    child.close()
+    
+    return exit_code
+
+@socketio.on('enter_input')
+def set_enter_input():
+    global enter_input
+    enter_input = True
+    print("set_enter_input: !ENTER!", enter_input) # debug purposes only
+
+def check_domain(domain):
+    # Split the domain into its components
+    parts = domain.split('.')
+    # Ensure the domain has at least two parts (e.g., 'example.com')
+    if len(parts) < 2:
+        return False
+    # Check if each part of the domain is valid
+    for part in parts:
+        if not part.isalnum():
+            return False
+    # Join the parts in reverse order for the lookup
+    reversed_domain = '.'.join(parts[::-1])
+    try:
+        # Retrieve the IP address associated with the domain
+        ip_address = socket.gethostbyname(reversed_domain)
+        return ip_address
+    except socket.gaierror:
+        return False
 
 def allowed_file(filename):
     return '.' in filename and \
