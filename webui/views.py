@@ -681,7 +681,7 @@ def run_cmd(cmd_str, suppress_output = True, suppress_input = True):
                 end_script = True
             if output1 != output: 
                 output = output1
-                if suppress_output == False:
+                if not suppress_output:
                     print(output.strip().replace(cmd_line, '')) # for debug purposes only
                     socketio.emit('output', output.strip().replace(cmd_line, '') + '\n') 
         except pexpect.TIMEOUT:
@@ -808,6 +808,8 @@ def get_certs(cmd_str, suppress_output = True, suppress_input = True):
     debug_inout = open(os.path.abspath('./debug_inout.txt'), "w") # for debug purposes only
     global enter_input
     enter_yes = False
+    yes_count = 0
+    enter_count = 0
     end_script = False
     capture_output = False
     capture_output_trigger = str("Output from acme-dns-auth.py")
@@ -855,7 +857,8 @@ def get_certs(cmd_str, suppress_output = True, suppress_input = True):
                         print("CNAME CHALLENGE SENT:\n" + CNAME_Challenge, file=debug_inout) # for debug purposes only
                         CNAME_Challenge = ""
                 if enter_yes_trigger in output:
-                    enter_yes = True
+                    if yes_count < 1:
+                        enter_yes = True
                     print("enter_yes_trigger received: " + output + "\n enter_yes=" + str(enter_yes), file=debug_inout) # for debug purposes only
                 if suppress_output == False: 
                     if capture_output:
@@ -873,13 +876,16 @@ def get_certs(cmd_str, suppress_output = True, suppress_input = True):
             if enter_yes:
                 # print("Sending to terminal: Y", file=debug_file) # for debut only
                 child.sendline("Y")
-                print('sent Y to child', file=debug_file)
+                yes_count += 1
+                print('sent Y to child', file=debug_inout)
                 enter_yes = False
                 print("enter_yes set to: " + str(enter_yes), file=debug_inout) # for debug purposes only
             if enter_input is True:
                 # print("Sending ENTER to terminal", file=debug_file) # for debug purposes only
-                child.sendline('')
-                print('sent enter from enter_input to child', file=debug_file)
+                if enter_count < 1:
+                    child.sendline('')
+                    enter_count += 1
+                print('sent enter from enter_input to child', file=debug_inout)
                 enter_input = False
                 print("enter_input set to: " + str(enter_input), file=debug_inout) # for debug purposes only
         if child.eof() or end_script:
