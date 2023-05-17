@@ -804,6 +804,7 @@ def set_letsencrypt_off():
     socketio.emit('letsencrypt_set_off', {'message': message, 'category': category})
 
 def get_certs(cmd_str, suppress_output = True, suppress_input = True):
+    debug_file = open(os.path.abspath('./debug_output.txt'), "w") # for debug purposes only
     global enter_input
     enter_yes = False
     end_script = False
@@ -814,9 +815,9 @@ def get_certs(cmd_str, suppress_output = True, suppress_input = True):
         child.expect(['\r\n', pexpect.EOF, pexpect.TIMEOUT], timeout=0.1)
         output = child.before.decode('utf-8')
         cmd_line = output.strip()
-        print('cmd_line: ', cmd_line) # for debug purposes only
+        print('cmd_line: ', cmd_line, file=debug_file) # for debug purposes only
         if output: # for debug purposes only
-            print('first output: ', output.strip()) # for debug purposes only
+            print('first output: ', output.strip(), file=debug_file) # for debug purposes only
     except pexpect.TIMEOUT:
         pass
     child.sendline(cmd_str)
@@ -826,7 +827,7 @@ def get_certs(cmd_str, suppress_output = True, suppress_input = True):
         output1 = output1.replace(cmd_line, '')
         if output1 != output: 
             output = output1
-            print(output.strip()) # for debug purposes only
+            print(output.strip(), file=debug_file) # for debug purposes only
     except pexpect.TIMEOUT:
         pass
     while True:
@@ -852,16 +853,16 @@ def get_certs(cmd_str, suppress_output = True, suppress_input = True):
                         CNAME_Challenge += output
                         if "Waiting for verification..." in output:
                             capture_output = False
-                    print(output.strip().replace(cmd_line, '')) # for debug purposes only
+                    print(output.strip().replace(cmd_line, ''), file=debug_file) # for debug purposes only
         except pexpect.TIMEOUT:
             pass
         if not suppress_input:
             if enter_yes:
-                print("Sending to terminal: Y") # for debut only
+                print("Sending to terminal: Y", file=debug_file) # for debut only
                 child.sendline("Y")
                 enter_yes = False
             if enter_input is True:
-                print("Sending ENTER to terminal") # for debug purposes only
+                print("Sending ENTER to terminal", file=debug_file) # for debug purposes only
                 child.sendline('')
                 enter_input = False
         if child.eof() or end_script:
@@ -879,13 +880,15 @@ def get_certs(cmd_str, suppress_output = True, suppress_input = True):
         pass
     output = child.before.decode('utf-8')
     # Parse the output to extract the $? value
-    print('Exit code command result: ', output.strip().replace(cmd_line, '')) # for debug purposes only
+    print('Exit code command result: ', output.strip().replace(cmd_line, ''), file=debug_file) # for debug purposes only
     if output.strip().replace(cmd_line, '').startswith("exit_code="):
         exit_code = int(output.strip().replace(cmd_line, '').split("=")[-1])
     else:
         exit_code = int(42069)
-    print('Exit code = ', exit_code) # for debug purposes only
+    print('Exit code = ', exit_code, file=debug_file) # for debug purposes only
     child.close()
+    debug_file.close() # for debug purposes only
+
     
     return exit_code
 
