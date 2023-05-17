@@ -86,38 +86,47 @@
         </table>
       </div>
     </div>
-    <div class="row" style="margin-top: 0.5em">
-      <div class="col text-center">
-        <h5>IMPORTANT:</h5>
-        <p>
-          Before continuing you must ensure your domain(s) above are pointing to
-          {{ setting['vpnip'] }}, you must ensure your domain(s) are forwarded
-          to the services requested, and you must be ready to update the CNAME
-          record of each domain you are requesting a cert for.
-        </p>
+    <div class="row" id="enable_message" style="margin-top: 0.5em">
+      <div class="col">
+        <div class="row">
+          <div class="col text-center">
+            <h5>IMPORTANT:</h5>
+            <p>
+              Before continuing you must ensure your domain(s) above are
+              pointing to {{ setting['vpnip'] }}, you must ensure your domain(s)
+              are forwarded to the services requested, and you must be ready to
+              update the CNAME record of each domain you are requesting a cert
+              for.
+            </p>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col text-center">
+            <button
+              id="enable_letsencrypt"
+              type="button"
+              class="btn btn-success"
+            >
+              Get Certs
+            </button>
+            <button
+              id="enable_letsencrypt_loading"
+              class="btn btn-success d-none"
+              type="button"
+              disabled
+            >
+              <span
+                class="spinner-grow spinner-grow-sm"
+                role="status"
+                aria-hidden="true"
+              ></span>
+              Loading...
+            </button>
+          </div>
+        </div>
       </div>
     </div>
-    <div class="row">
-      <div class="col text-center">
-        <button id="enable_letsencrypt" type="button" class="btn btn-success">
-          Get Certs
-        </button>
-        <button
-          id="enable_letsencrypt_loading"
-          class="btn btn-success d-none"
-          type="button"
-          disabled
-        >
-          <span
-            class="spinner-grow spinner-grow-sm"
-            role="status"
-            aria-hidden="true"
-          ></span>
-          Loading...
-        </button>
-      </div>
-    </div>
-    <div class="row d-none" id="CNAME_Challenge">
+    <div class="row d-none" id="CNAME_Challenge" style="margin-top: 0.5em">
       <div class="col">
         <div class="row">
           <div class="col text-center">
@@ -224,12 +233,16 @@
   }
   $("#enable_letsencrypt").click(setLetsencrypt_on);
   socket.on("CNAMEoutput", function (CNAME_data) {
+    var enable_message = document.getElementById("enable_message");
+    if (enable_message !== null) {
+      enable_message.classList.add("d-none");
+    }
     var CNAME_Challenge = document.getElementById("CNAME_Challenge");
     if (CNAME_Challenge !== null) {
       CNAME_Challenge.classList.remove("d-none");
     }
     $("#CNAMEText").append(
-      CNAME_Challenge +
+      CNAME_data +
         '<br><br>First update the CNAME record(s) of your domain(s) as shown above. After the CNAME records are updated, press "Enter" below.'
     );
   });
@@ -244,6 +257,10 @@
       var CNAME_Challenge = document.getElementById("CNAME_Challenge");
       if (CNAME_Challenge !== null) {
         CNAME_Challenge.classList.add("d-none");
+      }
+      var enable_message = document.getElementById("enable_message");
+      if (enable_message !== null) {
+        enable_message.classList.remove("d-none");
       }
     }
   });
