@@ -233,9 +233,11 @@
   }
   $("#enable_letsencrypt").click(setLetsencrypt_on);
   socket.on("CNAMEoutput", function (CNAME_data) {
-    var enable_message = document.getElementById("enable_message");
-    if (enable_message !== null) {
-      enable_message.classList.add("d-none");
+    var enable_letsencrypt_loading = document.getElementById(
+      "enable_letsencrypt_loading"
+    );
+    if (enable_letsencrypt_loading !== null) {
+      enable_letsencrypt_loading.classList.add("d-none");
     }
     var CNAME_Challenge = document.getElementById("CNAME_Challenge");
     if (CNAME_Challenge !== null) {
@@ -258,9 +260,11 @@
       if (CNAME_Challenge !== null) {
         CNAME_Challenge.classList.add("d-none");
       }
-      var enable_message = document.getElementById("enable_message");
-      if (enable_message !== null) {
-        enable_message.classList.remove("d-none");
+      var enable_letsencrypt_loading = document.getElementById(
+        "enable_letsencrypt_loading"
+      );
+      if (enable_letsencrypt_loading !== null) {
+        enable_letsencrypt_loading.classList.remove("d-none");
       }
     }
   });
