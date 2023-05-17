@@ -863,7 +863,7 @@ def get_certs(cmd_str, suppress_output = True, suppress_input = True):
                 if suppress_output == False: 
                     if capture_output:
                         if CNAME_data:
-                            CNAME_data += str("<br>")
+                            CNAME_data += "&lt;br&gt;"
                         CNAME_data += str(output)
                         print("capturing output: " + output)
                         if capture_output_trigger_off in output:
