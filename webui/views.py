@@ -842,6 +842,7 @@ def get_certs(cmd_str, suppress_output = True, suppress_input = True):
                 end_script = True
             if output1 != output:
                 output = output1
+                print(output.strip(), file=debug_file)
                 if capture_output_trigger in output:
                     capture_output = True
                 if CNAME_Challenge_trigger in output:
@@ -863,10 +864,12 @@ def get_certs(cmd_str, suppress_output = True, suppress_input = True):
             if enter_yes:
                 # print("Sending to terminal: Y", file=debug_file) # for debut only
                 child.sendline("Y")
+                print('enter yes', file=debug_file)
                 enter_yes = False
             if enter_input is True:
                 # print("Sending ENTER to terminal", file=debug_file) # for debug purposes only
                 child.sendline('')
+                print('sending enter from enter_input', file=debug_file)
                 enter_input = False
         if child.eof() or end_script:
             break
