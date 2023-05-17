@@ -805,6 +805,7 @@ def set_letsencrypt_off():
 
 def get_certs(cmd_str, suppress_output = True, suppress_input = True):
     global enter_input
+    enter_yes = False
     end_script = False
     capture_output = False
     CNAME_Challenge = ""
@@ -840,6 +841,8 @@ def get_certs(cmd_str, suppress_output = True, suppress_input = True):
                 if CNAME_Challenge:
                     socketio.emit('CNAMEoutput', CNAME_Challenge)
                     CNAME_Challenge = ""
+            if "(Y)es/(N)o:" in output1:
+                enter_yes = True
             if output1 != output: 
                 output = output1
                 if suppress_output == False:
@@ -853,9 +856,10 @@ def get_certs(cmd_str, suppress_output = True, suppress_input = True):
         except pexpect.TIMEOUT:
             pass
         if not suppress_input:
-            if "(Y)es/(N)o:" in output:
+            if enter_yes:
                 print("Sending to terminal: Y") # for debut only
                 child.sendline("Y")
+                enter_yes = False
             if enter_input is True:
                 print("Sending ENTER to terminal") # for debug purposes only
                 child.sendline('')
