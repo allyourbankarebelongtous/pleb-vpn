@@ -809,7 +809,7 @@ def get_certs(cmd_str, suppress_output = True, suppress_input = True):
     enter_yes = False
     end_script = False
     capture_output = False
-    CNAME_Challenge = ""
+    CNAME_Challenge = str()
     child = pexpect.spawn('/bin/bash')
     try:
         child.expect(['\r\n', pexpect.EOF, pexpect.TIMEOUT], timeout=0.1)
@@ -850,19 +850,18 @@ def get_certs(cmd_str, suppress_output = True, suppress_input = True):
                     if capture_output:
                         if CNAME_Challenge:
                             CNAME_Challenge += "\n"
-                        CNAME_Challenge += output
+                        CNAME_Challenge += str(output)
                         if "Waiting for verification..." in output:
                             capture_output = False
-                    print(output.strip().replace(cmd_line, ''), file=debug_file) # for debug purposes only
         except pexpect.TIMEOUT:
             pass
         if not suppress_input:
             if enter_yes:
-                print("Sending to terminal: Y", file=debug_file) # for debut only
+                # print("Sending to terminal: Y", file=debug_file) # for debut only
                 child.sendline("Y")
                 enter_yes = False
             if enter_input is True:
-                print("Sending ENTER to terminal", file=debug_file) # for debug purposes only
+                # print("Sending ENTER to terminal", file=debug_file) # for debug purposes only
                 child.sendline('')
                 enter_input = False
         if child.eof() or end_script:
@@ -880,6 +879,7 @@ def get_certs(cmd_str, suppress_output = True, suppress_input = True):
         pass
     output = child.before.decode('utf-8')
     # Parse the output to extract the $? value
+    print(CNAME_Challenge, file=debug_file) # for debug purposes only
     print('Exit code command result: ', output.strip().replace(cmd_line, ''), file=debug_file) # for debug purposes only
     if output.strip().replace(cmd_line, '').startswith("exit_code="):
         exit_code = int(output.strip().replace(cmd_line, '').split("=")[-1])
