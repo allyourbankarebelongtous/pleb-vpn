@@ -232,20 +232,20 @@
       CNAME_Challenge +
         '<br><br>First update the CNAME record(s) of your domain(s) as shown above. After the CNAME records are updated, press "Enter" below.'
     );
-    $("#enterBtn").click(function () {
-      if (
-        confirm_dialog(
-          (message =
-            "Are you sure you have entered your CNAME challenge(s) in your domain record(s) and are ready to continue?")
-        ) == true
-      ) {
-        socket.emit("enter_input");
-        var CNAME_Challenge = document.getElementById("CNAME_Challenge");
-        if (CNAME_Challenge !== null) {
-          CNAME_Challenge.classList.add("d-none");
-        }
+  });
+  $("#enterBtn").click(function () {
+    if (
+      confirm_dialog(
+        (message =
+          "Are you sure you have entered your CNAME challenge(s) in your domain record(s) and are ready to continue?")
+      ) == true
+    ) {
+      socket.emit("enter_input");
+      var CNAME_Challenge = document.getElementById("CNAME_Challenge");
+      if (CNAME_Challenge !== null) {
+        CNAME_Challenge.classList.add("d-none");
       }
-    });
+    }
   });
   socket.on("letsencrypt_set_on", function (data) {
     var activateBtn = document.getElementById("enable_letsencrypt");
@@ -306,15 +306,6 @@
       "&category=" +
       encodeURIComponent(category);
     window.location.href = url;
-  });
-  window.addEventListener("DOMContentLoaded", function () {
-    var modalDialog = document.querySelector("#CNAMEModal .modal-dialog");
-    function updateModalSize() {
-      modalDialog.style.width = window.innerWidth + "px";
-      modalDialog.style.height = window.innerHeight + "px";
-    }
-    window.addEventListener("resize", updateModalSize);
-    updateModalSize();
   });
 </script>
 {% endblock %}
