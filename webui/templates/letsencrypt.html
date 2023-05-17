@@ -94,7 +94,12 @@
     </div>
     <div class="row">
       <div class="col text-center">
-        <button id="enable_letsencrypt" type="button" class="btn btn-success">
+        <button
+          id="enable_letsencrypt"
+          type="button"
+          class="btn btn-success"
+          onClick="this.form.submit()"
+        >
           Get Certs
         </button>
         <button
@@ -177,25 +182,22 @@
   </div>
   <div class="row" style="margin-top: 0.5em">
     <div class="col text-center">
-      <form id="set_letsencrypt_off">
-        <button id="disable_letsencrypt" type="button" class="btn btn-danger">
-          Delete Certs
-        </button>
-        <button
-          id="disable_letsencrypt_loading"
-          class="btn btn-danger d-none"
-          type="button"
-          onClick="this.form.submit()"
-          disabled
-        >
-          <span
-            class="spinner-grow spinner-grow-sm"
-            role="status"
-            aria-hidden="true"
-          ></span>
-          Loading...
-        </button>
-      </form>
+      <button id="disable_letsencrypt" type="button" class="btn btn-danger">
+        Delete Certs
+      </button>
+      <button
+        id="disable_letsencrypt_loading"
+        class="btn btn-danger d-none"
+        type="button"
+        disabled
+      >
+        <span
+          class="spinner-grow spinner-grow-sm"
+          role="status"
+          aria-hidden="true"
+        ></span>
+        Loading...
+      </button>
     </div>
   </div>
 </div>
@@ -287,7 +289,7 @@
       socket.emit("set_letsencrypt_off");
     }
   }
-  $("#set_letsencrypt_off").submit(setLetsencrypt_off);
+  $("#disable_letsencrypt").click(setLetsencrypt_off);
   socket.on("letsencrypt_set_off", function (data) {
     var activateBtn = document.getElementById("disable_letsencrypt");
     if (activateBtn !== null) {
