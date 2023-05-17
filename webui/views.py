@@ -809,6 +809,10 @@ def get_certs(cmd_str, suppress_output = True, suppress_input = True):
     enter_yes = False
     end_script = False
     capture_output = False
+    capture_output_trigger = str("Output from acme-dns-auth.py")
+    capture_output_trigger_off = str("Waiting for verification...")
+    enter_yes_trigger = str("(Y)es/(N)o:")
+    CNAME_Challenge_trigger = str("Press Enter to Continue")
     CNAME_Challenge = str()
     child = pexpect.spawn('/bin/bash')
     try:
@@ -836,22 +840,22 @@ def get_certs(cmd_str, suppress_output = True, suppress_input = True):
             output1 = child.before.decode('utf-8')
             if cmd_line in output1:
                 end_script = True
-            if "Output from acme-dns-auth.py" in output1:
-                capture_output = True
-            if "Press Enter to Continue" in output1:
-                if CNAME_Challenge:
-                    socketio.emit('CNAMEoutput', CNAME_Challenge)
-                    CNAME_Challenge = ""
-            if "(Y)es/(N)o:" in output1:
-                enter_yes = True
-            if output1 != output: 
+            if output1 != output:
                 output = output1
-                if suppress_output == False:
+                if capture_output_trigger in output:
+                    capture_output = True
+                if CNAME_Challenge_trigger in output:
+                    if CNAME_Challenge:
+                        socketio.emit('CNAMEoutput', CNAME_Challenge)
+                        CNAME_Challenge = ""
+                if enter_yes_trigger in output:
+                    enter_yes = True
+                if suppress_output == False: 
                     if capture_output:
                         if CNAME_Challenge:
-                            CNAME_Challenge += "\n"
+                            CNAME_Challenge += str("\n")
                         CNAME_Challenge += str(output)
-                        if "Waiting for verification..." in output:
+                        if capture_output_trigger_off in output:
                             capture_output = False
         except pexpect.TIMEOUT:
             pass
@@ -894,9 +898,11 @@ def get_certs(cmd_str, suppress_output = True, suppress_input = True):
 
 @socketio.on('enter_input')
 def set_enter_input():
+    debug_file = open(os.path.abspath('./debug_enter.txt'), "w") # for debug purposes only
     global enter_input
     enter_input = True
-    print("set_enter_input: !ENTER!", enter_input) # debug purposes only
+    print("set_enter_input: !ENTER!", enter_input, file=debug_file) # debug purposes only
+    debug_file.close() # for debug purposes only
 
 def check_domain(domain):
     # Split the domain into its components
