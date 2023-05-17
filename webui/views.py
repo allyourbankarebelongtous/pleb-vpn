@@ -901,11 +901,9 @@ def check_domain(domain):
     for part in parts:
         if not part.isalnum():
             return False
-    # Join the parts in reverse order for the lookup
-    reversed_domain = '.'.join(parts[::-1])
     try:
         # Retrieve the IP address associated with the domain
-        ip_address = socket.gethostbyname(reversed_domain)
+        ip_address = socket.gethostbyname(domain)
         return ip_address
     except socket.gaierror:
         return False
