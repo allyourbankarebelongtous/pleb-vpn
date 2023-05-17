@@ -815,8 +815,8 @@ def get_certs(cmd_str, suppress_output = True, suppress_input = True):
     capture_output_trigger = str("Output from acme-dns-auth.py")
     capture_output_trigger_off = str("Waiting for verification...")
     enter_yes_trigger = str("(Y)es/(N)o:")
-    CNAME_Challenge_trigger = str("Press Enter to Continue")
-    CNAME_Challenge = str()
+    CNAME_data_trigger = str("Press Enter to Continue")
+    CNAME_data = str()
     child = pexpect.spawn('/bin/bash')
     try:
         child.expect(['\r\n', pexpect.EOF, pexpect.TIMEOUT], timeout=0.1)
@@ -850,21 +850,21 @@ def get_certs(cmd_str, suppress_output = True, suppress_input = True):
                     print("capture_output_trigger received: " + output, file=debug_inout) # for debug purposes only
                     capture_output = True
                     print("capture_output set to: " + str(capture_output), file=debug_inout) # for debug purposes only
-                if CNAME_Challenge_trigger in output:
-                    print("CNAME_Challenge_trigger received: " + output, file=debug_inout) # for debug purposes only
-                    if CNAME_Challenge:
-                        socketio.emit('CNAMEoutput', CNAME_Challenge)
-                        print("CNAME CHALLENGE SENT:\n" + CNAME_Challenge, file=debug_inout) # for debug purposes only
-                        CNAME_Challenge = ""
+                if CNAME_data_trigger in output:
+                    print("CNAME_data_trigger received: " + output, file=debug_inout) # for debug purposes only
+                    if CNAME_data:
+                        socketio.emit('CNAMEoutput', CNAME_data)
+                        print("CNAME CHALLENGE SENT:\n" + CNAME_data, file=debug_inout) # for debug purposes only
+                        CNAME_data = ""
                 if enter_yes_trigger in output:
                     if yes_count < 1:
                         enter_yes = True
                     print("enter_yes_trigger received: " + output + "\n enter_yes=" + str(enter_yes), file=debug_inout) # for debug purposes only
                 if suppress_output == False: 
                     if capture_output:
-                        if CNAME_Challenge:
-                            CNAME_Challenge += str("\n")
-                        CNAME_Challenge += str(output)
+                        if CNAME_data:
+                            CNAME_data += str("\n")
+                        CNAME_data += str(output)
                         print("capturing output: " + output)
                         if capture_output_trigger_off in output:
                             print("capture_output_off received: " + output, file=debug_inout) # for debug purposes only

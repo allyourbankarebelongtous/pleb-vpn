@@ -223,7 +223,7 @@
     }
   }
   $("#enable_letsencrypt").click(setLetsencrypt_on);
-  socket.on("CNAMEoutput", function (CNAME_Challenge) {
+  socket.on("CNAMEoutput", function (CNAME_data) {
     var CNAME_Challenge = document.getElementById("CNAME_Challenge");
     if (CNAME_Challenge !== null) {
       CNAME_Challenge.classList.remove("d-none");
