@@ -11,15 +11,15 @@
 {% if setting['plebvpn'] != "on" %}
 <div class="container">
   <div class="row">
-    <div class="col">
-      <h5 align="center">Pleb-VPN is not connected. Enable Plev-VPN first!</h5>
+    <div class="col text-center">
+      <h5>Pleb-VPN is not connected. Enable Plev-VPN first!</h5>
     </div>
   </div>
 </div>
 {% else %} {% if setting['letsencrypt_ssl'] != "on" %}
 <div class="container">
   <div class="row">
-    <div class="col">
+    <div class="col text-center">
       <p>
         Input your desired domain(s) and select the service(s) you wish to
         enable ssl/https for.
@@ -140,13 +140,13 @@
 {% else %}
 <div class="container">
   <div class="row">
-    <div class="col">
+    <div class="col text-center">
       <p>LetsEncrypt enabled for the following service(s).</p>
     </div>
   </div>
   <div class="row">
     <div class="col" style="border-top: 1px solid lightgrey">
-      <table>
+      <table class="table">
         <tbody>
           <tr>
             <th scope="row">BTCPayServer</th>
@@ -179,7 +179,7 @@
     <div class="col text-center">
       <form id="set_letsencrypt_off">
         <button id="disable_letsencrypt" type="button" class="btn btn-danger">
-          Get Certs
+          Delete Certs
         </button>
         <button
           id="disable_letsencrypt_loading"
