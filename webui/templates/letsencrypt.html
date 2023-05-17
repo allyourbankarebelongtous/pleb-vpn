@@ -230,7 +230,7 @@
     }
   }
   $("#set_letsencrypt_on").submit(setLetsencrypt_on);
-  socketio.on("CNAMEoutput", function (CNAME_Challenge) {
+  socket.on("CNAMEoutput", function (CNAME_Challenge) {
     $("#CNAMEText").append(
       CNAME_Challenge +
         '<br><br>First update the CNAME record(s) of your domain(s) as shown above. After the CNAME records are updated, press "Enter" below.'
