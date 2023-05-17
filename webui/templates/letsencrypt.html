@@ -98,12 +98,7 @@
     </div>
     <div class="row">
       <div class="col text-center">
-        <button
-          id="enable_letsencrypt"
-          type="button"
-          class="btn btn-success"
-          onClick="this.form.submit()"
-        >
+        <button id="enable_letsencrypt" type="button" class="btn btn-success">
           Get Certs
         </button>
         <button
@@ -235,7 +230,7 @@
       socket.emit("set_letsencrypt_on", formData);
     }
   }
-  $("#set_letsencrypt_on").submit(setLetsencrypt_on);
+  $("#enable_letsencrypt").click(setLetsencrypt_on);
   socket.on("CNAMEoutput", function (CNAME_Challenge) {
     $("#CNAMEText").append(
       CNAME_Challenge +
