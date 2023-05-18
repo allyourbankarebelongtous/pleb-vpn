@@ -22,6 +22,7 @@ torsplittunnel_status = {}
 torsplittunnel_test_status = {}
 user_input = None
 enter_input = False
+user_canceled = False
 update_available = False
 
 @views.route('/', methods=['GET', 'POST'])
@@ -781,6 +782,9 @@ def set_letsencrypt_on(formData):
     if exit_code == 0:
         message = 'LetsEncrypt certificates installed!'
         category = 'success'
+    elif exit_code == int(21):
+        message = 'User canceled, script exited.'
+        category = 'info'
     elif exit_code == int(42069):
         message = 'Script exited with unknown status.'
         category = 'info'
@@ -879,9 +883,14 @@ def get_certs(cmd_str, suppress_output = True, suppress_input = True):
                 print('sent enter from enter_input to child', file=debug_inout)
                 enter_input = False
                 print("enter_input set to: " + str(enter_input), file=debug_inout) # for debug purposes only
-        if child.eof() or end_script:
+        if child.eof() or end_script or user_canceled:
             break
     time.sleep(0.1)
+    if user_canceled:
+        child.close()
+
+        return 21
+    
     child.sendline('echo "exit_code=$?"')
     # Wait for the command to complete and capture the output
     try:
@@ -902,7 +911,6 @@ def get_certs(cmd_str, suppress_output = True, suppress_input = True):
     print('Exit code = ', exit_code, file=debug_file) # for debug purposes only
     child.close()
     debug_file.close() # for debug purposes only
-
     
     return exit_code
 
@@ -911,7 +919,15 @@ def set_enter_input():
     debug_file = open(os.path.abspath('./debug_enter.txt'), "w") # for debug purposes only
     global enter_input
     enter_input = True
-    print("set_enter_input: !ENTER!", enter_input, file=debug_file) # debug purposes only
+    print("set_enter_input: !ENTER!", str(enter_input), file=debug_file) # debug purposes only
+    debug_file.close() # for debug purposes only
+
+@socketio.on('user_cancel')
+def user_cancel():
+    debug_file = open(os.path.abspath('./debug_close.txt'), "w") # for debug purposes only
+    global user_canceled
+    user_canceled = True
+    print("user_canceled: True", str(user_canceled), file=debug_file) # debug purposes only
     debug_file.close() # for debug purposes only
 
 def check_domain(domain):

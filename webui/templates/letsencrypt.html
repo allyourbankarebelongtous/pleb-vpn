@@ -258,6 +258,8 @@
       if (activateLoading !== null) {
         activateLoading.classList.remove("d-none");
       }
+    } else {
+      socket.emet("user_cancel");
     }
   });
   socket.on("letsencrypt_set_on", function (data) {
