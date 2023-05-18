@@ -865,12 +865,13 @@ def get_certs(cmd_str, suppress_output = True, suppress_input = True):
         if not suppress_input:
             if enter_yes:
                 # print("Sending to terminal: Y", file=debug_file) # for debut only
-                child.sendline("Y")
-                yes_count += 1
-                print('sent Y to child', file=debug_inout)
-                enter_yes = False
-                print("enter_yes set to: " + str(enter_yes), file=debug_inout) # for debug purposes only
-            if enter_input is True:
+                if yes_count < 1:
+                    child.sendline("Y")
+                    yes_count += 1
+                    print('sent Y to child', file=debug_inout)
+                    enter_yes = False
+                    print("enter_yes set to: " + str(enter_yes), file=debug_inout) # for debug purposes only
+            if enter_input:
                 # print("Sending ENTER to terminal", file=debug_file) # for debug purposes only
                 if enter_count < 1:
                     child.sendline('')

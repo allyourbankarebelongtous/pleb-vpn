@@ -229,16 +229,17 @@
         letsencryptlnbits: $("#letsencryptlnbits").is(":checked"),
       };
       socket.emit("set_letsencrypt_on", formData);
+      var CNAME_Challenge = document.getElementById("CNAME_Challenge");
+      if (CNAME_Challenge !== null) {
+        CNAME_Challenge.classList.remove("d-none");
+      }
     }
   }
   $("#enable_letsencrypt").click(setLetsencrypt_on);
   socket.on("CNAMEoutput", function (CNAME_data) {
-    var CNAME_Challenge = document.getElementById("CNAME_Challenge");
-    if (CNAME_Challenge !== null) {
-      CNAME_Challenge.classList.remove("d-none");
-    }
+    $("#CNAMEText").append(CNAME_data + "<br>");
   });
-  $("#CNAMEText").append(CNAME_data + "<br>");
+
   $("#enterBtn").click(function () {
     if (
       confirm_dialog(
