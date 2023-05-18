@@ -338,7 +338,7 @@ WantedBy=multi-user.target
 
       # Enable and run once
       sudo systemctl enable pleb-vpn-letsencrypt-config.service
-      sudo systemctl start pleb-vpn-letsencrypt-config.service
+      sudo /mnt/hdd/mynode/pleb-vpn/letsencrypt/set_nginx_localip.sh
     fi
 
     # reload nginx
