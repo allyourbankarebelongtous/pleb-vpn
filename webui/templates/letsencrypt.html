@@ -242,10 +242,9 @@
 
   $("#enterBtn").click(function () {
     if (
-      confirm_dialog(
-        (message =
-          "Are you sure you have entered your CNAME challenge(s) in your domain record(s) and are ready to continue?")
-      ) == true
+      confirm(
+        "Are you sure you have entered your CNAME challenge(s) in your domain record(s) and are ready to continue?"
+      )
     ) {
       socket.emit("enter_input");
       var activateBtn = document.getElementById("enable_letsencrypt");
@@ -259,7 +258,8 @@
         activateLoading.classList.remove("d-none");
       }
     } else {
-      socket.emet("user_cancel");
+      socket.emit("user_cancel");
+      // Add your commands to execute when the user clicks "Cancel" here
     }
   });
   socket.on("letsencrypt_set_on", function (data) {

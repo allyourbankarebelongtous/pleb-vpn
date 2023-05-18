@@ -811,6 +811,7 @@ def get_certs(cmd_str, suppress_output = True, suppress_input = True):
     debug_file = open(os.path.abspath('./debug_output.txt'), "w") # for debug purposes only
     debug_inout = open(os.path.abspath('./debug_inout.txt'), "w") # for debug purposes only
     global enter_input
+    global user_canceled
     enter_yes = False
     yes_count = 0
     enter_count = 0
@@ -887,7 +888,9 @@ def get_certs(cmd_str, suppress_output = True, suppress_input = True):
             break
     time.sleep(0.1)
     if user_canceled:
+        child.sendline('')
         child.close()
+        user_canceled = False
 
         return 21
     
