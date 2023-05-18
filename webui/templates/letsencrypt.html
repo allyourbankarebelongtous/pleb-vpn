@@ -129,12 +129,12 @@
     <div class="row d-none" id="CNAME_Challenge" style="margin-top: 0.5em">
       <div class="col">
         <div class="row">
-          <div class="col text-center">
+          <div class="col">
             <div id="CNAMEText"></div>
           </div>
         </div>
         <div class="row">
-          <div class="col text-center">
+          <div class="col">
             <button id="enterBtn" class="btn btn-primary">Enter</button>
           </div>
         </div>
@@ -229,14 +229,14 @@
         letsencryptlnbits: $("#letsencryptlnbits").is(":checked"),
       };
       socket.emit("set_letsencrypt_on", formData);
-      var CNAME_Challenge = document.getElementById("CNAME_Challenge");
-      if (CNAME_Challenge !== null) {
-        CNAME_Challenge.classList.remove("d-none");
-      }
     }
   }
   $("#enable_letsencrypt").click(setLetsencrypt_on);
   socket.on("CNAMEoutput", function (CNAME_data) {
+    var CNAME_Challenge = document.getElementById("CNAME_Challenge");
+    if (CNAME_Challenge !== null) {
+      CNAME_Challenge.classList.remove("d-none");
+    }
     $("#CNAMEText").append(CNAME_data + "<br>");
   });
 
@@ -248,9 +248,15 @@
       ) == true
     ) {
       socket.emit("enter_input");
-      var CNAME_Challenge = document.getElementById("CNAME_Challenge");
-      if (CNAME_Challenge !== null) {
-        CNAME_Challenge.classList.add("d-none");
+      var activateBtn = document.getElementById("enable_letsencrypt");
+      if (activateBtn !== null) {
+        activateBtn.classList.add("d-none");
+      }
+      var activateLoading = document.getElementById(
+        "enable_letsencrypt_loading"
+      );
+      if (activateLoading !== null) {
+        activateLoading.classList.remove("d-none");
       }
     }
   });
