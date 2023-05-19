@@ -22,7 +22,6 @@ torsplittunnel_status = {}
 torsplittunnel_test_status = {}
 user_input = None
 enter_input = False
-user_canceled = False
 update_available = False
 
 @views.route('/', methods=['GET', 'POST'])
@@ -811,7 +810,6 @@ def get_certs(cmd_str, suppress_output = True, suppress_input = True):
     debug_file = open(os.path.abspath('./debug_output.txt'), "w") # for debug purposes only
     debug_inout = open(os.path.abspath('./debug_inout.txt'), "w") # for debug purposes only
     global enter_input
-    global user_canceled
     enter_yes = False
     yes_count = 0
     enter_count = 0
@@ -884,16 +882,9 @@ def get_certs(cmd_str, suppress_output = True, suppress_input = True):
                 print('sent enter from enter_input to child', file=debug_inout)
                 enter_input = False
                 print("enter_input set to: " + str(enter_input), file=debug_inout) # for debug purposes only
-        if child.eof() or end_script or user_canceled:
+        if child.eof() or end_script:
             break
     time.sleep(0.1)
-    if user_canceled:
-        child.sendline('')
-        child.close()
-        user_canceled = False
-
-        return 21
-    
     child.sendline('echo "exit_code=$?"')
     # Wait for the command to complete and capture the output
     try:
@@ -923,14 +914,6 @@ def set_enter_input():
     global enter_input
     enter_input = True
     print("set_enter_input: !ENTER!", str(enter_input), file=debug_file) # debug purposes only
-    debug_file.close() # for debug purposes only
-
-@socketio.on('user_cancel')
-def user_cancel():
-    debug_file = open(os.path.abspath('./debug_close.txt'), "w") # for debug purposes only
-    global user_canceled
-    user_canceled = True
-    print("user_canceled: True", str(user_canceled), file=debug_file) # debug purposes only
     debug_file.close() # for debug purposes only
 
 def check_domain(domain):

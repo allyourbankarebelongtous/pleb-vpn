@@ -241,25 +241,14 @@
   });
 
   $("#enterBtn").click(function () {
-    if (
-      confirm(
-        "Are you sure you have entered your CNAME challenge(s) in your domain record(s) and are ready to continue?"
-      )
-    ) {
-      socket.emit("enter_input");
-      var activateBtn = document.getElementById("enable_letsencrypt");
-      if (activateBtn !== null) {
-        activateBtn.classList.add("d-none");
-      }
-      var activateLoading = document.getElementById(
-        "enable_letsencrypt_loading"
-      );
-      if (activateLoading !== null) {
-        activateLoading.classList.remove("d-none");
-      }
-    } else {
-      socket.emit("user_cancel");
-      // Add your commands to execute when the user clicks "Cancel" here
+    socket.emit("enter_input");
+    var activateBtn = document.getElementById("enable_letsencrypt");
+    if (activateBtn !== null) {
+      activateBtn.classList.add("d-none");
+    }
+    var activateLoading = document.getElementById("enable_letsencrypt_loading");
+    if (activateLoading !== null) {
+      activateLoading.classList.remove("d-none");
     }
   });
   socket.on("letsencrypt_set_on", function (data) {
