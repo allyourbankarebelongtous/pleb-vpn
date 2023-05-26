@@ -3,10 +3,10 @@ from flask_login import login_required, current_user
 from werkzeug.utils import secure_filename
 from socket_io import socketio
 from plebvpn_common import config
-# from PIL import Image
+from datetime import datetime
 from .models import User
 from . import db
-import json, os, subprocess, time, pexpect, random, qrcode, io, base64, shutil, re, socket, requests, datetime
+import json, os, subprocess, time, pexpect, random, qrcode, io, base64, shutil, re, socket, requests
 
 views = Blueprint('views', __name__)
 
