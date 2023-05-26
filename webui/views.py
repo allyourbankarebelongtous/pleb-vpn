@@ -856,8 +856,9 @@ def get_plebVPN_status():
                 name, value = line.split("=")
                 plebVPN_status[name] = str(value).rstrip().strip('\'\'')
     os.remove(os.path.join(EXEC_DIR, 'pleb-vpn_status.tmp'))
+    setting=get_conf()
     repo_date = check_repository_updated('mynode') # mynode branch included for testing purposes
-    if plebVPN_status['versiondate'] != repo_date:
+    if setting['versiondate'] != repo_date:
         update_available = True
 
 
