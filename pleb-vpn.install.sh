@@ -370,7 +370,7 @@ update() {
   else
     sudo systemctl stop pleb-vpn.service
     sudo rm -rf ${execdir}
-    if [ "${nodetype}" = "mynode" ]; then
+    if [ "${nodetype}" = "raspiblitz" ]; then
       sudo cp -p -r /home/admin/pleb-vpn-tmp/pleb-vpn /home/admin/
       sudo cp -p -r ${execdir} /mnt/hdd/app-data/
     elif [ "${nodetype}" = "mynode" ]; then
