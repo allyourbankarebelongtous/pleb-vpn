@@ -102,11 +102,12 @@
       </div>
     </div>
   </div>
+  {% if lnd %}
   <div class="row">
     <div class="col">
       <div class="row">
-        <div class="col">
-          <h2 align="center">LND Hybrid Status</h2>
+        <div class="col text-center">
+          <h2>LND Hybrid Status</h2>
         </div>
       </div>
       <div class="row">
@@ -159,6 +160,65 @@
       </div>
     </div>
   </div>
+  {% endif %} {% if cln %}
+  <div class="row">
+    <div class="col">
+      <div class="row">
+        <div class="col text-center">
+          <h2>Core Lightning Hybrid Status</h2>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col" style="border-top: 1px solid lightgrey">
+          <table class="table">
+            <thead>
+              <tr>
+                <th scope="col">Setting</th>
+                <th scope="col">Value</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <th scope="row">Core Lightning Alias</th>
+                <td>{{ cln_hybrid_status['Alias'] }}</td>
+              </tr>
+              <tr>
+                <th scope="row">Core Lightning Node ID</th>
+                <td>{{ cln_hybrid_status['Node_ID'] }}</td>
+              </tr>
+              <tr>
+                <th scope="row">Core Lightning Hybrid Status</th>
+                <td>{{ setting['clnhybrid'] }}</td>
+              </tr>
+              <tr>
+                <th scope="row">Core Lightning Hybrid Port</th>
+                <td>{{ setting['clnport'] }}</td>
+              </tr>
+              <tr>
+                {% if cln_hybrid_status['address0Type'] == 'torv3' %}
+                <th scope="row">Core Lightning Tor Address</th>
+                {% else %}
+                <th scope="row">Core Lightning IPV4 Address</th>
+                {% endif %}
+                <td>{{ cln_hybrid_status['address0'] }}</td>
+              </tr>
+              {% if setting['clnhybrid'] == "on" %}
+              <tr>
+                {% if lnd_hybrid_status['address1Type'] == 'torv3' %}
+                <th scope="row">Core Lightning Tor Address</th>
+                {% else %}
+                <th scope="row">Core Lightning IPV4 Address</th>
+                {% endif %}
+                <td>{{ cln_hybrid_status['address1'] }}</td>
+              </tr>
+              {% endif %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
   <div class="row">
     <div class="col">
       <div class="row">
@@ -225,77 +285,49 @@
       {% endif %}
     </div>
   </div>
-
   <div class="row">
-    <div class="col">
-      <div class="row">
-        <h2 align="center">Update Pleb-VPN</h2>
-      </div>
-      <div class="row">
-        <div class="col" style="border-top: 1px solid lightgrey">
-          <table class="table">
-            <tbody>
-              <tr>
-                <th scope="row">Current Version</th>
-                <td>{{ setting['version'] }}</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-      {% if update_available == False %}
-      <div class="row">
-        <div class="col text-center">
-          <button id="update-scripts" type="button" class="btn btn-success">
-            Update Pleb-VPN
-          </button>
-        </div>
-      </div>
-      <div class="row">
-        <div id="output"></div>
-      </div>
-      <div class="row">
-        <div class="col text-center">
-          <button id="enter-button" type="button" class="btn btn-primary">
-            Enter
-          </button>
-        </div>
-      </div>
-      {% else %}
-      <div class="row">
-        <div class="col text-center">
-          <button id="reboot-button" type="button" class="btn btn-primary">
-            Reboot (needs systemd server to work)
-          </button>
-        </div>
-      </div>
-      {% endif %}
+    <div class="col" style="border-top: 1px solid lightgrey">
+      <table class="table">
+        <tbody>
+          <tr>
+            <th scope="row">Current Version</th>
+            <td>{{ setting['version'] }}</td>
+          </tr>
+        </tbody>
+      </table>
     </div>
   </div>
+  {% if update_available == True %}
+  <div class="row">
+    <div class="col text-center">
+      <h2>Update Pleb-VPN</h2>
+      <p>
+        A Pleb-VPN update is available. To update, click "Update Pleb-VPN".
+        Pleb-VPN will update and restart. Your settings will be unaffected.
+      </p>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col text-center">
+      <button id="update-scripts" type="button" class="btn btn-success">
+        Update Pleb-VPN
+      </button>
+    </div>
+  </div>
+  {% endif %}
 </div>
 <script>
   var socket = io.connect("http://" + document.domain + ":" + location.port);
-  socket.on("output", function (data) {
-    $("#output").append(data + "<br>");
-  });
   $("#update-scripts").click(function () {
-    socket.emit("update_scripts");
-  });
-  $("#enter-button").click(function () {
-    socket.emit("enter_input");
-  });
-  $("#reboot-button").click(function () {
-    socket.emit("start_reboot");
-  });
-  socket.on("update_complete", function (data) {
-    var message = data.message;
-    var category = data.category;
-    var url =
-      "/?message=" +
-      encodeURIComponent(message) +
-      "&category=" +
-      encodeURIComponent(category);
-    window.location.href = url;
+    event.preventDefault();
+    if (
+      confirm_dialog(
+        (message =
+          "Pleb-VPN will restart. Your settings will be unchanged. Are you sure you want to update Pleb-VPN?")
+      ) == true
+    ) {
+      socket.emit("update_scripts");
+    }
   });
 </script>
 {% endblock %}

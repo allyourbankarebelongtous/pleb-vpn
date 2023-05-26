@@ -2,35 +2,59 @@ from flask import Blueprint, render_template, request, flash, jsonify, redirect,
 from flask_login import login_required, current_user
 from werkzeug.utils import secure_filename
 from socket_io import socketio
-from datetime import datetime, timedelta
 from plebvpn_common import config
 # from PIL import Image
 from .models import User
 from . import db
-import json, os, subprocess, time, pexpect, random, qrcode, io, base64, shutil, re, datetime, socket
+import json, os, subprocess, time, pexpect, random, qrcode, io, base64, shutil, re, socket, requests, datetime
 
 views = Blueprint('views', __name__)
 
+# define variables
 ALLOWED_EXTENSIONS = {'conf'}
-PLEBVPN_CONF_UPLOAD_FOLDER = '/mnt/hdd/mynode/pleb-vpn/openvpn'
-conf_file_location = '/mnt/hdd/mynode/pleb-vpn/pleb-vpn.conf'
+if os.path.exists('/mnt/hdd/mynode/'):
+    HOME_DIR = str('/mnt/hdd/mynode/pleb-vpn')
+    EXEC_DIR = str('/mnt/hdd/mynode/pleb-vpn')
+if os.path.exists('/mnt/hdd/app-data/'):
+    HOME_DIR = str('/mnt/hdd/app-data/pleb-vpn')
+    EXEC_DIR = str('/home/admin/pleb-vpn')
+PLEBVPN_CONF_UPLOAD_FOLDER = os.path.join(HOME_DIR, '/openvpn')
+conf_file_location = os.path.join(HOME_DIR, '/pleb-vpn.conf')
 conf_file = config.PlebConfig(conf_file_location)
 plebVPN_status = {}
 lnd_hybrid_status = {}
+cln_hybrid_status = {}
 wireguard_status = {}
 torsplittunnel_status = {}
 torsplittunnel_test_status = {}
-user_input = None
-enter_input = False
 update_available = False
+enter_input = False
 
+########################
+### Home Page routes ###
+########################
+
+# home page
 @views.route('/', methods=['GET', 'POST'])
 @login_required
 def home():
+    # determine whether LND, CLN, or both node implementations are available
+    lnd = False
+    cln = False
+    lndpath = os.path.join('/etc/systemd/system', 'lnd.service')
+    clnpath = os.path.join('/etc/systemd/system', 'lightningd.service')
+    if os.path.exists(lndpath):
+        lnd = True
+    if os.path.exists(clnpath):
+        cln = True
     if plebVPN_status == {}:
         get_plebVPN_status()
-    if lnd_hybrid_status == {}:
-        get_lnd_hybrid_status()
+    if lnd:
+        if lnd_hybrid_status == {}:
+            get_lnd_hybrid_status()
+    if cln:
+        if cln_hybrid_status == {}:
+            get_cln_hybrid_status()
     if wireguard_status == {}:
         get_wireguard_status()
     message = request.args.get('message') # for when activiating a script with SocketIO, to flash messages after redirecting to home page
@@ -43,19 +67,40 @@ def home():
                            setting=get_conf(), 
                            plebVPN_status=plebVPN_status, 
                            lnd_hybrid_status=lnd_hybrid_status,
+                           cln_hybrid_status=cln_hybrid_status,
                            wireguard_status=wireguard_status,
+                           lnd=lnd,
+                           cln=cln,
                            update_available=update_available)
 
+# home page data refresh
 @views.route('/refresh_plebVPN_data', methods=['POST'])
 @login_required
 def refresh_plebVPN_data():
     # refresh pleb-vpn status of connection to vps
     get_plebVPN_status()
     get_lnd_hybrid_status()
+    get_cln_hybrid_status()
     get_wireguard_status()
 
     return jsonify({})
 
+# to update plebvpn
+@socketio.on('update_scripts')
+def update_scripts():
+    # reset update_available
+    global update_available
+    update_available = False
+    # update pleb-vpn
+    cmd_str = [os.path.join(EXEC_DIR, "/pleb-vpn.install.sh") + " update 1"]
+    result = subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True)
+    print(result.stdout, result.stderr)
+
+##############################
+### pleb-vpn config routes ###
+##############################
+
+# pleb-vpn main page
 @views.route('/pleb-VPN', methods=['GET', 'POST'])
 @login_required
 def pleb_VPN():
@@ -81,6 +126,7 @@ def pleb_VPN():
 
     return render_template("pleb-vpn.html", user=current_user, setting=get_conf(), plebVPN_status=plebVPN_status)
 
+# turn pleb-vpn on or off
 @views.route('/set_plebVPN', methods=['POST'])
 def set_plebVPN():
     # turns pleb-vpn connection to vps on or off
@@ -91,7 +137,7 @@ def set_plebVPN():
     if user:
         if user.id == current_user.id:
             if setting['plebvpn'] == 'on':
-                cmd_str = ["sudo /mnt/hdd/mynode/pleb-vpn/vpn-install.sh off"]
+                cmd_str = ["sudo " + os.path.join(EXEC_DIR, "/vpn-install.sh") + " off 1"]
                 result = subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True)
                 # for debug purposes
                 print(result.stdout, result.stderr)
@@ -101,7 +147,7 @@ def set_plebVPN():
                 else:
                     flash('An unknown error occured!', category='error')
             else:
-                cmd_str = ["sudo /mnt/hdd/mynode/pleb-vpn/vpn-install.sh on"]
+                cmd_str = ["sudo " + os.path.join(EXEC_DIR, "/vpn-install.sh") + " on 1 1"]
                 result = subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True)
                 # for debug purposes
                 print(result.stdout, result.stderr)
@@ -113,6 +159,7 @@ def set_plebVPN():
 
     return jsonify({})
 
+# delete pleb-vpn conf file
 @views.route('/delete_plebvpn_conf', methods=['POST'])
 def delete_plebvpn_conf():
     # delete plebvpn.conf from pleb-vpn/openvpn
@@ -121,17 +168,36 @@ def delete_plebvpn_conf():
     user = User.query.get(userId)
     if user:
         if user.id == current_user.id:
-            if os.path.exists(os.path.abspath('./openvpn/plebvpn.conf')):
-                os.remove(os.path.abspath('./openvpn/plebvpn.conf'))
+            if os.path.exists(PLEBVPN_CONF_UPLOAD_FOLDER + '/plebvpn.conf'):
+                os.remove(PLEBVPN_CONF_UPLOAD_FOLDER + '/plebvpn.conf')
                 get_plebVPN_status()
                 flash('plebvpn.conf file deleted', category='success')
     
     return jsonify({})
 
-@views.route('/lnd-hybrid', methods=['GET', 'POST'])
+# checks if plebvpn.conf is a valid .conf file
+def allowed_file(filename):
+    return '.' in filename and \
+        filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+#########################
+### Hybrid routes ###
+#########################
+
+# hybrid home page
+@views.route('/hybrid', methods=['GET', 'POST'])
 @login_required
-def lnd_hybrid():
-    # get new LND port
+def hybrid():
+    # determine whether LND, CLN, or both node implementations are available for hybrid mode
+    lnd = False
+    cln = False
+    lndpath = os.path.join('/etc/systemd/system', 'lnd.service')
+    clnpath = os.path.join('/etc/systemd/system', 'lightningd.service')
+    if os.path.exists(lndpath):
+        lnd = True
+    if os.path.exists(clnpath):
+        cln = True
+    # get new LND or CLN port
     if request.method == 'POST':
         if "lnPort" in request.form:
             lnPort = request.form.get('lnPort')
@@ -143,12 +209,23 @@ def lnd_hybrid():
                 conf_file.set_option('lnport', lnPort)
                 conf_file.write()
                 flash('Received new LND Port: ' + lnPort, category='success') 
+        if "clnPort" in request.form:
+            clnPort = request.form.get('clnPort')
+            if not clnPort.isdigit():
+                flash('Error! CLN Hybrid Port must be four numbers (example: 9739)', category='error')
+            elif len(clnPort) != 4:
+                flash('Error! CLN Hybrid Port must be four numbers (example: 9739)', category='error')
+            else:
+                conf_file.set_option('clnport', clnPort)
+                conf_file.write()
+                flash('Received new LND Port: ' + clnPort, category='success') 
 
-    return render_template('lnd-hybrid.html', user=current_user, setting=get_conf())
+    return render_template('hybrid.html', user=current_user, setting=get_conf, lnd=lnd, cln=cln())
 
+# turn lnd hybrid mode on or off
 @views.route('/set_lndHybrid', methods=['POST'])
 def set_lndHybrid():
-    # turns pleb-vpn connection to vps on or off
+    # turns lnd hybrid mode on or off
     setting = get_conf()
     user = json.loads(request.data)
     userId = user['userId']
@@ -156,7 +233,7 @@ def set_lndHybrid():
     if user:
         if user.id == current_user.id:
             if setting['lndhybrid'] == 'on':
-                cmd_str = ["sudo /mnt/hdd/mynode/pleb-vpn/lnd-hybrid.sh off"]
+                cmd_str = ["sudo " + os.path.join(EXEC_DIR, "/lnd-hybrid.sh") + " off"]
                 result = subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True)
                 # for debug purposes
                 print(result.stdout, result.stderr)
@@ -166,7 +243,7 @@ def set_lndHybrid():
                 else:
                     flash('An unknown error occured!', category='error')
             else:
-                cmd_str = ["sudo /mnt/hdd/mynode/pleb-vpn/lnd-hybrid.sh on 1"]
+                cmd_str = ["sudo " + os.path.join(EXEC_DIR, "/lnd-hybrid.sh") + " on 1 1"]
                 result = subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True)
                 # for debug purposes
                 print(result.stdout, result.stderr)
@@ -178,14 +255,62 @@ def set_lndHybrid():
 
     return jsonify({})
 
+# turn cln hybrid mode on or off
+@views.route('/set_clnHybrid', methods=['POST'])
+def set_clnHybrid():
+    # turns cln hybrid mode on or off
+    setting = get_conf()
+    user = json.loads(request.data)
+    userId = user['userId']
+    user = User.query.get(userId)
+    if user:
+        if user.id == current_user.id:
+            if setting['clnhybrid'] == 'on':
+                cmd_str = ["sudo " + os.path.join(EXEC_DIR, "/cln-hybrid.sh") + " off"]
+                result = subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True)
+                # for debug purposes
+                print(result.stdout, result.stderr)
+                get_plebVPN_status()
+                if result.returncode == 0:
+                    flash('Core Lightning Hybrid mode disabled.', category='success')
+                else:
+                    flash('An unknown error occured!', category='error')
+            else:
+                cmd_str = ["sudo " + os.path.join(EXEC_DIR, "/cln-hybrid.sh") + " on 1 1"]
+                result = subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True)
+                # for debug purposes
+                print(result.stdout, result.stderr)
+                get_plebVPN_status()
+                if result.returncode == 0:
+                    flash('Core Lightning Hybrid mode enabled!', category='success')
+                else:
+                    flash('An unknown error occured!', category='error')
+
+    return jsonify({})
+
+#######################
+### payments routes ###
+#######################
+
+# payments home page
 @views.route('/payments', methods=['GET', 'POST'])
 @login_required
 def payments():
+    # determine whether LND, CLN, or both node implementations are available for sending payments
+    lnd = False
+    cln = False
+    lndpath = os.path.join('/etc/systemd/system', 'lnd.service')
+    clnpath = os.path.join('/etc/systemd/system', 'lightningd.service')
+    if os.path.exists(lndpath):
+        lnd = True
+    if os.path.exists(clnpath):
+        cln = True
     if request.method == 'POST':
         frequency = request.form['frequency']
         pubkey = request.form['pubkey']
         amount = request.form['amount']
         denomination = request.form['denomination']
+        node = request.form['node']
         if 'old_payment_id' in request.form:
             old_payment_id = request.form['old_payment_id']
         else:
@@ -194,16 +319,16 @@ def payments():
             message = request.form['message']
         else:
             message = None
-        is_valid = valid_payment(frequency, pubkey, amount, denomination)
+        is_valid = valid_payment(frequency, node, pubkey, amount, denomination)
         if is_valid == "0":
             if old_payment_id is not None:
-                cmd_str = ["sudo bash /mnt/hdd/mynode/pleb-vpn/payments/managepayments.sh deletepayment " + old_payment_id]
+                cmd_str = ["sudo bash " + os.path.join(EXEC_DIR, "/payments/managepayments.sh") + " deletepayment " + old_payment_id + " 1"]
                 result = subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True)
             if message is not None:
-                payment_string = frequency + " " + pubkey + " " + amount + " " + denomination + " \"" + message + "\""
+                payment_string = frequency + " " + node + " " + pubkey + " " + amount + " " + denomination + " \"" + message + "\""
             else:
-                payment_string = frequency + " " + pubkey + " " + amount + " " + denomination
-            cmd_str = ["sudo bash /mnt/hdd/mynode/pleb-vpn/payments/managepayments.sh newpayment " + payment_string]
+                payment_string = frequency + " " + node + " " + pubkey + " " + amount + " " + denomination
+            cmd_str = ["sudo bash " + os.path.join(EXEC_DIR, "/payments/managepayments.sh") + " newpayment " + payment_string]
             print(cmd_str) # for debug purposes only
             result = subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True)
             # for debug purposes
@@ -211,17 +336,18 @@ def payments():
             if result.returncode == 0:
                 flash('Payment saved and scheduled!', category='success')
             else:
-                    flash('An unknown error occured!', category='error')
+                flash('An unknown error occured!', category='error')
         else:
             flash(is_valid, category='error')
 
-    return render_template('payments.html', user=current_user, current_payments=get_payments())
+    return render_template('payments.html', user=current_user, current_payments=get_payments(), lnd=lnd, cln=cln)
 
+# delete payment
 @views.route('/delete_payment', methods=['POST'])
 def delete_payment():
     payment_id = json.loads(request.data)
     payment_id = payment_id['payment_id']
-    cmd_str = ["sudo bash /mnt/hdd/mynode/pleb-vpn/payments/managepayments.sh deletepayment " + payment_id]
+    cmd_str = ["sudo bash " + os.path.join(EXEC_DIR, "/payments/managepayments.sh") + " deletepayment " + payment_id + " 1"]
     result = subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True)
     # for debug purposes
     print(result.stdout, result.stderr)
@@ -232,9 +358,10 @@ def delete_payment():
 
     return jsonify({})
 
+# delete all payments
 @views.route('/delete_all_payments', methods=['POST'])
 def delete_all_payments():
-    cmd_str = ["sudo bash /mnt/hdd/mynode/pleb-vpn/payments/managepayments.sh deleteall 1"]
+    cmd_str = ["sudo bash " + os.path.join(EXEC_DIR, "/payments/managepayments.sh") + " deleteall 1"]
     result = subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True)
     # for debug purposes
     print(result.stdout, result.stderr)
@@ -245,11 +372,12 @@ def delete_all_payments():
     
     return jsonify({})
 
+# send payment now
 @views.route('/send_payment', methods=['POST'])
 def send_payment():
     payment_id = json.loads(request.data)
     payment_id = payment_id['payment_id']
-    cmd_str = ["sudo -u bitcoin /mnt/hdd/mynode/pleb-vpn/payments/keysends/_" + payment_id + "_keysend.sh"]
+    cmd_str = ["sudo -u bitcoin " + os.path.join(EXEC_DIR, "/payments/keysends/_") + payment_id + "_keysend.sh"]
     result = subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True)
     # for debug purposes
     print(result.stdout, result.stderr)
@@ -269,6 +397,38 @@ def send_payment():
 
     return jsonify({})
 
+# checks to see if new payment is valid
+def valid_payment(frequency, node, pubkey, amount, denomination):
+    is_valid = str(0)
+    if frequency != "daily":
+        if frequency != "weekly":
+            if frequency != "monthly":
+                if frequency != "yearly":
+                    is_valid = "Error: the frequency must be either 'daily', 'weekly', 'monthly', or 'yearly'"
+    if node != "lnd" and node != "cln":
+        is_valid = "Error: node type must be either 'lnd' or 'cln'"
+    pattern = r'^[a-zA-Z0-9]{66}$'
+    match = re.match(pattern, pubkey)
+    if not match:
+        is_valid = "Error: you did not submit a valid pubkey"
+    if denomination == "USD":
+        pattern = r'^\d+\.\d{2}$'
+        match = re.match(pattern, amount)
+        if not match:
+            is_valid = "Error: you did not input a valid amount. Amount must be in the form of x.xx for USD and must only contain digits and a decimal"
+    elif denomination == "sats":
+        if not amount.isdigit():
+            is_valid = "Error: you did not input a valid amount. Amount for sats must only contain digits"
+    else:
+        is_valid = "Error: you did not input a valid denomination. Denomination must either be 'sats' or 'USD'"
+
+    return is_valid
+
+########################
+### wireguard routes ###
+########################
+
+# wireguard main page
 @views.route('/wireguard', methods=['GET', 'POST'])
 @login_required
 def wireguard():
@@ -287,12 +447,13 @@ def wireguard():
 
     return render_template('wireguard.html', user=current_user, setting=get_conf())
 
+# get wireguard client qr code
 @views.route('/wireguard/clientqrcode', methods=['POST'])
 def generate_qr_code():
     filename = json.loads(request.data)
     filename = filename['filename']
     # Read the contents of the text file
-    path = os.path.join('/mnt/hdd/mynode/pleb-vpn/wireguard/clients', filename)
+    path = os.path.join(HOME_DIR, '/wireguard/clients', filename)
     with open(path, 'r') as f:
         file_contents = f.read()
 
@@ -313,16 +474,18 @@ def generate_qr_code():
     # Return the image as a JSON response
     return jsonify(image=img_base64)
 
+# download wireguard client file
 @views.route('/wireguard/download_client')
 def download_file():
     # Get the filename from the URL query string
     filename = request.args.get('filename')
-    path = os.path.join('/mnt/hdd/mynode/pleb-vpn/wireguard/clients', filename)
+    path = os.path.join(HOME_DIR, '/wireguard/clients', filename)
     # Check if the file exists
     if not os.path.exists(path):
         return "File not found", 404
     return send_file(path, as_attachment=True)
 
+# set wireguard on or off
 @views.route('/set_wireguard', methods=['POST'])
 def set_wireguard():
     # turns wireguard on or off
@@ -333,7 +496,7 @@ def set_wireguard():
     if user:
         if user.id == current_user.id:
             if setting['wireguard'] == 'on':
-                cmd_str = ["sudo /mnt/hdd/mynode/pleb-vpn/wg-install.sh off"]
+                cmd_str = ["sudo " + os.path.join(EXEC_DIR, "/wg-install.sh") + " off"]
                 result = subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True)
                 # for debug purposes
                 print(result.stdout, result.stderr)
@@ -352,12 +515,12 @@ def set_wireguard():
                             break
                     conf_file.set_option('wgip', new_wgIP)
                     conf_file.write()
-                    cmd_str = ["sudo /mnt/hdd/mynode/pleb-vpn/wg-install.sh on 1"]
+                    cmd_str = ["sudo " + os.path.join(EXEC_DIR, "/wg-install.sh") + " on 0 1 1"]
                 else:
-                    if os.path.isfile('/mnt/hdd/mynode/pleb-vpn/wireguard/wg0.conf'):
-                        cmd_str = ["sudo /mnt/hdd/mynode/pleb-vpn/wg-install.sh on"]
+                    if os.path.isfile(os.path.join(HOME_DIR, '/wireguard/wg0.conf')):
+                        cmd_str = ["sudo " + os.path.join(EXEC_DIR, "/wg-install.sh") + " on 1 0 1"]
                     else:
-                        cmd_str = ["sudo /mnt/hdd/mynode/pleb-vpn/wg-install.sh on 1"]
+                        cmd_str = ["sudo " + os.path.join(EXEC_DIR, "/wg-install.sh") + " on 0 1 1"]
                 result = subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True)
                 # for debug purposes
                 print(result.stdout, result.stderr)
@@ -371,6 +534,7 @@ def set_wireguard():
 
     return jsonify({})
 
+# delete wireguard conf files
 @views.route('/delete_wireguard_conf', methods=['POST'])
 @login_required
 def delete_wireguard_conf():
@@ -379,8 +543,8 @@ def delete_wireguard_conf():
     user = User.query.get(userId)
     if user:
         if user.id == current_user.id:
-            if os.path.exists('/mnt/hdd/mynode/pleb-vpn/wireguard'):
-                shutil.rmtree('/mnt/hdd/mynode/pleb-vpn/wireguard')
+            if os.path.exists(os.path.join(HOME_DIR, '/wireguard')):
+                shutil.rmtree(os.path.join(HOME_DIR, '/wireguard'))
             conf_file.set_option('wgip', '')
             conf_file.set_option('wglan', '')
             conf_file.set_option('wgport', '')
@@ -388,6 +552,38 @@ def delete_wireguard_conf():
 
     return jsonify({})
 
+# checks if wireguard ip selected is a valid ip
+def is_valid_ip(ip_str):
+    setting = get_conf()
+    # check that the IP does not match our local IP
+    if setting['lan'] in ip_str:
+        return False
+    # Split the IP address into four parts
+    parts = ip_str.split('.')
+    if len(parts) != 4:
+        return False
+    # Convert each part to an integer
+    try:
+        parts = [int(part) for part in parts]
+    except ValueError:
+        return False
+    # Check that each part is in the valid range
+    if parts[0] != 10:
+        return False
+    if not (0 <= parts[1] <= 255):
+        return False
+    if not (0 <= parts[2] <= 255):
+        return False
+    if not (0 <= parts[3] <= 252):
+        return False
+    # If all checks pass, return True
+    return True
+
+##################################
+### tor split-tunneling routes ###
+##################################
+
+# tor split-tunneling home page
 @views.route('/torsplittunnel', methods=['GET'])
 @login_required
 def torsplittunnel():
@@ -397,6 +593,7 @@ def torsplittunnel():
 
     return render_template('tor-split-tunnel.html', user=current_user, setting=get_conf(), torsplittunnel_status=torsplittunnel_status, torsplittunnel_test_status=torsplittunnel_test_status)
 
+# set tor split-tunneling on or off
 @views.route('/set_torsplittunnel', methods=['POST'])
 def set_torsplittunnel():
     # turns tor split-tunneling on or off
@@ -407,7 +604,7 @@ def set_torsplittunnel():
     if user:
         if user.id == current_user.id:
             if setting['torsplittunnel'] == 'on':
-                cmd_str = ["sudo /mnt/hdd/mynode/pleb-vpn/tor.split-tunnel.sh off 1"]
+                cmd_str = ["sudo " + os.path.join(EXEC_DIR, "/tor.split-tunnel.sh") + " off 1"]
                 result = subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True)
                 # for debug purposes
                 print(result.stdout, result.stderr)
@@ -417,7 +614,7 @@ def set_torsplittunnel():
                 else:
                     flash('An unknown error occured!', category='error')
             else:
-                cmd_str = ["sudo /mnt/hdd/mynode/pleb-vpn/tor.split-tunnel.sh on 1"]
+                cmd_str = ["sudo " + os.path.join(EXEC_DIR, "/tor.split-tunnel.sh") + " on 1"]
                 result = subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True)
                 # for debug purposes
                 print(result.stdout, result.stderr)
@@ -429,306 +626,11 @@ def set_torsplittunnel():
 
     return jsonify({})
 
-def get_conf():
-    setting = {}
-    with open(os.path.abspath('./pleb-vpn.conf')) as conf:
-        for line in conf:
-            if "=" in line:
-                name, value = line.split("=")
-                setting[name] = str(value).rstrip().strip('\'\'')
-    return setting
+##########################
+### letsencrypt routes ###
+##########################
 
-def get_plebVPN_status():
-    # get status of pleb-vpn connection to vps
-    global plebVPN_status
-    plebVPN_status = {}
-    cmd_str = ["/mnt/hdd/mynode/pleb-vpn/vpn-install.sh status"]
-    subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True)
-    with open(os.path.abspath('./pleb-vpn_status.tmp')) as status:
-        for line in status:
-            if "=" in line:
-                name, value = line.split("=")
-                plebVPN_status[name] = str(value).rstrip().strip('\'\'')
-    os.remove(os.path.abspath('./pleb-vpn_status.tmp'))
-
-def get_lnd_hybrid_status():
-    # get status of lnd hybrid mode
-    global lnd_hybrid_status
-    lnd_hybrid_status = {}
-    cmd_str = ["sudo /mnt/hdd/mynode/pleb-vpn/lnd-hybrid.sh status"]
-    subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True)
-    with open(os.path.abspath('./lnd_hybrid_status.tmp')) as status:
-        for line in status:
-            if "=" in line:
-                name, value = line.split("=")
-                lnd_hybrid_status[name] = str(value).rstrip().strip('\'\'')
-    os.remove(os.path.abspath('./lnd_hybrid_status.tmp'))
-
-def get_wireguard_status():
-    # get status of wireguard service
-    global wireguard_status
-    wireguard_status = {}
-    cmd_str = ["sudo /mnt/hdd/mynode/pleb-vpn/wg-install.sh status"]
-    subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True)
-    with open(os.path.abspath('./wireguard_status.tmp')) as status:
-        for line in status:
-            if "=" in line:
-                name, value = line.split("=")
-                wireguard_status[name] = str(value).rstrip().strip('\'\'')
-    os.remove(os.path.abspath('./wireguard_status.tmp'))
-
-def get_payments():
-    # get current payments
-    current_payments = {}
-    # today = datetime.now()
-    # yesterday = datetime.now() - timedelta(days=1)
-    # sunday = today - datetime.timedelta(days=today.weekday())
-    # saturday = sunday - timedelta(days=1)
-    # first_of_month = datetime(today.year, today.month, 1)
-    # last_of_month = first_of_month - timedelta(days=1)
-    # first_of_year = datetime(today.year, 1, 1)
-    # last_of_year = first_of_year - timedelta(days=1)
-    # today = datetime(today.year, today.month, today.day, 1, 0, 0)
-    # yesterday = datetime(yesterday.year, yesterday.month, yesterday.day, 23, 0, 0)
-    # sunday = datetime(sunday.year, sunday.month, sunday.day, 1, 0, 0)
-    # saturday = datetime(saturday.year, saturday.month, saturday.day, 23, 0, 0)
-    # first_of_month = datetime(first_of_month.year, first_of_month.month, first_of_month.day, 1, 0, 0)
-    # last_of_month = datetime(last_of_month.year, last_of_month.month, last_of_month.day, 23, 0, 0)
-    # first_of_year = datetime(first_of_year.year, first_of_year.month, first_of_year.day, 1, 0, 0)
-    # last_of_year = datetime(last_of_year.year, last_of_year.month, last_of_year.day, 23, 0, 0)
-    # today = today.strftime("%Y-%m-%d %H:%M:%S")
-    # yesterday = yesterday.strftime("%Y-%m-%d %H:%M:%S")
-    # sunday = sunday.strftime("%Y-%m-%d %H:%M:%S")
-    # saturday = saturday.strftime("%Y-%m-%d %H:%M:%S")
-    # first_of_month = first_of_month.strftime("%Y-%m-%d %H:%M:%S")
-    # last_of_month = last_of_month.strftime("%Y-%m-%d %H:%M:%S")
-    # first_of_year = first_of_year.strftime("%Y-%m-%d %H:%M:%S")
-    # last_of_year = last_of_year.strftime("%Y-%m-%d %H:%M:%S")
-    cmd_str = ["sudo bash /mnt/hdd/mynode/pleb-vpn/payments/managepayments.sh status"]
-    subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True)
-    with open(os.path.abspath('./payments/current_payments.tmp')) as payments:
-        for line in payments:
-            line_parts = re.findall(r'"[^"]*"|\S+', line.strip())
-            try:
-                category = line_parts[0]
-                id = line_parts[1]
-                pubkey = line_parts[2]
-                amount = line_parts[3]
-                denomination = line_parts[4]
-                if denomination == "usd":
-                    denomination = "USD"
-                if len(line_parts) >= 6:
-                    message = line_parts[5].strip('"')
-                else:
-                    message = ""
-                if category not in current_payments:
-                    current_payments[category] = []
-                # if category == 'daily':
-                #     start_date = "start=$(date -d '" + yesterday + "' +%s); "
-                #     end_date = "end=$(date -d '" + today + "' +%s); "
-                # elif category == 'weekly':
-                #     start_date = "start=$(date -d '" + saturday + "' +%s); "
-                #     end_date = "end=$(date -d '" + sunday + "' +%s); "
-                # elif category == 'monthly':
-                #     start_date = "start=$(date -d '" + last_of_month + "' +%s); "
-                #     end_date = "end=$(date -d '" + first_of_month + "' +%s); "
-                # elif category == 'yearly':
-                #     start_date = "start=$(date -d '" + last_of_year + "' +%s); "
-                #     end_date = "end=$(date -d '" + first_of_year + "' +%s); "
-                # else:
-                #     start_date = "error"
-                #     end_date = "error"
-                
-                current_payments[category].append((id, pubkey, amount, denomination, message))
-            except IndexError:
-                print("Error: Not enough elements in line_parts for line: ", line)
-
-    os.remove(os.path.abspath('./payments/current_payments.tmp'))
-    return current_payments
-
-def get_torsplittunnel_status():
-    # get status of tor split-tunnel service
-    global torsplittunnel_status
-    torsplittunnel_status = {}
-    cmd_str = ["sudo /mnt/hdd/mynode/pleb-vpn/tor.split-tunnel.sh status"]
-    subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True)
-    with open(os.path.abspath('./split-tunnel_status.tmp')) as status:
-        for line in status:
-            if "=" in line:
-                name, value = line.split("=")
-                torsplittunnel_status[name] = str(value).rstrip().strip('\'\'')
-    os.remove(os.path.abspath('./split-tunnel_status.tmp'))
-
-@views.route('/get_torsplittunnel_test_status', methods=['POST'])
-def get_torsplittunnel_test_status():
-    # test status of tor split-tunnel service
-    user = json.loads(request.data)
-    userId = user['userId']
-    user = User.query.get(userId)
-    if user:
-        if user.id == current_user.id:
-            global torsplittunnel_test_status
-            torsplittunnel_test_status = {}
-            cmd_str = ["sudo /mnt/hdd/mynode/pleb-vpn/tor.split-tunnel.sh status 1"]
-            subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True)
-            with open(os.path.abspath('./split-tunnel_test_status.tmp')) as status:
-                for line in status:
-                    if "=" in line:
-                        name, value = line.split("=")
-                        torsplittunnel_test_status[name] = str(value).rstrip().strip('\'\'')
-            os.remove(os.path.abspath('./split-tunnel_test_status.tmp'))
-
-    return jsonify({})
-
-@views.route('/test-scripts', methods=['GET'])
-@login_required
-def test_scripts():
-    message = request.args.get('message')
-    category = request.args.get('category')
-
-    if message is not None:
-        print('flashing message: ', message) # for debug purposes only
-        flash(message, category=category)
-
-    return render_template('test-scripts.html', user=current_user)
-
-@socketio.on('start_process')
-def start_process(data):
-
-    cmd_str = str(data)
-    exit_code = run_cmd(cmd_str, False, False)
-    print('Back on start_process, the exit code received from run_cmd(cmd_str) is: ', exit_code)
-    if exit_code == 0:
-        message = 'Script exited successfully!'
-        category = 'success'
-    elif exit_code == 42069:
-        message = 'Script exited with unknown status.'
-        category = 'info'
-    else:
-        message = 'Script exited with an error.'
-        category = 'error'
-
-    print('before returning, message = ', message, 'category = ', category) # for debug purposes only
-    socketio.emit('process_complete', {'message': message, 'category': category})
-
-@socketio.on('update_scripts')
-def update_scripts():
-    global update_available
-    # update pleb-vpn (not for production)
-    cmd_str = "/mnt/hdd/mynode/pleb-vpn/pleb-vpn.install.sh update"
-    exit_code = run_cmd(cmd_str, False, False)
-    if exit_code == 0:
-        message = 'Pleb-VPN update successful! Click restart to restart Pleb-VPN webui.'
-        category = 'success'
-        update_available = True
-    elif exit_code == int(42069):
-        message = 'Script exited with unknown status. Click restart to restart Pleb-VPN webui.'
-        category = 'info'
-        update_available = True
-    else:
-        message = 'Pleb-VPN update unsuccessful. Check your internet connection and try again.'
-        category = 'error'
-
-    print('before returning, message = ', message, 'category = ', category) # for debug purposes only
-    socketio.emit('update_complete', {'message': message, 'category': category})
-
-@socketio.on('user_input')
-def set_user_input(input):
-    global user_input
-    user_input = input
-    print("set_user_input: ", user_input) # debug purposes only
-
-@socketio.on('start_reboot')
-def start_reboot():
-    global update_available
-    print("starting reboot") # debug purposes only
-    cmd_str = "/mnt/hdd/mynode/pleb-vpn/vpn-install.sh reboot"
-    update_available = False
-    run_cmd(cmd_str)
-
-def run_cmd(cmd_str, suppress_output = True, suppress_input = True):
-    global user_input
-    global enter_input
-    end_script = False
-    child = pexpect.spawn('/bin/bash')
-    try:
-        child.expect(['\r\n', pexpect.EOF, pexpect.TIMEOUT], timeout=0.1)
-        output = child.before.decode('utf-8')
-        cmd_line = output.strip()
-        print('cmd_line: ', cmd_line) # for debug purposes only
-        socketio.emit('output', 'cmd_line: ' + cmd_line + '\n') # for debug purposes only
-        if output: # for debug purposes only
-            print('first output: ', output.strip()) # for debug purposes only
-            socketio.emit('output', 'first output: ' + output.strip() + '\n')  # for debug purposes only
-    except pexpect.TIMEOUT:
-        pass
-    child.sendline(cmd_str)
-    try:
-        child.expect(['\r\n', pexpect.EOF, pexpect.TIMEOUT], timeout=0.1)
-        output1 = child.before.decode('utf-8')
-        output1 = output1.replace(cmd_line, '')
-        if output1 != output: 
-            output = output1
-            print(output.strip()) # for debug purposes only
-            socketio.emit('output', output.strip() + '\n')  # for debug purposes only
-    except pexpect.TIMEOUT:
-        pass
-    while True:
-        try:
-            child.expect(['\r\n', pexpect.EOF, pexpect.TIMEOUT], timeout=0.1)
-            output1 = child.before.decode('utf-8')
-            if cmd_line in output1:
-                end_script = True
-            if output1 != output: 
-                output = output1
-                if not suppress_output:
-                    print(output.strip().replace(cmd_line, '')) # for debug purposes only
-                    socketio.emit('output', output.strip().replace(cmd_line, '') + '\n') 
-        except pexpect.TIMEOUT:
-            pass
-        if not suppress_input:
-            if user_input is not None:
-                print("Sending to terminal: ", user_input) # for debug purposes only
-                child.sendline(user_input)
-                user_input = None
-            if enter_input is True:
-                print("Sending ENTER to terminal") # for debug purposes only
-                child.sendline('')
-                enter_input = False
-        if child.eof() or end_script:
-            break
-    # # Wait for the command to complete and capture the output
-    # try:
-    #     child.expect(['\r\n', pexpect.EOF, pexpect.TIMEOUT], timeout=0.1)
-    # except pexpect.TIMEOUT:
-    #     pass
-    # output = child.before.decode('utf-8')
-    # Send a command to the shell to print the exit code
-    time.sleep(0.1)
-    child.sendline('echo "exit_code=$?"')
-    # Wait for the command to complete and capture the output
-    try:
-        child.expect(['\r\n', pexpect.EOF, pexpect.TIMEOUT], timeout=0.1)
-    except pexpect.TIMEOUT:
-        pass
-    try:
-        child.expect(['\r\n', pexpect.EOF, pexpect.TIMEOUT], timeout=0.1)
-    except pexpect.TIMEOUT:
-        pass
-    output = child.before.decode('utf-8')
-    # Parse the output to extract the $? value
-    print('Exit code command result: ', output.strip().replace(cmd_line, '')) # for debug purposes only
-    socketio.emit('Exit code command result: ', output.strip().replace(cmd_line, '') + '\n')  # for debug purposes only
-    if output.strip().replace(cmd_line, '').startswith("exit_code="):
-        exit_code = int(output.strip().replace(cmd_line, '').split("=")[-1])
-    else:
-        exit_code = int(42069)
-    print('Exit code = ', exit_code) # for debug purposes only
-    socketio.emit('Exit code = ', str(exit_code) + '\n')  # for debug purposes only
-    child.close()
-    
-    return exit_code
-
+# letsencrypt home page
 @views.route('/letsencrypt', methods=['GET'])
 @login_required
 def letsencrypt():
@@ -741,6 +643,7 @@ def letsencrypt():
 
     return render_template('letsencrypt.html', user=current_user, setting=get_conf())
 
+# turn letsencrypt on and get certs
 @socketio.on('set_letsencrypt_on')
 def set_letsencrypt_on(formData):
     setting=get_conf()
@@ -776,14 +679,11 @@ def set_letsencrypt_on(formData):
             else:
                 letsencryptdomain1 = lnbitsdomain
                 letsencryptdomain2 = ""
-    cmd_str = "/mnt/hdd/mynode/pleb-vpn/letsencrypt.install.sh on 0 0 1 " + letsencryptbtcpay + " " + letsencryptlnbits + " " + letsencryptdomain1 + " " + letsencryptdomain2
+    cmd_str = os.path.join(EXEC_DIR, "/letsencrypt.install.sh") + " on 0 0 1 " + letsencryptbtcpay + " " + letsencryptlnbits + " " + letsencryptdomain1 + " " + letsencryptdomain2
     exit_code = get_certs(cmd_str, False, False)
     if exit_code == 0:
         message = 'LetsEncrypt certificates installed!'
         category = 'success'
-    elif exit_code == int(21):
-        message = 'User canceled, script exited.'
-        category = 'info'
     elif exit_code == int(42069):
         message = 'Script exited with unknown status.'
         category = 'info'
@@ -792,9 +692,10 @@ def set_letsencrypt_on(formData):
         category = 'error'
     socketio.emit('letsencrypt_set_on', {'message': message, 'category': category})
 
+# turn letsencrypt off and delete certs
 @socketio.on('set_letsencrypt_off')
 def set_letsencrypt_off():
-    cmd_str = ["/mnt/hdd/mynode/pleb-vpn/letsencrypt.install.sh off"]
+    cmd_str = [os.path.join(EXEC_DIR, "/letsencrypt.install.sh") + " off"]
     result = subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True)
     # for debug purposes
     print(result.stdout, result.stderr)
@@ -806,6 +707,7 @@ def set_letsencrypt_off():
         category = 'error'
     socketio.emit('letsencrypt_set_off', {'message': message, 'category': category})
 
+# execute letsencrypt script with pexpect interactively
 def get_certs(cmd_str, suppress_output = True, suppress_input = True):
     debug_file = open(os.path.abspath('./debug_output.txt'), "w") # for debug purposes only
     debug_inout = open(os.path.abspath('./debug_inout.txt'), "w") # for debug purposes only
@@ -908,14 +810,7 @@ def get_certs(cmd_str, suppress_output = True, suppress_input = True):
     
     return exit_code
 
-@socketio.on('enter_input')
-def set_enter_input():
-    debug_file = open(os.path.abspath('./debug_enter.txt'), "w") # for debug purposes only
-    global enter_input
-    enter_input = True
-    print("set_enter_input: !ENTER!", str(enter_input), file=debug_file) # debug purposes only
-    debug_file.close() # for debug purposes only
-
+# checks if the domain(s) for letsencrypt are valid and point to vps ip
 def check_domain(domain):
     # Split the domain into its components
     parts = domain.split('.')
@@ -933,56 +828,172 @@ def check_domain(domain):
     except socket.gaierror:
         return False
 
-def allowed_file(filename):
-    return '.' in filename and \
-           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+############################################
+### status, config, and helper functions ###
+############################################
 
-def is_valid_ip(ip_str):
-    setting = get_conf()
-    # check that the IP does not match our local IP
-    if setting['lan'] in ip_str:
-        return False
-    # Split the IP address into four parts
-    parts = ip_str.split('.')
-    if len(parts) != 4:
-        return False
-    # Convert each part to an integer
+# get pleb-vpn config file values
+def get_conf():
+    setting = {}
+    with open(os.path.join(HOME_DIR, '/pleb-vpn.conf')) as conf:
+        for line in conf:
+            if "=" in line:
+                name, value = line.split("=")
+                setting[name] = str(value).rstrip().strip('\'\'')
+    return setting
+
+# get status of openvpn connection
+def get_plebVPN_status():
+    # get status of pleb-vpn connection to vps
+    global plebVPN_status
+    global update_available
+    plebVPN_status = {}
+    cmd_str = [os.path.join(EXEC_DIR, "/vpn-install.sh") + " status 1"]
+    subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True)
+    with open(os.path.join(EXEC_DIR, '/pleb-vpn_status.tmp')) as status:
+        for line in status:
+            if "=" in line:
+                name, value = line.split("=")
+                plebVPN_status[name] = str(value).rstrip().strip('\'\'')
+    os.remove(os.path.join(EXEC_DIR, '/pleb-vpn_status.tmp'))
+    repo_date = check_repository_updated('mynode') # mynode branch included for testing purposes
+    if plebVPN_status['versiondate'] != repo_date:
+        update_available = True
+
+
+# get status of lnd hybrid mode
+def get_lnd_hybrid_status():
+    # get status of lnd hybrid mode
+    global lnd_hybrid_status
+    lnd_hybrid_status = {}
+    cmd_str = ["sudo " + os.path.join(EXEC_DIR, "/lnd-hybrid.sh") + " status 1"]
+    subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True)
+    with open(os.path.join(EXEC_DIR, '/lnd_hybrid_status.tmp')) as status:
+        for line in status:
+            if "=" in line:
+                name, value = line.split("=")
+                lnd_hybrid_status[name] = str(value).rstrip().strip('\'\'')
+    os.remove(os.path.join(EXEC_DIR, '/lnd_hybrid_status.tmp'))
+
+# get status of CLN hybrid mode
+def get_cln_hybrid_status():
+    # get status of CLN hybrid mode
+    global cln_hybrid_status
+    cln_hybrid_status = {}
+    cmd_str = ["sudo " + os.path.join(EXEC_DIR, "/cln-hybrid.sh") + " status 1"]
+    subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True)
+    with open(os.path.join(EXEC_DIR, '/cln_hybrid_status.tmp')) as status:
+        for line in status:
+            if "=" in line:
+                name, value = line.split("=")
+                cln_hybrid_status[name] = str(value).rstrip().strip('\'\'')
+    os.remove(os.path.join(EXEC_DIR, '/cln_hybrid_status.tmp'))
+
+# get status of wireguard
+def get_wireguard_status():
+    # get status of wireguard service
+    global wireguard_status
+    wireguard_status = {}
+    cmd_str = ["sudo " + os.path.join(EXEC_DIR, "/wg-install.sh") + " status 1"]
+    subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True)
+    with open(os.path.join(EXEC_DIR, '/wireguard_status.tmp')) as status:
+        for line in status:
+            if "=" in line:
+                name, value = line.split("=")
+                wireguard_status[name] = str(value).rstrip().strip('\'\'')
+    os.remove(os.path.join(EXEC_DIR, '/wireguard_status.tmp'))
+
+# get current payments scheduled
+def get_payments():
+    # get current payments
+    current_payments = {}
+    cmd_str = ["sudo bash " + os.path.join(EXEC_DIR, "/payments/managepayments.sh") + " status 1"]
+    subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True)
+    with open(os.path.join(EXEC_DIR, '/payments/current_payments.tmp')) as payments:
+        for line in payments:
+            line_parts = re.findall(r'"[^"]*"|\S+', line.strip())
+            try:
+                category = line_parts[0]
+                id = line_parts[1]
+                node = line_parts[2]
+                pubkey = line_parts[3]
+                amount = line_parts[4]
+                denomination = line_parts[5]
+                if denomination == "usd":
+                    denomination = "USD"
+                if len(line_parts) >= 7:
+                    message = line_parts[6].strip('"')
+                else:
+                    message = ""
+                if category not in current_payments:
+                    current_payments[category] = []
+                current_payments[category].append((id, node, pubkey, amount, denomination, message))
+            except IndexError:
+                print("Error: Not enough elements in line_parts for line: ", line)
+
+    os.remove(os.path.join(EXEC_DIR, '/payments/current_payments.tmp'))
+    return current_payments
+
+# get status of tor split-tunneling
+def get_torsplittunnel_status():
+    # get status of tor split-tunnel service
+    global torsplittunnel_status
+    torsplittunnel_status = {}
+    cmd_str = ["sudo " + os.path.join(EXEC_DIR, "/tor.split-tunnel.sh") + " status 1 1 1"]
+    subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True)
+    with open(os.path.join(EXEC_DIR, '/split-tunnel_status.tmp')) as status:
+        for line in status:
+            if "=" in line:
+                name, value = line.split("=")
+                torsplittunnel_status[name] = str(value).rstrip().strip('\'\'')
+    os.remove(os.path.join(EXEC_DIR, '/split-tunnel_status.tmp'))
+
+# run test of tor split-tunneling service
+@views.route('/get_torsplittunnel_test_status', methods=['POST'])
+def get_torsplittunnel_test_status():
+    # test status of tor split-tunnel service
+    user = json.loads(request.data)
+    userId = user['userId']
+    user = User.query.get(userId)
+    if user:
+        if user.id == current_user.id:
+            global torsplittunnel_test_status
+            torsplittunnel_test_status = {}
+            cmd_str = ["sudo " + os.path.join(EXEC_DIR, "/tor.split-tunnel.sh") + " status 1 0 1"]
+            subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True)
+            with open(os.path.join(EXEC_DIR, '/split-tunnel_test_status.tmp')) as status:
+                for line in status:
+                    if "=" in line:
+                        name, value = line.split("=")
+                        torsplittunnel_test_status[name] = str(value).rstrip().strip('\'\'')
+            os.remove(os.path.join(EXEC_DIR, '/split-tunnel_test_status.tmp'))
+
+    return jsonify({})
+
+# get enter input for commands run using pexpect (needed for letsencrypt script)
+@socketio.on('enter_input')
+def set_enter_input():
+    debug_file = open(os.path.abspath('./debug_enter.txt'), "w") # for debug purposes only
+    global enter_input
+    enter_input = True
+    print("set_enter_input: !ENTER!", str(enter_input), file=debug_file) # debug purposes only
+    debug_file.close() # for debug purposes only
+
+# check date of last commit to https://github.com/allyourbankarebelongtous/pleb-vpn/
+def check_repository_updated(branch=""):
+    # Construct the API endpoint URL
+    url = f"https://api.github.com/repos/allyourbankarebelongtous/pleb-vpn/commits/{branch}"
     try:
-        parts = [int(part) for part in parts]
-    except ValueError:
-        return False
-    # Check that each part is in the valid range
-    if parts[0] != 10:
-        return False
-    if not (0 <= parts[1] <= 255):
-        return False
-    if not (0 <= parts[2] <= 255):
-        return False
-    if not (0 <= parts[3] <= 252):
-        return False
-    # If all checks pass, return True
-    return True
-
-def valid_payment(frequency, pubkey, amount, denomination):
-    is_valid = str(0)
-    if frequency != "daily":
-        if frequency != "weekly":
-            if frequency != "monthly":
-                if frequency != "yearly":
-                    is_valid = "Error: the frequency must be either 'daily', 'weekly', 'monthly', or 'yearly'"
-    pattern = r'^[a-zA-Z0-9]{66}$'
-    match = re.match(pattern, pubkey)
-    if not match:
-        is_valid = "Error: you did not submit a valid pubkey"
-    if denomination == "USD":
-        pattern = r'^\d+\.\d{2}$'
-        match = re.match(pattern, amount)
-        if not match:
-            is_valid = "Error: you did not input a valid amount. Amount must be in the form of x.xx for USD and must only contain digits and a decimal"
-    elif denomination == "sats":
-        if not amount.isdigit():
-            is_valid = "Error: you did not input a valid amount. Amount for sats must only contain digits"
-    else:
-        is_valid = "Error: you did not input a valid denomination. Denomination must either be 'sats' or 'USD'"
-
-    return is_valid
+        # Send a GET request to the API
+        response = requests.get(url)
+        response.raise_for_status()  # Raise an exception if the request fails
+        # Get the date of the last commit
+        last_commit_date = response.json()[0]["commit"]["committer"]["date"]
+        # Format the date in the same format as git log -1 --format=%ci
+        dt = datetime.strptime(last_commit_date, "%Y-%m-%dT%H:%M:%SZ")
+        formatted_date = dt.strftime("%Y-%m-%d %H:%M:%S %z")
+        
+        return formatted_date
+    except requests.exceptions.RequestException as e:
+        print(f"Error: {e}")
+        return None

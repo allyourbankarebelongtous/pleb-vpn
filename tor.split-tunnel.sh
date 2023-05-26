@@ -9,8 +9,16 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   exit 1
 fi
 
-plebVPNConf="/mnt/hdd/mynode/pleb-vpn/pleb-vpn.conf"
-plebVPNTempConf="/mnt/hdd/mynode/pleb-vpn/pleb-vpn.conf.tmp"
+# find home directory based on node implementation
+if [ -d "/mnt/hdd/mynode/pleb-vpn/" ]; then
+  homedir="/mnt/hdd/mynode/pleb-vpn"
+  execdir="/opt/mynode/pleb-vpn"
+elif [ -d "/mnt/hdd/app-data/pleb-vpn/" ]; then
+  homedir="/mnt/hdd/app-data/pleb-vpn"
+  execdir="/home/admin/pleb-vpn"
+fi
+plebVPNConf="${homedir}/pleb-vpn.conf"
+plebVPNTempConf="${homedir}/pleb-vpn.conf.tmp"
 sed '1d' $plebVPNConf > $plebVPNTempConf
 source ${plebVPNTempConf}
 sudo rm ${plebVPNTempConf}
@@ -33,18 +41,39 @@ function setting() # FILE LINENUMBER NAME VALUE
 }
 
 status() {
-  local check_config="${1}"
+  local skipWhiptail="${1}"
+  local skip_config_check="${2}"
+  local webui="${3}"
+  if [ ! "${skipWhiptail}" = "1" ]; then
+    whiptail --title "Tor Split-Tunnel status check" --msgbox "If you interrupt this test (Ctrl + C) then you should make sure your VPN is active with 
+'sudo systemctl start openvpn@plebvpn' before resuming operations. This test will temporarily 
+deactivate the VPN to see if tor can connect without the VPN operational. 
+
+This test can take some time. 
+
+A failure of this test does not necessarily indicate that split-tunneling is not active, 
+it could be that tor is down or having issues.
+" 15 100
+  fi
   echo "NOTE: If you interrupt this test (Ctrl + C) then you should make sure your VPN is active with 
 'sudo systemctl start openvpn@plebvpn' before resuming operations. This test will temporarily 
 deactivate the VPN to see if tor can connect without the VPN operational. This test can take some time. 
 A failure of this test does not necessarily indicate that split-tunneling is not active, it could be 
 that tor is down or having issues."
   if [ ! "${torsplittunnel}" = "on" ]; then
-    message="Tor Split-Tunnel service is off by config. Use menu to configure tor split-tunneling."
-    echo "message=${message}" | tee /mnt/hdd/mynode/pleb-vpn/split-tunnel_status.tmp
-    exit 0
+    if [ "${webui}" = "1" ]; then
+      message="Tor Split-Tunnel service is off by config. Use menu to configure tor split-tunneling."
+      echo "message=${message}" | tee ${execdir}/split-tunnel_status.tmp
+      exit 0
+    else
+      whiptail --title "Tor Split-Tunnel status" --msgbox "
+Tor Split-Tunnel service is off by config.
+Use menu to install Pleb-VPN.
+" 9 40
+      exit 0
+    fi
   else
-    if [ "${check_config}" = "1" ]; then
+    if [ ! "${skip_config_check}" = "1" ]; then
       echo "checking configuration"
       message="Tor Split-Tunnel service is working normally"
       echo "Checking connection over clearnet with VPN on..."
@@ -96,67 +125,132 @@ Try checking the status using STATUS menu later. If unable to connect, uninstall
       else
         vpnWorking="yes"
       fi 
-      echo "vpn_operating=${vpnWorking}
+      if [ "${webui}" = "1" ]; then
+        echo "vpn_operating=${vpnWorking}
 split_tunnel_working=${torSplitTunnelOK}
 current_ip=${currentIP}
 firewall_ok=${firewallOK}
-message=${message}" | tee /mnt/hdd/mynode/pleb-vpn/split-tunnel_test_status.tmp
-      exit 0
+message=${message}" | tee ${execdir}/split-tunnel_test_status.tmp
+        exit 0
+      else
+        whiptail --title "Tor Split-Tunnel status" --msgbox "
+Split-Tunnel activated: yes
+VPN operating: ${vpnWorking}
+Tor able to connect through firewall when VPN is down: ${torSplitTunnelOK}
+VPN server IP: ${vpnip}
+VPN server port: ${vpnport}
+Current IP (should match VPN server IP): ${currentIP}
+Firewall configuration OK: ${firewallOK}
+${message}
+" 16 100
+        exit 0
+      fi
     else
-      message="Tor Split-Tunnel service is working normally"
-      echo "Checking ip tables"
-      nftableStatus="ok"
-      if ! [ $(nft list chain inet filter input | grep -c "meta cgroup 1114129") -eq 1 ]; then
-        nftableStatus="missing nft rules"
-        message="Tor Split-Tunnel service is incorrectly configured"
+      if [ "${nodetype}" = "mynode" ]; then
+        message="Tor Split-Tunnel service is working normally"
+        echo "Checking ip tables"
+        nftableStatus="ok"
+        if ! [ $(nft list chain inet filter input | grep -c "meta cgroup 1114129") -eq 1 ]; then
+          nftableStatus="missing nft rules"
+          message="Tor Split-Tunnel service is incorrectly configured"
+        fi
+        if ! [ $(nft list chain inet filter output | grep -c "meta cgroup 1114129") -eq 1 ]; then
+          nftableStatus="missing nft rules"
+          message="Tor Split-Tunnel service is incorrectly configured"
+        fi
+        if ! [ $(nft list chain ip nat POSTROUTING | grep -c "meta cgroup 1114129") -eq 1 ]; then
+          nftableStatus="missing nft rules"
+          message="Tor Split-Tunnel service is incorrectly configured"
+        fi
+        if ! [ $(nft list chain ip mangle markit | grep -c "meta cgroup 1114129") -eq 1 ]; then
+          nftableStatus="missing nft rules"
+          message="Tor Split-Tunnel service is incorrectly configured"
+        fi
+        iptableStatus="ok"
+        if ! [ $(iptables -L INPUT | grep -c "0xb") -eq 1 ]; then
+          iptableStatus="missing iptable rules"
+          message="Tor Split-Tunnel service is incorrectly configured"
+        fi
+        if ! [ $(iptables -L FORWARD | grep -c "0xb") -eq 1 ]; then
+          iptableStatus="missing iptable rules"
+          message="Tor Split-Tunnel service is incorrectly configured"
+        fi
+        if ! [ $(iptables -L OUTPUT | grep -c "0xb") -eq 1 ]; then
+          iptableStatus="missing iptable rules"
+          message="Tor Split-Tunnel service is incorrectly configured"
+        fi
+        echo "Checking ip route"
+        OIFNAME=$(ip r | grep default | cut -d " " -f5)
+        GATEWAY=$(ip r | grep default | cut -d " " -f3)
+        iprouteStatus="ok"
+        if ! [ $(ip rou show table novpn | grep -c "default via ${GATEWAY} dev ${OIFNAME}") -eq 1 ]; then
+          iprouteStatus="missing ip route"
+          message="Tor Split-Tunnel service is incorrectly configured"
+        fi
+        echo "Checking cgroup config"
+        cgroup_tasks=$(cat /sys/fs/cgroup/net_cls/novpn/tasks)
+        tor_tasks=$(pgrep -x tor)
+        cgroupStatus="ok"
+        if ! [ "${cgroup_tasks}" = "${tor_tasks}" ]; then
+          cgroupStatus="bad cgroup config"
+          message="Tor Split-Tunnel service is incorrectly configured"
+        fi
+      elif [ "${nodetype}" = "raspiblitz" ]; then
+        message="Tor Split-Tunnel service is working normally"
+        echo "Checking ip tables"
+        nftableStatus="ok"
+        if ! [ $(nft list chain ip filter ufw-user-input | grep -c "meta cgroup 1114129") -eq 1 ]; then
+          nftableStatus="missing nft rules"
+          message="Tor Split-Tunnel service is incorrectly configured"
+        fi
+        if ! [ $(nft list chain ip filter ufw-user-output | grep -c "meta cgroup 1114129") -eq 1 ]; then
+          nftableStatus="missing nft rules"
+          message="Tor Split-Tunnel service is incorrectly configured"
+        fi
+        if ! [ $(nft list chain ip nat POSTROUTING | grep -c "meta cgroup 1114129") -eq 1 ]; then
+          nftableStatus="missing nft rules"
+          message="Tor Split-Tunnel service is incorrectly configured"
+        fi
+        if ! [ $(nft list chain ip mangle markit | grep -c "meta cgroup 1114129") -eq 1 ]; then
+          nftableStatus="missing nft rules"
+          message="Tor Split-Tunnel service is incorrectly configured"
+        fi
+        iptableStatus="ok"
+        echo "Checking ip route"
+        OIFNAME=$(ip r | grep default | cut -d " " -f5)
+        GATEWAY=$(ip r | grep default | cut -d " " -f3)
+        iprouteStatus="ok"
+        if ! [ $(ip rou show table novpn | grep -c "default via ${GATEWAY} dev ${OIFNAME}") -eq 1 ]; then
+          iprouteStatus="missing ip route"
+          message="Tor Split-Tunnel service is incorrectly configured"
+        fi
+        echo "Checking cgroup config"
+        cgroup_tasks=$(cat /sys/fs/cgroup/net_cls/novpn/tasks)
+        tor_tasks=$(pgrep -x tor)
+        cgroupStatus="ok"
+        if ! [ "${cgroup_tasks}" = "${tor_tasks}" ]; then
+          cgroupStatus="bad cgroup config"
+          message="Tor Split-Tunnel service is incorrectly configured"
+        fi
       fi
-      if ! [ $(nft list chain inet filter output | grep -c "meta cgroup 1114129") -eq 1 ]; then
-        nftableStatus="missing nft rules"
-        message="Tor Split-Tunnel service is incorrectly configured"
-      fi
-      if ! [ $(nft list chain ip nat POSTROUTING | grep -c "meta cgroup 1114129") -eq 1 ]; then
-        nftableStatus="missing nft rules"
-        message="Tor Split-Tunnel service is incorrectly configured"
-      fi
-      if ! [ $(nft list chain ip mangle markit | grep -c "meta cgroup 1114129") -eq 1 ]; then
-        nftableStatus="missing nft rules"
-        message="Tor Split-Tunnel service is incorrectly configured"
-      fi
-      iptableStatus="ok"
-      if ! [ $(iptables -L INPUT | grep -c "0xb") -eq 1 ]; then
-        iptableStatus="missing iptable rules"
-        message="Tor Split-Tunnel service is incorrectly configured"
-      fi
-      if ! [ $(iptables -L FORWARD | grep -c "0xb") -eq 1 ]; then
-        iptableStatus="missing iptable rules"
-        message="Tor Split-Tunnel service is incorrectly configured"
-      fi
-      if ! [ $(iptables -L OUTPUT | grep -c "0xb") -eq 1 ]; then
-        iptableStatus="missing iptable rules"
-        message="Tor Split-Tunnel service is incorrectly configured"
-      fi
-      echo "Checking ip route"
-      OIFNAME=$(ip r | grep default | cut -d " " -f5)
-      GATEWAY=$(ip r | grep default | cut -d " " -f3)
-      iprouteStatus="ok"
-      if ! [ $(ip rou show table novpn | grep -c "default via ${GATEWAY} dev ${OIFNAME}") -eq 1 ]; then
-        iprouteStatus="missing ip route"
-        message="Tor Split-Tunnel service is incorrectly configured"
-      fi
-      echo "Checking cgroup config"
-      cgroup_tasks=$(cat /sys/fs/cgroup/net_cls/novpn/tasks)
-      tor_tasks=$(pgrep -x tor)
-      cgroupStatus="ok"
-      if ! [ "${cgroup_tasks}" = "${tor_tasks}" ]; then
-        cgroupStatus="bad cgroup config"
-        message="Tor Split-Tunnel service is incorrectly configured"
-      fi
-      echo "nftableStatus=${nftableStatus}
+      if [ "${webui}" = "1" ]; then
+        echo "nftableStatus=${nftableStatus}
 iptableStatus=${iptableStatus}
 iprouteStatus=${iprouteStatus}
 cgroupStatus=${cgroupStatus}
-message=${message}" | tee /mnt/hdd/mynode/pleb-vpn/split-tunnel_status.tmp
-      exit 0
+message=${message}" | tee ${execdir}/split-tunnel_status.tmp
+        exit 0
+      else
+        whiptail --title "Tor Split-Tunnel config check" --msgbox "
+Split-Tunnel activated: yes
+nftables config: ${nftableStatus}
+iptables config: ${iptableStatus}
+ip route config: ${iprouteStatus}
+cgroup config: ${cgroupStatus}
+${message}
+" 16 100
+        exit 0
+      fi
     fi
   fi
 }
@@ -166,7 +260,7 @@ on() {
   local skipTest="${1}"
 
   # install dependencies
-echo "Checking and installing requirements..."
+  echo "Checking and installing requirements..."
   # check for cgroup and install
   echo "Checking cgroup-tools..."
   checkcgroup=$(cgcreate -h 2>/dev/null | grep -c "Usage")
@@ -210,58 +304,58 @@ echo "Checking and installing requirements..."
   GATEWAY=$(ip r | grep default | cut -d " " -f3)
 
   # first check for and remove old names from prior starts
-  while [ $(nft list tables | grep -c nat) -gt 0 ]
-  do
-    nft delete table ip nat
-  done
-  while [ $(nft list tables | grep -c mangle) -gt 0 ]
-  do
-    nft delete table ip mangle
-  done
-  while [ $(nft list table inet filter | grep -c input) -gt 0 ]
-  do
-    nft delete chain inet filter input
-  done
-  while [ $(nft list table inet filter | grep -c output) -gt 0 ]
-  do
-    nft delete chain inet filter output
-  done
-  while [ $(iptables -L INPUT | grep -c "0xb") -gt 0 ]
-  do
-    iptables -D INPUT -m mark --mark 0xb -j ACCEPT
-  done
-  while [ $(iptables -L FORWARD | grep -c "0xb") -gt 0 ]
-  do
-    iptables -D FORWARD -m mark --mark 0xb -j ACCEPT
-  done
-  while [ $(iptables -L OUTPUT | grep -c "0xb") -gt 0 ]
-  do
-    iptables -D OUTPUT -m mark --mark 0xb -j ACCEPT
-  done
-  while [ $(ip rule | grep -c "fwmark 0xb lookup novpn") -gt 0 ]
-  do
-    ip rule del from all table novpn fwmark 11
-  done
-  while [ $(ip rule | grep -c novpn) -gt 0 ]
-  do
-    ip rou del from all table novpn default via ${GATEWAY}
-  done
 
-  # create group novpn
-  sudo groupadd novpn
+  # raspiblitz config
+  if [ "${nodetype}" = "raspiblitz" ]; then
+    ip_nat_handles=$(nft -a list table ip nat | grep "meta cgroup 1114129 counter" | sed "s/.*handle //")
+    while [ $(nft list table ip nat | grep -c "meta cgroup 1114129 counter") -gt 0 ]
+    do
+      ruleNumber=$(nft list table ip nat | grep -c "meta cgroup 1114129 counter")
+      ip_nat_handle=$(echo "${ip_nat_handles}" | sed -n ${ruleNumber}p)
+      nft delete rule ip nat POSTROUTING handle ${ip_nat_handle}
+    done
+    while [ $(nft list tables | grep -c mangle) -gt 0 ]
+    do
+      nft delete table ip mangle
+    done
+    ip_filter_input_handles=$(nft -a list chain ip filter ufw-user-input | grep "meta cgroup 1114129 counter" | sed "s/.*handle //")
+    while [ $(nft list chain ip filter ufw-user-input | grep -c "meta cgroup 1114129 counter") -gt 0 ]
+    do
+      ruleNumber=$(nft list chain ip filter ufw-user-input | grep -c "meta cgroup 1114129 counter")
+      ip_filter_input_handle=$(echo "${ip_filter_input_handles}" | sed -n ${ruleNumber}p)
+      nft delete rule ip filter ufw-user-input handle ${ip_filter_input_handle}
+    done
+    ip_filter_output_handles=$(nft -a list chain ip filter ufw-user-output | grep "meta cgroup 1114129 counter" | sed "s/.*handle //")
+    while [ $(nft list chain ip filter ufw-user-output | grep -c "meta cgroup 1114129 counter") -gt 0 ]
+    do
+      ruleNumber=$(nft list chain ip filter ufw-user-output | grep -c "meta cgroup 1114129 counter")
+      ip_filter_output_handle=$(echo "${ip_filter_output_handles}" | sed -n ${ruleNumber}p)
+      nft delete rule ip filter ufw-user-output handle ${ip_filter_output_handle}
+    done
+    while [ $(ip rule | grep -c "fwmark 0xb lookup novpn") -gt 0 ]
+    do
+      ip rule del from all table novpn fwmark 11
+    done
+    while [ $(ip rule | grep -c novpn) -gt 0 ]
+    do
+      ip rou del from all table novpn default via ${GATEWAY}
+    done
 
-  # create routing table
-  if [ ! -d /etc/iproute2/rt_tables.d ]; then
-    mkdir /etc/iproute2/rt_tables.d/
-  fi
-  echo "1000 novpn" | tee /etc/iproute2/rt_tables.d/novpn-route.conf
+    # create group novpn
+    sudo groupadd novpn
 
-  # create-cgroup.sh
-  echo "create create-cgroup.sh in pleb-vpn/split-tunnel..."
-  if [ ! -d /mnt/hdd/mynode/pleb-vpn/split-tunnel ]; then
-    mkdir /mnt/hdd/mynode/pleb-vpn/split-tunnel
-  fi
-  echo '#!/bin/bash
+    # create routing table
+    if [ ! -d /etc/iproute2/rt_tables.d ]; then
+      mkdir /etc/iproute2/rt_tables.d/
+    fi
+    echo "1000 novpn" | tee /etc/iproute2/rt_tables.d/novpn-route.conf
+
+    # create-cgroup.sh
+    echo "create create-cgroup.sh in pleb-vpn/split-tunnel..."
+    if [ ! -d ${execdir}/split-tunnel ]; then
+      mkdir ${execdir}/split-tunnel
+    fi
+    echo '#!/bin/bash
 
 # creates cgroup novpn for processes to skip vpn
 modprobe cls_cgroup
@@ -272,69 +366,65 @@ mount -t cgroup -o net_cls novpn /sys/fs/cgroup/net_cls
 cgcreate -t debian-tor:novpn -a debian-tor:novpn -d 775 -f 664 -s 664 -g net_cls:novpn
 echo 0x00110011 > /sys/fs/cgroup/net_cls/novpn/net_cls.classid
 
-' | tee /mnt/hdd/mynode/pleb-vpn/split-tunnel/create-cgroup.sh
-  chmod 755 -R /mnt/hdd/mynode/pleb-vpn/split-tunnel
-  # run create-cgroup.sh
-  echo "execute create-cgroup.sh"
-  /mnt/hdd/mynode/pleb-vpn/split-tunnel/create-cgroup.sh
+' | tee ${execdir}/split-tunnel/create-cgroup.sh
+    chmod 755 -R ${execdir}/split-tunnel
+    # run create-cgroup.sh
+    echo "execute create-cgroup.sh"
+    ${execdir}/split-tunnel/create-cgroup.sh
 
-  # create pleb-vpn-create-cgroup.service
-  echo "create create-cgroup.service to auto-create cgroup on start"
-  echo "[Unit]
+    # create pleb-vpn-create-cgroup.service
+    echo "create create-cgroup.service to auto-create cgroup on start"
+    echo "[Unit]
 Description=Creates cgroup for split-tunneling tor from vpn
 StartLimitInterval=200
 StartLimitBurst=5
 [Service]
 Type=oneshot
 RemainAfterExit=yes
-ExecStart=/bin/bash /mnt/hdd/mynode/pleb-vpn/split-tunnel/create-cgroup.sh
-User=root
-Group=root
+ExecStart=/bin/bash /home/admin/pleb-vpn/split-tunnel/create-cgroup.sh
 [Install]
 WantedBy=multi-user.target
 " | tee /etc/systemd/system/pleb-vpn-create-cgroup.service
 
-  # add pleb-vpn-create-cgroup.service as a tor requirement
-  echo "adding pleb-vpn-create-cgroup.service as a requirement to start tor"
-  if [ ! -d /etc/systemd/system/tor@default.service.d ]; then
-    mkdir /etc/systemd/system/tor@default.service.d >/dev/null
-  fi
-  echo "#Don't edit this file, it is created by pleb-vpn split-tunnel
+    # add pleb-vpn-create-cgroup.service as a tor requirement
+    echo "adding pleb-vpn-create-cgroup.service as a requirement to start tor"
+    if [ ! -d /etc/systemd/system/tor@default.service.d ]; then
+      mkdir /etc/systemd/system/tor@default.service.d >/dev/null
+    fi
+    echo "#Don't edit this file, it is created by pleb-vpn split-tunnel
 [Unit]
 Requires=pleb-vpn-create-cgroup.service
 After=pleb-vpn-create-cgroup.service
 " | tee /etc/systemd/system/tor@default.service.d/tor-cgroup.conf
 
-  # tor-split-tunnel.sh
-  echo "create tor-split-tunnel.sh in pleb-vpn/split-tunnel to add tor to cgroup for split-tunnel"
-  echo '#!/bin/bash
+    # tor-split-tunnel.sh
+    echo "create tor-split-tunnel.sh in pleb-vpn/split-tunnel to add tor to cgroup for split-tunnel"
+    echo '#!/bin/bash
 
 # adds tor to cgroup for split-tunneling
 tor_pid=$(pgrep -x tor)
 cgclassify -g net_cls:novpn $tor_pid
-' | tee /mnt/hdd/mynode/pleb-vpn/split-tunnel/tor-split-tunnel.sh
-  chmod 755 -R /mnt/hdd/mynode/pleb-vpn/split-tunnel
-  # run tor-split-tunnel.sh
-  echo "execute tor-split-tunnel.sh"
-  /mnt/hdd/mynode/pleb-vpn/split-tunnel/tor-split-tunnel.sh
-  
-  # create pleb-vpn-tor-split-tunnel.service
-  echo "Create tor-split-tunnel.service systemd service..."
-  echo "[Unit]
+' | tee ${execdir}/split-tunnel/tor-split-tunnel.sh
+    chmod 755 -R ${execdir}/split-tunnel
+    # run tor-split-tunnel.sh
+    echo "execute tor-split-tunnel.sh"
+    ${execdir}/split-tunnel/tor-split-tunnel.sh
+    
+    # create pleb-vpn-tor-split-tunnel.service
+    echo "Create tor-split-tunnel.service systemd service..."
+    echo "[Unit]
 Description=Adding tor process to cgroup novpn
 Requires=tor@default.service
 After=tor@default.service
 [Service]
 Type=oneshot
-ExecStart=/bin/bash /mnt/hdd/mynode/pleb-vpn/split-tunnel/tor-split-tunnel.sh
-User=root
-Group=root
+ExecStart=/bin/bash /home/admin/pleb-vpn/split-tunnel/tor-split-tunnel.sh
 [Install]
 WantedBy=multi-user.target
 " | tee /etc/systemd/system/pleb-vpn-tor-split-tunnel.service
-  # create pleb-vpn-tor-split-tunnel.timer
-  echo "Create tor-split-tunnel.timer systemd service..."
-  echo "[Unit]
+    # create pleb-vpn-tor-split-tunnel.timer
+    echo "Create tor-split-tunnel.timer systemd service..."
+    echo "[Unit]
 Description=1 min timer to add tor process to cgroup novpn
 [Timer]
 OnBootSec=10
@@ -344,9 +434,218 @@ Persistent=true
 WantedBy=timers.target
 " | tee /etc/systemd/system/pleb-vpn-tor-split-tunnel.timer
 
-  # nftables-config.sh
-  echo "Creating nftables-config.sh in pleb-vpn/split-tunnel..."
-  echo '#!/bin/bash
+    # nftables-config.sh
+    echo "Creating nftables-config.sh in pleb-vpn/split-tunnel..."
+    echo '#!/bin/bash
+
+# adds route and rules to allow novpn cgroup past firewall
+
+# first clean tables from existing duplicate rules
+OIFNAME=$(ip r | grep default | cut -d " " -f5)
+GATEWAY=$(ip r | grep default | cut -d " " -f3)
+
+# first check for and remove old names from prior starts
+ip_nat_handles=$(nft -a list table ip nat | grep "meta cgroup 1114129 counter" | sed "s/.*handle //")
+while [ $(nft list table ip nat | grep -c "meta cgroup 1114129 counter") -gt 0 ]
+do
+  ruleNumber=$(nft list table ip nat | grep -c "meta cgroup 1114129 counter")
+  ip_nat_handle=$(echo "${ip_nat_handles}" | sed -n ${ruleNumber}p)
+  nft delete rule ip nat POSTROUTING handle ${ip_nat_handle}
+done
+while [ $(nft list tables | grep -c mangle) -gt 0 ]
+do
+  nft delete table ip mangle
+done
+ip_filter_input_handles=$(nft -a list chain ip filter ufw-user-input | grep "meta cgroup 1114129 counter" | sed "s/.*handle //")
+while [ $(nft list chain ip filter ufw-user-input | grep -c "meta cgroup 1114129 counter") -gt 0 ]
+do
+  ruleNumber=$(nft list chain ip filter ufw-user-input | grep -c "meta cgroup 1114129 counter")
+  ip_filter_input_handle=$(echo "${ip_filter_input_handles}" | sed -n ${ruleNumber}p)
+  nft delete rule ip filter ufw-user-input handle ${ip_filter_input_handle}
+done
+ip_filter_output_handles=$(nft -a list chain ip filter ufw-user-output | grep "meta cgroup 1114129 counter" | sed "s/.*handle //")
+while [ $(nft list chain ip filter ufw-user-output | grep -c "meta cgroup 1114129 counter") -gt 0 ]
+do
+  ruleNumber=$(nft list chain ip filter ufw-user-output | grep -c "meta cgroup 1114129 counter")
+  ip_filter_output_handle=$(echo "${ip_filter_output_handles}" | sed -n ${ruleNumber}p)
+  nft delete rule ip filter ufw-user-output handle ${ip_filter_output_handle}
+done
+while [ $(ip rule | grep -c "fwmark 0xb lookup novpn") -gt 0 ]
+do
+  ip rule del from all table novpn fwmark 11
+done
+while [ $(ip rule | grep -c novpn) -gt 0 ]
+do
+  ip rou del from all table novpn default via ${GATEWAY}
+done
+
+# add/refresh rules
+nft add rule ip nat POSTROUTING oifname ${OIFNAME} meta cgroup 1114129 counter masquerade
+nft add table ip mangle
+nft add chain ip mangle markit "{type route hook output priority filter; policy accept;}"
+nft add rule ip mangle markit meta cgroup 1114129 counter meta mark set 0xb
+nft add rule ip filter ufw-user-input meta cgroup 1114129 counter accept
+nft add rule ip filter ufw-user-output meta cgroup 1114129 counter accept
+ip route add default via ${GATEWAY} table novpn
+ip rule add fwmark 11 table novpn
+' | tee ${execdir}/split-tunnel/nftables-config.sh
+    chmod 755 -R ${execdir}/split-tunnel
+    # run it once
+    ${execdir}/split-tunnel/nftables-config.sh
+
+    # create nftables-config.service
+    echo "Create nftables-config systemd service..."
+    echo "[Unit]
+Description=Configure nftables for split-tunnel process
+Requires=pleb-vpn-tor-split-tunnel.service
+After=pleb-vpn-tor-split-tunnel.service
+[Service]
+Type=oneshot
+ExecStart=/bin/bash /home/admin/pleb-vpn/split-tunnel/nftables-config.sh
+[Install]
+WantedBy=multi-user.target
+" | tee /etc/systemd/system/pleb-vpn-nftables-config.service
+  
+  # mynode config
+  elif [ "${nodetype}" = "mynode" ]; then
+
+    while [ $(nft list tables | grep -c nat) -gt 0 ]
+    do
+      nft delete table ip nat
+    done
+    while [ $(nft list tables | grep -c mangle) -gt 0 ]
+    do
+      nft delete table ip mangle
+    done
+    while [ $(nft list table inet filter | grep -c input) -gt 0 ]
+    do
+      nft delete chain inet filter input
+    done
+    while [ $(nft list table inet filter | grep -c output) -gt 0 ]
+    do
+      nft delete chain inet filter output
+    done
+    while [ $(iptables -L INPUT | grep -c "0xb") -gt 0 ]
+    do
+      iptables -D INPUT -m mark --mark 0xb -j ACCEPT
+    done
+    while [ $(iptables -L FORWARD | grep -c "0xb") -gt 0 ]
+    do
+      iptables -D FORWARD -m mark --mark 0xb -j ACCEPT
+    done
+    while [ $(iptables -L OUTPUT | grep -c "0xb") -gt 0 ]
+    do
+      iptables -D OUTPUT -m mark --mark 0xb -j ACCEPT
+    done
+    while [ $(ip rule | grep -c "fwmark 0xb lookup novpn") -gt 0 ]
+    do
+      ip rule del from all table novpn fwmark 11
+    done
+    while [ $(ip rule | grep -c novpn) -gt 0 ]
+    do
+      ip rou del from all table novpn default via ${GATEWAY}
+    done
+
+    # create group novpn
+    sudo groupadd novpn
+
+    # create routing table
+    if [ ! -d /etc/iproute2/rt_tables.d ]; then
+      mkdir /etc/iproute2/rt_tables.d/
+    fi
+    echo "1000 novpn" | tee /etc/iproute2/rt_tables.d/novpn-route.conf
+
+    # create-cgroup.sh
+    echo "create create-cgroup.sh in pleb-vpn/split-tunnel..."
+    if [ ! -d ${execdir}/split-tunnel ]; then
+      mkdir ${execdir}/split-tunnel
+    fi
+    echo '#!/bin/bash
+
+# creates cgroup novpn for processes to skip vpn
+modprobe cls_cgroup
+if [ ! -d /sys/fs/cgroup/net_cls ]; then
+  mkdir /sys/fs/cgroup/net_cls
+fi
+mount -t cgroup -o net_cls novpn /sys/fs/cgroup/net_cls
+cgcreate -t debian-tor:novpn -a debian-tor:novpn -d 775 -f 664 -s 664 -g net_cls:novpn
+echo 0x00110011 > /sys/fs/cgroup/net_cls/novpn/net_cls.classid
+
+' | tee ${execdir}/split-tunnel/create-cgroup.sh
+    chmod 755 -R ${execdir}/split-tunnel
+    # run create-cgroup.sh
+    echo "execute create-cgroup.sh"
+    ${execdir}/split-tunnel/create-cgroup.sh
+
+    # create pleb-vpn-create-cgroup.service
+    echo "create create-cgroup.service to auto-create cgroup on start"
+    echo "[Unit]
+Description=Creates cgroup for split-tunneling tor from vpn
+StartLimitInterval=200
+StartLimitBurst=5
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/bin/bash /opt/mynode/pleb-vpn/split-tunnel/create-cgroup.sh
+User=root
+Group=root
+[Install]
+WantedBy=multi-user.target
+" | tee /etc/systemd/system/pleb-vpn-create-cgroup.service
+
+    # add pleb-vpn-create-cgroup.service as a tor requirement
+    echo "adding pleb-vpn-create-cgroup.service as a requirement to start tor"
+    if [ ! -d /etc/systemd/system/tor@default.service.d ]; then
+      mkdir /etc/systemd/system/tor@default.service.d >/dev/null
+    fi
+    echo "#Don't edit this file, it is created by pleb-vpn split-tunnel
+[Unit]
+Requires=pleb-vpn-create-cgroup.service
+After=pleb-vpn-create-cgroup.service
+  " | tee /etc/systemd/system/tor@default.service.d/tor-cgroup.conf
+
+    # tor-split-tunnel.sh
+    echo "create tor-split-tunnel.sh in pleb-vpn/split-tunnel to add tor to cgroup for split-tunnel"
+    echo '#!/bin/bash
+
+# adds tor to cgroup for split-tunneling
+tor_pid=$(pgrep -x tor)
+cgclassify -g net_cls:novpn $tor_pid
+' | tee ${execdir}/split-tunnel/tor-split-tunnel.sh
+    chmod 755 -R ${execdir}/split-tunnel
+    # run tor-split-tunnel.sh
+    echo "execute tor-split-tunnel.sh"
+    ${execdir}/split-tunnel/tor-split-tunnel.sh
+    
+    # create pleb-vpn-tor-split-tunnel.service
+    echo "Create tor-split-tunnel.service systemd service..."
+    echo "[Unit]
+Description=Adding tor process to cgroup novpn
+Requires=tor@default.service
+After=tor@default.service
+[Service]
+Type=oneshot
+ExecStart=/bin/bash /opt/mynode/pleb-vpn/split-tunnel/tor-split-tunnel.sh
+User=root
+Group=root
+[Install]
+WantedBy=multi-user.target
+" | tee /etc/systemd/system/pleb-vpn-tor-split-tunnel.service
+    # create pleb-vpn-tor-split-tunnel.timer
+    echo "Create tor-split-tunnel.timer systemd service..."
+    echo "[Unit]
+Description=1 min timer to add tor process to cgroup novpn
+[Timer]
+OnBootSec=10
+OnUnitActiveSec=10
+Persistent=true
+[Install]
+WantedBy=timers.target
+" | tee /etc/systemd/system/pleb-vpn-tor-split-tunnel.timer
+
+    # nftables-config.sh
+    echo "Creating nftables-config.sh in pleb-vpn/split-tunnel..."
+    echo '#!/bin/bash
 
 # adds route and rules to allow novpn cgroup past firewall
 
@@ -408,18 +707,18 @@ iptables -A OUTPUT -m mark --mark 0xb -j ACCEPT
 iptables -A FORWARD -m mark --mark 0xb -j ACCEPT
 ip route add default via ${GATEWAY} table novpn
 ip rule add fwmark 11 table novpn
-' | tee /mnt/hdd/mynode/pleb-vpn/split-tunnel/nftables-config.sh
-  chmod 755 -R /mnt/hdd/mynode/pleb-vpn/split-tunnel
-  # run it once
-  /mnt/hdd/mynode/pleb-vpn/split-tunnel/nftables-config.sh
+' | tee ${execdir}/split-tunnel/nftables-config.sh
+    chmod 755 -R ${execdir}/split-tunnel
+    # run it once
+    ${execdir}/split-tunnel/nftables-config.sh
 
-  # create nftables-config.service
-  echo "Create nftables-config systemd service..."
-  echo "[Unit]
+    # create nftables-config.service
+    echo "Create nftables-config systemd service..."
+    echo "[Unit]
 Description=Configure nftables for split-tunnel process
 After=network.service
 [Service]
-ExecStart=/bin/bash /mnt/hdd/mynode/pleb-vpn/split-tunnel/nftables-config.sh
+ExecStart=/bin/bash /opt/mynode/pleb-vpn/split-tunnel/nftables-config.sh
 User=root
 Group=root
 Restart=on-failure
@@ -427,6 +726,7 @@ RestartSec=5s
 [Install]
 WantedBy=multi-user.target
 " | tee /etc/systemd/system/pleb-vpn-nftables-config.service
+  fi
 
   # enable and start all services
   echo "enabling services..."
@@ -442,6 +742,9 @@ WantedBy=multi-user.target
   systemctl start pleb-vpn-tor-split-tunnel.service
   systemctl start pleb-vpn-nftables-config.service
   systemctl start pleb-vpn-tor-split-tunnel.timer
+
+  # copy service config files to /mnt/hdd to preserve through updates
+  cp -p -r ${execdir}/split-tunnel ${homedir}/
 
   # check configuration
   if ! [ "${skipTest}" = "1" ]; then
@@ -489,7 +792,7 @@ WantedBy=multi-user.target
     sleep 2
     echo "checking vpn IP"
     currentIP=$(curl https://api.ipify.org)
-    echo "current IP = (${currentIP})...should be ${vpnIP}"
+    echo "current IP = (${currentIP})...should be ${vpnip}"
   fi
   echo "tor split-tunneling enabled!"
   sleep 2
@@ -532,39 +835,90 @@ off() {
   OIFNAME=$(ip r | grep default | cut -d " " -f5)
   GATEWAY=$(ip r | grep default | cut -d " " -f3)
 
-  # first check for and remove old names from prior starts
-  while [ $(nft list tables | grep -c nat) -gt 0 ]
-  do
-    nft delete table ip nat
-  done
-  while [ $(nft list tables | grep -c mangle) -gt 0 ]
-  do
-    nft delete table ip mangle
-  done
-  while [ $(nft list table inet filter | grep -c pre-input) -gt 0 ]
-  do
-    nft delete chain inet filter pre-input
-  done
-  while [ $(nft list table inet filter | grep -c pre-output) -gt 0 ]
-  do
-    nft delete chain inet filter pre-output
-  done
-  while [ $(ip rule | grep -c "fwmark 0xb lookup novpn") -gt 0 ]
-  do
-    ip rule del from all table novpn fwmark 11
-  done
-  while [ $(ip rule | grep -c novpn) -gt 0 ]
-  do
-    ip rou del from all table novpn default via ${GATEWAY}
-  done
-
+  # raspiblitz config
+  if [ "${nodetype}" = "raspiblitz" ]; then
+    ip_nat_handles=$(nft -a list table ip nat | grep "meta cgroup 1114129 counter" | sed "s/.*handle //")
+    while [ $(nft list table ip nat | grep -c "meta cgroup 1114129 counter") -gt 0 ]
+    do
+      ruleNumber=$(nft list table ip nat | grep -c "meta cgroup 1114129 counter")
+      ip_nat_handle=$(echo "${ip_nat_handles}" | sed -n ${ruleNumber}p)
+      nft delete rule ip nat POSTROUTING handle ${ip_nat_handle}
+    done
+    while [ $(nft list tables | grep -c mangle) -gt 0 ]
+    do
+      nft delete table ip mangle
+    done
+    ip_filter_input_handles=$(nft -a list chain ip filter ufw-user-input | grep "meta cgroup 1114129 counter" | sed "s/.*handle //")
+    while [ $(nft list chain ip filter ufw-user-input | grep -c "meta cgroup 1114129 counter") -gt 0 ]
+    do
+      ruleNumber=$(nft list chain ip filter ufw-user-input | grep -c "meta cgroup 1114129 counter")
+      ip_filter_input_handle=$(echo "${ip_filter_input_handles}" | sed -n ${ruleNumber}p)
+      nft delete rule ip filter ufw-user-input handle ${ip_filter_input_handle}
+    done
+    ip_filter_output_handles=$(nft -a list chain ip filter ufw-user-output | grep "meta cgroup 1114129 counter" | sed "s/.*handle //")
+    while [ $(nft list chain ip filter ufw-user-output | grep -c "meta cgroup 1114129 counter") -gt 0 ]
+    do
+      ruleNumber=$(nft list chain ip filter ufw-user-output | grep -c "meta cgroup 1114129 counter")
+      ip_filter_output_handle=$(echo "${ip_filter_output_handles}" | sed -n ${ruleNumber}p)
+      nft delete rule ip filter ufw-user-output handle ${ip_filter_output_handle}
+    done
+    while [ $(ip rule | grep -c "fwmark 0xb lookup novpn") -gt 0 ]
+    do
+      ip rule del from all table novpn fwmark 11
+    done
+    while [ $(ip rule | grep -c novpn) -gt 0 ]
+    do
+      ip rou del from all table novpn default via ${GATEWAY}
+    done
+  
+  # mynode config
+  elif [ "${nodetype}" = "mynode" ]; then
+    # first check for and remove old names from prior starts
+    while [ $(nft list tables | grep -c nat) -gt 0 ]
+    do
+      nft delete table ip nat
+    done
+    while [ $(nft list tables | grep -c mangle) -gt 0 ]
+    do
+      nft delete table ip mangle
+    done
+    while [ $(nft list table inet filter | grep -c input) -gt 0 ]
+    do
+      nft delete chain inet filter input
+    done
+    while [ $(nft list table inet filter | grep -c output) -gt 0 ]
+    do
+      nft delete chain inet filter output
+    done
+    while [ $(iptables -L INPUT | grep -c "0xb") -gt 0 ]
+    do
+      iptables -D INPUT -m mark --mark 0xb -j ACCEPT
+    done
+    while [ $(iptables -L FORWARD | grep -c "0xb") -gt 0 ]
+    do
+      iptables -D FORWARD -m mark --mark 0xb -j ACCEPT
+    done
+    while [ $(iptables -L OUTPUT | grep -c "0xb") -gt 0 ]
+    do
+      iptables -D OUTPUT -m mark --mark 0xb -j ACCEPT
+    done
+    while [ $(ip rule | grep -c "fwmark 0xb lookup novpn") -gt 0 ]
+    do
+      ip rule del from all table novpn fwmark 11
+    done
+    while [ $(ip rule | grep -c novpn) -gt 0 ]
+    do
+      ip rou del from all table novpn default via ${GATEWAY}
+    done
+  fi
 
   # remove routing table
   rm /etc/iproute2/rt_tables.d/novpn-route.conf
 
   # remove split-tunnel scripts
   echo "removing split-tunnel scripts"
-  rm -rf /mnt/hdd/mynode/pleb-vpn/split-tunnel
+  rm -rf ${execdir}/split-tunnel
+  rm -rf ${homedir}/split-tunnel
 
   # remove group novpn
   sudo groupdel novpn
@@ -611,7 +965,7 @@ off() {
     sleep 2
     echo "checking VPN IP"
     currentIP=$(curl https://api.ipify.org)
-    echo "current IP = (${currentIP})...should be ${vpnIP}"
+    echo "current IP = (${currentIP})...should be ${vpnip}"
     echo "Checking connection over tor with VPN on (takes some time, likely multiple tries)..."
     echo "Will attempt a connection up to 10 times before giving up..."
     inc=1
@@ -643,5 +997,5 @@ off() {
 case "${1}" in
   on) on "${2}" ;;
   off) off "${2}" ;;
-  status) status "${2}" ;;
+  status) status "${2}" "${3}" "${4}" ;;
 esac

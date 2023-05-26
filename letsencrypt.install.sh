@@ -12,8 +12,10 @@ fi
 # find home directory based on node implementation
 if [ -d "/mnt/hdd/mynode/pleb-vpn/" ]; then
   homedir="/mnt/hdd/mynode/pleb-vpn"
+  execdir="/opt/mynode/pleb-vpn"
 elif [ -d "/mnt/hdd/app-data/pleb-vpn/" ]; then
   homedir="/mnt/hdd/app-data/pleb-vpn"
+  execdir="/home/admin/pleb-vpn"
 fi
 plebVPNConf="${homedir}/pleb-vpn.conf"
 plebVPNTempConf="${homedir}/pleb-vpn.conf.tmp"
@@ -158,15 +160,15 @@ Are you ready to continue?
       fi
 
       # get domain names
-      sudo touch /var/cache/raspiblitz/.tmp
-      sudo chmod 777 /var/cache/raspiblitz/.tmp
-      whiptail --title "Enter Domain" --inputbox "Enter the first domain name that you wish to secure (example: btcpay.mydomain.com)" 11 80 2>/var/cache/raspiblitz/.tmp
-      letsencryptdomain1=$(cat /var/cache/raspiblitz/.tmp)
+      sudo touch ${execdir}/.tmp
+      sudo chmod 777 ${execdir}/.tmp
+      whiptail --title "Enter Domain" --inputbox "Enter the first domain name that you wish to secure (example: btcpay.mydomain.com)" 11 80 2>${execdir}/.tmp
+      letsencryptdomain1=$(cat ${execdir}/.tmp)
       # check first domain name
       if [ "${letsencryptdomain1}" = "" ]; then
         whiptail --title "Invalid Domain" --inputbox "Domain cannot be blank. 
-Re-Enter the first domain name that you wish to secure (example: btcpay.mydomain.com)" 12 80 2>/var/cache/raspiblitz/.tmp
-        letsencryptdomain1=$(cat /var/cache/raspiblitz/.tmp)
+Re-Enter the first domain name that you wish to secure (example: btcpay.mydomain.com)" 12 80 2>${execdir}/.tmp
+        letsencryptdomain1=$(cat ${execdir}/.tmp)
         if [ "${letsencryptdomain1}" = "" ]; then
           echo "ERROR: Invalid domain. Domain cannot be blank. Please try again later"
           echo "LetsEncrypt install canceled"
@@ -185,8 +187,8 @@ domain name incorrectly chose <Re-Enter Domain> below. If you fixed your A recor
 the host of ${letsencryptdomain1} again, chose <Check Again> below.
 " 20 100
         if [ $? -eq 0 ]; then
-          whiptail --title "Enter Domain" --inputbox "Enter the first domain name that you wish to secure (example: btcpay.mydomain.com)" 11 80 2>/var/cache/raspiblitz/.tmp
-          letsencryptdomain1=$(cat /var/cache/raspiblitz/.tmp)
+          whiptail --title "Enter Domain" --inputbox "Enter the first domain name that you wish to secure (example: btcpay.mydomain.com)" 11 80 2>${execdir}/.tmp
+          letsencryptdomain1=$(cat ${execdir}/.tmp)
           domain1host=$(host ${letsencryptdomain1} | grep -v IPv6 | cut -d " " -f4)
         else
           echo "LetsEncrypt install canceled"
@@ -200,8 +202,8 @@ the host of ${letsencryptdomain1} again, chose <Check Again> below.
         fi
       fi
       if [ "${letsencryptbtcpay}" = "on" ] && [ "${letsencryptlnbits}" = "on" ]; then
-        whiptail --title "Enter Domain" --inputbox "Enter the second domain name that you wish to secure (example: lnbits.mydomain.com)" 11 80 2>/var/cache/raspiblitz/.tmp
-        letsencryptdomain2=$(cat /var/cache/raspiblitz/.tmp)
+        whiptail --title "Enter Domain" --inputbox "Enter the second domain name that you wish to secure (example: lnbits.mydomain.com)" 11 80 2>${execdir}/.tmp
+        letsencryptdomain2=$(cat ${execdir}/.tmp)
       else
         letsencryptdomain2=""
       fi
@@ -219,8 +221,8 @@ domain name incorrectly chose <Re-Enter Domain> below. If you fixed your A recor
 the host of ${letsencryptdomain1} again, chose <Check Again> below.
 " 20 120
           if [ $? -eq 0 ]; then
-            whiptail --title "Enter Domain" --inputbox "Enter the second domain name that you wish to secure (example: btcpay.mydomain.com)" 11 80 2>/var/cache/raspiblitz/.tmp
-            letsencryptdomain1=$(cat /var/cache/raspiblitz/.tmp)
+            whiptail --title "Enter Domain" --inputbox "Enter the second domain name that you wish to secure (example: btcpay.mydomain.com)" 11 80 2>${execdir}/.tmp
+            letsencryptdomain1=$(cat ${execdir}/.tmp)
             domain1host=$(host ${letsencryptdomain1} | grep -v IPv6 | cut -d " " -f4)
           else
             echo "LetsEncrypt install canceled"
@@ -269,7 +271,7 @@ Contact allyourbankarebelongtous with any questions or issues.
       echo "LetsEncrypt install success!"
     fi
 
-    # link certs to /mnt/hdd/app-data/pleb-vpn/letsencrypt
+    # link certs to ${homedir}/letsencrypt
     sudo chmod -R 755 /etc/letsencrypt
     sudo ln -s /etc/letsencrypt/live/"${letsencryptdomain1}"/fullchain.pem "${homedir}"/letsencrypt/tls.cert
     sudo ln -s /etc/letsencrypt/live/"${letsencryptdomain1}"/privkey.pem "${homedir}"/letsencrypt/tls.key
@@ -319,9 +321,9 @@ if [ \"\${letsencryptlnbits}\" = \"on\" ]; then
 fi
 
 systemctl reload nginx
-" | sudo tee /mnt/hdd/mynode/pleb-vpn/letsencrypt/set_nginx_localip.sh
-      sudo chown admin:admin /mnt/hdd/mynode/pleb-vpn/letsencrypt/set_nginx_localip.sh
-      sudo chmod 755 /mnt/hdd/mynode/pleb-vpn/letsencrypt/set_nginx_localip.sh
+" | sudo tee ${homedir}/letsencrypt/set_nginx_localip.sh
+      sudo chown admin:admin ${homedir}/letsencrypt/set_nginx_localip.sh
+      sudo chmod 755 ${homedir}/letsencrypt/set_nginx_localip.sh
 
       echo "[Unit]
 Description=Add localip to nginx btcpayserver and lnbits for ssl proxy
@@ -338,7 +340,7 @@ WantedBy=multi-user.target
 
       # Enable and run once
       sudo systemctl enable pleb-vpn-letsencrypt-config.service
-      sudo /mnt/hdd/mynode/pleb-vpn/letsencrypt/set_nginx_localip.sh
+      sudo ${homedir}/letsencrypt/set_nginx_localip.sh
     fi
 
     # reload nginx
@@ -440,7 +442,7 @@ Is the information correct?
       sudo certbot certonly --noninteractive --agree-tos --manual --manual-auth-hook /etc/letsencrypt/acme-dns-auth.py --preferred-challenges dns --register-unsafely-without-email --agree-tos -d ${letsencryptdomain1}
     fi
 
-    # link certs to /mnt/hdd/app-data/pleb-vpn/letsencrypt
+    # link certs to ${homedir}/letsencrypt
     sudo chmod -R 755 /etc/letsencrypt
     sudo rm ${homedir}/letsencrypt/tls.cert &> /dev/null
     sudo rm ${homedir}/letsencrypt/tls.key &> /dev/null
@@ -492,9 +494,9 @@ if [ \"\${letsencryptlnbits}\" = \"on\" ]; then
 fi
 
 systemctl reload nginx
-" | sudo tee /mnt/hdd/mynode/pleb-vpn/letsencrypt/set_nginx_localip.sh
-      sudo chown admin:admin /mnt/hdd/mynode/pleb-vpn/letsencrypt/set_nginx_localip.sh
-      sudo chmod 755 /mnt/hdd/mynode/pleb-vpn/letsencrypt/set_nginx_localip.sh
+" | sudo tee ${homedir}/letsencrypt/set_nginx_localip.sh
+      sudo chown admin:admin ${homedir}/letsencrypt/set_nginx_localip.sh
+      sudo chmod 755 ${homedir}/letsencrypt/set_nginx_localip.sh
 
       echo "[Unit]
 Description=Add localip to nginx btcpayserver and lnbits for ssl proxy
@@ -550,7 +552,7 @@ off() {
   elif [ "${nodetype}" = "mynode" ]; then
     sudo rm /etc/nginx/mynode/mynode_ssl_cert_key_letsencrypt.conf
     sudo systemctl disable pleb-vpn-letsencrypt-config.service
-    sudo rm /mnt/hdd/mynode/pleb-vpn/letsencrypt/set_nginx_localip.sh
+    sudo rm ${homedir}/letsencrypt/set_nginx_localip.sh
     sudo rm /etc/systemd/system/pleb-vpn-letsencrypt-config.service
     sudo sed -i "s/\(proxy_pass http:\/\/\).*/\1127.0.0.1:49392;/" /etc/nginx/sites-enabled/https_btcpayserver.conf
     sudo sed -i 's/mynode_ssl_cert_key_letsencrypt.conf/mynode_ssl_cert_key.conf/' /etc/nginx/sites-enabled/https_btcpayserver.conf

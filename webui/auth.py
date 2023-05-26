@@ -3,11 +3,9 @@ from .models import User
 from werkzeug.security import generate_password_hash, check_password_hash
 from . import db
 from flask_login import login_user, login_required, logout_user, current_user
-import os, subprocess
 
 
 auth = Blueprint('auth', __name__)
-plebVPN_status = {}
 
 @auth.route('/login', methods=['GET', 'POST'])
 def login():
@@ -50,30 +48,6 @@ def change_password():
             User.query.filter_by(id=current_user.id).update(dict(password=newHash))
             db.session.commit() 
             flash('Password changed successfully!', category='success')
-            if plebVPN_status == {}:
-                plebVPN_status = get_plebVPN_status()
-            return render_template("home.html", user=current_user, setting=get_conf(), plebVPN_status=plebVPN_status) 
+            return redirect(url_for('views.home'))
     
     return render_template("change_password.html", user=current_user)
-
-def get_conf():
-    setting = {}
-    with open(os.path.abspath('./pleb-vpn.conf')) as conf:
-        for line in conf:
-            if "=" in line:
-                name, value = line.split("=")
-                setting[name] = str(value).rstrip().strip('\'\'')
-    return setting
-
-def get_plebVPN_status():
-    # get status of pleb-vpn connection to vps
-    global plebVPN_status
-    plebVPN_status = {}
-    cmd_str = ["sudo /mnt/hdd/mynode/pleb-vpn/vpn-install.sh status"]
-    subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True)
-    with open(os.path.abspath('./pleb-vpn_status.tmp')) as status:
-        for line in status:
-            if "=" in line:
-                name, value = line.split("=")
-                plebVPN_status[name] = str(value).rstrip().strip('\'\'')
-    os.remove(os.path.abspath('./pleb-vpn_status.tmp'))

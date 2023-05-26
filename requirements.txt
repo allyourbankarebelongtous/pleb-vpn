@@ -1,0 +1,12 @@
+flask
+flask_sqlalchemy
+flask-socketio
+gevent
+gevent-websocket
+pexpect
+flask_login
+gunicorn
+qrcode
+pillow
+requests
+pydantic

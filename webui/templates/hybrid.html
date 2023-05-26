@@ -1,0 +1,354 @@
+{% extends "base.html" %} {% block title %}Hybrid{% endblock %} {% block content
+%}
+<div class="container text-center">
+  <div class="row">
+    <div class="col">
+      <h3>Lightning Node Hybrid Mode</h3>
+    </div>
+  </div>
+</div>
+<br />
+{% if setting['plebvpn'] != "on" %}
+<div class="container">
+  <div class="row">
+    <div class="col text-center">
+      <h5>Pleb-VPN is not connected. Enable Plev-VPN first!</h5>
+    </div>
+  </div>
+</div>
+{% else %} {% if lnd %}
+<div class="container text-center">
+  <div class="row">
+    <div class="col text-center">
+      <h4>LND Hybrid</h4>
+    </div>
+  </div>
+</div>
+<br />
+{% if setting['lndhybrid'] != "on" %}
+<div class="container">
+  {% if setting['lnport'] == '' %}
+  <div class="row">
+    <div class="col text-center">
+      <h5>Add LND Port for hybrid mode</h5>
+    </div>
+  </div>
+  <form method="POST">
+    <div class="row">
+      <div class="col">
+        <p>
+          Missing LND Port for hybrid mode. Enter your Pleb-VPN assigned LND
+          port.
+        </p>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col">
+        <div class="form-group">
+          <label for="lnPort">LND Port</label>
+          <input
+            type="text"
+            class="form-control"
+            id="lnPort"
+            name="lnPort"
+            placeholder="Enter port"
+          />
+        </div>
+        <div class="col">
+          <button
+            type="button"
+            class="btn btn-success"
+            onClick="this.form.submit()"
+          >
+            Set LND Port
+          </button>
+        </div>
+      </div>
+    </div>
+  </form>
+  {% else %}
+  <div class="row">
+    <div class="col text-center">
+      <h5>LND Port detected</h5>
+    </div>
+  </div>
+  <form method="POST">
+    <div class="row">
+      <div class="col">
+        <p>Enable LND Hybrid mode</p>
+      </div>
+      <div class="col">
+        <button
+          id="activate"
+          type="button"
+          class="btn btn-success"
+          onClick="setlndHybrid_on({{ current_user.id }})"
+        >
+          Activate
+        </button>
+        <button
+          id="activate_loading"
+          class="btn btn-success d-none"
+          type="button"
+          disabled
+        >
+          <span
+            class="spinner-grow spinner-grow-sm"
+            role="status"
+            aria-hidden="true"
+          ></span>
+          Loading...
+        </button>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col">
+        <p>LND Port: {{ setting['lnport'] }}</p>
+      </div>
+    </div>
+  </form>
+  <form method="POST">
+    <div class="row">
+      <div class="col text-center">
+        <h5>Change LND Port</h5>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col">
+        <div class="form-group">
+          <input
+            type="text"
+            class="form-control"
+            id="lnPort"
+            name="lnPort"
+            placeholder="Enter LND port"
+          />
+        </div>
+      </div>
+      <div class="col">
+        <button
+          type="button"
+          class="btn btn-success"
+          onClick="this.form.submit()"
+        >
+          Change LND Port
+        </button>
+      </div>
+    </div>
+  </form>
+
+  {% endif %}
+</div>
+{% else %}
+<div class="container">
+  <div class="row">
+    <div class="col text-center">
+      <h5>Deactivate LND Hybrid mode</h5>
+    </div>
+  </div>
+  <form method="POST">
+    <div class="row">
+      <div class="col">
+        <p>Dectivate LND Hybrid</p>
+      </div>
+      <div class="col">
+        <button
+          id="deactivate"
+          type="button"
+          class="btn btn-danger"
+          onClick="setlndHybrid_off({{ current_user.id }})"
+        >
+          Dectivate
+        </button>
+        <button
+          id="deactivate_loading"
+          class="btn btn-danger d-none"
+          type="button"
+          disabled
+        >
+          <span
+            class="spinner-grow spinner-grow-sm"
+            role="status"
+            aria-hidden="true"
+          ></span>
+          Loading...
+        </button>
+      </div>
+    </div>
+  </form>
+</div>
+{% endif %} {% endif %} {% if cln %}
+<div class="container text-center">
+  <div class="row">
+    <div class="col">
+      <h4>Core Lightning Hybrid</h4>
+    </div>
+  </div>
+</div>
+<br />
+{% if setting['clnhybrid'] != "on" %}
+<div class="container">
+  {% if setting['clnport'] == '' %}
+  <div class="row">
+    <div class="col text-center">
+      <h5>Add Core Lightning Port for hybrid mode</h5>
+    </div>
+  </div>
+  <form method="POST">
+    <div class="row">
+      <div class="col">
+        <p>
+          Missing Core Lightning Port for hybrid mode. Enter your Pleb-VPN
+          assigned Core Lightning port.
+        </p>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col">
+        <div class="form-group">
+          <label for="clnPort">CLN Port</label>
+          <input
+            type="text"
+            class="form-control"
+            id="clnPort"
+            name="clnPort"
+            placeholder="Enter port"
+          />
+        </div>
+        <div class="col">
+          <button
+            type="button"
+            class="btn btn-success"
+            onClick="this.form.submit()"
+          >
+            Set CLN Port
+          </button>
+        </div>
+      </div>
+    </div>
+  </form>
+  {% else %}
+  <div class="row">
+    <div class="col text-center">
+      <h5>Core Lightning Port detected</h5>
+    </div>
+  </div>
+  <form method="POST">
+    <div class="row">
+      <div class="col">
+        <p>Enable Core Lightning Hybrid mode</p>
+      </div>
+      <div class="col">
+        <button
+          id="activate"
+          type="button"
+          class="btn btn-success"
+          onClick="setclnHybrid_on({{ current_user.id }})"
+        >
+          Activate
+        </button>
+        <button
+          id="activate_loading"
+          class="btn btn-success d-none"
+          type="button"
+          disabled
+        >
+          <span
+            class="spinner-grow spinner-grow-sm"
+            role="status"
+            aria-hidden="true"
+          ></span>
+          Loading...
+        </button>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col">
+        <p>CLN Port: {{ setting['clnport'] }}</p>
+      </div>
+    </div>
+  </form>
+  <form method="POST">
+    <div class="row">
+      <div class="col text-center">
+        <h5>Change Core Lightning Port</h5>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col">
+        <div class="form-group">
+          <input
+            type="text"
+            class="form-control"
+            id="clnPort"
+            name="clnPort"
+            placeholder="Enter CLN port"
+          />
+        </div>
+      </div>
+      <div class="col">
+        <button
+          type="button"
+          class="btn btn-success"
+          onClick="this.form.submit()"
+        >
+          Change CLN Port
+        </button>
+      </div>
+    </div>
+  </form>
+
+  {% endif %}
+</div>
+{% else %}
+<div class="container">
+  <div class="row">
+    <div class="col text-center">
+      <h5>Deactivate Core Lightning Hybrid mode</h5>
+    </div>
+  </div>
+  <form method="POST">
+    <div class="row">
+      <div class="col">
+        <p>Dectivate CLN Hybrid</p>
+      </div>
+      <div class="col">
+        <button
+          id="deactivate"
+          type="button"
+          class="btn btn-danger"
+          onClick="setclnHybrid_off({{ current_user.id }})"
+        >
+          Dectivate
+        </button>
+        <button
+          id="deactivate_loading"
+          class="btn btn-danger d-none"
+          type="button"
+          disabled
+        >
+          <span
+            class="spinner-grow spinner-grow-sm"
+            role="status"
+            aria-hidden="true"
+          ></span>
+          Loading...
+        </button>
+      </div>
+    </div>
+  </form>
+</div>
+{% endif %} {% endif %} {% if not lnd and not cln %}
+<div class="container">
+  <div class="row">
+    <div class="col text-center">
+      <h5>
+        No node implementation found. Ensure you are running either LND or Core
+        Lightning first.
+      </h5>
+    </div>
+  </div>
+</div>
+{% endif %} {% endif %} {% endblock %}

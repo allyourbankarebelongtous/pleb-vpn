@@ -1,16 +1,30 @@
 #!/bin/bash
 
-# generates a payment script for a recurring payment and places the command in /mnt/hdd/mynode/pleb-vpn/payments/keysends.
-# includes the script name and location in /mnt/hdd/mynode/pleb-vpn/payments/[frequency][node]payments.sh
-# adds the payment as an option to delete in /mnt/hdd/mynode/pleb-vpn/payments.conf
+# generates a payment script for a recurring payment and places the command in ${execdir}/payments/keysends.
+# includes the script name and location in ${execdir}/payments/[frequency][node]payments.sh
+# adds the payment as an option to delete in ${execdir}/payments.conf
 # checks for systemd timer and if required sets it up.
 
 HEIGHT=19
 WIDTH=120
 
-# for mynode, only use lnd
-lnd="on"
-cl="off"
+# find home directory based on node implementation
+if [ -d "/mnt/hdd/mynode/pleb-vpn/" ]; then
+  homedir="/mnt/hdd/mynode/pleb-vpn"
+  execdir="/mnt/hdd/mynode/pleb-vpn"
+elif [ -d "/mnt/hdd/app-data/pleb-vpn/" ]; then
+  homedir="/mnt/hdd/app-data/pleb-vpn"
+  execdir="/home/admin/pleb-vpn"
+fi
+plebVPNConf="${homedir}/pleb-vpn.conf"
+plebVPNTempConf="${homedir}/pleb-vpn.conf.tmp"
+sed '1d' $plebVPNConf > $plebVPNTempConf
+source ${plebVPNTempConf}
+sudo rm ${plebVPNTempConf}
+
+if [ "${nodetype}" = "raspiblitz" ]; then
+  source /mnt/hdd/raspiblitz.conf
+fi
 
 # Node menu options (if necessary)
 NODE_OPTIONS=(LND "Send sats using the LND node" \
@@ -67,41 +81,45 @@ esac
 cancel_check $AMOUNT
 
 # check which node implementation to use, and if necessary, ask the user
-if [ "${lnd}" = "on" ]; then
-  if [ "${cl}" = "on" ]; then
-    node="ask"
-  else
-    node="lnd"
+if [ "${nodetype}" = "raspiblitz" ]; then
+  if [ "${lnd}" = "on" ]; then
+    if [ "${cl}" = "on" ]; then
+      node="ask"
+    else
+      node="lnd"
+    fi
+   else
+    if [ "${cl}" = "on" ]; then
+      node="none"
+    else
+      node="cln"
+    fi
   fi
- else
-  if [ "${cl}" = "on" ]; then
-    node="none"
-  else
-    node="cln"
+  if [ "${node}" = "ask" ]; then
+    # Ask user which node implementation to use
+    NODE_TYPE=$(dialog --clear \
+          --backtitle "Recurring Payments" \
+          --title "Recurring Keysend" \
+          --ok-label "Select" \
+          --cancel-label "Exit" \
+          --menu "Automatically send some sats to another node on a daily/weekly/monthly basis." \
+          $HEIGHT $WIDTH $HEIGHT \
+          "${NODE_OPTIONS[@]}" \
+          2>&1 >/dev/tty)
+
+    cancel_check $NODE_TYPE
+
+    case $NODE_TYPE in
+          LND)
+            node="lnd"
+            ;;
+          CL)
+            node="cln"
+            ;;
+    esac
   fi
-fi
-if [ "${node}" = "ask" ]; then
-  # Ask user which node implementation to use
-  NODE_TYPE=$(dialog --clear \
-        --backtitle "Recurring Payments" \
-        --title "Recurring Keysend" \
-        --ok-label "Select" \
-        --cancel-label "Exit" \
-        --menu "Automatically send some sats to another node on a daily/weekly/monthly basis." \
-        $HEIGHT $WIDTH $HEIGHT \
-        "${NODE_OPTIONS[@]}" \
-        2>&1 >/dev/tty)
-
-  cancel_check $NODE_TYPE
-
-  case $NODE_TYPE in
-        LND)
-          node="lnd"
-          ;;
-        CL)
-          node="cln"
-          ;;
-  esac
+else
+  node="lnd"
 fi
 if [ "${node}" = "none" ]; then
   echo "error: no node implementation found."
@@ -160,17 +178,19 @@ who sent the payment. If you use this with @allyourbankarebelongtous VPS
 service, please include your TG handle or protonmail email for accounting.
 " 12 85
 if [ $? -eq 0 ]; then
-  sudo touch /mnt/hdd/mynode/pleb-vpn/payments/.tmp
-  sudo chmod 777 /mnt/hdd/mynode/pleb-vpn/payments/.tmp
-  whiptail --title "Enter Message" --inputbox "Enter the message you wish to send with each payment" 12 100 2>/mnt/hdd/mynode/pleb-vpn/payments/.tmp
-  message=$(cat /mnt/hdd/mynode/pleb-vpn/payments/.tmp)
+  sudo touch ${execdir}/payments/.tmp
+  sudo chmod 777 ${execdir}/payments/.tmp
+  whiptail --title "Enter Message" --inputbox "Enter the message you wish to send with each payment" 12 100 2>${execdir}/payments/.tmp
+  message=$(cat ${execdir}/payments/.tmp)
+  sudo rm ${execdir}/payments/.tmp
 fi
  
 # Generate a keysend script
 short_node_id=$(echo $NODE_ID | cut -c 1-7)
-script_name="/mnt/hdd/mynode/pleb-vpn/payments/keysends/_${short_node_id}_${freq}_${node}_keysend.sh"
+script_name="${execdir}/payments/keysends/_${short_node_id}_${freq}_${node}_keysend.sh"
+script_backup_name="${homedir}/payments/keysends/_${short_node_id}_${freq}_${node}_keysend.sh"
 denomination=$(echo $DENOMINATION | tr '[:upper:]' '[:lower:]')
-echo -n "/mnt/hdd/mynode/pleb-vpn/.venv/bin/python /mnt/hdd/mynode/pleb-vpn/payments/_recurringpayment_${node}.py " \
+echo -n "${execdir}/.venv/bin/python ${execdir}/payments/_recurringpayment_${node}.py " \
       "--$denomination $AMOUNT " \
       "--node_id $NODE_ID " \
       > $script_name
@@ -179,14 +199,16 @@ if [ ! "${message}" = "" ]; then
   echo "--message \"${message}\"
 " | tee -a $script_name
 fi
-chmod +x $script_name
+chmod 755 $script_name
 
 # add payment to execution list
-subscriptionlist="/mnt/hdd/mynode/pleb-vpn/payments/${freq}${node}payments.sh"
+subscriptionlist="${execdir}/payments/${freq}${node}payments.sh"
 # first check if already on the list to avoid duplicates in case of payment change
 scriptexists=$(cat ${subscriptionlist} | grep -c ${script_name})
 if [ ${scriptexists} -eq 0 ]; then
   echo "${script_name}" >>${subscriptionlist}
+  subscriptionbackuplist="${homedir}/payments/${freq}${node}payments.sh"
+  sudo cp -p $subscriptionlist $subscriptionbackuplist
 fi
 
 # check if systemd unit for frequency and node exists, and if not, create it
@@ -199,7 +221,7 @@ Description=Execute ${freq} payments
 [Service]
 User=bitcoin
 Group=bitcoin
-ExecStart=/bin/bash /mnt/hdd/mynode/pleb-vpn/payments/${freq}${node}payments.sh" \
+ExecStart=/bin/bash ${execdir}/payments/${freq}${node}payments.sh" \
     > /etc/systemd/system/payments-${freq}-${node}.service
   echo -n "# this file will run ${freq} to execute any ${freq} recurring payments
 [Unit]

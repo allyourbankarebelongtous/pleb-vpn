@@ -25,11 +25,14 @@ content %}
     <div class="col-3">
       <div class="row" style="margin-top: 0.5em">
         <div class="col">
-          <h5>Daily Payment</h5>
+          {% if line[1] == "lnd" %}
+          <h5>Daily Payment from LND node</h5>
+          {% elif line[1] == "cln" %}
+          <h5>Daily Payment from Core Lightning node</h5>
+          {% endif %}
           <p><small>every day at time 0000</small></p>
         </div>
       </div>
-
       <div class="row">
         <div class="col">
           <div class="btn-group">
@@ -77,15 +80,15 @@ content %}
         <tbody>
           <tr>
             <th scope="row">Destination Pubkey</th>
-            <td>{{ line[1] }}</td>
+            <td>{{ line[2] }}</td>
           </tr>
           <tr>
             <th scope="row">Amount</th>
-            <td>{{ line[2] }} {{ line[3] }}</td>
+            <td>{{ line[3] }} {{ line[4] }}</td>
           </tr>
           <tr>
             <th scope="row">Message</th>
-            <td>{{ line[4] }}</td>
+            <td>{{ line[5] }}</td>
           </tr>
         </tbody>
       </table>
@@ -108,6 +111,42 @@ content %}
       <div class="row">
         <table class="table">
           <tbody>
+            {% if lnd and cln %}
+            <tr>
+              <th scope="row">
+                Which node do you want to send this payment from?
+              </th>
+              <td>
+                {% if line[1] == "lnd" %}
+                <select class="form-control" id="node" name="node">
+                  <option value="lnd" selected>LND</option>
+                  <option value="cln">Core Lightning</option>
+                </select>
+                {% elif line[1] == "cln" %}
+                <select class="form-control" id="node" name="node">
+                  <option value="lnd">LND</option>
+                  <option value="cln" selected>Core Lightning</option>
+                </select>
+                {% endif %}
+              </td>
+            </tr>
+            {% else %} {% if lnd %}
+            <input
+              class="form-control"
+              type="hidden"
+              name="node"
+              id="node"
+              value="lnd"
+            />
+            {% endif %} {% if cln %}
+            <input
+              class="form-control"
+              type="hidden"
+              name="node"
+              id="node"
+              value="cln"
+            />
+            {% endif %} {% endif %}
             <tr>
               <th scope="row">How often do you want to send this payment?</th>
               <td>
@@ -127,7 +166,7 @@ content %}
                   type="text"
                   id="pubkey"
                   name="pubkey"
-                  value="{{ line[1] }}"
+                  value="{{ line[2] }}"
                 />
               </td>
             </tr>
@@ -139,14 +178,14 @@ content %}
                   type="text"
                   id="amount"
                   name="amount"
-                  value="{{ line[2] }}"
+                  value="{{ line[3] }}"
                 />
               </td>
             </tr>
             <tr>
               <th scope="row">Denomination</th>
               <td>
-                {% if line[3] == "sats" %}
+                {% if line[4] == "sats" %}
                 <select
                   class="form-control"
                   id="denomination"
@@ -175,7 +214,7 @@ content %}
                   type="text"
                   id="message"
                   name="message"
-                  value="{{ line[4] }}"
+                  value="{{ line[5] }}"
                 />
               </td>
             </tr>
@@ -215,11 +254,14 @@ content %}
     <div class="col-3">
       <div class="row" style="margin-top: 0.5em">
         <div class="col">
-          <h5>Weekly Payment</h5>
+          {% if line[1] == "lnd" %}
+          <h5>Weekly Payment from LND node</h5>
+          {% elif line[1] == "cln" %}
+          <h5>Weekly Payment from Core Lightning node</h5>
+          {% endif %}
           <p><small>every Sunday morning at time 0000</small></p>
         </div>
       </div>
-
       <div class="row">
         <div class="col">
           <div class="btn-group">
@@ -267,15 +309,15 @@ content %}
         <tbody>
           <tr>
             <th scope="row">Destination Pubkey</th>
-            <td>{{ line[1] }}</td>
+            <td>{{ line[2] }}</td>
           </tr>
           <tr>
             <th scope="row">Amount</th>
-            <td>{{ line[2] }} {{ line[3] }}</td>
+            <td>{{ line[3] }} {{ line[4] }}</td>
           </tr>
           <tr>
             <th scope="row">Message</th>
-            <td>{{ line[4] }}</td>
+            <td>{{ line[5] }}</td>
           </tr>
         </tbody>
       </table>
@@ -298,6 +340,42 @@ content %}
       <div class="row">
         <table class="table">
           <tbody>
+            {% if lnd and cln %}
+            <tr>
+              <th scope="row">
+                Which node do you want to send this payment from?
+              </th>
+              <td>
+                {% if line[1] == "lnd" %}
+                <select class="form-control" id="node" name="node">
+                  <option value="lnd" selected>LND</option>
+                  <option value="cln">Core Lightning</option>
+                </select>
+                {% elif line[1] == "cln" %}
+                <select class="form-control" id="node" name="node">
+                  <option value="lnd">LND</option>
+                  <option value="cln" selected>Core Lightning</option>
+                </select>
+                {% endif %}
+              </td>
+            </tr>
+            {% else %} {% if lnd %}
+            <input
+              class="form-control"
+              type="hidden"
+              name="node"
+              id="node"
+              value="lnd"
+            />
+            {% endif %} {% if cln %}
+            <input
+              class="form-control"
+              type="hidden"
+              name="node"
+              id="node"
+              value="cln"
+            />
+            {% endif %} {% endif %}
             <tr>
               <th scope="row">How often do you want to send this payment?</th>
               <td>
@@ -317,7 +395,7 @@ content %}
                   type="text"
                   id="pubkey"
                   name="pubkey"
-                  value="{{ line[1] }}"
+                  value="{{ line[2] }}"
                 />
               </td>
             </tr>
@@ -329,14 +407,14 @@ content %}
                   type="text"
                   id="amount"
                   name="amount"
-                  value="{{ line[2] }}"
+                  value="{{ line[3] }}"
                 />
               </td>
             </tr>
             <tr>
               <th scope="row">Denomination</th>
               <td>
-                {% if line[3] == "sats" %}
+                {% if line[4] == "sats" %}
                 <select
                   class="form-control"
                   id="denomination"
@@ -365,7 +443,7 @@ content %}
                   type="text"
                   id="message"
                   name="message"
-                  value="{{ line[4] }}"
+                  value="{{ line[5] }}"
                 />
               </td>
             </tr>
@@ -394,6 +472,7 @@ content %}
       </div>
     </form>
   </div>
+
   {% endfor %} {% endif %} {% if current_payments['monthly']|length > 0 %} {%
   for line in current_payments['monthly'] %}
   <div
@@ -404,11 +483,14 @@ content %}
     <div class="col-3">
       <div class="row" style="margin-top: 0.5em">
         <div class="col">
-          <h5>Monthly Payment</h5>
+          {% if line[1] == "lnd" %}
+          <h5>Monthly Payment from LND node</h5>
+          {% elif line[1] == "cln" %}
+          <h5>Monthly Payment from Core Lightning node</h5>
+          {% endif %}
           <p><small>every 1st of the month at time 0000</small></p>
         </div>
       </div>
-
       <div class="row">
         <div class="col">
           <div class="btn-group">
@@ -456,15 +538,15 @@ content %}
         <tbody>
           <tr>
             <th scope="row">Destination Pubkey</th>
-            <td>{{ line[1] }}</td>
+            <td>{{ line[2] }}</td>
           </tr>
           <tr>
             <th scope="row">Amount</th>
-            <td>{{ line[2] }} {{ line[3] }}</td>
+            <td>{{ line[3] }} {{ line[4] }}</td>
           </tr>
           <tr>
             <th scope="row">Message</th>
-            <td>{{ line[4] }}</td>
+            <td>{{ line[5] }}</td>
           </tr>
         </tbody>
       </table>
@@ -487,6 +569,42 @@ content %}
       <div class="row">
         <table class="table">
           <tbody>
+            {% if lnd and cln %}
+            <tr>
+              <th scope="row">
+                Which node do you want to send this payment from?
+              </th>
+              <td>
+                {% if line[1] == "lnd" %}
+                <select class="form-control" id="node" name="node">
+                  <option value="lnd" selected>LND</option>
+                  <option value="cln">Core Lightning</option>
+                </select>
+                {% elif line[1] == "cln" %}
+                <select class="form-control" id="node" name="node">
+                  <option value="lnd">LND</option>
+                  <option value="cln" selected>Core Lightning</option>
+                </select>
+                {% endif %}
+              </td>
+            </tr>
+            {% else %} {% if lnd %}
+            <input
+              class="form-control"
+              type="hidden"
+              name="node"
+              id="node"
+              value="lnd"
+            />
+            {% endif %} {% if cln %}
+            <input
+              class="form-control"
+              type="hidden"
+              name="node"
+              id="node"
+              value="cln"
+            />
+            {% endif %} {% endif %}
             <tr>
               <th scope="row">How often do you want to send this payment?</th>
               <td>
@@ -506,7 +624,7 @@ content %}
                   type="text"
                   id="pubkey"
                   name="pubkey"
-                  value="{{ line[1] }}"
+                  value="{{ line[2] }}"
                 />
               </td>
             </tr>
@@ -518,14 +636,14 @@ content %}
                   type="text"
                   id="amount"
                   name="amount"
-                  value="{{ line[2] }}"
+                  value="{{ line[3] }}"
                 />
               </td>
             </tr>
             <tr>
               <th scope="row">Denomination</th>
               <td>
-                {% if line[3] == "sats" %}
+                {% if line[4] == "sats" %}
                 <select
                   class="form-control"
                   id="denomination"
@@ -554,7 +672,7 @@ content %}
                   type="text"
                   id="message"
                   name="message"
-                  value="{{ line[4] }}"
+                  value="{{ line[5] }}"
                 />
               </td>
             </tr>
@@ -583,6 +701,7 @@ content %}
       </div>
     </form>
   </div>
+
   {% endfor %} {% endif %} {% if current_payments['yearly']|length > 0 %} {% for
   line in current_payments['yearly'] %}
   <div
@@ -593,11 +712,14 @@ content %}
     <div class="col-3">
       <div class="row" style="margin-top: 0.5em">
         <div class="col">
-          <h5>Yearly Payment</h5>
+          {% if line[1] == "lnd" %}
+          <h5>Yearly Payment from LND node</h5>
+          {% elif line[1] == "cln" %}
+          <h5>Yearly Payment from Core Lightning node</h5>
+          {% endif %}
           <p><small>every Jan 1st at time 0000</small></p>
         </div>
       </div>
-
       <div class="row">
         <div class="col">
           <div class="btn-group">
@@ -645,15 +767,15 @@ content %}
         <tbody>
           <tr>
             <th scope="row">Destination Pubkey</th>
-            <td>{{ line[1] }}</td>
+            <td>{{ line[2] }}</td>
           </tr>
           <tr>
             <th scope="row">Amount</th>
-            <td>{{ line[2] }} {{ line[3] }}</td>
+            <td>{{ line[3] }} {{ line[4] }}</td>
           </tr>
           <tr>
             <th scope="row">Message</th>
-            <td>{{ line[4] }}</td>
+            <td>{{ line[5] }}</td>
           </tr>
         </tbody>
       </table>
@@ -676,6 +798,42 @@ content %}
       <div class="row">
         <table class="table">
           <tbody>
+            {% if lnd and cln %}
+            <tr>
+              <th scope="row">
+                Which node do you want to send this payment from?
+              </th>
+              <td>
+                {% if line[1] == "lnd" %}
+                <select class="form-control" id="node" name="node">
+                  <option value="lnd" selected>LND</option>
+                  <option value="cln">Core Lightning</option>
+                </select>
+                {% elif line[1] == "cln" %}
+                <select class="form-control" id="node" name="node">
+                  <option value="lnd">LND</option>
+                  <option value="cln" selected>Core Lightning</option>
+                </select>
+                {% endif %}
+              </td>
+            </tr>
+            {% else %} {% if lnd %}
+            <input
+              class="form-control"
+              type="hidden"
+              name="node"
+              id="node"
+              value="lnd"
+            />
+            {% endif %} {% if cln %}
+            <input
+              class="form-control"
+              type="hidden"
+              name="node"
+              id="node"
+              value="cln"
+            />
+            {% endif %} {% endif %}
             <tr>
               <th scope="row">How often do you want to send this payment?</th>
               <td>
@@ -695,7 +853,7 @@ content %}
                   type="text"
                   id="pubkey"
                   name="pubkey"
-                  value="{{ line[1] }}"
+                  value="{{ line[2] }}"
                 />
               </td>
             </tr>
@@ -707,14 +865,14 @@ content %}
                   type="text"
                   id="amount"
                   name="amount"
-                  value="{{ line[2] }}"
+                  value="{{ line[3] }}"
                 />
               </td>
             </tr>
             <tr>
               <th scope="row">Denomination</th>
               <td>
-                {% if line[3] == "sats" %}
+                {% if line[4] == "sats" %}
                 <select
                   class="form-control"
                   id="denomination"
@@ -743,7 +901,7 @@ content %}
                   type="text"
                   id="message"
                   name="message"
-                  value="{{ line[4] }}"
+                  value="{{ line[5] }}"
                 />
               </td>
             </tr>
@@ -787,6 +945,35 @@ content %}
     <div class="row" style="border-top: 1px solid lightgrey">
       <table class="table">
         <tbody>
+          {% if lnd and cln %}
+          <tr>
+            <th scope="row">
+              Which node do you want to send this payment from?
+            </th>
+            <td>
+              <select class="form-control" id="node" name="node">
+                <option value="lnd" selected>LND</option>
+                <option value="cln">Core Lightning</option>
+              </select>
+            </td>
+          </tr>
+          {% else %} {% if lnd %}
+          <input
+            class="form-control"
+            type="hidden"
+            name="node"
+            id="node"
+            value="lnd"
+          />
+          {% endif %} {% if cln %}
+          <input
+            class="form-control"
+            type="hidden"
+            name="node"
+            id="node"
+            value="cln"
+          />
+          {% endif %} {% endif %}
           <tr>
             <th scope="row">How often do you want to send this payment?</th>
             <td>
