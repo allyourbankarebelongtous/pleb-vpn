@@ -398,6 +398,7 @@ update() {
       sudo rm ${homedir}/updates.sh
     fi
     # add version date to pleb-vpn.conf
+    plebVPNConf="${homedir}/pleb-vpn.conf"
     setting ${plebVPNConf} "2" "versiondate" "'${versiondate}'"
     # install webui
     cd ${execdir}
