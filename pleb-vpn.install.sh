@@ -39,7 +39,11 @@ function setting() # FILE LINENUMBER NAME VALUE
     sudo sed -i --follow-symlinks "${LINENUMBER}i${NAME}=" ${FILE}
   fi
   echo "# updating setting (${NAME}) with value(${VALUE})"
-  sudo sed -i --follow-symlinks "s:^${NAME}=.*:${NAME}=${VALUE}:g" ${FILE}
+  if [[ ${VALUE} == *":"* ]]; then
+    sudo sed -i --follow-symlinks "s/^${NAME}=.*/${NAME}=${VALUE}/g" ${FILE}
+  else
+    sudo sed -i --follow-symlinks "s:^${NAME}=.*:${NAME}=${VALUE}:g" ${FILE}
+  fi
 }
 
 on() {
@@ -185,7 +189,7 @@ lndconffile=
   fi
   if [ "${nodetype}" = "mynode" ]; then
     internet_localip=$(hostname -I | awk '{print $1}')
-    LndConfFile="/mnt/hdd/mynode/lnd/lnd.conf"
+    lndConfFile="/mnt/hdd/mynode/lnd/lnd.conf"
     CLCONF=""
   fi
   LAN=$(echo "${internet_localip}" | sed 's/^\(.*\)\.\(.*\)\.\(.*\)\.\(.*\)$/\1\.\2\.\3/g')
