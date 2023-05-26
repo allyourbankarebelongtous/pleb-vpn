@@ -12,7 +12,7 @@ if [ -d "/mnt/hdd/mynode/pleb-vpn/" ]; then
   homedir="/mnt/hdd/mynode/pleb-vpn"
   execdir="/opt/mynode/pleb-vpn"
   nodetype="mynode"
-elif [ -d "/mnt/hdd/app-data/pleb-vpn/" ]; then
+elif [ -f "/mnt/hdd/raspiblitz.conf" ]; then
   homedir="/mnt/hdd/app-data/pleb-vpn"
   execdir="/home/admin/pleb-vpn"
   nodetype="raspiblitz"
