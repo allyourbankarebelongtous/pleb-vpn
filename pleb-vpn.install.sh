@@ -396,6 +396,14 @@ update() {
       sudo rm ${execdir}/updates.sh
       sudo rm ${homedir}/updates.sh
     fi
+    # install webui
+    cd ${execdir}
+    echo "installing virtualenv..."
+    sudo apt install -y virtualenv
+    sudo virtualenv -p python3 .venv
+    # install requirements
+    echo "installing requirements..."
+    sudo ${execdir}/.venv/bin/pip install -r ${execdir}/requirements.txt
     # start pleb-vpn.service
     sudo systemctl start pleb-vpn.service
     echo "Update success!" 
