@@ -352,7 +352,7 @@ update() {
   sudo git clone --recursive https://github.com/allyourbankarebelongtous/pleb-vpn.git
   cd /home/admin/pleb-vpn-tmp/pleb-vpn
   # get version date
-  versiondate=$(/opt/mynode/pleb-vpn/.venv/bin/python check_date.py)
+  versiondate=$(python3 /home/admin/pleb-vpn-tmp/pleb-vpn/check_date.py)
   # these commands are for checking out a specific branch
   sudo git checkout -b mynode
   sudo git pull origin mynode
@@ -369,7 +369,6 @@ update() {
     sudo rm -rf /home/admin/pleb-vpn-tmp
     exit 1
   else
-    sudo systemctl stop pleb-vpn.service
     sudo rm -rf ${execdir}
     if [ "${nodetype}" = "raspiblitz" ]; then
       sudo cp -p -r /home/admin/pleb-vpn-tmp/pleb-vpn /home/admin/
@@ -409,8 +408,6 @@ update() {
     echo "installing requirements..."
     sudo ${execdir}/.venv/bin/pip install -r ${execdir}/requirements.txt
     # start pleb-vpn.service
-    sleep 10
-    sudo systemctl start pleb-vpn.service
     echo "Update success!" 
   fi
   if [ ! "${skip_key}" = "1" ]; then
