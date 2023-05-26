@@ -323,7 +323,6 @@ ExecStartPre=/usr/bin/is_not_shutting_down.sh
 ExecStart=/bin/bash -c \"/opt/mynode/pleb-vpn/.venv/bin/gunicorn -k geventwebsocket.gunicorn.workers.GeventWebSocketWorker -w 1 -b 0.0.0.0:2420 main:app\"
 User=root
 Group=root
-Restart=always
 Type=simple
 TimeoutSec=120
 Restart=always
@@ -409,6 +408,7 @@ update() {
     echo "installing requirements..."
     sudo ${execdir}/.venv/bin/pip install -r ${execdir}/requirements.txt
     # start pleb-vpn.service
+    sleep 10
     sudo systemctl start pleb-vpn.service
     echo "Update success!" 
   fi
@@ -698,6 +698,13 @@ uninstall() {
   sudo systemctl stop pleb-vpn.service
   sudo systemctl disable pleb-vpn.service
   sudo rm /etc/systemd/system/pleb-vpn.service
+
+  # remove rules from firewall
+  sudo ufw delete allow 2420
+  if [ "${nodetype}" = "mynode" ]; then
+    # remove from firewallConf
+    sed -i "/ufw allow 2420 comment 'allow Pleb-VPN HTTP'/d" ${firewallConf}
+  fi
 
   # delete files
   sudo rm -rf ${execdir}
