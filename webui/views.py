@@ -18,8 +18,8 @@ if os.path.exists('/mnt/hdd/mynode/'):
 if os.path.exists('/mnt/hdd/app-data/'):
     HOME_DIR = str('/mnt/hdd/app-data/pleb-vpn')
     EXEC_DIR = str('/home/admin/pleb-vpn')
-PLEBVPN_CONF_UPLOAD_FOLDER = os.path.join(HOME_DIR, '/openvpn')
-conf_file_location = os.path.join(HOME_DIR, '/pleb-vpn.conf')
+PLEBVPN_CONF_UPLOAD_FOLDER = os.path.join(HOME_DIR, 'openvpn')
+conf_file_location = os.path.join(HOME_DIR, 'pleb-vpn.conf')
 conf_file = config.PlebConfig(conf_file_location)
 plebVPN_status = {}
 lnd_hybrid_status = {}
@@ -92,7 +92,7 @@ def update_scripts():
     global update_available
     update_available = False
     # update pleb-vpn
-    cmd_str = [os.path.join(EXEC_DIR, "/pleb-vpn.install.sh") + " update 1"]
+    cmd_str = [os.path.join(EXEC_DIR, "pleb-vpn.install.sh") + " update 1"]
     result = subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True)
     print(result.stdout, result.stderr)
 
@@ -137,7 +137,7 @@ def set_plebVPN():
     if user:
         if user.id == current_user.id:
             if setting['plebvpn'] == 'on':
-                cmd_str = ["sudo " + os.path.join(EXEC_DIR, "/vpn-install.sh") + " off 1"]
+                cmd_str = ["sudo " + os.path.join(EXEC_DIR, "vpn-install.sh") + " off 1"]
                 result = subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True)
                 # for debug purposes
                 print(result.stdout, result.stderr)
@@ -147,7 +147,7 @@ def set_plebVPN():
                 else:
                     flash('An unknown error occured!', category='error')
             else:
-                cmd_str = ["sudo " + os.path.join(EXEC_DIR, "/vpn-install.sh") + " on 1 1"]
+                cmd_str = ["sudo " + os.path.join(EXEC_DIR, "vpn-install.sh") + " on 1 1"]
                 result = subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True)
                 # for debug purposes
                 print(result.stdout, result.stderr)
@@ -233,7 +233,7 @@ def set_lndHybrid():
     if user:
         if user.id == current_user.id:
             if setting['lndhybrid'] == 'on':
-                cmd_str = ["sudo " + os.path.join(EXEC_DIR, "/lnd-hybrid.sh") + " off"]
+                cmd_str = ["sudo " + os.path.join(EXEC_DIR, "lnd-hybrid.sh") + " off"]
                 result = subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True)
                 # for debug purposes
                 print(result.stdout, result.stderr)
@@ -243,7 +243,7 @@ def set_lndHybrid():
                 else:
                     flash('An unknown error occured!', category='error')
             else:
-                cmd_str = ["sudo " + os.path.join(EXEC_DIR, "/lnd-hybrid.sh") + " on 1 1"]
+                cmd_str = ["sudo " + os.path.join(EXEC_DIR, "lnd-hybrid.sh") + " on 1 1"]
                 result = subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True)
                 # for debug purposes
                 print(result.stdout, result.stderr)
@@ -266,7 +266,7 @@ def set_clnHybrid():
     if user:
         if user.id == current_user.id:
             if setting['clnhybrid'] == 'on':
-                cmd_str = ["sudo " + os.path.join(EXEC_DIR, "/cln-hybrid.sh") + " off"]
+                cmd_str = ["sudo " + os.path.join(EXEC_DIR, "cln-hybrid.sh") + " off"]
                 result = subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True)
                 # for debug purposes
                 print(result.stdout, result.stderr)
@@ -276,7 +276,7 @@ def set_clnHybrid():
                 else:
                     flash('An unknown error occured!', category='error')
             else:
-                cmd_str = ["sudo " + os.path.join(EXEC_DIR, "/cln-hybrid.sh") + " on 1 1"]
+                cmd_str = ["sudo " + os.path.join(EXEC_DIR, "cln-hybrid.sh") + " on 1 1"]
                 result = subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True)
                 # for debug purposes
                 print(result.stdout, result.stderr)
@@ -322,13 +322,13 @@ def payments():
         is_valid = valid_payment(frequency, node, pubkey, amount, denomination)
         if is_valid == "0":
             if old_payment_id is not None:
-                cmd_str = ["sudo bash " + os.path.join(EXEC_DIR, "/payments/managepayments.sh") + " deletepayment " + old_payment_id + " 1"]
+                cmd_str = ["sudo bash " + os.path.join(EXEC_DIR, "payments/managepayments.sh") + " deletepayment " + old_payment_id + " 1"]
                 result = subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True)
             if message is not None:
                 payment_string = frequency + " " + node + " " + pubkey + " " + amount + " " + denomination + " \"" + message + "\""
             else:
                 payment_string = frequency + " " + node + " " + pubkey + " " + amount + " " + denomination
-            cmd_str = ["sudo bash " + os.path.join(EXEC_DIR, "/payments/managepayments.sh") + " newpayment " + payment_string]
+            cmd_str = ["sudo bash " + os.path.join(EXEC_DIR, "payments/managepayments.sh") + " newpayment " + payment_string]
             print(cmd_str) # for debug purposes only
             result = subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True)
             # for debug purposes
@@ -347,7 +347,7 @@ def payments():
 def delete_payment():
     payment_id = json.loads(request.data)
     payment_id = payment_id['payment_id']
-    cmd_str = ["sudo bash " + os.path.join(EXEC_DIR, "/payments/managepayments.sh") + " deletepayment " + payment_id + " 1"]
+    cmd_str = ["sudo bash " + os.path.join(EXEC_DIR, "payments/managepayments.sh") + " deletepayment " + payment_id + " 1"]
     result = subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True)
     # for debug purposes
     print(result.stdout, result.stderr)
@@ -361,7 +361,7 @@ def delete_payment():
 # delete all payments
 @views.route('/delete_all_payments', methods=['POST'])
 def delete_all_payments():
-    cmd_str = ["sudo bash " + os.path.join(EXEC_DIR, "/payments/managepayments.sh") + " deleteall 1"]
+    cmd_str = ["sudo bash " + os.path.join(EXEC_DIR, "payments/managepayments.sh") + " deleteall 1"]
     result = subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True)
     # for debug purposes
     print(result.stdout, result.stderr)
@@ -377,7 +377,7 @@ def delete_all_payments():
 def send_payment():
     payment_id = json.loads(request.data)
     payment_id = payment_id['payment_id']
-    cmd_str = ["sudo -u bitcoin " + os.path.join(EXEC_DIR, "/payments/keysends/_") + payment_id + "_keysend.sh"]
+    cmd_str = ["sudo -u bitcoin " + os.path.join(EXEC_DIR, "payments/keysends/_") + payment_id + "_keysend.sh"]
     result = subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True)
     # for debug purposes
     print(result.stdout, result.stderr)
@@ -453,7 +453,7 @@ def generate_qr_code():
     filename = json.loads(request.data)
     filename = filename['filename']
     # Read the contents of the text file
-    path = os.path.join(HOME_DIR, '/wireguard/clients', filename)
+    path = os.path.join(HOME_DIR, 'wireguard/clients', filename)
     with open(path, 'r') as f:
         file_contents = f.read()
 
@@ -479,7 +479,7 @@ def generate_qr_code():
 def download_file():
     # Get the filename from the URL query string
     filename = request.args.get('filename')
-    path = os.path.join(HOME_DIR, '/wireguard/clients', filename)
+    path = os.path.join(HOME_DIR, 'wireguard/clients', filename)
     # Check if the file exists
     if not os.path.exists(path):
         return "File not found", 404
@@ -496,7 +496,7 @@ def set_wireguard():
     if user:
         if user.id == current_user.id:
             if setting['wireguard'] == 'on':
-                cmd_str = ["sudo " + os.path.join(EXEC_DIR, "/wg-install.sh") + " off"]
+                cmd_str = ["sudo " + os.path.join(EXEC_DIR, "wg-install.sh") + " off"]
                 result = subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True)
                 # for debug purposes
                 print(result.stdout, result.stderr)
@@ -515,12 +515,12 @@ def set_wireguard():
                             break
                     conf_file.set_option('wgip', new_wgIP)
                     conf_file.write()
-                    cmd_str = ["sudo " + os.path.join(EXEC_DIR, "/wg-install.sh") + " on 0 1 1"]
+                    cmd_str = ["sudo " + os.path.join(EXEC_DIR, "wg-install.sh") + " on 0 1 1"]
                 else:
-                    if os.path.isfile(os.path.join(HOME_DIR, '/wireguard/wg0.conf')):
-                        cmd_str = ["sudo " + os.path.join(EXEC_DIR, "/wg-install.sh") + " on 1 0 1"]
+                    if os.path.isfile(os.path.join(HOME_DIR, 'wireguard/wg0.conf')):
+                        cmd_str = ["sudo " + os.path.join(EXEC_DIR, "wg-install.sh") + " on 1 0 1"]
                     else:
-                        cmd_str = ["sudo " + os.path.join(EXEC_DIR, "/wg-install.sh") + " on 0 1 1"]
+                        cmd_str = ["sudo " + os.path.join(EXEC_DIR, "wg-install.sh") + " on 0 1 1"]
                 result = subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True)
                 # for debug purposes
                 print(result.stdout, result.stderr)
@@ -543,8 +543,8 @@ def delete_wireguard_conf():
     user = User.query.get(userId)
     if user:
         if user.id == current_user.id:
-            if os.path.exists(os.path.join(HOME_DIR, '/wireguard')):
-                shutil.rmtree(os.path.join(HOME_DIR, '/wireguard'))
+            if os.path.exists(os.path.join(HOME_DIR, 'wireguard')):
+                shutil.rmtree(os.path.join(HOME_DIR, 'wireguard'))
             conf_file.set_option('wgip', '')
             conf_file.set_option('wglan', '')
             conf_file.set_option('wgport', '')
@@ -604,7 +604,7 @@ def set_torsplittunnel():
     if user:
         if user.id == current_user.id:
             if setting['torsplittunnel'] == 'on':
-                cmd_str = ["sudo " + os.path.join(EXEC_DIR, "/tor.split-tunnel.sh") + " off 1"]
+                cmd_str = ["sudo " + os.path.join(EXEC_DIR, "tor.split-tunnel.sh") + " off 1"]
                 result = subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True)
                 # for debug purposes
                 print(result.stdout, result.stderr)
@@ -614,7 +614,7 @@ def set_torsplittunnel():
                 else:
                     flash('An unknown error occured!', category='error')
             else:
-                cmd_str = ["sudo " + os.path.join(EXEC_DIR, "/tor.split-tunnel.sh") + " on 1"]
+                cmd_str = ["sudo " + os.path.join(EXEC_DIR, "tor.split-tunnel.sh") + " on 1"]
                 result = subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True)
                 # for debug purposes
                 print(result.stdout, result.stderr)
@@ -679,7 +679,7 @@ def set_letsencrypt_on(formData):
             else:
                 letsencryptdomain1 = lnbitsdomain
                 letsencryptdomain2 = ""
-    cmd_str = os.path.join(EXEC_DIR, "/letsencrypt.install.sh") + " on 0 0 1 " + letsencryptbtcpay + " " + letsencryptlnbits + " " + letsencryptdomain1 + " " + letsencryptdomain2
+    cmd_str = os.path.join(EXEC_DIR, "letsencrypt.install.sh") + " on 0 0 1 " + letsencryptbtcpay + " " + letsencryptlnbits + " " + letsencryptdomain1 + " " + letsencryptdomain2
     exit_code = get_certs(cmd_str, False, False)
     if exit_code == 0:
         message = 'LetsEncrypt certificates installed!'
@@ -695,7 +695,7 @@ def set_letsencrypt_on(formData):
 # turn letsencrypt off and delete certs
 @socketio.on('set_letsencrypt_off')
 def set_letsencrypt_off():
-    cmd_str = [os.path.join(EXEC_DIR, "/letsencrypt.install.sh") + " off"]
+    cmd_str = [os.path.join(EXEC_DIR, "letsencrypt.install.sh") + " off"]
     result = subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True)
     # for debug purposes
     print(result.stdout, result.stderr)
@@ -835,7 +835,7 @@ def check_domain(domain):
 # get pleb-vpn config file values
 def get_conf():
     setting = {}
-    with open(os.path.join(HOME_DIR, '/pleb-vpn.conf')) as conf:
+    with open(os.path.join(HOME_DIR, 'pleb-vpn.conf')) as conf:
         for line in conf:
             if "=" in line:
                 name, value = line.split("=")
@@ -848,14 +848,14 @@ def get_plebVPN_status():
     global plebVPN_status
     global update_available
     plebVPN_status = {}
-    cmd_str = [os.path.join(EXEC_DIR, "/vpn-install.sh") + " status 1"]
+    cmd_str = [os.path.join(EXEC_DIR, "vpn-install.sh") + " status 1"]
     subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True)
-    with open(os.path.join(EXEC_DIR, '/pleb-vpn_status.tmp')) as status:
+    with open(os.path.join(EXEC_DIR, 'pleb-vpn_status.tmp')) as status:
         for line in status:
             if "=" in line:
                 name, value = line.split("=")
                 plebVPN_status[name] = str(value).rstrip().strip('\'\'')
-    os.remove(os.path.join(EXEC_DIR, '/pleb-vpn_status.tmp'))
+    os.remove(os.path.join(EXEC_DIR, 'pleb-vpn_status.tmp'))
     repo_date = check_repository_updated('mynode') # mynode branch included for testing purposes
     if plebVPN_status['versiondate'] != repo_date:
         update_available = True
@@ -866,50 +866,50 @@ def get_lnd_hybrid_status():
     # get status of lnd hybrid mode
     global lnd_hybrid_status
     lnd_hybrid_status = {}
-    cmd_str = ["sudo " + os.path.join(EXEC_DIR, "/lnd-hybrid.sh") + " status 1"]
+    cmd_str = ["sudo " + os.path.join(EXEC_DIR, "lnd-hybrid.sh") + " status 1"]
     subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True)
-    with open(os.path.join(EXEC_DIR, '/lnd_hybrid_status.tmp')) as status:
+    with open(os.path.join(EXEC_DIR, 'lnd_hybrid_status.tmp')) as status:
         for line in status:
             if "=" in line:
                 name, value = line.split("=")
                 lnd_hybrid_status[name] = str(value).rstrip().strip('\'\'')
-    os.remove(os.path.join(EXEC_DIR, '/lnd_hybrid_status.tmp'))
+    os.remove(os.path.join(EXEC_DIR, 'lnd_hybrid_status.tmp'))
 
 # get status of CLN hybrid mode
 def get_cln_hybrid_status():
     # get status of CLN hybrid mode
     global cln_hybrid_status
     cln_hybrid_status = {}
-    cmd_str = ["sudo " + os.path.join(EXEC_DIR, "/cln-hybrid.sh") + " status 1"]
+    cmd_str = ["sudo " + os.path.join(EXEC_DIR, "cln-hybrid.sh") + " status 1"]
     subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True)
-    with open(os.path.join(EXEC_DIR, '/cln_hybrid_status.tmp')) as status:
+    with open(os.path.join(EXEC_DIR, 'cln_hybrid_status.tmp')) as status:
         for line in status:
             if "=" in line:
                 name, value = line.split("=")
                 cln_hybrid_status[name] = str(value).rstrip().strip('\'\'')
-    os.remove(os.path.join(EXEC_DIR, '/cln_hybrid_status.tmp'))
+    os.remove(os.path.join(EXEC_DIR, 'cln_hybrid_status.tmp'))
 
 # get status of wireguard
 def get_wireguard_status():
     # get status of wireguard service
     global wireguard_status
     wireguard_status = {}
-    cmd_str = ["sudo " + os.path.join(EXEC_DIR, "/wg-install.sh") + " status 1"]
+    cmd_str = ["sudo " + os.path.join(EXEC_DIR, "wg-install.sh") + " status 1"]
     subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True)
-    with open(os.path.join(EXEC_DIR, '/wireguard_status.tmp')) as status:
+    with open(os.path.join(EXEC_DIR, 'wireguard_status.tmp')) as status:
         for line in status:
             if "=" in line:
                 name, value = line.split("=")
                 wireguard_status[name] = str(value).rstrip().strip('\'\'')
-    os.remove(os.path.join(EXEC_DIR, '/wireguard_status.tmp'))
+    os.remove(os.path.join(EXEC_DIR, 'wireguard_status.tmp'))
 
 # get current payments scheduled
 def get_payments():
     # get current payments
     current_payments = {}
-    cmd_str = ["sudo bash " + os.path.join(EXEC_DIR, "/payments/managepayments.sh") + " status 1"]
+    cmd_str = ["sudo bash " + os.path.join(EXEC_DIR, "payments/managepayments.sh") + " status 1"]
     subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True)
-    with open(os.path.join(EXEC_DIR, '/payments/current_payments.tmp')) as payments:
+    with open(os.path.join(EXEC_DIR, 'payments/current_payments.tmp')) as payments:
         for line in payments:
             line_parts = re.findall(r'"[^"]*"|\S+', line.strip())
             try:
@@ -931,7 +931,7 @@ def get_payments():
             except IndexError:
                 print("Error: Not enough elements in line_parts for line: ", line)
 
-    os.remove(os.path.join(EXEC_DIR, '/payments/current_payments.tmp'))
+    os.remove(os.path.join(EXEC_DIR, 'payments/current_payments.tmp'))
     return current_payments
 
 # get status of tor split-tunneling
@@ -939,14 +939,14 @@ def get_torsplittunnel_status():
     # get status of tor split-tunnel service
     global torsplittunnel_status
     torsplittunnel_status = {}
-    cmd_str = ["sudo " + os.path.join(EXEC_DIR, "/tor.split-tunnel.sh") + " status 1 1 1"]
+    cmd_str = ["sudo " + os.path.join(EXEC_DIR, "tor.split-tunnel.sh") + " status 1 1 1"]
     subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True)
-    with open(os.path.join(EXEC_DIR, '/split-tunnel_status.tmp')) as status:
+    with open(os.path.join(EXEC_DIR, 'split-tunnel_status.tmp')) as status:
         for line in status:
             if "=" in line:
                 name, value = line.split("=")
                 torsplittunnel_status[name] = str(value).rstrip().strip('\'\'')
-    os.remove(os.path.join(EXEC_DIR, '/split-tunnel_status.tmp'))
+    os.remove(os.path.join(EXEC_DIR, 'split-tunnel_status.tmp'))
 
 # run test of tor split-tunneling service
 @views.route('/get_torsplittunnel_test_status', methods=['POST'])
@@ -959,14 +959,14 @@ def get_torsplittunnel_test_status():
         if user.id == current_user.id:
             global torsplittunnel_test_status
             torsplittunnel_test_status = {}
-            cmd_str = ["sudo " + os.path.join(EXEC_DIR, "/tor.split-tunnel.sh") + " status 1 0 1"]
+            cmd_str = ["sudo " + os.path.join(EXEC_DIR, "tor.split-tunnel.sh") + " status 1 0 1"]
             subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True)
-            with open(os.path.join(EXEC_DIR, '/split-tunnel_test_status.tmp')) as status:
+            with open(os.path.join(EXEC_DIR, 'split-tunnel_test_status.tmp')) as status:
                 for line in status:
                     if "=" in line:
                         name, value = line.split("=")
                         torsplittunnel_test_status[name] = str(value).rstrip().strip('\'\'')
-            os.remove(os.path.join(EXEC_DIR, '/split-tunnel_test_status.tmp'))
+            os.remove(os.path.join(EXEC_DIR, 'split-tunnel_test_status.tmp'))
 
     return jsonify({})
 
