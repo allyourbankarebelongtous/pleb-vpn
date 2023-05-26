@@ -369,13 +369,12 @@ update() {
     sudo rm -rf /home/admin/pleb-vpn-tmp
     exit 1
   else
-    sudo rm -rf ${execdir}
     if [ "${nodetype}" = "raspiblitz" ]; then
       sudo cp -p -r /home/admin/pleb-vpn-tmp/pleb-vpn /home/admin/
-      sudo cp -p -r ${execdir} /mnt/hdd/app-data/
+      sudo cp -p -r /home/admin/pleb-vpn-tmp/pleb-vpn /mnt/hdd/app-data/
     elif [ "${nodetype}" = "mynode" ]; then
       sudo cp -p -r /home/admin/pleb-vpn-tmp/pleb-vpn /opt/mynode/
-      sudo cp -p -r ${execdir} /mnt/hdd/mynode/
+      sudo cp -p -r /home/admin/pleb-vpn-tmp/pleb-vpn /mnt/hdd/mynode/
     fi
     sudo rm -rf /home/admin/pleb-vpn-tmp
     # fix permissions
@@ -396,18 +395,16 @@ update() {
       sudo rm ${execdir}/updates.sh
       sudo rm ${homedir}/updates.sh
     fi
-    # add version date to pleb-vpn.conf
+    # check for update_requirements.txt and if it exists, run it, then delete it
+    isUpdateReqs=$(ls ${execdir} | grep -c update_requirements.txt)
+    if [ ${isUpdateReqs} -eq 1 ]; then
+      sudo ${execdir}/.venv/bin/pip install -r ${execdir}/update_requirements.txt
+      sudo rm ${execdir}/update_requirements.txt
+      sudo rm ${homedir}/update_requirements.txt
+    fi
+    # update version date to pleb-vpn.conf
     plebVPNConf="${homedir}/pleb-vpn.conf"
     setting ${plebVPNConf} "2" "versiondate" "'${versiondate}'"
-    # install webui
-    cd ${execdir}
-    echo "installing virtualenv..."
-    sudo apt install -y virtualenv
-    sudo virtualenv -p python3 .venv
-    # install requirements
-    echo "installing requirements..."
-    sudo ${execdir}/.venv/bin/pip install -r ${execdir}/requirements.txt
-    # start pleb-vpn.service
     echo "Update success!" 
   fi
   if [ ! "${skip_key}" = "1" ]; then
