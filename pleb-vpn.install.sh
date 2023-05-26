@@ -78,11 +78,16 @@ on() {
   # get date of last commit to store in pleb-vpn.conf
   versiondate=$(/opt/mynode/pleb-vpn/.venv/bin/python check_date.py)
 
-  # check for, and if present, remove updates.sh
+  # check for, and if present, remove updates.sh and update_requirements.txt
   isUpdateScript=$(ls ${execdir} | grep -c updates.sh)
   if [ ${isUpdateScript} -eq 1 ]; then
     # only used for updates, not new installs, so remove
     sudo rm ${execdir}/updates.sh
+  fi
+  isUpdateReqs=$(ls ${execdir} | grep -c update_requirements.txt)
+  if [ ${isUpdateReqs} -eq 1 ]; then
+    # only used for updates, not new installs, so remove
+    sudo rm ${execdir}/update_requirements.txt
   fi
   sudo mkdir ${execdir}/payments/keysends
   if [ "${nodetype}" = "raspiblitz" ]; then
@@ -351,8 +356,6 @@ update() {
   cd /home/admin/pleb-vpn-tmp
   sudo git clone --recursive https://github.com/allyourbankarebelongtous/pleb-vpn.git
   cd /home/admin/pleb-vpn-tmp/pleb-vpn
-  # get version date
-  versiondate=$(python3 /home/admin/pleb-vpn-tmp/pleb-vpn/check_date.py)
   # these commands are for checking out a specific branch
   sudo git checkout -b mynode
   sudo git pull origin mynode
@@ -369,6 +372,10 @@ update() {
     sudo rm -rf /home/admin/pleb-vpn-tmp
     exit 1
   else
+    # get version date
+    versiondate=$(python3 check_date.py)
+    # update version date to pleb-vpn.conf
+    setting ${plebVPNConf} "2" "versiondate" "'${versiondate}'"
     if [ "${nodetype}" = "raspiblitz" ]; then
       sudo cp -p -r /home/admin/pleb-vpn-tmp/pleb-vpn /home/admin/
       sudo cp -p -r /home/admin/pleb-vpn-tmp/pleb-vpn /mnt/hdd/app-data/
@@ -376,18 +383,13 @@ update() {
       sudo cp -p -r /home/admin/pleb-vpn-tmp/pleb-vpn /opt/mynode/
       sudo cp -p -r /home/admin/pleb-vpn-tmp/pleb-vpn /mnt/hdd/mynode/
     fi
+    cd /home/admin
     sudo rm -rf /home/admin/pleb-vpn-tmp
     # fix permissions
     sudo chown -R admin:admin ${homedir}
     sudo chown -R admin:admin ${execdir}
     sudo chmod -R 755 ${homedir}
     sudo chmod -R 755 ${execdir}
-    if [ -d ${homedir}/split-tunnel/ ]; then
-      sudo cp -p -r ${homedir}/split-tunnel ${execdir}
-    fi
-    sudo cp -p -r ${homedir}/payments ${execdir}
-    sudo ln -s ${homedir}/pleb-vpn.conf ${execdir}/pleb-vpn.conf
-    cd /home/admin
     # check for updates.sh and if exists, run it, then delete it
     isUpdateScript=$(ls ${execdir} | grep -c updates.sh)
     if [ ${isUpdateScript} -eq 1 ]; then
@@ -402,9 +404,6 @@ update() {
       sudo rm ${execdir}/update_requirements.txt
       sudo rm ${homedir}/update_requirements.txt
     fi
-    # update version date to pleb-vpn.conf
-    plebVPNConf="${homedir}/pleb-vpn.conf"
-    setting ${plebVPNConf} "2" "versiondate" "'${versiondate}'"
     echo "Update success!" 
   fi
   if [ ! "${skip_key}" = "1" ]; then
