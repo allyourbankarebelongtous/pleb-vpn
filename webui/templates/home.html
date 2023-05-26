@@ -309,8 +309,21 @@
   </div>
   <div class="row">
     <div class="col text-center">
-      <button id="update-scripts" type="button" class="btn btn-success">
+      <button id="update-scripts" type="button" class="btn btn-primary">
         Update Pleb-VPN
+      </button>
+      <button
+        id="update-scripts_loading"
+        class="btn btn-primary d-none"
+        type="button"
+        disabled
+      >
+        <span
+          class="spinner-grow spinner-grow-sm"
+          role="status"
+          aria-hidden="true"
+        ></span>
+        Loading...
       </button>
     </div>
   </div>
@@ -326,6 +339,14 @@
           "Pleb-VPN will restart. Your settings will be unchanged. Are you sure you want to update Pleb-VPN?")
       ) == true
     ) {
+      var updateBtn = document.getElementById("update-scripts");
+      if (updateBtn !== null) {
+        updateBtn.classList.add("d-none");
+      }
+      var updateLoading = document.getElementById("update-scripts_loading");
+      if (updateLoading !== null) {
+        updateLoading.classList.remove("d-none");
+      }
       socket.emit("update_scripts");
     }
   });

@@ -96,7 +96,7 @@ lndconffile=
 
   # get date of last commit to store in pleb-vpn.conf
   cd ${execdir}
-  versiondate=$(git log -1 --format=%ci)
+  versiondate=$(/opt/mynode/pleb-vpn/.venv/bin/python check_date.py)
 
   # update new conf file with values from old conf file
   newConf="${homedir}/pleb-vpn.conf.new"

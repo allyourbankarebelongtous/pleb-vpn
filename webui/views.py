@@ -2,6 +2,7 @@ from flask import Blueprint, render_template, request, flash, jsonify, redirect,
 from flask_login import login_required, current_user
 from werkzeug.utils import secure_filename
 from socket_io import socketio
+from check_date import check_repository_updated
 from plebvpn_common import config
 from datetime import datetime
 from .models import User
@@ -979,27 +980,3 @@ def set_enter_input():
     enter_input = True
     print("set_enter_input: !ENTER!", str(enter_input), file=debug_file) # debug purposes only
     debug_file.close() # for debug purposes only
-
-# check date of last commit to https://github.com/allyourbankarebelongtous/pleb-vpn/
-def check_repository_updated(branch=""):
-    url = f"https://api.github.com/repos/allyourbankarebelongtous/pleb-vpn/commits/{branch}"
-    print("url =", url)
-    try:
-        response = requests.get(url)
-        response.raise_for_status()
-        data = response.json()
-        print("json response")
-        print(data)
-
-        if data:  # Check if data is not empty
-            last_commit_date = data["commit"]["committer"]["date"]
-            dt = datetime.strptime(last_commit_date, "%Y-%m-%dT%H:%M:%SZ")
-            formatted_date = dt.strftime("%Y-%m-%d %H:%M:%S %z")
-            print("formatted_date=", formatted_date)
-            return formatted_date
-        else:
-            print("no data")
-            return None
-    except requests.exceptions.RequestException as e:
-        print(f"Error: {e}")
-        return None

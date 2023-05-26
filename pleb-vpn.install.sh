@@ -76,7 +76,7 @@ on() {
   sudo chmod -R 755 ${execdir}
 
   # get date of last commit to store in pleb-vpn.conf
-  versiondate=$(git log -1 --format=%ci)
+  versiondate=$(/opt/mynode/pleb-vpn/.venv/bin/python check_date.py)
 
   # check for, and if present, remove updates.sh
   isUpdateScript=$(ls ${execdir} | grep -c updates.sh)
@@ -330,7 +330,7 @@ Restart=always
 RestartSec=60
 StandardOutput=syslog
 StandardError=syslog
-SyslogIdentifier=lndg
+SyslogIdentifier=pleb-vpn
 
 [Install]
 WantedBy=multi-user.target" | sudo tee "/etc/systemd/system/pleb-vpn.service"
@@ -351,8 +351,10 @@ update() {
   sudo mkdir /home/admin/pleb-vpn-tmp
   cd /home/admin/pleb-vpn-tmp
   sudo git clone --recursive https://github.com/allyourbankarebelongtous/pleb-vpn.git
-  # these commands are for checking out a specific branch for testing
   cd /home/admin/pleb-vpn-tmp/pleb-vpn
+  # get version date
+  versiondate=$(/opt/mynode/pleb-vpn/.venv/bin/python check_date.py)
+  # these commands are for checking out a specific branch
   sudo git checkout -b mynode
   sudo git pull origin mynode
   sudo git submodule init
@@ -396,6 +398,8 @@ update() {
       sudo rm ${execdir}/updates.sh
       sudo rm ${homedir}/updates.sh
     fi
+    # add version date to pleb-vpn.conf
+    setting ${plebVPNConf} "2" "versiondate" "'${versiondate}'"
     # install webui
     cd ${execdir}
     echo "installing virtualenv..."
@@ -528,7 +532,7 @@ Restart=always
 RestartSec=60
 StandardOutput=syslog
 StandardError=syslog
-SyslogIdentifier=lndg
+SyslogIdentifier=pleb-vpn
 
 [Install]
 WantedBy=multi-user.target" | sudo tee "/etc/systemd/system/pleb-vpn.service"
