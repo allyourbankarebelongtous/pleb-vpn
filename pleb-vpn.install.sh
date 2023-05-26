@@ -282,7 +282,7 @@ lndconffile=
   fi
 
   # create systemd service
-  echo "# Install pleb-vpn.service file for pleb-vpn application server"
+  echo "Install pleb-vpn.service file for pleb-vpn application server"
   if [ "${nodetype}" = "raspiblitz" ]; then
     echo "
 [Unit]
@@ -306,7 +306,7 @@ PrivateTmp=true
 
 [Install]
 WantedBy=multi-user.target" | sudo tee "/etc/systemd/system/pleb-vpn.service"
-  elif [ "${nodetype" = "mynode" ]; then
+  elif [ "${nodetype}" = "mynode" ]; then
     echo "
 [Unit]
 Description=Pleb-VPN guincorn app
