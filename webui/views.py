@@ -97,6 +97,13 @@ def update_scripts():
     result = subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True)
     print(result.stdout, result.stderr)
 
+@socketio.on('uninstall-plebvpn')
+def uninstall_plebvpn():
+    # update pleb-vpn
+    cmd_str = [os.path.join(EXEC_DIR, "pleb-vpn.install.sh") + " uninstall"]
+    result = subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True)
+    print(result.stdout, result.stderr)
+
 ##############################
 ### pleb-vpn config routes ###
 ##############################

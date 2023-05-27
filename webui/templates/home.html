@@ -328,6 +328,18 @@
     </div>
   </div>
   {% endif %}
+  <div class="row">
+    <div class="col text-center">
+      <h2>Uninstall Pleb-VPN</h2>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col text-center">
+      <button id="uninstall-plebvpn" type="button" class="btn btn-danger">
+        Uninstall Pleb-VPN
+      </button>
+    </div>
+  </div>
 </div>
 <script>
   var socket = io.connect("http://" + document.domain + ":" + location.port);
@@ -348,6 +360,17 @@
         updateLoading.classList.remove("d-none");
       }
       socket.emit("update_scripts");
+    }
+  });
+  $("#uninstall-plebvpn").click(function () {
+    event.preventDefault();
+    if (
+      confirm_dialog(
+        (message =
+          "This will completely remove Pleb-VPN and all services from your node, restoring it to its original configuration. Are you sure you want to uninstall Pleb-VPN?")
+      ) == true
+    ) {
+      socket.emit("uninstall-plebvpn");
     }
   });
 </script>
