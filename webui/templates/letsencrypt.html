@@ -242,6 +242,8 @@
 
   $("#enterBtn").click(function () {
     socket.emit("enter_input");
+  });
+  socket.on("wait_for_confirmation", function (data) {
     var activateBtn = document.getElementById("enable_letsencrypt");
     if (activateBtn !== null) {
       activateBtn.classList.add("d-none");

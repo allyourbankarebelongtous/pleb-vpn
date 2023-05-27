@@ -792,6 +792,7 @@ def get_certs(cmd_str, suppress_output = True, suppress_input = True):
                 if enter_count < 1:
                     child.sendline('')
                     enter_count += 1
+                    socketio.emit('wait_for_confirmation')
                 print('sent enter from enter_input to child', file=debug_inout)
                 enter_input = False
                 print("enter_input set to: " + str(enter_input), file=debug_inout) # for debug purposes only
