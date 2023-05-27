@@ -304,8 +304,12 @@
   </div>
   {% if update_available == True %}
   <div class="row">
+    <div class="col text-center" style="border-top: 1px solid lightgrey">
+      <h7>A new version is available</h7>
+    </div>
+  </div>
+  <div class="row">
     <div class="col text-center">
-      <h5>Update Pleb-VPN</h5>
       <p>
         A Pleb-VPN update is available. To update, click "Update Pleb-VPN".
         Pleb-VPN will update and restart. Your settings will be unaffected. You
@@ -332,6 +336,12 @@
         ></span>
         Loading...
       </button>
+    </div>
+  </div>
+  {% else %}
+  <div class="row">
+    <div class="col text-center" style="border-top: 1px solid lightgrey">
+      <h7>Pleb-VPN is up to date.</h7>
     </div>
   </div>
   {% endif %}
