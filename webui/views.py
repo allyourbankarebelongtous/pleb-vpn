@@ -228,7 +228,7 @@ def hybrid():
                 conf_file.write()
                 flash('Received new LND Port: ' + clnPort, category='success') 
 
-    return render_template('hybrid.html', user=current_user, setting=get_conf, lnd=lnd, cln=cln())
+    return render_template('hybrid.html', user=current_user, setting=get_conf(), lnd=lnd, cln=cln)
 
 # turn lnd hybrid mode on or off
 @views.route('/set_lndHybrid', methods=['POST'])
