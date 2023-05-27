@@ -314,11 +314,11 @@ def payments():
     if os.path.exists(clnpath):
         cln = True
     if request.method == 'POST':
+        node = request.form['node']
         frequency = request.form['frequency']
         pubkey = request.form['pubkey']
         amount = request.form['amount']
         denomination = request.form['denomination']
-        node = request.form['node']
         if 'old_payment_id' in request.form:
             old_payment_id = request.form['old_payment_id']
         else:
@@ -333,6 +333,7 @@ def payments():
                 cmd_str = ["sudo bash " + os.path.join(EXEC_DIR, "payments/managepayments.sh") + " deletepayment " + old_payment_id + " 1"]
                 result = subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True)
             if message is not None:
+                message=message.replace('$', '$$')
                 payment_string = frequency + " " + node + " " + pubkey + " " + amount + " " + denomination + " \"" + message + "\""
             else:
                 payment_string = frequency + " " + node + " " + pubkey + " " + amount + " " + denomination
