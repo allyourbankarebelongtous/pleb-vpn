@@ -241,7 +241,7 @@ off() {
   sudo sed -i '/bind-addr=0.0.0.0/d' ${clnconffile}
   sudo sed -i '/announce-addr/d' ${clnconffile}
   # configure firewall
-  if [ ! "${clnport]" = "9736" ] && [ ! "${clnport}" = "9735" ]; then
+  if [ ! "${clnport}" = "9736" ] && [ ! "${clnport}" = "9735" ]; then
     sudo ufw delete allow ${clnport}
   fi
   # restart CLN
