@@ -333,7 +333,7 @@ def payments():
                 cmd_str = ["sudo bash " + os.path.join(EXEC_DIR, "payments/managepayments.sh") + " deletepayment " + old_payment_id + " 1"]
                 result = subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True)
             if message is not None:
-                message=message.replace('$', '\$')
+                message=message.replace('$', '\\$')
                 payment_string = frequency + " " + node + " " + pubkey + " " + amount + " " + denomination + " \"" + message + "\""
             else:
                 payment_string = frequency + " " + node + " " + pubkey + " " + amount + " " + denomination
