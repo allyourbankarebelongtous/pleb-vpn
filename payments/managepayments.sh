@@ -205,8 +205,9 @@ newpayment() {
           > $script_name
     # add message if present
     if [ ! "${message}" = "" ]; then
-      echo "--message \"${message}\"
-" | tee -a $script_name
+      echo "--message \"${message//\"/\\\"}\"" | tee -a $script_name
+      # echo "--message \"${message}\"
+# " | tee -a $script_name
     fi
     chmod 755 $script_name
 
