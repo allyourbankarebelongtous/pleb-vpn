@@ -111,6 +111,15 @@ def uninstall_plebvpn():
 @views.route('/pleb-VPN', methods=['GET', 'POST'])
 @login_required
 def pleb_VPN():
+    # determine whether LND, CLN, or both node implementations are available for hybrid mode
+    lnd = False
+    cln = False
+    lndpath = os.path.join('/etc/systemd/system', 'lnd.service')
+    clnpath = os.path.join('/etc/systemd/system', 'lightningd.service')
+    if os.path.exists(lndpath):
+        lnd = True
+    if os.path.exists(clnpath):
+        cln = True
     # upload plebvpn.conf file
     if request.method == 'POST':
         # check if the post request has the file part
@@ -131,7 +140,7 @@ def pleb_VPN():
             get_plebVPN_status()
             flash('Upload successful!', category='success')
 
-    return render_template("pleb-vpn.html", user=current_user, setting=get_conf(), plebVPN_status=plebVPN_status)
+    return render_template("pleb-vpn.html", user=current_user, setting=get_conf(), plebVPN_status=plebVPN_status, lnd=lnd, cln=cln)
 
 # turn pleb-vpn on or off
 @views.route('/set_plebVPN', methods=['POST'])
@@ -333,6 +342,7 @@ def payments():
                 cmd_str = ["sudo bash " + os.path.join(EXEC_DIR, "payments/managepayments.sh") + " deletepayment " + old_payment_id + " 1"]
                 result = subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True)
             if message is not None:
+                # fix message so dollar signs are sent as literall $ and not values
                 message = message.replace('$', r'\$')
                 payment_string = frequency + " " + node + " " + pubkey + " " + amount + " " + denomination + " \"" + message + "\""
             else:

@@ -320,15 +320,13 @@ off() {
   # remove and uninstall openvpn
   local webui="${1}"
 
-  if [ ! "${webui}" = "1" ]; then
-    # first ensure that no nodes are operating on clearnet and wireguard and letsencrypt are uninstalled
-    if [ "${lndhybrid}" = "on" ] || [ "${clnhybrid}" = "on" ] || [ "${wireguard}" = "on" ] || [ "${letsencrypt_ssl}" = "on" ]; then
-      echo "# WARNING #"
-      echo "you must first disable hybrid mode on your node(s) before removing openvpn"
-      echo "otherwise your home IP will be visible"
-      echo "you must also disable wireguard and letsencrypt, as they will not function without a static ip"
-      exit 1
-    fi
+  # first ensure that no nodes are operating on clearnet and wireguard and letsencrypt are uninstalled
+  if [ "${lndhybrid}" = "on" ] || [ "${clnhybrid}" = "on" ] || [ "${wireguard}" = "on" ] || [ "${letsencrypt_ssl}" = "on" ] || [ "${torsplittunnel}" = "on" ]; then
+    echo "# WARNING #"
+    echo "you must first disable hybrid mode on your node(s) before removing openvpn"
+    echo "otherwise your home IP will be visible"
+    echo "you must also disable wireguard and letsencrypt, as they will not function without a static ip"
+    exit 1
   fi
 
   # uninstall openvpn
@@ -351,11 +349,11 @@ off() {
   if [ "${nodetype}" = "mynode" ]; then
     # add new rules to firewallConf
     LAN=$(ip rou | grep default | cut -d " " -f3 | sed 's/^\(.*\)\.\(.*\)\.\(.*\)\.\(.*\)$/\1\.\2\.\3/g')
-    sed -i "/ufw allow in to ${LAN}\.0\/24/d" ${firewallConf}
-    sed -i "/ufw allow out to ${LAN}\.0\/24/d" ${firewallConf}
-    sed -i "/ufw allow out to ${vpnip} port ${vpnport} proto udp/d" ${firewallConf}
-    sed -i "/ufw allow out on tun0 from any to any/d" ${firewallConf}
-    sed -i "/ufw allow in on tun0 from any to any/d" ${firewallConf}
+    sed -i "/ufw allow in to ${LAN}\.0\/24/dg" ${firewallConf}
+    sed -i "/ufw allow out to ${LAN}\.0\/24/dg" ${firewallConf}
+    sed -i "/ufw allow out to ${vpnip} port ${vpnport} proto udp/dg" ${firewallConf}
+    sed -i "/ufw allow out on tun0 from any to any/dg" ${firewallConf}
+    sed -i "/ufw allow in on tun0 from any to any/dg" ${firewallConf}
     sed -i "s/ufw default deny outgoing/ufw default allow outgoing/g" ${firewallConf}
   fi
   setting ${plebVPNConf} "2" "vpnport" "''"

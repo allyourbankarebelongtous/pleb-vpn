@@ -482,11 +482,11 @@ off() {
   sudo ufw delete allow out to ${wglan}.0/24
   if [ "${nodetype}" = "mynode" ]; then
   # remove from firewallConf
-    sed -i "/ufw allow ${wgport}.*/d" ${firewallConf}
-    sed -i "/ufw allow out on wg0 from any to any/d" ${firewallConf}
-    sed -i "/ufw allow in on wg0 from any to any/d" ${firewallConf}
-    sed -i "/ufw allow in to ${wglan}\.0\/24/d" ${firewallConf}
-    sed -i "/ufw allow out to ${wglan}\.0\/24/d" ${firewallConf}
+    sed -i "/ufw allow ${wgport}.*/dg" ${firewallConf}
+    sed -i "/ufw allow out on wg0 from any to any/dg" ${firewallConf}
+    sed -i "/ufw allow in on wg0 from any to any/dg" ${firewallConf}
+    sed -i "/ufw allow in to ${wglan}\.0\/24/dg" ${firewallConf}
+    sed -i "/ufw allow out to ${wglan}\.0\/24/dg" ${firewallConf}
   fi
 
   # remove tlsextraip from lnd.conf

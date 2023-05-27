@@ -331,7 +331,7 @@ off() {
     sudo ufw delete allow ${lnport}
     if [ "${nodetype}" = "mynode" ]; then
       # remove from firewallConf
-      sed -i "/ufw allow ${lnport}.*/d" ${firewallConf}
+      sed -i "/ufw allow ${lnport}.*/dg" ${firewallConf}
     fi
   fi
 

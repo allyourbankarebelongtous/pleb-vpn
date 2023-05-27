@@ -451,10 +451,13 @@ restore() {
   # allow through firewall
   sudo ufw allow 2420 comment 'allow Pleb-VPN HTTP'
   if [ "${nodetype}" = "mynode" ]; then
+    lineExists=$(cat $firewallConf | grep -c "allow Pleb-VPN HTTP")
+    if [ $lineExists -eq 0 ]; then
       # add new rules to firewallConf
       sectionLine=$(cat ${firewallConf} | grep -n "^\# Add firewall rules" | cut -d ":" -f1 | head -n 1)
       insertLine=$(expr $sectionLine + 1)
       sed -i "${insertLine}iufw allow 2420 comment 'allow Pleb-VPN HTTP'" ${firewallConf}
+    fi
   fi
 
   if [ "${nodetype}" = "raspiblitz" ]; then
@@ -698,7 +701,7 @@ uninstall() {
   sudo ufw delete allow 2420
   if [ "${nodetype}" = "mynode" ]; then
     # remove from firewallConf
-    sed -i "/ufw allow 2420 comment 'allow Pleb-VPN HTTP'/d" ${firewallConf}
+    sed -i "/ufw allow 2420 comment 'allow Pleb-VPN HTTP'/dg" ${firewallConf}
   fi
 
   # delete files

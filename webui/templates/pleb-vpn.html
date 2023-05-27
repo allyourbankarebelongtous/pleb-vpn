@@ -8,19 +8,21 @@ content %}
   </div>
 </div>
 <br />
-{% if setting['lndhybrid'] == "on" or setting['wireguard'] == "on" %}
+{% if setting['lndhybrid'] == "on" or setting['clnhybrid'] == "on" or
+setting['wireguard'] == "on" or setting['torsplittunnel'] == "on" or
+setting['letsencryt_ssl'] == "on" %}
 <div class="container">
   <div class="row">
-    <div class="col">
-      <h5 align="center">
+    <div class="col text-center">
+      <h5>
         You cannot disable Pleb-VPN unless you turn off all services first!
       </h5>
     </div>
   </div>
   <br />
   <div class="row">
-    <div class="col">
-      <h6 align="center">Status of current services</h6>
+    <div class="col text-center">
+      <h6>Status of current services</h6>
     </div>
   </div>
   <div class="row">
@@ -33,13 +35,28 @@ content %}
           </tr>
         </thead>
         <tbody>
+          {% if lnd %}
           <tr>
             <th scope="row">LND Hybrid Status</th>
             <td>{{ setting['lndhybrid'] }}</td>
           </tr>
+          {% endif %} {% if cln %}
+          <tr>
+            <th scope="row">Core Lightning Hybrid Status</th>
+            <td>{{ setting['clnhybrid'] }}</td>
+          </tr>
+          {% endif %}
           <tr>
             <th scope="row">Wireguard Status</th>
             <td>{{ setting['wireguard'] }}</td>
+          </tr>
+          <tr>
+            <th scope="row">Tor Split-Tunnel Status</th>
+            <td>{{ setting['torsplittunnel'] }}</td>
+          </tr>
+          <tr>
+            <th scope="row">LetsEncrypt Status</th>
+            <td>{{ setting['letsencrypt_ssl'] }}</td>
           </tr>
         </tbody>
       </table>
