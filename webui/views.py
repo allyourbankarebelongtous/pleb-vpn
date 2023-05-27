@@ -334,7 +334,6 @@ def payments():
                 result = subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True)
             if message is not None:
                 message = message.replace('$', r'\$')
-                message = message.replace('"', r'\"')
                 payment_string = frequency + " " + node + " " + pubkey + " " + amount + " " + denomination + " \"" + message + "\""
             else:
                 payment_string = frequency + " " + node + " " + pubkey + " " + amount + " " + denomination
