@@ -405,6 +405,7 @@ update() {
       sudo rm ${homedir}/update_requirements.txt
     fi
     echo "Update success!" 
+    sudo systemctl restart pleb-vpn.service
   fi
   if [ ! "${skip_key}" = "1" ]; then
     echo "Press ENTER to continue"
