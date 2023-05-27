@@ -21,7 +21,6 @@ if os.path.exists('/mnt/hdd/raspiblitz.conf'):
     EXEC_DIR = str('/home/admin/pleb-vpn')
 PLEBVPN_CONF_UPLOAD_FOLDER = os.path.join(HOME_DIR, 'openvpn')
 conf_file_location = os.path.join(HOME_DIR, 'pleb-vpn.conf')
-conf_file = config.PlebConfig(conf_file_location)
 plebVPN_status = {}
 lnd_hybrid_status = {}
 cln_hybrid_status = {}
@@ -207,6 +206,7 @@ def hybrid():
         cln = True
     # get new LND or CLN port
     if request.method == 'POST':
+        conf_file = config.PlebConfig(conf_file_location)
         if "lnPort" in request.form:
             lnPort = request.form.get('lnPort')
             if not lnPort.isdigit():
@@ -442,6 +442,7 @@ def valid_payment(frequency, node, pubkey, amount, denomination):
 def wireguard():
     # get new Wireguard port
     if request.method == 'POST':
+        conf_file = config.PlebConfig(conf_file_location)
         if "wgPort" in request.form:
             wgPort = request.form.get('wgPort')
             if not wgPort.isdigit():
@@ -516,6 +517,7 @@ def set_wireguard():
             else:
                 # check if no wireguard IP in pleb-vpn.conf, and if not, generate one
                 if not is_valid_ip(setting['wgip']):
+                    conf_file = config.PlebConfig(conf_file_location)
                     while True:
                         new_wgIP = '10.' + str(random.randint(0, 255)) + '.' + str(random.randint(0, 255)) + '.' + str(random.randint(0, 252))
                         print(new_wgIP) # for debug purposes only
@@ -551,6 +553,7 @@ def delete_wireguard_conf():
     user = User.query.get(userId)
     if user:
         if user.id == current_user.id:
+            conf_file = config.PlebConfig(conf_file_location)
             if os.path.exists(os.path.join(HOME_DIR, 'wireguard')):
                 shutil.rmtree(os.path.join(HOME_DIR, 'wireguard'))
             conf_file.set_option('wgip', '')
