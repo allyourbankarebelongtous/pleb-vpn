@@ -703,8 +703,19 @@ def set_letsencrypt_on(formData):
     cmd_str = os.path.join(EXEC_DIR, "letsencrypt.install.sh") + " on 0 0 1 " + letsencryptbtcpay + " " + letsencryptlnbits + " " + letsencryptdomain1 + " " + letsencryptdomain2
     exit_code = get_certs(cmd_str, False, False)
     if exit_code == 0:
-        message = 'LetsEncrypt certificates installed!'
-        category = 'success'
+        if setting['nodetype'] == "mynode":
+            # start service to ensure nginx config is correct
+            cmd_str = ["sudo systemctl start pleb-vpn-letsencrypt-config.service"]
+            result = subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True)
+            if result.returncode == 0:
+                message = 'LetsEncrypt certificates installed!'
+                category = 'success'
+            else:
+                message = 'An unknown error occured!'
+                category = 'error'
+        else:
+            message = 'LetsEncrypt certificates installed!'
+            category = 'success'
     elif exit_code == int(42069):
         message = 'Script exited with unknown status.'
         category = 'info'
