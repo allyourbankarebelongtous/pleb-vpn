@@ -336,6 +336,14 @@ def payments():
             message = request.form['message']
         else:
             message = None
+        if denomination == "USD":
+            # correct format for USD to always use two decimal places
+            amount_parts = amount.split('.')
+            if len(amount_parts) == 1:
+                amount = amount + ".00"
+            elif len(amount_parts[1]) == 1:
+                amount = amount + "0"
+        # check payment validity
         is_valid = valid_payment(frequency, node, pubkey, amount, denomination)
         if is_valid == "0":
             if old_payment_id is not None:
@@ -431,7 +439,7 @@ def valid_payment(frequency, node, pubkey, amount, denomination):
     if not match:
         is_valid = "Error: you did not submit a valid pubkey"
     if denomination == "USD":
-        pattern = r'^\d+(\.\d{1,2})?$'
+        pattern = r'^\d+\.\d{2}$'
         match = re.match(pattern, amount)
         if not match:
             is_valid = "Error: you did not input a valid amount. Amount must be a positive integer and contain from zero to two decimal places only."
