@@ -337,12 +337,6 @@ RestartSec=5s
 [Install]
 WantedBy=multi-user.target
 " | sudo tee /etc/systemd/system/pleb-vpn-letsencrypt-config.service
-
-      # Enable and run once
-      sudo systemctl enable pleb-vpn-letsencrypt-config.service
-      sudo bash ${homedir}/letsencrypt/set_nginx_localip.sh
-      sleep 60
-      sudo systemctl start pleb-vpn-letsencrypt-config.service
     fi
 
     # save acme authenticaton
@@ -504,11 +498,6 @@ RestartSec=5s
 [Install]
 WantedBy=multi-user.target
 " | sudo tee /etc/systemd/system/pleb-vpn-letsencrypt-config.service
-
-      # Enable and run once
-      sudo systemctl enable pleb-vpn-letsencrypt-config.service
-      sleep 60
-      sudo systemctl start pleb-vpn-letsencrypt-config.service
     fi
 
   fi
