@@ -610,8 +610,7 @@ def is_valid_ip(ip_str):
 @login_required
 def torsplittunnel():
     # tor split-tunneling
-    if torsplittunnel_status == {}:
-        get_torsplittunnel_status()
+    get_torsplittunnel_status()
 
     return render_template('tor-split-tunnel.html', user=current_user, setting=get_conf(), torsplittunnel_status=torsplittunnel_status, torsplittunnel_test_status=torsplittunnel_test_status)
 

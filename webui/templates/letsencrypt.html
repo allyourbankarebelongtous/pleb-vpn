@@ -240,7 +240,7 @@
     $("#CNAMEText").append(CNAME_data + "<br>");
   });
 
-  $("#enterBtn").click(function () {
+  $("#enterBtn").click(function (event) {
     event.preventDefault();
     socket.emit("enter_input");
   });

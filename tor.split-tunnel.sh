@@ -716,7 +716,8 @@ ip rule add fwmark 11 table novpn
     echo "Create nftables-config systemd service..."
     echo "[Unit]
 Description=Configure nftables for split-tunnel process
-After=network.service
+Wants=www.service docker_images.service
+After=www.service docker_images.service
 [Service]
 ExecStart=/bin/bash /opt/mynode/pleb-vpn/split-tunnel/nftables-config.sh
 User=root
