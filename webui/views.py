@@ -431,10 +431,10 @@ def valid_payment(frequency, node, pubkey, amount, denomination):
     if not match:
         is_valid = "Error: you did not submit a valid pubkey"
     if denomination == "USD":
-        pattern = r'^\d+\.\d{2}$'
+        pattern = r'^\d+(\.\d{1,2})?$'
         match = re.match(pattern, amount)
         if not match:
-            is_valid = "Error: you did not input a valid amount. Amount must be in the form of x.xx for USD and must only contain digits and a decimal"
+            is_valid = "Error: you did not input a valid amount. Amount must be a positive integer and contain from zero to two decimal places only."
     elif denomination == "sats":
         if not amount.isdigit():
             is_valid = "Error: you did not input a valid amount. Amount for sats must only contain digits"
