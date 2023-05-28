@@ -341,7 +341,7 @@ WantedBy=multi-user.target
       # Enable and run once
       sudo systemctl enable pleb-vpn-letsencrypt-config.service
       sudo bash ${homedir}/letsencrypt/set_nginx_localip.sh
-      sleep 30
+      sleep 60
       sudo systemctl start pleb-vpn-letsencrypt-config.service
     fi
 
@@ -507,7 +507,7 @@ WantedBy=multi-user.target
 
       # Enable and run once
       sudo systemctl enable pleb-vpn-letsencrypt-config.service
-      sleep 30
+      sleep 60
       sudo systemctl start pleb-vpn-letsencrypt-config.service
     fi
 
