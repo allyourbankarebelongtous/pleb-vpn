@@ -345,14 +345,6 @@ WantedBy=multi-user.target
       sudo systemctl start pleb-vpn-letsencrypt-config.service
     fi
 
-    # reload nginx
-    sudo nginx -t
-    if [ ! $? -eq 0 ]; then
-      echo "ERROR: nginx config error. Uninstall letsencrypt service to restore nginx config"
-      exit 1
-    fi
-    sudo systemctl reload nginx
-
     # save acme authenticaton
     sudo cp -p /etc/letsencrypt/acmedns.json ${homedir}/letsencrypt/
 
@@ -515,16 +507,9 @@ WantedBy=multi-user.target
 
       # Enable and run once
       sudo systemctl enable pleb-vpn-letsencrypt-config.service
+      sleep 30
       sudo systemctl start pleb-vpn-letsencrypt-config.service
     fi
-
-    # reload nginx
-    sudo nginx -t
-    if [ ! $? -eq 0 ]; then
-      echo "ERROR: nginx config error. Uninstall letsencrypt service to restore nginx config"
-      exit 1
-    fi
-    sudo systemctl reload nginx
 
   fi
   # update pleb-vpn.conf
@@ -544,6 +529,8 @@ off() {
   fi
   sudo rm -rf /etc/letsencrypt/live
   sudo apt purge -y certbot
+  sudo rm ${homedir}/letsencrypt/tls.cert
+  sudo rm ${homedir}/letsencrypt/tls.key
 
   if [ "${nodetype}" = "raspiblitz" ]; then
     sudo rm /etc/nginx/snippets/ssl-certificate-app-data-letsencrypt.conf
