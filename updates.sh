@@ -226,6 +226,47 @@ lndconffile=
     ed -s ${infoBlitz} <<< "${insertLine}r /home/admin/pleb-vpn/update.tmp"$'\nw'
     sudo rm /home/admin/pleb-vpn/update.tmp
   fi
+
+  # Add webui to raspiblitz
+  cd ${execdir}
+  echo "installing virtualenv..."
+  sudo apt install -y virtualenv
+  sudo virtualenv -p python3 .venv
+  # install requirements
+  echo "installing requirements..."
+  sudo ${execdir}/.venv/bin/pip install -r ${execdir}/requirements.txt
+  cd /home/admin
+  # allow through firewall
+  sudo ufw allow 2420 comment 'allow Pleb-VPN HTTP'
+  # create pleb-vpn.service
+  if [ ! -f /etc/systemd/system/pleb-vpn.service ]; then
+    echo "
+[Unit]
+Description=Pleb-VPN guincorn app
+Wants=network.target
+After=network.target mnt-hdd.mount
+
+[Service]
+WorkingDirectory=/home/admin/pleb-vpn
+ExecStart=/home/admin/pleb-vpn/.venv/bin/gunicorn -k geventwebsocket.gunicorn.workers.GeventWebSocketWorker -w 1 -b 0.0.0.0:2420 main:app
+User=admin
+Group=admin
+Type=simple
+Restart=always
+StandardOutput=journal
+StandardError=journal
+RestartSec=60
+
+# Hardening
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target" | sudo tee "/etc/systemd/system/pleb-vpn.service"
+  fi
+  # enable and start systemd service
+  sudo systemctl enable pleb-vpn.service
+  sudo systemctl start pleb-vpn.service
+
 fi
 
 # update version
