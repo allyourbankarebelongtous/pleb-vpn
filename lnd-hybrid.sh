@@ -333,7 +333,7 @@ off() {
       # remove from firewallConf
       while [ $(cat ${firewallConf} | grep -c "ufw allow ${lnport}") -gt 0 ];
       do
-        sed -i "/ufw allow ${lnport}.*/dg" ${firewallConf}
+        sed -i "/ufw allow ${lnport}.*/d" ${firewallConf}
       done
     fi
   fi
