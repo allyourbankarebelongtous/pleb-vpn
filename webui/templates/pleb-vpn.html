@@ -6,6 +6,85 @@ content %}
       <h3>Pleb-VPN Settings</h3>
     </div>
   </div>
+  <div class="row">
+    <div class="col text-center">
+      <button
+        id="activate"
+        type="button"
+        class="btn btn-success"
+        onClick="refreshplebVPNdata({{ current_user.id }})"
+      >
+        Refesh Data
+      </button>
+      <button
+        id="activate_loading"
+        class="btn btn-success d-none"
+        type="button"
+        disabled
+      >
+        <span
+          class="spinner-grow spinner-grow-sm"
+          role="status"
+          aria-hidden="true"
+        ></span>
+        Loading...
+      </button>
+    </div>
+  </div>
+</div>
+<br />
+<div class="container container-fluid">
+  {% if plebVPN_status['message'] != null %}
+  <div class="row">
+    <div class="col text-center" style="border-top: 1px solid lightgrey">
+      <h7>{{ plebVPN_status['message'] }}</h7>
+    </div>
+  </div>
+  {% endif %}
+  <div class="row">
+    <div class="col" style="border-top: 1px solid lightgrey">
+      <table class="table">
+        <thead>
+          <tr>
+            <th scope="col">Setting</th>
+            <th scope="col">Value</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th scope="row">Pleb-VPN Status</th>
+            <td>{{ setting['plebvpn'] }}</td>
+          </tr>
+          <tr>
+            <th scope="row">Pleb-VPN Operating</th>
+            <td>{{ plebVPN_status['vpn_operating'] }}</td>
+          </tr>
+          {% if setting['plebvpn'] == "on" %}
+          <tr>
+            <th scope="row">Current IP</th>
+            <td>{{ plebVPN_status['current_ip'] }}</td>
+          </tr>
+          <tr>
+            <th scope="row">Pleb-VPN IP</th>
+            <td>{{ setting['vpnip'] }}</td>
+          </tr>
+          <tr>
+            <th scope="row">Pleb-VPN Port for VPS</th>
+            <td>{{ setting['vpnport'] }}</td>
+          </tr>
+          <tr>
+            <th scope="row">Firewall Config OK</th>
+            <td>{{ plebVPN_status['firewall_configured'] }}</td>
+          </tr>
+          {% endif %}
+          <tr>
+            <th scope="row">VPN config file exists</th>
+            <td>{{ plebVPN_status['config_exists'] }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
 </div>
 <br />
 {% if setting['lndhybrid'] == "on" or setting['clnhybrid'] == "on" or
@@ -67,8 +146,8 @@ setting['letsencryt_ssl'] == "on" %}
 plebVPN_status['config_exists'] != "yes" %}
 <div class="container">
   <div class="row">
-    <div class="col">
-      <h5 align="center">Upload plebvpn.conf file</h5>
+    <div class="col text-center">
+      <h5>Upload plebvpn.conf file</h5>
     </div>
   </div>
   <form method="POST" enctype="multipart/form-data">
@@ -98,8 +177,8 @@ plebVPN_status['config_exists'] != "yes" %}
 {% else %}
 <div class="container">
   <div class="row">
-    <div class="col">
-      <h5 align="center">plebvpn.conf file detected</h5>
+    <div class="col text-center">
+      <h5>plebvpn.conf file detected</h5>
     </div>
   </div>
   <form method="POST">
@@ -150,8 +229,8 @@ plebVPN_status['config_exists'] != "yes" %}
 {% endif %} {% else %}
 <div class="container">
   <div class="row">
-    <div class="col">
-      <h5 align="center">Deactivate Pleb-VPN</h5>
+    <div class="col text-center">
+      <h5>Deactivate Pleb-VPN</h5>
     </div>
   </div>
   <form method="POST">

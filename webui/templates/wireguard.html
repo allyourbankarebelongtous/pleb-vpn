@@ -11,17 +11,74 @@ content %}
 {% if setting['plebvpn'] != "on" %}
 <div class="container">
   <div class="row">
-    <div class="col">
-      <h5 align="center">Pleb-VPN is not connected. Enable Plev-VPN first!</h5>
+    <div class="col text-center">
+      <h5>Pleb-VPN is not connected. Enable Plev-VPN first!</h5>
     </div>
   </div>
 </div>
-{% else %} {% if setting['wireguard'] != "on" %}
+{% else %}
+
+<div class="container container-fluid">
+  <div class="row">
+    <div class="col text-center">
+      <h6>Wireguard LAN Status</h6>
+    </div>
+  </div>
+
+  {% if wireguard_status['message'] != null %}
+  <div class="row">
+    <div class="col text-center" style="border-top: 1px solid lightgrey">
+      <h7>{{ wireguard_status['message'] }}</h7>
+    </div>
+  </div>
+  {% endif %}
+
+  <div class="row">
+    <div class="col" style="border-top: 1px solid lightgrey">
+      <table class="table">
+        <thead>
+          <tr>
+            <th scope="col">Setting</th>
+            <th scope="col">Value</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th scope="row">Wireguard Status</th>
+            <td>{{ setting['wireguard'] }}</td>
+          </tr>
+          {% if setting['wgport'] != "" %}
+          <tr>
+            <th scope="row">Wireguard Port</th>
+            <td>{{ setting['wgport'] }}</td>
+          </tr>
+          {% endif %}
+          <tr>
+            <th scope="row">Existing config found</th>
+            <td>{{ wireguard_status['config_file_found'] }}</td>
+          </tr>
+          {% if setting['wireguard'] == "on" %}
+          <tr>
+            <th scope="row">Wireguard Operating</th>
+            <td>{{ wireguard_status['operating'] }}</td>
+          </tr>
+          <tr>
+            <th scope="row">Wireguard Node IP</th>
+            <td>{{ wireguard_status['server_IP'] }}</td>
+          </tr>
+          {% endif %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+{% if setting['wireguard'] != "on" %}
 <div class="container">
   {% if setting['wgport'] == '' %}
   <div class="row">
-    <div class="col">
-      <h5 align="center">Add Port for wireguard private LAN</h5>
+    <div class="col text-center">
+      <h5>Add Port for wireguard private LAN</h5>
     </div>
   </div>
   <form method="POST">
@@ -59,8 +116,8 @@ content %}
   </form>
   {% else %}
   <div class="row">
-    <div class="col">
-      <h5 align="center">Wireguard Port detected</h5>
+    <div class="col text-center">
+      <h5>Wireguard Port detected</h5>
     </div>
   </div>
   <form method="POST">
@@ -100,8 +157,8 @@ content %}
   </form>
   <form method="POST">
     <div class="row">
-      <div class="col">
-        <h5 align="center">Change Wireguard Port</h5>
+      <div class="col text-center">
+        <h5>Change Wireguard Port</h5>
       </div>
     </div>
     <div class="row">

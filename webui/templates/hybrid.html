@@ -6,6 +6,31 @@
       <h3>Lightning Node Hybrid Mode</h3>
     </div>
   </div>
+  <div class="row">
+    <div class="col text-center">
+      <button
+        id="activate"
+        type="button"
+        class="btn btn-success"
+        onClick="refreshplebVPNdata({{ current_user.id }})"
+      >
+        Refesh Data
+      </button>
+      <button
+        id="activate_loading"
+        class="btn btn-success d-none"
+        type="button"
+        disabled
+      >
+        <span
+          class="spinner-grow spinner-grow-sm"
+          role="status"
+          aria-hidden="true"
+        ></span>
+        Loading...
+      </button>
+    </div>
+  </div>
 </div>
 <br />
 {% if setting['plebvpn'] != "on" %}
@@ -25,6 +50,64 @@
   </div>
 </div>
 <br />
+
+<div class="container container-fluid">
+  <div class="row">
+    <div class="col text-center">
+      <h6>LND Hybrid Status</h6>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col" style="border-top: 1px solid lightgrey">
+      <table class="table">
+        <thead>
+          <tr>
+            <th scope="col">Setting</th>
+            <th scope="col">Value</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th scope="row">LND Alias</th>
+            <td>{{ lnd_hybrid_status['Alias'] }}</td>
+          </tr>
+          <tr>
+            <th scope="row">LND Node ID</th>
+            <td>{{ lnd_hybrid_status['Node_ID'] }}</td>
+          </tr>
+          <tr>
+            <th scope="row">LND Hybrid Status</th>
+            <td>{{ setting['lndhybrid'] }}</td>
+          </tr>
+          <tr>
+            <th scope="row">LND Hybrid Port</th>
+            <td>{{ setting['lnport'] }}</td>
+          </tr>
+          <tr>
+            {% if lnd_hybrid_status['address0Type'] == 'torv3' %}
+            <th scope="row">LND Tor Address</th>
+            {% else %}
+            <th scope="row">LND IPV4 Address</th>
+            {% endif %}
+            <td>{{ lnd_hybrid_status['address0'] }}</td>
+          </tr>
+          {% if setting['lndhybrid'] == "on" %}
+          <tr>
+            {% if lnd_hybrid_status['address1Type'] == 'torv3' %}
+            <th scope="row">LND Tor Address</th>
+            {% else %}
+            <th scope="row">LND IPV4 Address</th>
+            {% endif %}
+            <td>{{ lnd_hybrid_status['address1'] }}</td>
+          </tr>
+          {% endif %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+<br />
+
 {% if setting['lndhybrid'] != "on" %}
 <div class="container">
   {% if setting['lnport'] == '' %}
@@ -187,6 +270,62 @@
   </div>
 </div>
 <br />
+
+<div class="row">
+  <div class="col text-center">
+    <h6>Core Lightning Hybrid Status</h6>
+  </div>
+</div>
+<div class="row">
+  <div class="col" style="border-top: 1px solid lightgrey">
+    <table class="table">
+      <thead>
+        <tr>
+          <th scope="col">Setting</th>
+          <th scope="col">Value</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <th scope="row">Core Lightning Alias</th>
+          <td>{{ cln_hybrid_status['Alias'] }}</td>
+        </tr>
+        <tr>
+          <th scope="row">Core Lightning Node ID</th>
+          <td>{{ cln_hybrid_status['Node_ID'] }}</td>
+        </tr>
+        <tr>
+          <th scope="row">Core Lightning Hybrid Status</th>
+          <td>{{ setting['clnhybrid'] }}</td>
+        </tr>
+        <tr>
+          <th scope="row">Core Lightning Hybrid Port</th>
+          <td>{{ setting['clnport'] }}</td>
+        </tr>
+        <tr>
+          {% if cln_hybrid_status['address0Type'] == 'torv3' %}
+          <th scope="row">Core Lightning Tor Address</th>
+          {% else %}
+          <th scope="row">Core Lightning IPV4 Address</th>
+          {% endif %}
+          <td>{{ cln_hybrid_status['address0'] }}</td>
+        </tr>
+        {% if setting['clnhybrid'] == "on" %}
+        <tr>
+          {% if cln_hybrid_status['address1Type'] == 'torv3' %}
+          <th scope="row">Core Lightning Tor Address</th>
+          {% else %}
+          <th scope="row">Core Lightning IPV4 Address</th>
+          {% endif %}
+          <td>{{ cln_hybrid_status['address1'] }}</td>
+        </tr>
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
+</div>
+<br />
+
 {% if setting['clnhybrid'] != "on" %}
 <div class="container">
   {% if setting['clnport'] == '' %}
