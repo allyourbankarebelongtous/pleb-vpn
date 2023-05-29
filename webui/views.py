@@ -206,6 +206,15 @@ def delete_plebvpn_conf():
     
     return jsonify({})
 
+# pleb-vpn data refresh
+@views.route('/refresh_plebVPN_data', methods=['POST'])
+@login_required
+def refresh_plebVPN_data():
+    # refresh pleb-vpn status of connection to vps
+    get_plebVPN_status()
+
+    return jsonify({})
+
 # checks if plebvpn.conf is a valid .conf file
 def allowed_file(filename):
     return '.' in filename and \
