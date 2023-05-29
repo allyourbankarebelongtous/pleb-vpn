@@ -54,20 +54,20 @@ block content %}
 <div class="row">
   <div class="col">
     <div class="row">
-      <div class="col">
-        <h5 align="center">Tor Split-Tunnel Status</h5>
+      <div class="col text-center">
+        <h5>Tor Split-Tunnel Status</h5>
       </div>
     </div>
     {% if torsplittunnel_test_status['message'] != null %}
     <div class="row">
       <div class="col text-center" style="border-top: 1px solid lightgrey">
-        <h7 align="center">{{ torsplittunnel_test_status['message'] }}</h7>
+        <h7>{{ torsplittunnel_test_status['message'] }}</h7>
       </div>
     </div>
     {% else %} {% if torsplittunnel_status['message'] != null %}
     <div class="row">
       <div class="col text-center" style="border-top: 1px solid lightgrey">
-        <h7 align="center">{{ torsplittunnel_status['message'] }}</h7>
+        <h7>{{ torsplittunnel_status['message'] }}</h7>
       </div>
     </div>
     {% endif %} {% endif %}

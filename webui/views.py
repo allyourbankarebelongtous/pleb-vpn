@@ -227,6 +227,10 @@ def hybrid():
         lnd = True
     if os.path.exists(clnpath):
         cln = True
+    if lnd_hybrid_status == {}:
+        get_lnd_hybrid_status()
+    if cln_hybrid_status == {}:
+        get_cln_hybrid_status()
     # get new LND or CLN port
     if request.method == 'POST':
         conf_file = config.PlebConfig(conf_file_location)
@@ -251,7 +255,7 @@ def hybrid():
                 conf_file.write()
                 flash('Received new LND Port: ' + clnPort, category='success') 
 
-    return render_template('hybrid.html', user=current_user, setting=get_conf(), lnd=lnd, cln=cln)
+    return render_template('hybrid.html', user=current_user, setting=get_conf(), lnd_hybrid_status=lnd_hybrid_status, cln_hybrid_status=cln_hybrid_status, lnd=lnd, cln=cln)
 
 # turn lnd hybrid mode on or off
 @views.route('/set_lndHybrid', methods=['POST'])
@@ -517,6 +521,8 @@ def valid_payment(frequency, node, pubkey, amount, denomination):
 @login_required
 def wireguard():
     # get new Wireguard port
+    if wireguard_status == {}:
+        get_wireguard_status()
     if request.method == 'POST':
         conf_file = config.PlebConfig(conf_file_location)
         if "wgPort" in request.form:
@@ -530,7 +536,7 @@ def wireguard():
                 conf_file.write()
                 flash('Received new Wireguard Port: ' + wgPort, category='success') 
 
-    return render_template('wireguard.html', user=current_user, setting=get_conf())
+    return render_template('wireguard.html', user=current_user, setting=get_conf(), wireguard_status=wireguard_status)
 
 # get wireguard client qr code
 @views.route('/wireguard/clientqrcode', methods=['POST'])
@@ -683,7 +689,8 @@ def is_valid_ip(ip_str):
 @login_required
 def torsplittunnel():
     # tor split-tunneling
-    get_torsplittunnel_status()
+    if torsplittunnel_status == {}:
+        get_torsplittunnel_status()
 
     return render_template('tor-split-tunnel.html', user=current_user, setting=get_conf(), torsplittunnel_status=torsplittunnel_status, torsplittunnel_test_status=torsplittunnel_test_status)
 
