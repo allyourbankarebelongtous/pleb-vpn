@@ -237,13 +237,26 @@
       <button id="uninstall-plebvpn" type="button" class="btn btn-danger">
         Uninstall Pleb-VPN
       </button>
+      <button
+        id="uninstall-plebvpn_loading"
+        class="btn btn-danger d-none"
+        type="button"
+        disabled
+      >
+        <span
+          class="spinner-grow spinner-grow-sm"
+          role="status"
+          aria-hidden="true"
+        ></span>
+        Loading...
+      </button>
     </div>
   </div>
 </div>
 <script>
   var socket = io.connect("http://" + document.domain + ":" + location.port);
   $("#update-scripts").click(function () {
-    event.preventDefault();
+    event.preventDefault(event);
     if (
       confirm_dialog(
         (message =
@@ -261,7 +274,7 @@
       socket.emit("update_scripts");
     }
   });
-  $("#uninstall-plebvpn").click(function () {
+  $("#uninstall-plebvpn").click(function (event) {
     event.preventDefault();
     if (
       confirm_dialog(
@@ -269,6 +282,16 @@
           "This will completely remove Pleb-VPN and all services from your node, restoring it to its original configuration. Are you sure you want to uninstall Pleb-VPN?")
       ) == true
     ) {
+      var uninstallBtn = document.getElementById("uninstall-plebvpn");
+      if (uninstallBtn !== null) {
+        uninstallBtn.classList.add("d-none");
+      }
+      var uninstallLoading = document.getElementById(
+        "uninstall-plebvpn_loading"
+      );
+      if (uninstallLoading !== null) {
+        uninstallLoading.classList.remove("d-none");
+      }
       socket.emit("uninstall-plebvpn");
     }
   });
