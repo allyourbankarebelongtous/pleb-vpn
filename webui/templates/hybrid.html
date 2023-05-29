@@ -85,18 +85,18 @@
           </tr>
           <tr>
             {% if lnd_hybrid_status['address0Type'] == 'torv3' %}
-            <th scope="row">LND Tor Address</th>
+            <th scope="row">LND tor address</th>
             {% else %}
-            <th scope="row">LND IPV4 Address</th>
+            <th scope="row">LND IPV4 address</th>
             {% endif %}
             <td>{{ lnd_hybrid_status['address0'] }}</td>
           </tr>
           {% if setting['lndhybrid'] == "on" %}
           <tr>
             {% if lnd_hybrid_status['address1Type'] == 'torv3' %}
-            <th scope="row">LND Tor Address</th>
+            <th scope="row">LND tor address</th>
             {% else %}
-            <th scope="row">LND IPV4 Address</th>
+            <th scope="row">LND IPV4 address</th>
             {% endif %}
             <td>{{ lnd_hybrid_status['address1'] }}</td>
           </tr>
