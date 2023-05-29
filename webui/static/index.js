@@ -517,6 +517,81 @@ function refreshplebVPNdata(userId) {
   });
 }
 
+function refreshhybriddata(userId) {
+  var activateBtn = document.getElementById("activate");
+  if (activateBtn !== null) {
+    activateBtn.classList.add("d-none");
+  }
+  var activateLoading = document.getElementById("activate_loading");
+  if (activateLoading !== null) {
+    activateLoading.classList.remove("d-none");
+  }
+  fetch("/refresh_hybrid_data", {
+    method: "POST",
+    body: JSON.stringify({ userId: userId }),
+  }).then((_res) => {
+    var activateBtn = document.getElementById("activate");
+    if (activateBtn !== null) {
+      activateBtn.classList.remove("d-none");
+    }
+    var activateLoading = document.getElementById("activate_loading");
+    if (activateLoading !== null) {
+      activateLoading.classList.add("d-none");
+    }
+    window.location.href = "/hybrid";
+  });
+}
+
+function refreshwireguarddata(userId) {
+  var activateBtn = document.getElementById("activate");
+  if (activateBtn !== null) {
+    activateBtn.classList.add("d-none");
+  }
+  var activateLoading = document.getElementById("activate_loading");
+  if (activateLoading !== null) {
+    activateLoading.classList.remove("d-none");
+  }
+  fetch("/refresh_wireguard_data", {
+    method: "POST",
+    body: JSON.stringify({ userId: userId }),
+  }).then((_res) => {
+    var activateBtn = document.getElementById("activate");
+    if (activateBtn !== null) {
+      activateBtn.classList.remove("d-none");
+    }
+    var activateLoading = document.getElementById("activate_loading");
+    if (activateLoading !== null) {
+      activateLoading.classList.add("d-none");
+    }
+    window.location.href = "/wireguard";
+  });
+}
+
+function refreshtorsplittunneldata(userId) {
+  var activateBtn = document.getElementById("activate");
+  if (activateBtn !== null) {
+    activateBtn.classList.add("d-none");
+  }
+  var activateLoading = document.getElementById("activate_loading");
+  if (activateLoading !== null) {
+    activateLoading.classList.remove("d-none");
+  }
+  fetch("/refresh_torsplittunnel_data", {
+    method: "POST",
+    body: JSON.stringify({ userId: userId }),
+  }).then((_res) => {
+    var activateBtn = document.getElementById("activate");
+    if (activateBtn !== null) {
+      activateBtn.classList.remove("d-none");
+    }
+    var activateLoading = document.getElementById("activate_loading");
+    if (activateLoading !== null) {
+      activateLoading.classList.add("d-none");
+    }
+    window.location.href = "/torsplittunnel";
+  });
+}
+
 function confirm_dialog(message) {
   var result = confirm(message);
   return result;

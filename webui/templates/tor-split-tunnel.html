@@ -55,6 +55,31 @@ block content %}
   <div class="col">
     <div class="row">
       <div class="col text-center">
+        <button
+          id="activate"
+          type="button"
+          class="btn btn-success"
+          onClick="refreshtorsplittunneldata({{ current_user.id }})"
+        >
+          Refesh Data
+        </button>
+        <button
+          id="activate_loading"
+          class="btn btn-success d-none"
+          type="button"
+          disabled
+        >
+          <span
+            class="spinner-grow spinner-grow-sm"
+            role="status"
+            aria-hidden="true"
+          ></span>
+          Loading...
+        </button>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col text-center">
         <h5>Tor Split-Tunnel Status</h5>
       </div>
     </div>

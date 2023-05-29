@@ -82,6 +82,7 @@ def refresh_plebVPN_data():
     get_lnd_hybrid_status()
     get_cln_hybrid_status()
     get_wireguard_status()
+    get_torsplittunnel_status()
 
     return jsonify({})
 
@@ -336,6 +337,16 @@ def set_clnHybrid():
                     flash('Core Lightning Hybrid mode enabled!', category='success')
                 else:
                     flash('An unknown error occured!', category='error')
+
+    return jsonify({})
+
+# refresh hybrid data
+@views.route('/refresh_hybrid_data', methods=['POST'])
+@login_required
+def refresh_hybrid_data():
+    # refresh lnd and cln hybrid data
+    get_lnd_hybrid_status()
+    get_cln_hybrid_status()
 
     return jsonify({})
 
@@ -653,6 +664,15 @@ def delete_wireguard_conf():
 
     return jsonify({})
 
+# wireguard data refresh
+@views.route('/refresh_wireguard_data', methods=['POST'])
+@login_required
+def refresh_wireguard_data():
+    # refresh pleb-vpn status of connection to vps
+    get_wireguard_status()
+
+    return jsonify({})
+
 # checks if wireguard ip selected is a valid ip
 def is_valid_ip(ip_str):
     setting = get_conf()
@@ -732,6 +752,15 @@ def set_torsplittunnel():
                     flash('tor split-tunneling enabled!', category='success')
                 else:
                     flash('An unknown error occured!', category='error')
+
+    return jsonify({})
+
+# tor split-tunnel data refresh
+@views.route('/refresh_torsplittunnel_data', methods=['POST'])
+@login_required
+def refresh_torsplittunnel_data():
+    # refresh pleb-vpn status of connection to vps
+    get_torsplittunnel_status()
 
     return jsonify({})
 

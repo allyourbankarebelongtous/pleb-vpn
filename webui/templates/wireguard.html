@@ -6,6 +6,31 @@ content %}
       <h3>Wireguard private LAN</h3>
     </div>
   </div>
+  <div class="row">
+    <div class="col text-center">
+      <button
+        id="activate"
+        type="button"
+        class="btn btn-success"
+        onClick="refreshwireguarddata({{ current_user.id }})"
+      >
+        Refesh Data
+      </button>
+      <button
+        id="activate_loading"
+        class="btn btn-success d-none"
+        type="button"
+        disabled
+      >
+        <span
+          class="spinner-grow spinner-grow-sm"
+          role="status"
+          aria-hidden="true"
+        ></span>
+        Loading...
+      </button>
+    </div>
+  </div>
 </div>
 <br />
 {% if setting['plebvpn'] != "on" %}
