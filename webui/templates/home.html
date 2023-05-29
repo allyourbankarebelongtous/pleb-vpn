@@ -63,20 +63,12 @@
               <tr>
                 <th scope="col">Setting</th>
                 <th scope="col">Value</th>
-                <th scope="col">Link</th>
               </tr>
             </thead>
             <tbody>
               <tr>
                 <th scope="row">VPN Connection Status</th>
                 <td>{{ setting['plebvpn'] }}</td>
-                <td>
-                  <a
-                    href="/pleb-VPN"
-                    class="link-light link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover"
-                    >Pleb-VPN Settings</a
-                  >
-                </td>
               </tr>
               {% if setting['plebvpn'] == "on" %}
               <tr>
@@ -87,13 +79,6 @@
               <tr>
                 <th scope="row">LND Hybrid Status</th>
                 <td>{{ setting['lndhybrid'] }}</td>
-                <td>
-                  <a
-                    href="/hybrid"
-                    class="link-light link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover"
-                    >Hybrid Settings</a
-                  >
-                </td>
               </tr>
               {% if setting['lndhybrid'] == "on" %}
               <tr>
@@ -122,47 +107,19 @@
               <tr>
                 <th scope="row">CLN Hybrid Status</th>
                 <td>{{ setting['clnhybrid'] }}</td>
-                <td>
-                  <a
-                    href="/hybrid"
-                    class="link-light link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover"
-                    >Hybrid Settings</a
-                  >
-                </td>
               </tr>
               {% endif %}
               <tr>
                 <th scope="row">Wireguard LAN Status</th>
                 <td>{{ setting['wireguard'] }}</td>
-                <td>
-                  <a
-                    href="/wireguard"
-                    class="link-light link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover"
-                    >Wireguard Settings</a
-                  >
-                </td>
               </tr>
               <tr>
                 <th scope="row">Tor Split-Tunnel Status</th>
                 <td>{{ setting['torsplittunnel'] }}</td>
-                <td>
-                  <a
-                    href="/torsplittunnel"
-                    class="link-light link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover"
-                    >Tor Split-Tunnel Settings</a
-                  >
-                </td>
               </tr>
               <tr>
                 <th scope="row">LetsEncrypt Status</th>
                 <td>{{ setting['letsencrypt_ssl'] }}</td>
-                <td>
-                  <a
-                    href="/letsencrypt"
-                    class="link-light link-offset-2 link-underline-opacity-25 link-underline-opacity-100-hover"
-                    >LetsEncrypt Settings</a
-                  >
-                </td>
               </tr>
             </tbody>
           </table>
