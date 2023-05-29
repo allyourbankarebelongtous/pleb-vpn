@@ -207,9 +207,9 @@ def delete_plebvpn_conf():
     return jsonify({})
 
 # pleb-vpn data refresh
-@views.route('/refresh_plebVPN_data', methods=['POST'])
+@views.route('/refresh_VPN_data', methods=['POST'])
 @login_required
-def refresh_plebVPN_data():
+def refresh_VPN_data():
     # refresh pleb-vpn status of connection to vps
     get_plebVPN_status()
 
