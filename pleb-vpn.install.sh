@@ -692,11 +692,6 @@ uninstall() {
     fi
   fi
 
-  # stop and remove pleb-vpn.service
-  sudo systemctl stop pleb-vpn.service
-  sudo systemctl disable pleb-vpn.service
-  sudo rm /etc/systemd/system/pleb-vpn.service
-
   # remove rules from firewall
   sudo ufw delete allow 2420
   if [ "${nodetype}" = "mynode" ]; then
@@ -710,6 +705,12 @@ uninstall() {
   # delete files
   sudo rm -rf ${execdir}
   sudo rm -rf ${homedir}
+
+  # stop and remove pleb-vpn.service
+  sudo rm /etc/systemd/system/pleb-vpn.service
+  sudo systemctl disable pleb-vpn.service
+  sudo systemctl stop pleb-vpn.service
+
   exit 0
 }
 
