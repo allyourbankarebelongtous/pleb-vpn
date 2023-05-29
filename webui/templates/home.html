@@ -69,30 +69,7 @@
             <tbody>
               <tr>
                 <th scope="row">VPN Connection Status</th>
-                <td>
-                  {% if setting['plebvpn'] == "on" %}
-                  <div class="form-check form-switch">
-                    <input
-                      class="form-check-input"
-                      type="checkbox"
-                      role="switch"
-                      id="plebvpn_on"
-                      checked
-                      disabled
-                    />
-                  </div>
-                  {% else %}
-                  <div class="form-check form-switch">
-                    <input
-                      class="form-check-input"
-                      type="checkbox"
-                      role="switch"
-                      id="plebvpn_off"
-                      disabled
-                    />
-                  </div>
-                  {% endif %}
-                </td>
+                <td>{{ setting['plebvpn'] }}</td>
                 <td>
                   <a
                     href="/pleb-VPN"
@@ -104,30 +81,7 @@
               {% if lnd %}
               <tr>
                 <th scope="row">LND Hybrid Status</th>
-                <td>
-                  {% if setting['lndhybrid'] == "on" %}
-                  <div class="form-check form-switch">
-                    <input
-                      class="form-check-input"
-                      type="checkbox"
-                      role="switch"
-                      id="lndhybrid_on"
-                      checked
-                      disabled
-                    />
-                  </div>
-                  {% else %}
-                  <div class="form-check form-switch">
-                    <input
-                      class="form-check-input"
-                      type="checkbox"
-                      role="switch"
-                      id="lndhybrid_off"
-                      disabled
-                    />
-                  </div>
-                  {% endif %}
-                </td>
+                <td>{{ setting['lndhybrid'] }}</td>
                 <td>
                   <a
                     href="/hybrid"
@@ -139,30 +93,7 @@
               {% endif %} {% if cln %}
               <tr>
                 <th scope="row">CLN Hybrid Status</th>
-                <td>
-                  {% if setting['clnhybrid'] == "on" %}
-                  <div class="form-check form-switch">
-                    <input
-                      class="form-check-input"
-                      type="checkbox"
-                      role="switch"
-                      id="clnhybrid_on"
-                      checked
-                      disabled
-                    />
-                  </div>
-                  {% else %}
-                  <div class="form-check form-switch">
-                    <input
-                      class="form-check-input"
-                      type="checkbox"
-                      role="switch"
-                      id="clnhybrid_off"
-                      disabled
-                    />
-                  </div>
-                  {% endif %}
-                </td>
+                <td>{{ setting['clnhybrid'] }}</td>
                 <td>
                   <a
                     href="/hybrid"
@@ -174,30 +105,7 @@
               {% endif %}
               <tr>
                 <th scope="row">Wireguard LAN Status</th>
-                <td>
-                  {% if setting['wireguard'] == "on" %}
-                  <div class="form-check form-switch">
-                    <input
-                      class="form-check-input"
-                      type="checkbox"
-                      role="switch"
-                      id="wireguard_on"
-                      checked
-                      disabled
-                    />
-                  </div>
-                  {% else %}
-                  <div class="form-check form-switch">
-                    <input
-                      class="form-check-input"
-                      type="checkbox"
-                      role="switch"
-                      id="wireguard_off"
-                      disabled
-                    />
-                  </div>
-                  {% endif %}
-                </td>
+                <td>{{ setting['wireguard'] }}</td>
                 <td>
                   <a
                     href="/wireguard"
@@ -208,30 +116,7 @@
               </tr>
               <tr>
                 <th scope="row">Tor Split-Tunnel Status</th>
-                <td>
-                  {% if setting['torsplittunnel'] == "on" %}
-                  <div class="form-check form-switch">
-                    <input
-                      class="form-check-input"
-                      type="checkbox"
-                      role="switch"
-                      id="torsplittunnel_on"
-                      checked
-                      disabled
-                    />
-                  </div>
-                  {% else %}
-                  <div class="form-check form-switch">
-                    <input
-                      class="form-check-input"
-                      type="checkbox"
-                      role="switch"
-                      id="torsplittunnel_off"
-                      disabled
-                    />
-                  </div>
-                  {% endif %}
-                </td>
+                <td>{{ setting['torsplittunnel'] }}</td>
                 <td>
                   <a
                     href="/torsplittunnel"
@@ -242,30 +127,7 @@
               </tr>
               <tr>
                 <th scope="row">LetsEncrypt Status</th>
-                <td>
-                  {% if setting['letsencrypt_ssl'] == "on" %}
-                  <div class="form-check form-switch">
-                    <input
-                      class="form-check-input"
-                      type="checkbox"
-                      role="switch"
-                      id="letsencrypt_ssl_on"
-                      checked
-                      disabled
-                    />
-                  </div>
-                  {% else %}
-                  <div class="form-check form-switch">
-                    <input
-                      class="form-check-input"
-                      type="checkbox"
-                      role="switch"
-                      id="letsencrypt_ssl_off"
-                      disabled
-                    />
-                  </div>
-                  {% endif %}
-                </td>
+                <td>{{ setting['letsencrypt_ssl'] }}</td>
                 <td>
                   <a
                     href="/letsencrypt"
