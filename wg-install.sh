@@ -482,11 +482,26 @@ off() {
   sudo ufw delete allow out to ${wglan}.0/24
   if [ "${nodetype}" = "mynode" ]; then
   # remove from firewallConf
-    sed -i "/ufw allow ${wgport}.*/dg" ${firewallConf}
-    sed -i "/ufw allow out on wg0 from any to any/dg" ${firewallConf}
-    sed -i "/ufw allow in on wg0 from any to any/dg" ${firewallConf}
-    sed -i "/ufw allow in to ${wglan}\.0\/24/dg" ${firewallConf}
-    sed -i "/ufw allow out to ${wglan}\.0\/24/dg" ${firewallConf}
+    while [ $(cat ${firewallConf} | grep -c "ufw allow ${wgport}") -gt 0 ];
+    do
+      sed -i "/ufw allow ${wgport}.*/d" ${firewallConf}
+    done
+    while [ $(cat ${firewallConf} | grep -c "ufw allow out on wg0 from any to any") -gt 0 ];
+    do
+      sed -i "/ufw allow out on wg0 from any to any/d" ${firewallConf}
+    done
+    while [ $(cat ${firewallConf} | grep -c "ufw allow in on wg0 from any to any") -gt 0 ];
+    do
+      sed -i "/ufw allow in on wg0 from any to any/d" ${firewallConf}
+    done
+    while [ $(cat ${firewallConf} | grep -c "ufw allow in to ${wglan}") -gt 0 ];
+    do
+      sed -i "/ufw allow in to ${wglan}\.0\/24/d" ${firewallConf}
+    done
+    while [ $(cat ${firewallConf} | grep -c "ufw allow out to ${wglan}") -gt 0 ];
+    do
+      sed -i "/ufw allow out to ${wglan}\.0\/24/d" ${firewallConf}
+    done
   fi
 
   # remove tlsextraip from lnd.conf

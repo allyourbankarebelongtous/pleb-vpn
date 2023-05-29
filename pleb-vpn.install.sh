@@ -701,7 +701,10 @@ uninstall() {
   sudo ufw delete allow 2420
   if [ "${nodetype}" = "mynode" ]; then
     # remove from firewallConf
-    sed -i "/ufw allow 2420 comment 'allow Pleb-VPN HTTP'/dg" ${firewallConf}
+    while [ $(cat ${firewallConf} | grep -c "ufw allow 2420 comment 'allow Pleb-VPN HTTP'") -gt 0 ];
+    do
+      sed -i "/ufw allow 2420 comment 'allow Pleb-VPN HTTP'/d" ${firewallConf}
+    done
   fi
 
   # delete files

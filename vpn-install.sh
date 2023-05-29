@@ -347,13 +347,28 @@ off() {
   # enable firewall
   sudo ufw --force enable
   if [ "${nodetype}" = "mynode" ]; then
-    # add new rules to firewallConf
+    # delete rules from firewallConf
     LAN=$(ip rou | grep default | cut -d " " -f3 | sed 's/^\(.*\)\.\(.*\)\.\(.*\)\.\(.*\)$/\1\.\2\.\3/g')
-    sed -i "/ufw allow in to ${LAN}\.0\/24/dg" ${firewallConf}
-    sed -i "/ufw allow out to ${LAN}\.0\/24/dg" ${firewallConf}
-    sed -i "/ufw allow out to ${vpnip} port ${vpnport} proto udp/dg" ${firewallConf}
-    sed -i "/ufw allow out on tun0 from any to any/dg" ${firewallConf}
-    sed -i "/ufw allow in on tun0 from any to any/dg" ${firewallConf}
+    while [ $(cat ${firewallConf} | grep -c "ufw allow in to ${LAN}") -gt 0 ];
+    do
+      sed -i "/ufw allow in to ${LAN}\.0\/24/d" ${firewallConf}
+    done
+    while [ $(cat ${firewallConf} | grep -c "ufw allow out to ${LAN}") -gt 0 ];
+    do
+      sed -i "/ufw allow out to ${LAN}\.0\/24/d" ${firewallConf}
+    done
+    while [ $(cat ${firewallConf} | grep -c "ufw allow out to ${vpnip} port ${vpnport} proto udp") -gt 0 ];
+    do
+      sed -i "/ufw allow out to ${vpnip} port ${vpnport} proto udp/d" ${firewallConf}
+    done
+    while [ $(cat ${firewallConf} | grep -c "ufw allow out on tun0 from any to any") -gt 0 ];
+    do
+      sed -i "/ufw allow out on tun0 from any to any/d" ${firewallConf}
+    done
+    while [ $(cat ${firewallConf} | grep -c "ufw allow in on tun0 from any to any") -gt 0 ];
+    do
+      sed -i "/ufw allow in on tun0 from any to any/d" ${firewallConf}
+    done
     sed -i "s/ufw default deny outgoing/ufw default allow outgoing/g" ${firewallConf}
   fi
   setting ${plebVPNConf} "2" "vpnport" "''"

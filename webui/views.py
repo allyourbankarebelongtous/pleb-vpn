@@ -899,8 +899,9 @@ def get_plebVPN_status():
     os.remove(os.path.join(EXEC_DIR, 'pleb-vpn_status.tmp'))
     setting=get_conf()
     repo_date = check_repository_updated('mynode') # mynode branch included for testing purposes
-    if setting['versiondate'] != repo_date:
-        update_available = True
+    if repo_date is not None:
+        if setting['versiondate'] != repo_date: 
+            update_available = True
 
 
 # get status of lnd hybrid mode
