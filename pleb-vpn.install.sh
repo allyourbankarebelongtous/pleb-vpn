@@ -417,7 +417,14 @@ update() {
     exit 1
   else
     if [ "${nodetype}" = "raspiblitz" ]; then
-      sudo rm -rf /home/admin/pleb-vpn-tmp/pleb-vpn/${latestversion}.tar.gz
+      if [ -f ${execdir}/.git ]; then
+        sudo rm ${execdir}/.git
+        sudo rm ${execdir}/.gitattributes
+        sudo rm ${execdir}/.gitmodules
+        sudo rm ${homedir}/.git
+        sudo rm ${homedir}/.gitattributes
+        sudo rm ${homedir}/.gitmodules
+      fi
       sudo cp -p -r /home/admin/pleb-vpn-tmp/pleb-vpn /home/admin/
       sudo cp -p -r /home/admin/pleb-vpn-tmp/pleb-vpn /mnt/hdd/app-data/
     elif [ "${nodetype}" = "mynode" ]; then
