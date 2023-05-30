@@ -58,16 +58,18 @@ on() {
   if [ "${nodetype}" = "raspiblitz" ]; then
     cd /home/admin
     sudo mkdir pleb-vpn-tmp
-    cd pleb-vpn-tmp
+    sudo mkdir pleb-vpn
+    cd /home/admin/pleb-vpn-tmp/pleb-vpn
     sudo wget https://github.com/allyourbankarebelongtous/pleb-vpn/archive/refs/tags/${ver}.tar.gz
-    sudo tar -xzf "${ver}".tar.gz
-    isSuccess=$(ls /home/admin/pleb-vpn-tmp/ | grep -c pleb-vpn)
+    sudo tar -xzf ${ver}.tar.gz
+    isSuccess=$(ls /home/admin/pleb-vpn-tmp/pleb-vpn | grep -c plebvpn_common)
     if [ ${isSuccess} -eq 0 ]; then
       echo "error: download and unzip failed. Check internet connection and version number and try again."
       sudo rm -rf /home/admin/pleb-vpn-tmp
       exit 1
     else
-      sudo cp -p -r /home/admin/pleb-vpn-tmp/pleb-vpn* /home/admin/pleb-vpn
+      sudo rm -rf /home/admin/pleb-vpn-tmp/pleb-vpn/${ver}.tar.gz
+      sudo cp -p -r /home/admin/pleb-vpn-tmp/pleb-vpn /home/admin/
       sudo rm -rf /home/admin/pleb-vpn-tmp
     fi
   elif [ "${nodetype}" = "mynode" ]; then
@@ -78,16 +80,18 @@ on() {
       else
         cd /home/admin
         sudo mkdir pleb-vpn-tmp
-        cd pleb-vpn-tmp
+        sudo mkdir pleb-vpn
+        cd /home/admin/pleb-vpn-tmp/pleb-vpn
         sudo wget https://github.com/allyourbankarebelongtous/pleb-vpn/archive/refs/tags/${ver}.tar.gz
-        sudo tar -xzf "${ver}".tar.gz
-        isSuccess=$(ls /home/admin/pleb-vpn-tmp/ | grep -c pleb-vpn)
+        sudo tar -xzf ${ver}.tar.gz
+        isSuccess=$(ls /home/admin/pleb-vpn-tmp/pleb-vpn | grep -c plebvpn_common)
         if [ ${isSuccess} -eq 0 ]; then
           echo "error: download and unzip failed. Check internet connection and version number and try again."
           sudo rm -rf /home/admin/pleb-vpn-tmp
           exit 1
         else
-          sudo cp -p -r /home/admin/pleb-vpn-tmp/pleb-vpn* /opt/mynode/pleb-vpn
+          sudo rm -rf /home/admin/pleb-vpn-tmp/pleb-vpn/${ver}.tar.gz
+          sudo cp -p -r /home/admin/pleb-vpn-tmp/pleb-vpn /opt/mynode/
           sudo rm -rf /home/admin/pleb-vpn-tmp
         fi
       fi
@@ -398,10 +402,11 @@ update() {
 
   # download zip file into temp directory
   sudo mkdir /home/admin/pleb-vpn-tmp
-  cd /home/admin/pleb-vpn-tmp
+  sudo /home/admin/pleb-vpn-tmp/mkdir pleb-vpn
+  cd /home/admin/pleb-vpn-tmp/pleb-vpn
   sudo wget https://github.com/allyourbankarebelongtous/pleb-vpn/archive/refs/tags/${latestversion}.tar.gz
-  sudo tar -xzf "${latestversion}".tar.gz
-  isSuccess=$(ls /home/admin/pleb-vpn-tmp/ | grep -c pleb-vpn)
+  sudo tar -xzf ${latestversion}.tar.gz
+  isSuccess=$(ls /home/admin/pleb-vpn-tmp/pleb-vpn | grep -c plebvpn_common)
   if [ ${isSuccess} -eq 0 ]; then
     echo "error: download and unzip failed. Check internet connection and version number and try again."
     if [ ! "${skip_key}" = "1" ]; then
@@ -412,11 +417,12 @@ update() {
     exit 1
   else
     if [ "${nodetype}" = "raspiblitz" ]; then
-      sudo cp -p -r /home/admin/pleb-vpn-tmp/pleb-vpn* /home/admin/pleb-vpn
-      sudo cp -p -r /home/admin/pleb-vpn-tmp/pleb-vpn* /mnt/hdd/app-data/pleb-vpn
+      sudo rm -rf /home/admin/pleb-vpn-tmp/pleb-vpn/${latestversion}.tar.gz
+      sudo cp -p -r /home/admin/pleb-vpn-tmp/pleb-vpn /home/admin/
+      sudo cp -p -r /home/admin/pleb-vpn-tmp/pleb-vpn /mnt/hdd/app-data/
     elif [ "${nodetype}" = "mynode" ]; then
-      sudo cp -p -r /home/admin/pleb-vpn-tmp/pleb-vpn* /opt/mynode/pleb-vpn
-      sudo cp -p -r /home/admin/pleb-vpn-tmp/pleb-vpn* /mnt/hdd/mynode/pleb-vpn
+      sudo cp -p -r /home/admin/pleb-vpn-tmp/pleb-vpn /opt/mynode/
+      sudo cp -p -r /home/admin/pleb-vpn-tmp/pleb-vpn /mnt/hdd/mynode/
     fi
     cd /home/admin
     sudo rm -rf /home/admin/pleb-vpn-tmp
