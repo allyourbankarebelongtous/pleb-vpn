@@ -12,7 +12,7 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   exit 1
 fi
 
-ver="1.1beta"
+ver="v1.1betaRC1"
 
 if [ -d "/mnt/hdd/mynode" ]; then
   nodetype="mynode"
@@ -54,29 +54,48 @@ on() {
     echo "Please run as root (with sudo)"
     exit 1
   fi
-
-####################################### FIX THIS SECTION TO DOWNLOAD A VERSION TAR.GZ FILE INSTEAD ##########################################
-  # git pull from github
+  # wget tar.gz from github and put in execdir
   if [ "${nodetype}" = "raspiblitz" ]; then
-    cd /home/admin/
+    cd /home/admin
+    sudo mkdir pleb-vpn-tmp
+    cd pleb-vpn-tmp
+    sudo wget https://github.com/allyourbankarebelongtous/pleb-vpn/archive/refs/tags/pleb-vpn_${ver}.tar.gz
+    sudo tar -xzf pleb-vpn_${ver}.tar.gz
+    isSuccess=$(ls /home/admin/pleb-vpn-tmp/ | grep -c pleb-vpn)
+    if [ ${isSuccess} -eq 0 ]; then
+      echo "error: download and unzip failed. Check internet connection and version number and try again."
+      sudo rm -rf /home/admin/pleb-vpn-tmp
+      exit 1
+    fi
   elif [ "${nodetype}" = "mynode" ]; then
-    cd /opt/mynode/
+    if [ ! -d ${execdir}/webui ]; then
+      if [ -d ${execdir}/pleb-vpn/webui ]; then
+        sudo cp -p -r ${execdir}/pleb-vpn /opt/mynode/
+        sudo rm -rf ${execdir}/pleb-vpn
+      else
+        cd /home/admin
+        sudo mkdir pleb-vpn-tmp
+        cd pleb-vpn-tmp
+        sudo wget https://github.com/allyourbankarebelongtous/pleb-vpn/archive/refs/tags/pleb-vpn_${ver}.tar.gz
+        sudo tar -xzf pleb-vpn_${ver}.tar.gz
+        isSuccess=$(ls /home/admin/pleb-vpn-tmp/ | grep -c pleb-vpn)
+        if [ ${isSuccess} -eq 0 ]; then
+          echo "error: download and unzip failed. Check internet connection and version number and try again."
+          sudo rm -rf /home/admin/pleb-vpn-tmp
+          exit 1
+        else
+          sudo cp -p -r /home/admin/pleb-vpn-tmp/pleb-vpn /opt/mynode/
+          sudo rm -rf /home/admin/pleb-vpn-tmp
+        fi
+      fi
+    fi
   fi
-  sudo git clone --recursive https://github.com/allyourbankarebelongtous/pleb-vpn.git
-
-################################# FOR TESTING OTHER BRANCHES, NOT FOR PRODUCTION #########################################
-  cd ${execdir}
-  sudo git checkout -b mynode
-  sudo git pull origin mynode 
-  sudo git submodule init
-  sudo git submodule update
-
-################################# END TESTING #####################################
+  if [ "${nodetype}" = "raspiblitz" ]; then
+    sudo cp -p -r /home/admin/pleb-vpn-tmp/pleb-vpn /home/admin/
+    sudo rm -rf /home/admin/pleb-vpn-tmp
+  fi
   sudo chown -R admin:admin ${execdir}
   sudo chmod -R 755 ${execdir}
-
-  # get date of last commit to store in pleb-vpn.conf
-  versiondate=$(/opt/mynode/pleb-vpn/.venv/bin/python check_date.py)
 
   # check for, and if present, remove updates.sh and update_requirements.txt
   isUpdateScript=$(ls ${execdir} | grep -c updates.sh)
@@ -89,15 +108,17 @@ on() {
     # only used for updates, not new installs, so remove
     sudo rm ${execdir}/update_requirements.txt
   fi
+
+  # make payments directory and copy files to hard drive
   sudo mkdir ${execdir}/payments/keysends
   if [ "${nodetype}" = "raspiblitz" ]; then
-    # move the files to /mnt/hdd/app-data/pleb-vpn
+    # copy the files to /mnt/hdd/app-data/pleb-vpn
     sudo cp -p -r ${execdir} /mnt/hdd/app-data/
     # fix permissions
     sudo chown -R admin:admin ${homedir}
     sudo chmod -R 755 ${homedir}
   elif [ "${nodetype}" = "mynode" ]; then
-    # move the files to /mnt/hdd/mynode/pleb-vpn
+    # copy the files to /mnt/hdd/mynode/pleb-vpn
     sudo cp -p -r ${execdir} /mnt/hdd/mynode/
     # fix permissions
     sudo chown -R admin:admin ${homedir}
@@ -106,7 +127,6 @@ on() {
   # create and symlink pleb-vpn.conf
   echo "[PLEBVPN]
 version=
-versiondate=
 nodetype=
 lan=
 plebvpn=off
@@ -138,13 +158,12 @@ lndconffile=
 "| tee ${homedir}/pleb-vpn.conf
 
   # symlink pleb-vpn.conf
+  sudo ln -sf ${homedir}/pleb-vpn.conf ${execdir}/pleb-vpn.conf
   if [ "${nodetype}" = "raspiblitz" ]; then
-    sudo ln -sf ${homedir}/pleb-vpn.conf ${execdir}/pleb-vpn.conf
     # backup critical files and configs
     ${execdir}/pleb-vpn.backup.sh backup
-  elif [ "${nodetype}" = "mynode" ]; then
-    sudo ln -sf ${homedir}/pleb-vpn.conf ${execdir}/pleb-vpn.conf
   fi
+
   # initialize payment files
   inc=1
   while [ $inc -le 8 ]
@@ -202,7 +221,6 @@ lndconffile=
   setting ${plebVPNConf} "2" "clnconffile" "'${CLCONF}'"
   setting ${plebVPNConf} "2" "lan" "'${LAN}'"
   setting ${plebVPNConf} "2" "version" "'${ver}'"
-  setting ${plebVPNConf} "2" "versiondate" "'${versiondate}'"
   setting ${plebVPNConf} "2" "nodetype" "'${nodetype}'"
 
   # for raspiblitz menu install
@@ -282,12 +300,17 @@ lndconffile=
   sudo ${execdir}/.venv/bin/pip install -r ${execdir}/requirements.txt
 
   # allow through firewall
-  sudo ufw allow 2420 comment 'allow Pleb-VPN HTTP'
+  if [ "${nodetype}" = "raspiblitz" ]; then
+    sudo ufw allow 2420 comment 'allow Pleb-VPN HTTP'
+  fi
   if [ "${nodetype}" = "mynode" ]; then
+    if [ $(ls /usr/share/mynode_apps | grep -c pleb-vpn) -eq 0 ]; then
+      sudo ufw allow 2420 comment 'allow Pleb-VPN HTTP'
       # add new rules to firewallConf
       sectionLine=$(cat ${firewallConf} | grep -n "^\# Add firewall rules" | cut -d ":" -f1 | head -n 1)
       insertLine=$(expr $sectionLine + 1)
       sed -i "${insertLine}iufw allow 2420 comment 'allow Pleb-VPN HTTP'" ${firewallConf}
+    fi
   fi
 
   # create systemd service
@@ -316,16 +339,25 @@ PrivateTmp=true
 [Install]
 WantedBy=multi-user.target" | sudo tee "/etc/systemd/system/pleb-vpn.service"
   elif [ "${nodetype}" = "mynode" ]; then
-    echo "
+    if [ $(ls /usr/share/mynode_apps | grep -c pleb-vpn) -eq 0 ]; then
+      echo "
+# pleb-vpn service
+# /etc/systemd/system/pleb-vpn.service
+
 [Unit]
-Description=Pleb-VPN guincorn app
+Description=pleb-vpn
 Wants=www.service docker_images.service
 After=www.service docker_images.service
 
 [Service]
 WorkingDirectory=/opt/mynode/pleb-vpn
+
 ExecStartPre=/usr/bin/is_not_shutting_down.sh
+ExecStartPre=/bin/bash -c 'if [ -f /usr/bin/service_scripts/pre_pleb-vpn.sh ]; then /bin/bash /usr/bin/service_scripts/pre_pleb-vpn.sh; fi'
 ExecStart=/bin/bash -c \"/opt/mynode/pleb-vpn/.venv/bin/gunicorn -k geventwebsocket.gunicorn.workers.GeventWebSocketWorker -w 1 -b 0.0.0.0:2420 main:app\"
+ExecStartPost=/bin/bash -c 'if [ -f /usr/bin/service_scripts/post_pleb-vpn.sh ]; then /bin/bash /usr/bin/service_scripts/post_pleb-vpn.sh; fi'
+#ExecStop=FILL_IN_EXECSTOP_AND_UNCOMMENT_IF_NEEDED
+
 User=root
 Group=root
 Type=simple
@@ -338,6 +370,7 @@ SyslogIdentifier=pleb-vpn
 
 [Install]
 WantedBy=multi-user.target" | sudo tee "/etc/systemd/system/pleb-vpn.service"
+    fi
   fi
   sudo systemctl enable pleb-vpn.service
   sudo systemctl start pleb-vpn.service
@@ -345,26 +378,29 @@ WantedBy=multi-user.target" | sudo tee "/etc/systemd/system/pleb-vpn.service"
 }
 
 update() {
+  local new_ver="${1}"
+  local skip_key="${2}"
+  if [ -z ${new_ver} ]; then
+    echo "Error: Script needs a version to update to. Pass new version as argument 1 (example: pleb-vpn.install.sh update v1.1)."
+    if [ ! "${skip_key}" = "1" ]; then
+      echo "Press ENTER to continue"
+      read key </dev/tty
+    fi
+    exit 1
+  fi
   plebVPNConf="${homedir}/pleb-vpn.conf"
   plebVPNTempConf="${homedir}/pleb-vpn.conf.tmp"
   sudo sed '1d' $plebVPNConf > $plebVPNTempConf
   source ${plebVPNTempConf}
   sudo rm ${plebVPNTempConf}
-  local skip_key="${1}"
-  # git clone to temp directory
+  # download zip file into temp directory
   sudo mkdir /home/admin/pleb-vpn-tmp
   cd /home/admin/pleb-vpn-tmp
-  sudo git clone --recursive https://github.com/allyourbankarebelongtous/pleb-vpn.git
-  cd /home/admin/pleb-vpn-tmp/pleb-vpn
-  # these commands are for checking out a specific branch
-  sudo git checkout -b mynode
-  sudo git pull origin mynode
-  sudo git submodule init
-  sudo git submodule update
-  # check if successful
+  sudo wget https://github.com/allyourbankarebelongtous/pleb-vpn/archive/refs/tags/pleb-vpn_${new_ver}.tar.gz
+  sudo tar -xzf pleb-vpn_${ver}.tar.gz
   isSuccess=$(ls /home/admin/pleb-vpn-tmp/ | grep -c pleb-vpn)
   if [ ${isSuccess} -eq 0 ]; then
-    echo "error: git clone failed. Check internet connection and try again."
+    echo "error: download and unzip failed. Check internet connection and version number and try again."
     if [ ! "${skip_key}" = "1" ]; then
       echo "Press ENTER to continue"
       read key </dev/tty
@@ -372,10 +408,6 @@ update() {
     sudo rm -rf /home/admin/pleb-vpn-tmp
     exit 1
   else
-    # get version date
-    versiondate=$(python3 check_date.py)
-    # update version date to pleb-vpn.conf
-    setting ${plebVPNConf} "2" "versiondate" "'${versiondate}'"
     if [ "${nodetype}" = "raspiblitz" ]; then
       sudo cp -p -r /home/admin/pleb-vpn-tmp/pleb-vpn /home/admin/
       sudo cp -p -r /home/admin/pleb-vpn-tmp/pleb-vpn /mnt/hdd/app-data/
@@ -716,7 +748,7 @@ uninstall() {
 
 case "${1}" in
   on) on ;;
-  update) update "${2}" ;;
+  update) update "${2}" "${3}" ;;
   restore) restore ;;
   uninstall) uninstall ;;
   *) echo "err=Unknown action: ${1}" ; exit 1 ;;

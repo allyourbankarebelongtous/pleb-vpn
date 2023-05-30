@@ -2,7 +2,7 @@ from flask import Blueprint, render_template, request, flash, jsonify, redirect,
 from flask_login import login_required, current_user
 from werkzeug.utils import secure_filename
 from socket_io import socketio
-from check_date import check_repository_updated
+from check_update import get_latest_version
 from plebvpn_common import config
 from datetime import datetime
 from .models import User
@@ -1034,9 +1034,9 @@ def get_plebVPN_status():
                 plebVPN_status[name] = str(value).rstrip().strip('\'\'')
     os.remove(os.path.join(EXEC_DIR, 'pleb-vpn_status.tmp'))
     setting=get_conf()
-    repo_date = check_repository_updated('mynode') # mynode branch included for testing purposes
-    if repo_date is not None:
-        if setting['versiondate'] != repo_date: 
+    latest_version = get_latest_version()
+    if latest_version is not None:
+        if setting['version'] != latest_version: 
             update_available = True
 
 
