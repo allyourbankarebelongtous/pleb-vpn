@@ -189,7 +189,9 @@ lndconffile=
     sudo mv ${homedir}/pleb-vpn.conf.new ${homedir}/pleb-vpn.conf
     sudo chown admin:admin ${homedir}/pleb-vpn.conf
     sudo chmod 755 ${homedir}/pleb-vpn.conf
+  fi
 
+  if [ $(cat /home/admin/00infoBlitz.sh | grep -c "{plebvpn}") -eq 0 ]; then
     # change pleb-vpn.conf values to lowercase on 00infoBlitz status check screen
     # remove extra lines from 00infoBlitz.sh if required
     extraLine='  # Pleb-VPN info'
@@ -230,7 +232,9 @@ lndconffile=
       ed -s ${infoBlitz} <<< "${insertLine}r /home/admin/pleb-vpn/update.tmp"$'\nw'
       sudo rm /home/admin/pleb-vpn/update.tmp
     fi
+  fi
 
+  if [ $(ls /etc/systemd/system | grep -c pleb-vpn.service) -eq 0 ]; then
     # Add webui to raspiblitz
     cd ${execdir}
     echo "installing virtualenv..."
@@ -271,6 +275,17 @@ WantedBy=multi-user.target" | sudo tee "/etc/systemd/system/pleb-vpn.service"
     sudo systemctl enable pleb-vpn.service
     sudo systemctl start pleb-vpn.service
   fi
+
+  # remove git attributes from pleb-vpn folders if present (updates now done via releases)
+  if [ -d /home/admin/pleb-vpn/.git ]; then
+    sudo rm -rf /home/admin/pleb-vpn/.git
+    sudo rm /home/admin/pleb-vpn/.gitattributes
+    sudo rm /home/admin/pleb-vpn/.gitmodules
+    sudo rm -rf /mnt/hdd/app-data/pleb-vpn/.git
+    sudo rm /mnt/hdd/app-data/pleb-vpn/.gitattributes
+    sudo rm /mnt/hdd/app-data/pleb-vpn/.gitmodules
+  fi
+
 fi
 
 # update version
