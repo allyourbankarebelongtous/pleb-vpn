@@ -183,6 +183,8 @@ lndconffile=
     # remove old pleb-vpn.conf and replace with new file
     sudo rm ${homedir}/pleb-vpn.conf
     sudo mv ${homedir}/pleb-vpn.conf.new ${homedir}/pleb-vpn.conf
+    sudo chown admin:admin ${homedir}/pleb-vpn.conf
+    sudo chmod 755 ${homedir}/pleb-vpn.conf
 
     # change pleb-vpn.conf values to lowercase on 00infoBlitz status check screen
     # remove extra lines from 00infoBlitz.sh if required
