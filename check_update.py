@@ -32,4 +32,5 @@ def get_latest_version():
 
     return None  # Return None if no versions found or API request failed
     
-get_latest_version() # for testing purposes
+latestversion = get_latest_version() # for testing purposes
+print(latestversion)
