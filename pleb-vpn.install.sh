@@ -12,7 +12,7 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   exit 1
 fi
 
-ver="v1.1betaRC1"
+ver="v1.1.0betaRC1"
 
 if [ -d "/mnt/hdd/mynode" ]; then
   nodetype="mynode"
@@ -127,6 +127,7 @@ on() {
   # create and symlink pleb-vpn.conf
   echo "[PLEBVPN]
 version=
+latestversion=
 nodetype=
 lan=
 plebvpn=off

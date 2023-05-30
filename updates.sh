@@ -5,7 +5,7 @@
 # make sure updates can be re-run multiple times
 # keep updates present until most users have had the chance to update
 
-ver="1.1beta"
+ver="v1.1.0betaRC1"
 
 # get node info# find home directory based on node implementation
 if [ -d "/mnt/hdd/mynode/pleb-vpn/" ]; then
@@ -63,7 +63,7 @@ if [ "${nodetype}" = "raspiblitz" ]; then
   # create new pleb-vpn.conf file
   echo "[PLEBVPN]
 version=
-versiondate=
+latestversion=
 nodetype=
 lan=
 plebvpn=off
@@ -94,14 +94,9 @@ lndconffile=
 
 "| tee ${homedir}/pleb-vpn.conf.new
 
-  # get date of last commit to store in pleb-vpn.conf
-  cd ${execdir}
-  versiondate=$(/opt/mynode/pleb-vpn/.venv/bin/python check_date.py)
-
   # update new conf file with values from old conf file
   newConf="${homedir}/pleb-vpn.conf.new"
   setting ${newConf} "2" "nodetype" "'${nodetype}'"
-  setting ${newConf} "2" "versiondate" "'${versiondate}'"
   if [ -z "${LAN}" ]; then
     LAN=""
   fi
