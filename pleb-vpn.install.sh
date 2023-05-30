@@ -222,6 +222,7 @@ lndconffile=
   setting ${plebVPNConf} "2" "clnconffile" "'${CLCONF}'"
   setting ${plebVPNConf} "2" "lan" "'${LAN}'"
   setting ${plebVPNConf} "2" "version" "'${ver}'"
+  setting ${plebVPNConf} "2" "latestversion" "'${ver}'"
   setting ${plebVPNConf} "2" "nodetype" "'${nodetype}'"
 
   # for raspiblitz menu install
@@ -379,26 +380,28 @@ WantedBy=multi-user.target" | sudo tee "/etc/systemd/system/pleb-vpn.service"
 }
 
 update() {
-  local new_ver="${1}"
-  local skip_key="${2}"
-  if [ -z ${new_ver} ]; then
-    echo "Error: Script needs a version to update to. Pass new version as argument 1 (example: pleb-vpn.install.sh update v1.1)."
-    if [ ! "${skip_key}" = "1" ]; then
-      echo "Press ENTER to continue"
-      read key </dev/tty
-    fi
-    exit 1
-  fi
+  local skip_key="${1}"
   plebVPNConf="${homedir}/pleb-vpn.conf"
   plebVPNTempConf="${homedir}/pleb-vpn.conf.tmp"
   sudo sed '1d' $plebVPNConf > $plebVPNTempConf
   source ${plebVPNTempConf}
   sudo rm ${plebVPNTempConf}
+
+  # check for new version and update new version if it doesn't exists
+  if [ "${latestversion}" = "${version"} ]; then
+    # see if there's a newer version
+    latestversion=$(sudo ${execdir}/.venv/bin/python ${execdir}/check_update.py)
+    if [ "${latestversion}" = "${version"} ]; then
+      echo "already up to date with the latest version"
+      exit 0
+    fi
+  fi
+
   # download zip file into temp directory
   sudo mkdir /home/admin/pleb-vpn-tmp
   cd /home/admin/pleb-vpn-tmp
-  sudo wget https://github.com/allyourbankarebelongtous/pleb-vpn/archive/refs/tags/${new_ver}.tar.gz
-  sudo tar -xzf pleb-vpn_${ver}.tar.gz
+  sudo wget https://github.com/allyourbankarebelongtous/pleb-vpn/archive/refs/tags/${latestversion}.tar.gz
+  sudo tar -xzf pleb-vpn_${latestversion}.tar.gz
   isSuccess=$(ls /home/admin/pleb-vpn-tmp/ | grep -c pleb-vpn)
   if [ ${isSuccess} -eq 0 ]; then
     echo "error: download and unzip failed. Check internet connection and version number and try again."
@@ -749,7 +752,7 @@ uninstall() {
 
 case "${1}" in
   on) on ;;
-  update) update "${2}" "${3}" ;;
+  update) update "${2}" ;;
   restore) restore ;;
   uninstall) uninstall ;;
   *) echo "err=Unknown action: ${1}" ; exit 1 ;;

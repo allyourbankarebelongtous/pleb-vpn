@@ -28,7 +28,7 @@ CHOICE=$(dialog --clear \
 
 case $CHOICE in
   UPDATE)
-    /home/admin/pleb-vpn/pleb-vpn.install.sh update
+    /home/admin/pleb-vpn/pleb-vpn.install.sh update ${
     ;;
   UNINSTALL)
     whiptail --title "Completely Uninstall Pleb-VPN" --yes-button "Cancel" --no-button "Uninstall" --yesno "
