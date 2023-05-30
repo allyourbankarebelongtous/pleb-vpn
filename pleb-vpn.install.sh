@@ -73,8 +73,8 @@ on() {
       sudo rm -rf /home/admin/pleb-vpn-tmp
     fi
   elif [ "${nodetype}" = "mynode" ]; then
-    if [ ! -d ${execdir}/webui ]; then
-      if [ -d ${execdir}/pleb-vpn/webui ]; then
+    if [ ! -d ${execdir}/plebvpn_common ]; then
+      if [ -d ${execdir}/pleb-vpn/plebvpn_common ]; then
         sudo cp -p -r ${execdir}/pleb-vpn /opt/mynode/
         sudo rm -rf ${execdir}/pleb-vpn
       else
@@ -344,7 +344,7 @@ PrivateTmp=true
 [Install]
 WantedBy=multi-user.target" | sudo tee "/etc/systemd/system/pleb-vpn.service"
   elif [ "${nodetype}" = "mynode" ]; then
-    if [ $(ls /usr/share/mynode_apps | grep -c pleb-vpn) -eq 0 ]; then
+    if [ $(ls /etc/systemd/system | grep -c pleb-vpn.service) -eq 0 ]; then
       echo "
 # pleb-vpn service
 # /etc/systemd/system/pleb-vpn.service

@@ -82,11 +82,11 @@ function setlndHybrid_on(userId) {
       (message = "Use the current LND port and enable LND hybrid mode?")
     ) == true
   ) {
-    var activateBtn = document.getElementById("activate");
+    var activateBtn = document.getElementById("lnd_activate");
     if (activateBtn !== null) {
       activateBtn.classList.add("d-none");
     }
-    var activateLoading = document.getElementById("activate_loading");
+    var activateLoading = document.getElementById("lnd_activate_loading");
     if (activateLoading !== null) {
       activateLoading.classList.remove("d-none");
     }
@@ -94,11 +94,11 @@ function setlndHybrid_on(userId) {
       method: "POST",
       body: JSON.stringify({ userId: userId }),
     }).then((_res) => {
-      var activateBtn = document.getElementById("activate");
+      var activateBtn = document.getElementById("lnd_activate");
       if (activateBtn !== null) {
         activateBtn.classList.remove("d-none");
       }
-      var activateLoading = document.getElementById("activate_loading");
+      var activateLoading = document.getElementById("lnd_activate_loading");
       if (activateLoading !== null) {
         activateLoading.classList.add("d-none");
       }
@@ -113,11 +113,11 @@ function setlndHybrid_off(userId) {
       (message = "Are you sure you want to disable LND hybrid mode?")
     ) == true
   ) {
-    var deactivateBtn = document.getElementById("deactivate");
+    var deactivateBtn = document.getElementById("lnd_deactivate");
     if (deactivateBtn !== null) {
       deactivateBtn.classList.add("d-none");
     }
-    var deactivateLoading = document.getElementById("deactivate_loading");
+    var deactivateLoading = document.getElementById("lnd_deactivate_loading");
     if (deactivateLoading !== null) {
       deactivateLoading.classList.remove("d-none");
     }
@@ -125,11 +125,11 @@ function setlndHybrid_off(userId) {
       method: "POST",
       body: JSON.stringify({ userId: userId }),
     }).then((_res) => {
-      var deactivateBtn = document.getElementById("deactivate");
+      var deactivateBtn = document.getElementById("lnd_deactivate");
       if (deactivateBtn !== null) {
         deactivateBtn.classList.remove("d-none");
       }
-      var deactivateLoading = document.getElementById("deactivate_loading");
+      var deactivateLoading = document.getElementById("lnd_deactivate_loading");
       if (deactivateLoading !== null) {
         deactivateLoading.classList.add("d-none");
       }
@@ -145,11 +145,11 @@ function setclnHybrid_on(userId) {
         "Use the current CLN port and enable Core Lightning hybrid mode?")
     ) == true
   ) {
-    var activateBtn = document.getElementById("activate");
+    var activateBtn = document.getElementById("cln_activate");
     if (activateBtn !== null) {
       activateBtn.classList.add("d-none");
     }
-    var activateLoading = document.getElementById("activate_loading");
+    var activateLoading = document.getElementById("cln_activate_loading");
     if (activateLoading !== null) {
       activateLoading.classList.remove("d-none");
     }
@@ -157,11 +157,11 @@ function setclnHybrid_on(userId) {
       method: "POST",
       body: JSON.stringify({ userId: userId }),
     }).then((_res) => {
-      var activateBtn = document.getElementById("activate");
+      var activateBtn = document.getElementById("cln_activate");
       if (activateBtn !== null) {
         activateBtn.classList.remove("d-none");
       }
-      var activateLoading = document.getElementById("activate_loading");
+      var activateLoading = document.getElementById("cln_activate_loading");
       if (activateLoading !== null) {
         activateLoading.classList.add("d-none");
       }
@@ -176,11 +176,11 @@ function setclnHybrid_off(userId) {
       (message = "Are you sure you want to disable Core Lightning hybrid mode?")
     ) == true
   ) {
-    var deactivateBtn = document.getElementById("deactivate");
+    var deactivateBtn = document.getElementById("cln_deactivate");
     if (deactivateBtn !== null) {
       deactivateBtn.classList.add("d-none");
     }
-    var deactivateLoading = document.getElementById("deactivate_loading");
+    var deactivateLoading = document.getElementById("cln_deactivate_loading");
     if (deactivateLoading !== null) {
       deactivateLoading.classList.remove("d-none");
     }
@@ -188,11 +188,11 @@ function setclnHybrid_off(userId) {
       method: "POST",
       body: JSON.stringify({ userId: userId }),
     }).then((_res) => {
-      var deactivateBtn = document.getElementById("deactivate");
+      var deactivateBtn = document.getElementById("cln_deactivate");
       if (deactivateBtn !== null) {
         deactivateBtn.classList.remove("d-none");
       }
-      var deactivateLoading = document.getElementById("deactivate_loading");
+      var deactivateLoading = document.getElementById("cln_deactivate_loading");
       if (deactivateLoading !== null) {
         deactivateLoading.classList.add("d-none");
       }
