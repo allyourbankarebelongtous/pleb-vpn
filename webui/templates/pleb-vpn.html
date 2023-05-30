@@ -1,0 +1,267 @@
+{% extends "base.html" %} {% block title %}Pleb-VPN{% endblock %} {% block
+content %}
+<div class="container text-center">
+  <div class="row">
+    <div class="col">
+      <h3>Pleb-VPN Settings</h3>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col text-center">
+      <button
+        id="activate"
+        type="button"
+        class="btn btn-success"
+        onClick="refreshVPNdata({{ current_user.id }})"
+      >
+        Refesh Data
+      </button>
+      <button
+        id="activate_loading"
+        class="btn btn-success d-none"
+        type="button"
+        disabled
+      >
+        <span
+          class="spinner-grow spinner-grow-sm"
+          role="status"
+          aria-hidden="true"
+        ></span>
+        Loading...
+      </button>
+    </div>
+  </div>
+</div>
+<br />
+<div class="container container-fluid">
+  {% if plebVPN_status['message'] != null %}
+  <div class="row">
+    <div class="col text-center" style="border-top: 1px solid lightgrey">
+      <h7>{{ plebVPN_status['message'] }}</h7>
+    </div>
+  </div>
+  {% endif %}
+  <div class="row">
+    <div class="col" style="border-top: 1px solid lightgrey">
+      <table class="table">
+        <thead>
+          <tr>
+            <th scope="col">Setting</th>
+            <th scope="col">Value</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th scope="row">Pleb-VPN Status</th>
+            <td>{{ setting['plebvpn'] }}</td>
+          </tr>
+          <tr>
+            <th scope="row">Pleb-VPN Operating</th>
+            <td>{{ plebVPN_status['vpn_operating'] }}</td>
+          </tr>
+          {% if setting['plebvpn'] == "on" %}
+          <tr>
+            <th scope="row">Current IP</th>
+            <td>{{ plebVPN_status['current_ip'] }}</td>
+          </tr>
+          <tr>
+            <th scope="row">Pleb-VPN IP</th>
+            <td>{{ setting['vpnip'] }}</td>
+          </tr>
+          <tr>
+            <th scope="row">Pleb-VPN Port for VPS</th>
+            <td>{{ setting['vpnport'] }}</td>
+          </tr>
+          <tr>
+            <th scope="row">Firewall Config OK</th>
+            <td>{{ plebVPN_status['firewall_configured'] }}</td>
+          </tr>
+          {% endif %}
+          <tr>
+            <th scope="row">VPN config file exists</th>
+            <td>{{ plebVPN_status['config_exists'] }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+<br />
+{% if setting['lndhybrid'] == "on" or setting['clnhybrid'] == "on" or
+setting['wireguard'] == "on" or setting['torsplittunnel'] == "on" or
+setting['letsencryt_ssl'] == "on" %}
+<div class="container">
+  <div class="row">
+    <div class="col text-center">
+      <h5>
+        You cannot disable Pleb-VPN unless you turn off all services first!
+      </h5>
+    </div>
+  </div>
+  <br />
+  <div class="row">
+    <div class="col text-center">
+      <h6>Status of current services</h6>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col" style="border-top: 1px solid lightgrey">
+      <table class="table">
+        <thead>
+          <tr>
+            <th scope="col">Setting</th>
+            <th scope="col">Value</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% if lnd %}
+          <tr>
+            <th scope="row">LND Hybrid Status</th>
+            <td>{{ setting['lndhybrid'] }}</td>
+          </tr>
+          {% endif %} {% if cln %}
+          <tr>
+            <th scope="row">Core Lightning Hybrid Status</th>
+            <td>{{ setting['clnhybrid'] }}</td>
+          </tr>
+          {% endif %}
+          <tr>
+            <th scope="row">Wireguard Status</th>
+            <td>{{ setting['wireguard'] }}</td>
+          </tr>
+          <tr>
+            <th scope="row">Tor Split-Tunnel Status</th>
+            <td>{{ setting['torsplittunnel'] }}</td>
+          </tr>
+          <tr>
+            <th scope="row">LetsEncrypt Status</th>
+            <td>{{ setting['letsencrypt_ssl'] }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% else %} {% if setting['plebvpn'] != "on" %} {% if
+plebVPN_status['config_exists'] != "yes" %}
+<div class="container">
+  <div class="row">
+    <div class="col text-center">
+      <h5>Upload plebvpn.conf file</h5>
+    </div>
+  </div>
+  <form method="POST" enctype="multipart/form-data">
+    <div class="row">
+      <div class="col">
+        <div class="form-group">
+          <input
+            type="file"
+            name="plebvpn_conf"
+            class="form-control-file btn-primary"
+            id="file"
+          />
+        </div>
+      </div>
+      <div class="col">
+        <button
+          type="button"
+          class="btn btn-success"
+          onClick="this.form.submit()"
+        >
+          Upload plebvpn.conf
+        </button>
+      </div>
+    </div>
+  </form>
+</div>
+{% else %}
+<div class="container">
+  <div class="row">
+    <div class="col text-center">
+      <h5>plebvpn.conf file detected</h5>
+    </div>
+  </div>
+  <form method="POST">
+    <div class="row">
+      <div class="col">
+        <p>Activate Pleb-VPN</p>
+      </div>
+      <div class="col">
+        <button
+          id="activate"
+          type="button"
+          class="btn btn-success"
+          onClick="setplebVPN_on({{ current_user.id }})"
+        >
+          Activate
+        </button>
+        <button
+          id="activate_loading"
+          class="btn btn-success d-none"
+          type="button"
+          disabled
+        >
+          <span
+            class="spinner-grow spinner-grow-sm"
+            role="status"
+            aria-hidden="true"
+          ></span>
+          Loading...
+        </button>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col">
+        <p>Delete plebvpn.conf</p>
+      </div>
+      <div class="col">
+        <button
+          type="button"
+          class="btn btn-danger"
+          onClick="delete_plebvpn_conf({{ current_user.id }})"
+        >
+          Delete
+        </button>
+      </div>
+    </div>
+  </form>
+</div>
+{% endif %} {% else %}
+<div class="container">
+  <div class="row">
+    <div class="col text-center">
+      <h5>Deactivate Pleb-VPN</h5>
+    </div>
+  </div>
+  <form method="POST">
+    <div class="row">
+      <div class="col">
+        <p>Dectivate Pleb-VPN</p>
+      </div>
+      <div class="col">
+        <button
+          id="deactivate"
+          type="button"
+          class="btn btn-danger"
+          onClick="setplebVPN_off({{ current_user.id }})"
+        >
+          Dectivate
+        </button>
+        <button
+          id="deactivate_loading"
+          class="btn btn-danger d-none"
+          type="button"
+          disabled
+        >
+          <span
+            class="spinner-grow spinner-grow-sm"
+            role="status"
+            aria-hidden="true"
+          ></span>
+          Loading...
+        </button>
+      </div>
+    </div>
+  </form>
+</div>
+{% endif %} {% endif %} {% endblock %}

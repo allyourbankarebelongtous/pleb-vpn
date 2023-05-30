@@ -1,0 +1,314 @@
+{% extends "base.html" %} {% block title %}LetsEncrypt SSL/https{% endblock %}
+{% block content %}
+<div class="container text-center">
+  <div class="row">
+    <div class="col">
+      <h3>LetsEncrypt SSL/https for BTCPay/LNBits domain(s)</h3>
+    </div>
+  </div>
+</div>
+<br />
+{% if setting['plebvpn'] != "on" %}
+<div class="container">
+  <div class="row">
+    <div class="col text-center">
+      <h5>Pleb-VPN is not connected. Enable Plev-VPN first!</h5>
+    </div>
+  </div>
+</div>
+{% else %} {% if setting['letsencrypt_ssl'] != "on" %}
+<div class="container">
+  <div class="row">
+    <div class="col text-center">
+      <p>
+        Input your desired domain(s) and select the service(s) you wish to
+        enable ssl/https for.
+      </p>
+    </div>
+  </div>
+  <form id="set_letsencrypt_on">
+    <div class="row">
+      <div class="col" style="border-top: 1px solid lightgrey">
+        <table class="table">
+          <thead>
+            <tr>
+              <th scope="col">Service</th>
+              <th scope="col">Domain</th>
+              <th scope="col">Enable?</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th scope="row">BTCPayServer</th>
+              <td>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="btcpaydomain"
+                  name="btcpaydomain"
+                  placeholder="Enter BTCPayServer Domain"
+                />
+              </td>
+              <td>
+                <div class="form-check form-switch">
+                  <input
+                    class="form-check-input"
+                    type="checkbox"
+                    role="switch"
+                    id="letsencryptbtcpay"
+                  />
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <th scope="row">LNBits</th>
+              <td>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="lnbitsdomain"
+                  name="lnbitsdomain"
+                  placeholder="Enter LNBits Domain"
+                />
+              </td>
+              <td>
+                <div class="form-check form-switch">
+                  <input
+                    class="form-check-input"
+                    type="checkbox"
+                    role="switch"
+                    id="letsencryptlnbits"
+                  />
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="row" id="enable_message" style="margin-top: 0.5em">
+      <div class="col">
+        <div class="row">
+          <div class="col text-center">
+            <h5>IMPORTANT:</h5>
+            <p>
+              Before continuing you must ensure your domain(s) above are
+              pointing to {{ setting['vpnip'] }}, you must ensure your domain(s)
+              are forwarded to the services requested, and you must be ready to
+              update the CNAME record of each domain you are requesting a cert
+              for.
+            </p>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col text-center">
+            <button
+              id="enable_letsencrypt"
+              type="button"
+              class="btn btn-success"
+            >
+              Get Certs
+            </button>
+            <button
+              id="enable_letsencrypt_loading"
+              class="btn btn-success d-none"
+              type="button"
+              disabled
+            >
+              <span
+                class="spinner-grow spinner-grow-sm"
+                role="status"
+                aria-hidden="true"
+              ></span>
+              Loading...
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="row d-none" id="CNAME_Challenge" style="margin-top: 0.5em">
+      <div class="col">
+        <div class="row">
+          <div class="col">
+            <div id="CNAMEText"></div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col">
+            <button id="enterBtn" class="btn btn-primary">Enter</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </form>
+</div>
+{% else %}
+<div class="container">
+  <div class="row">
+    <div class="col text-center">
+      <p>LetsEncrypt enabled for the following service(s).</p>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col" style="border-top: 1px solid lightgrey">
+      <table class="table">
+        <tbody>
+          <tr>
+            <th scope="row">BTCPayServer</th>
+            <td>{{ setting['letsencryptbtcpay'] }}</td>
+          </tr>
+          <tr>
+            <th scope="row">LNBits</th>
+            <td>{{ setting['letsencryptlnbits'] }}</td>
+          </tr>
+          {% if setting['letsencryptdomain2'] != "" %}
+          <tr>
+            <th scope="row">Domain 1</th>
+            <td>{{ setting['letsencryptdomain1'] }}</td>
+          </tr>
+          <tr>
+            <th scope="row">Domain 2</th>
+            <td>{{ setting['letsencryptdomain2'] }}</td>
+          </tr>
+          {% else %}
+          <tr>
+            <th scope="row">Domain</th>
+            <td>{{ setting['letsencryptdomain1'] }}</td>
+          </tr>
+          {% endif %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <div class="row" style="margin-top: 0.5em">
+    <div class="col text-center">
+      <button id="disable_letsencrypt" type="button" class="btn btn-danger">
+        Delete Certs
+      </button>
+      <button
+        id="disable_letsencrypt_loading"
+        class="btn btn-danger d-none"
+        type="button"
+        disabled
+      >
+        <span
+          class="spinner-grow spinner-grow-sm"
+          role="status"
+          aria-hidden="true"
+        ></span>
+        Loading...
+      </button>
+    </div>
+  </div>
+</div>
+{% endif %} {% endif %}
+<script>
+  var socket = io.connect("http://" + document.domain + ":" + location.port);
+  function setLetsencrypt_on(event) {
+    event.preventDefault();
+    if (
+      confirm_dialog(
+        (message =
+          "Before enabling LetsEncrypt you must have your domain(s) pointed at your node's public IP, you must be ready to enter a CNAME record for each domain, and you must ensure the domain(s) are properly forwarded to the services you wish to enable. Are you ready to continue?")
+      ) == true
+    ) {
+      var activateBtn = document.getElementById("enable_letsencrypt");
+      if (activateBtn !== null) {
+        activateBtn.classList.add("d-none");
+      }
+      var activateLoading = document.getElementById(
+        "enable_letsencrypt_loading"
+      );
+      if (activateLoading !== null) {
+        activateLoading.classList.remove("d-none");
+      }
+      var formData = {
+        btcpaydomain: $("#btcpaydomain").val(),
+        lnbitsdomain: $("#lnbitsdomain").val(),
+        letsencryptbtcpay: $("#letsencryptbtcpay").is(":checked"),
+        letsencryptlnbits: $("#letsencryptlnbits").is(":checked"),
+      };
+      socket.emit("set_letsencrypt_on", formData);
+    }
+  }
+  $("#enable_letsencrypt").click(setLetsencrypt_on);
+  socket.on("CNAMEoutput", function (CNAME_data) {
+    var CNAME_Challenge = document.getElementById("CNAME_Challenge");
+    if (CNAME_Challenge !== null) {
+      CNAME_Challenge.classList.remove("d-none");
+    }
+    $("#CNAMEText").append(CNAME_data + "<br>");
+  });
+
+  $("#enterBtn").click(function (event) {
+    event.preventDefault();
+    socket.emit("enter_input");
+  });
+  socket.on("wait_for_confirmation", function (data) {
+    var CNAME_Challenge = document.getElementById("CNAME_Challenge");
+    if (CNAME_Challenge !== null) {
+      CNAME_Challenge.classList.add("d-none");
+    }
+  });
+  socket.on("letsencrypt_set_on", function (data) {
+    var activateBtn = document.getElementById("enable_letsencrypt");
+    if (activateBtn !== null) {
+      activateBtn.classList.remove("d-none");
+    }
+    var activateLoading = document.getElementById("enable_letsencrypt_loading");
+    if (activateLoading !== null) {
+      activateLoading.classList.add("d-none");
+    }
+    var message = data.message;
+    var category = data.category;
+    var url =
+      "/letsencrypt?message=" +
+      encodeURIComponent(message) +
+      "&category=" +
+      encodeURIComponent(category);
+    window.location.href = url;
+  });
+  function setLetsencrypt_off(event) {
+    event.preventDefault();
+    if (
+      confirm_dialog(
+        (message =
+          "Are you sure you want to disable LetsEncyrpt and delete your ssl certs?")
+      ) == true
+    ) {
+      var activateBtn = document.getElementById("disable_letsencrypt");
+      if (activateBtn !== null) {
+        activateBtn.classList.add("d-none");
+      }
+      var activateLoading = document.getElementById(
+        "disable_letsencrypt_loading"
+      );
+      if (activateLoading !== null) {
+        activateLoading.classList.remove("d-none");
+      }
+      socket.emit("set_letsencrypt_off");
+    }
+  }
+  $("#disable_letsencrypt").click(setLetsencrypt_off);
+  socket.on("letsencrypt_set_off", function (data) {
+    var activateBtn = document.getElementById("disable_letsencrypt");
+    if (activateBtn !== null) {
+      activateBtn.classList.remove("d-none");
+    }
+    var activateLoading = document.getElementById(
+      "disable_letsencrypt_loading"
+    );
+    if (activateLoading !== null) {
+      activateLoading.classList.add("d-none");
+    }
+    var message = data.message;
+    var category = data.category;
+    var url =
+      "/letsencrypt?message=" +
+      encodeURIComponent(message) +
+      "&category=" +
+      encodeURIComponent(category);
+    window.location.href = url;
+  });
+</script>
+{% endblock %}

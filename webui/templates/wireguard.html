@@ -1,0 +1,355 @@
+{% extends "base.html" %} {% block title %}LND Hybrid{% endblock %} {% block
+content %}
+<div class="container text-center">
+  <div class="row">
+    <div class="col">
+      <h3>Wireguard private LAN</h3>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col text-center">
+      <button
+        id="activate"
+        type="button"
+        class="btn btn-success"
+        onClick="refreshwireguarddata({{ current_user.id }})"
+      >
+        Refesh Data
+      </button>
+      <button
+        id="activate_loading"
+        class="btn btn-success d-none"
+        type="button"
+        disabled
+      >
+        <span
+          class="spinner-grow spinner-grow-sm"
+          role="status"
+          aria-hidden="true"
+        ></span>
+        Loading...
+      </button>
+    </div>
+  </div>
+</div>
+<br />
+{% if setting['plebvpn'] != "on" %}
+<div class="container">
+  <div class="row">
+    <div class="col text-center">
+      <h5>Pleb-VPN is not connected. Enable Plev-VPN first!</h5>
+    </div>
+  </div>
+</div>
+{% else %}
+
+<div class="container container-fluid">
+  <div class="row">
+    <div class="col text-center">
+      <h5>Wireguard LAN Status</h5>
+    </div>
+  </div>
+
+  {% if wireguard_status['message'] != null %}
+  <div class="row">
+    <div class="col text-center" style="border-top: 1px solid lightgrey">
+      <h7>{{ wireguard_status['message'] }}</h7>
+    </div>
+  </div>
+  {% endif %}
+
+  <div class="row">
+    <div class="col" style="border-top: 1px solid lightgrey">
+      <table class="table">
+        <thead>
+          <tr>
+            <th scope="col">Setting</th>
+            <th scope="col">Value</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th scope="row">Wireguard Status</th>
+            <td>{{ setting['wireguard'] }}</td>
+          </tr>
+          {% if setting['wgport'] != "" %}
+          <tr>
+            <th scope="row">Wireguard Port</th>
+            <td>{{ setting['wgport'] }}</td>
+          </tr>
+          {% endif %}
+          <tr>
+            <th scope="row">Existing config found</th>
+            <td>{{ wireguard_status['config_file_found'] }}</td>
+          </tr>
+          {% if setting['wireguard'] == "on" %}
+          <tr>
+            <th scope="row">Wireguard Operating</th>
+            <td>{{ wireguard_status['operating'] }}</td>
+          </tr>
+          <tr>
+            <th scope="row">Wireguard IP address</th>
+            <td>{{ wireguard_status['server_IP'] }}</td>
+          </tr>
+          {% endif %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+{% if setting['wireguard'] != "on" %}
+<div class="container">
+  {% if setting['wgport'] == '' %}
+  <div class="row">
+    <div class="col text-center">
+      <h5>Add Port for wireguard private LAN</h5>
+    </div>
+  </div>
+  <form method="POST">
+    <div class="row">
+      <div class="col">
+        <p>
+          Missing Port for Wireguard LAN. Enter your Pleb-VPN assigned Wireguard
+          Port.
+        </p>
+      </div>
+      <div class="col">
+        <div class="form-group">
+          <input
+            type="text"
+            class="form-control"
+            id="wgPort"
+            name="wgPort"
+            placeholder="Enter port"
+          />
+        </div>
+      </div>
+      <div class="col">
+        <button
+          type="button"
+          class="btn btn-success"
+          onClick="this.form.submit()"
+        >
+          Set Wireguard Port
+        </button>
+      </div>
+    </div>
+  </form>
+  {% else %}
+  <div class="row">
+    <div class="col text-center">
+      <h5>Wireguard Port detected</h5>
+    </div>
+  </div>
+  <form method="POST">
+    <div class="row">
+      <div class="col">
+        <p>Turn on Wireguard private LAN</p>
+      </div>
+      <div class="col">
+        <button
+          id="activate"
+          type="button"
+          class="btn btn-success"
+          onClick="setWireguard_on({{ current_user.id }})"
+        >
+          Activate
+        </button>
+        <button
+          id="activate_loading"
+          class="btn btn-success d-none"
+          type="button"
+          disabled
+        >
+          <span
+            class="spinner-grow spinner-grow-sm"
+            role="status"
+            aria-hidden="true"
+          ></span>
+          Loading...
+        </button>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col">
+        <p>Wireguard Port: {{ setting['wgport'] }}</p>
+      </div>
+    </div>
+  </form>
+  <form method="POST">
+    <div class="row">
+      <div class="col text-center">
+        <h5>Change Wireguard Port</h5>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col">
+        <div class="form-group">
+          <input
+            type="text"
+            class="form-control"
+            id="wgPort"
+            name="wgPort"
+            placeholder="Enter port"
+          />
+        </div>
+      </div>
+      <div class="col">
+        <button
+          type="button"
+          class="btn btn-success"
+          onClick="this.form.submit()"
+        >
+          Change Wireguard Port
+        </button>
+      </div>
+    </div>
+  </form>
+  {% endif %} {% if setting['wgip'] != "" %}
+  <br />
+  <div class="row">
+    <div class="col">
+      <h5>Delete existing wireguard config</h5>
+    </div>
+    <div class="col">
+      <button
+        type="button"
+        class="btn btn-danger"
+        onClick="delete_wireguard_conf({{ current_user.id }})"
+      >
+        Delete
+      </button>
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% else %}
+<div class="container">
+  <div class="row">
+    <div class="col">
+      <img id="qr_image" src="" />
+    </div>
+  </div>
+  <br />
+  <div class="row">
+    <div class="col text-center">
+      <h5>Get Wireguard client files</h5>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col" style="border-top: 1px solid lightgrey">
+      <table class="table">
+        <thead>
+          <tr>
+            <th scope="col">Client</th>
+            <th scope="col">Display QR Code</th>
+            <th scope="col">Download conf file</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th scope="row">Client 1</th>
+            <td>
+              <button
+                type="button"
+                class="btn btn-success"
+                onClick="display_qrcode('client1.conf')"
+              >
+                QR Code
+              </button>
+            </td>
+            <td>
+              <button
+                type="button"
+                class="btn btn-success"
+                onClick="download_file('client1.conf')"
+              >
+                Download file
+              </button>
+            </td>
+          </tr>
+          <tr>
+            <th scope="row">Client 2</th>
+            <td>
+              <button
+                type="button"
+                class="btn btn-success"
+                onClick="display_qrcode('client2.conf')"
+              >
+                QR Code
+              </button>
+            </td>
+            <td>
+              <button
+                type="button"
+                class="btn btn-success"
+                onClick="download_file('client2.conf')"
+              >
+                Download file
+              </button>
+            </td>
+          </tr>
+          <tr>
+            <th scope="row">Client 3</th>
+            <td>
+              <button
+                type="button"
+                class="btn btn-success"
+                onClick="display_qrcode('client3.conf')"
+              >
+                QR Code
+              </button>
+            </td>
+            <td>
+              <button
+                type="button"
+                class="btn btn-success"
+                onClick="download_file('client3.conf')"
+              >
+                Download file
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <br />
+  <div class="row">
+    <div class="col">
+      <h5 align="center">Deactivate Wireguard private LAN</h5>
+    </div>
+  </div>
+  <form method="POST">
+    <div class="row">
+      <div class="col">
+        <p>Dectivate Wireguard</p>
+      </div>
+      <div class="col">
+        <button
+          id="deactivate"
+          type="button"
+          class="btn btn-danger"
+          onClick="setWireguard_off({{ current_user.id }})"
+        >
+          Dectivate
+        </button>
+        <button
+          id="deactivate_loading"
+          class="btn btn-danger d-none"
+          type="button"
+          disabled
+        >
+          <span
+            class="spinner-grow spinner-grow-sm"
+            role="status"
+            aria-hidden="true"
+          ></span>
+          Loading...
+        </button>
+      </div>
+    </div>
+  </form>
+</div>
+{% endif %} {% endif %} {% endblock %}
