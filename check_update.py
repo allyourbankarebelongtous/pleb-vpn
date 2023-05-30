@@ -1,5 +1,4 @@
-import requests
-from datetime import datetime
+import requests, re
 
 # check latest release version for https://github.com/allyourbankarebelongtous/pleb-vpn/
 def get_latest_version():
@@ -10,12 +9,23 @@ def get_latest_version():
     if response.status_code == 200:
         # Filter and extract versions from the release names
         versions = [
-            release["name"].split("_")[1].split(".tar.gz")[0][1:]
+            release["tag_name"]
             for release in releases
+            if release["tag_name"].startswith("v")
         ]
 
-        # Sort the versions in descending order
-        versions.sort(reverse=True)
+        # Custom sorting function
+        def custom_sort_key(version):
+            version_without_v = re.sub(r"v", "", version)
+            version_segments = re.split(r"[.-]", version_without_v)
+            version_segments = [
+                int(segment) if segment.isdigit() else segment
+                for segment in version_segments
+            ]
+            return version_segments
+
+        # Sort the versions using the custom sort key function
+        versions.sort(key=custom_sort_key, reverse=True)
 
         if versions:
             return versions[0]  # Return the latest version

@@ -4,10 +4,9 @@ from werkzeug.utils import secure_filename
 from socket_io import socketio
 from check_update import get_latest_version
 from plebvpn_common import config
-from datetime import datetime
 from .models import User
 from . import db
-import json, os, subprocess, time, pexpect, random, qrcode, io, base64, shutil, re, socket, requests
+import json, os, subprocess, time, pexpect, random, qrcode, io, base64, shutil, re, socket, requests, re
 
 views = Blueprint('views', __name__)
 

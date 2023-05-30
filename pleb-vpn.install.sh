@@ -59,7 +59,7 @@ on() {
     cd /home/admin
     sudo mkdir pleb-vpn-tmp
     cd pleb-vpn-tmp
-    sudo wget https://github.com/allyourbankarebelongtous/pleb-vpn/archive/refs/tags/pleb-vpn_${ver}.tar.gz
+    sudo wget https://github.com/allyourbankarebelongtous/pleb-vpn/archive/refs/tags/${ver}.tar.gz
     sudo tar -xzf pleb-vpn_${ver}.tar.gz
     isSuccess=$(ls /home/admin/pleb-vpn-tmp/ | grep -c pleb-vpn)
     if [ ${isSuccess} -eq 0 ]; then
@@ -76,7 +76,7 @@ on() {
         cd /home/admin
         sudo mkdir pleb-vpn-tmp
         cd pleb-vpn-tmp
-        sudo wget https://github.com/allyourbankarebelongtous/pleb-vpn/archive/refs/tags/pleb-vpn_${ver}.tar.gz
+        sudo wget https://github.com/allyourbankarebelongtous/pleb-vpn/archive/refs/tags/${ver}.tar.gz
         sudo tar -xzf pleb-vpn_${ver}.tar.gz
         isSuccess=$(ls /home/admin/pleb-vpn-tmp/ | grep -c pleb-vpn)
         if [ ${isSuccess} -eq 0 ]; then
@@ -397,7 +397,7 @@ update() {
   # download zip file into temp directory
   sudo mkdir /home/admin/pleb-vpn-tmp
   cd /home/admin/pleb-vpn-tmp
-  sudo wget https://github.com/allyourbankarebelongtous/pleb-vpn/archive/refs/tags/pleb-vpn_${new_ver}.tar.gz
+  sudo wget https://github.com/allyourbankarebelongtous/pleb-vpn/archive/refs/tags/${new_ver}.tar.gz
   sudo tar -xzf pleb-vpn_${ver}.tar.gz
   isSuccess=$(ls /home/admin/pleb-vpn-tmp/ | grep -c pleb-vpn)
   if [ ${isSuccess} -eq 0 ]; then
