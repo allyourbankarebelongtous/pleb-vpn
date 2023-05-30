@@ -57,8 +57,8 @@ on() {
   # wget tar.gz from github and put in execdir
   if [ "${nodetype}" = "raspiblitz" ]; then
     cd /home/admin
-    sudo mkdir pleb-vpn-tmp
-    sudo mkdir pleb-vpn
+    sudo mkdir /home/admin/pleb-vpn-tmp
+    sudo mkdir /home/admin/pleb-vpn-tmp/pleb-vpn
     cd /home/admin/pleb-vpn-tmp/pleb-vpn
     sudo wget https://github.com/allyourbankarebelongtous/pleb-vpn/archive/refs/tags/${ver}.tar.gz
     sudo tar -xzf ${ver}.tar.gz
@@ -79,8 +79,8 @@ on() {
         sudo rm -rf ${execdir}/pleb-vpn
       else
         cd /home/admin
-        sudo mkdir pleb-vpn-tmp
-        sudo mkdir pleb-vpn
+        sudo mkdir /home/admin/pleb-vpn-tmp
+        sudo mkdir /home/admin/pleb-vpn-tmp/pleb-vpn
         cd /home/admin/pleb-vpn-tmp/pleb-vpn
         sudo wget https://github.com/allyourbankarebelongtous/pleb-vpn/archive/refs/tags/${ver}.tar.gz
         sudo tar -xzf ${ver}.tar.gz
@@ -402,7 +402,7 @@ update() {
 
   # download zip file into temp directory
   sudo mkdir /home/admin/pleb-vpn-tmp
-  sudo /home/admin/pleb-vpn-tmp/mkdir pleb-vpn
+  sudo mkdir /home/admin/pleb-vpn-tmp/pleb-vpn
   cd /home/admin/pleb-vpn-tmp/pleb-vpn
   sudo wget https://github.com/allyourbankarebelongtous/pleb-vpn/archive/refs/tags/${latestversion}.tar.gz
   sudo tar -xzf ${latestversion}.tar.gz
