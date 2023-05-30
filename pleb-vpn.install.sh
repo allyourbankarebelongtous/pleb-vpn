@@ -388,7 +388,7 @@ update() {
   sudo rm ${plebVPNTempConf}
 
   # check for new version and update new version if it doesn't exists
-  if [ "${latestversion}" = "${version"} ]; then
+  if [ "${latestversion}" = "${version}" ]; then
     # see if there's a newer version
     latestversion=$(sudo ${execdir}/.venv/bin/python ${execdir}/check_update.py)
     if [ "${latestversion}" = "${version"} ]; then
