@@ -417,11 +417,11 @@ update() {
     exit 1
   else
     if [ "${nodetype}" = "raspiblitz" ]; then
-      if [ -f ${execdir}/.git ]; then
-        sudo rm ${execdir}/.git
+      if [ -d ${execdir}/.git ]; then
+        sudo rm -rf ${execdir}/.git
         sudo rm ${execdir}/.gitattributes
         sudo rm ${execdir}/.gitmodules
-        sudo rm ${homedir}/.git
+        sudo rm -rf ${homedir}/.git
         sudo rm ${homedir}/.gitattributes
         sudo rm ${homedir}/.gitmodules
       fi
