@@ -663,6 +663,7 @@ WantedBy=timers.target" \
 }
 
 uninstall() { 
+  local mynode_uninstall="${1}"
   plebVPNConf="${homedir}/pleb-vpn.conf"
   source <(cat ${plebVPNConf} | sed '1d')
   # first uninstall services
@@ -744,13 +745,17 @@ uninstall() {
   fi
 
   # delete files
-  sudo rm -rf ${execdir}
-  sudo rm -rf ${homedir}
+  # these files will be deleted by mynode's uninstaller, so skip if uninstalling via mynode uninstaller
+  if [ ! "${mynode_uninstall}" = "1" ]; then
+    # these files will be deleted by mynode's uninstaller
+    sudo rm -rf ${execdir}
 
-  # stop and remove pleb-vpn.service
-  sudo rm /etc/systemd/system/pleb-vpn.service
-  sudo systemctl disable pleb-vpn.service
-  sudo systemctl stop pleb-vpn.service
+    # stop and remove pleb-vpn.service
+    sudo rm /etc/systemd/system/pleb-vpn.service
+    sudo systemctl disable pleb-vpn.service
+    sudo systemctl stop pleb-vpn.service
+  fi
+  sudo rm -rf ${homedir}
 
   exit 0
 }
@@ -759,6 +764,6 @@ case "${1}" in
   on) on ;;
   update) update "${2}" ;;
   restore) restore ;;
-  uninstall) uninstall ;;
+  uninstall) uninstall "${2}" ;;
   *) echo "err=Unknown action: ${1}" ; exit 1 ;;
 esac
