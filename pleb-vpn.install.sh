@@ -446,7 +446,7 @@ update() {
       sudo rm ${homedir}/update_requirements.txt
     fi
     # update version in pleb-vpn.conf
-    setting "${plebVPNConf}" "2" "version" "${latestversion}"
+    setting "${plebVPNConf}" "2" "version" "'${latestversion}'"
     echo "Update success!" 
     sudo systemctl restart pleb-vpn.service
   fi
