@@ -18,10 +18,7 @@ elif [ -f "/mnt/hdd/raspiblitz.conf" ]; then
   nodetype="raspiblitz"
 fi
 plebVPNConf="${homedir}/pleb-vpn.conf"
-plebVPNTempConf="${homedir}/pleb-vpn.conf.tmp"
-sed '1d' $plebVPNConf > $plebVPNTempConf
-source ${plebVPNTempConf}
-sudo rm ${plebVPNTempConf}
+source <(cat ${plebVPNConf} | sed '1d')
 
 function setting() # FILE LINENUMBER NAME VALUE
 {
@@ -214,7 +211,7 @@ lndconffile=
       sectionLine=$(cat ${infoBlitz} | grep -n "^${sectionName}" | cut -d ":" -f1)
       insertLine=$(expr $sectionLine + 2)
       echo '  # Pleb-VPN info
-      source /home/admin/pleb-vpn/pleb-vpn.conf
+      source <(cat ${plebVPNConf} | sed "1d")
       if [ "${plebvpn}" = "on" ]; then' | sudo tee /home/admin/pleb-vpn/update.tmp
       echo -e "    currentIP=\$(host myip.opendns.com resolver1.opendns.com 2>/dev/null | awk '/has / {print \$4}') >/dev/null 2>&1" | sudo tee -a /home/admin/pleb-vpn/update.tmp
       echo '    if [ "${currentIP}" = "${vpnip}" ]; then

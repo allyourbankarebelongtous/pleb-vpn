@@ -2,9 +2,19 @@
 
 # pleb-VPN status menu
 
-plebVPNConf="/home/admin/pleb-vpn/pleb-vpn.conf"
-source ${plebVPNConf}
-source /mnt/hdd/raspiblitz.conf
+# find home directory based on node implementation
+if [ -d "/mnt/hdd/mynode/pleb-vpn/" ]; then
+  homedir="/mnt/hdd/mynode/pleb-vpn"
+  execdir="/opt/mynode/pleb-vpn"
+elif [ -f "/mnt/hdd/raspiblitz.conf" ]; then
+  homedir="/mnt/hdd/app-data/pleb-vpn"
+  execdir="/home/admin/pleb-vpn"
+fi
+plebVPNConf="${homedir}/pleb-vpn.conf"
+source <(cat ${plebVPNConf} | sed '1d')
+if [ "${nodetype}" = "raspiblitz" ]; then
+  source /mnt/hdd/raspiblitz.conf
+fi
 
 # BASIC MENU INFO
 WIDTH=66

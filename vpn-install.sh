@@ -23,10 +23,7 @@ elif [ -f "/mnt/hdd/raspiblitz.conf" ]; then
   execdir="/home/admin/pleb-vpn"
 fi
 plebVPNConf="${homedir}/pleb-vpn.conf"
-plebVPNTempConf="${homedir}/pleb-vpn.conf.tmp"
-sed '1d' $plebVPNConf > $plebVPNTempConf
-source ${plebVPNTempConf}
-sudo rm ${plebVPNTempConf}
+source <(cat ${plebVPNConf} | sed '1d')
 
 if [ "${nodetype}" = "raspiblitz" ]; then
   source /mnt/hdd/raspiblitz.conf

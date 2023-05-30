@@ -385,10 +385,7 @@ WantedBy=multi-user.target" | sudo tee "/etc/systemd/system/pleb-vpn.service"
 update() {
   local skip_key="${1}"
   plebVPNConf="${homedir}/pleb-vpn.conf"
-  plebVPNTempConf="${homedir}/pleb-vpn.conf.tmp"
-  sudo sed '1d' $plebVPNConf > $plebVPNTempConf
-  source ${plebVPNTempConf}
-  sudo rm ${plebVPNTempConf}
+  source <(cat ${plebVPNConf} | sed '1d')
 
   # check for new version and update new version if it doesn't exists
   if [ "${latestversion}" = "${version}" ]; then
@@ -467,10 +464,7 @@ update() {
 
 restore() { 
   plebVPNConf="${homedir}/pleb-vpn.conf"
-  plebVPNTempConf="${homedir}/pleb-vpn.conf.tmp"
-  sudo sed '1d' $plebVPNConf > $plebVPNTempConf
-  source ${plebVPNTempConf}
-  sudo rm ${plebVPNTempConf}
+  source <(cat ${plebVPNConf} | sed '1d')
   # fix permissions
   sudo chown -R admin:admin ${homedir}
   sudo chmod -R 755 ${homedir}
@@ -670,10 +664,7 @@ WantedBy=timers.target" \
 
 uninstall() { 
   plebVPNConf="${homedir}/pleb-vpn.conf"
-  plebVPNTempConf="${homedir}/pleb-vpn.conf.tmp"
-  sudo sed '1d' $plebVPNConf > $plebVPNTempConf
-  source ${plebVPNTempConf}
-  sudo rm ${plebVPNTempConf}
+  source <(cat ${plebVPNConf} | sed '1d')
   # first uninstall services
   if [ "${letsencrypt_ssl}" = "on" ]; then
     sudo ${execdir}/letsencrypt.install.sh off
