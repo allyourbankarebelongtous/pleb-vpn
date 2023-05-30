@@ -59,6 +59,13 @@ if [ "${nodetype}" = "raspiblitz" ]; then
   " | sudo tee -a /mnt/hdd/app-data/custom-installs.sh
   fi
 
+  # change names of wireguard clients for webui
+  if [ -f /mnt/hdd/app-data/pleb-vpn/wireguard/clients/desktop.conf ]; then
+    sudo mv /mnt/hdd/app-data/pleb-vpn/wireguard/clients/mobile.conf /mnt/hdd/app-data/pleb-vpn/wireguard/clients/client1.conf
+    sudo mv /mnt/hdd/app-data/pleb-vpn/wireguard/clients/laptop.conf /mnt/hdd/app-data/pleb-vpn/wireguard/clients/client2.conf
+    sudo mv /mnt/hdd/app-data/pleb-vpn/wireguard/clients/desktop.conf /mnt/hdd/app-data/pleb-vpn/wireguard/clients/client3.conf
+  fi
+
   # change pleb-vpn.conf values to lowercase for webui
   # create new pleb-vpn.conf file
   if [ ! $(cat ${homedir}/pleb-vpn.conf | grep -c plebVPN) -eq 0 ]; then
