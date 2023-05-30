@@ -391,7 +391,7 @@ update() {
   if [ "${latestversion}" = "${version}" ]; then
     # see if there's a newer version
     latestversion=$(sudo ${execdir}/.venv/bin/python ${execdir}/check_update.py)
-    if [ "${latestversion}" = "${version"} ]; then
+    if [ "${latestversion}" = "${version}" ]; then
       echo "already up to date with the latest version"
       exit 0
     fi
