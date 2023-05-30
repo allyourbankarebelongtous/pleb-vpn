@@ -91,7 +91,7 @@ address1Type='${address1Type}'" | tee ${execdir}/lnd_hybrid_status.tmp
     else
       whiptail --title "LND Node hybrid status" --msgbox "
 Alias = ${nodeName}
-Hybrid Mode = ${lndHybrid}
+Hybrid Mode = ${lndhybrid}
 Node ID = ${nodeID}
 ${address0Type} address: ${address0}
 ${address1Type} address: ${address1}
@@ -107,7 +107,7 @@ address0Type='${address0Type}'" | tee ${execdir}/lnd_hybrid_status.tmp
     else
       whiptail --title "LND Node status" --msgbox "
 Alias = ${nodeName}
-Hybrid Mode = ${lndHybrid}
+Hybrid Mode = ${lndhybrid}
 Node ID = ${nodeID}
 ${address0Type} address: ${address0}
 " 12 100
