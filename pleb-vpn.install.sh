@@ -66,6 +66,9 @@ on() {
       echo "error: download and unzip failed. Check internet connection and version number and try again."
       sudo rm -rf /home/admin/pleb-vpn-tmp
       exit 1
+    else
+      sudo cp -p -r /home/admin/pleb-vpn-tmp/pleb-vpn* /home/admin/pleb-vpn
+      sudo rm -rf /home/admin/pleb-vpn-tmp
     fi
   elif [ "${nodetype}" = "mynode" ]; then
     if [ ! -d ${execdir}/webui ]; then
@@ -84,15 +87,11 @@ on() {
           sudo rm -rf /home/admin/pleb-vpn-tmp
           exit 1
         else
-          sudo cp -p -r /home/admin/pleb-vpn-tmp/pleb-vpn /opt/mynode/
+          sudo cp -p -r /home/admin/pleb-vpn-tmp/pleb-vpn* /opt/mynode/pleb-vpn
           sudo rm -rf /home/admin/pleb-vpn-tmp
         fi
       fi
     fi
-  fi
-  if [ "${nodetype}" = "raspiblitz" ]; then
-    sudo cp -p -r /home/admin/pleb-vpn-tmp/pleb-vpn /home/admin/
-    sudo rm -rf /home/admin/pleb-vpn-tmp
   fi
   sudo chown -R admin:admin ${execdir}
   sudo chmod -R 755 ${execdir}
@@ -413,11 +412,11 @@ update() {
     exit 1
   else
     if [ "${nodetype}" = "raspiblitz" ]; then
-      sudo cp -p -r /home/admin/pleb-vpn-tmp/pleb-vpn /home/admin/
-      sudo cp -p -r /home/admin/pleb-vpn-tmp/pleb-vpn /mnt/hdd/app-data/
+      sudo cp -p -r /home/admin/pleb-vpn-tmp/pleb-vpn* /home/admin/pleb-vpn
+      sudo cp -p -r /home/admin/pleb-vpn-tmp/pleb-vpn* /mnt/hdd/app-data/pleb-vpn
     elif [ "${nodetype}" = "mynode" ]; then
-      sudo cp -p -r /home/admin/pleb-vpn-tmp/pleb-vpn /opt/mynode/
-      sudo cp -p -r /home/admin/pleb-vpn-tmp/pleb-vpn /mnt/hdd/mynode/
+      sudo cp -p -r /home/admin/pleb-vpn-tmp/pleb-vpn* /opt/mynode/pleb-vpn
+      sudo cp -p -r /home/admin/pleb-vpn-tmp/pleb-vpn* /mnt/hdd/mynode/pleb-vpn
     fi
     cd /home/admin
     sudo rm -rf /home/admin/pleb-vpn-tmp
