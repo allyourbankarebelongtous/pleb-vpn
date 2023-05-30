@@ -61,7 +61,7 @@ if [ "${nodetype}" = "raspiblitz" ]; then
 
   # change pleb-vpn.conf values to lowercase for webui
   # create new pleb-vpn.conf file
-  if [ ! $(cat ${homedr}/pleb-vpn.conf | grep -c plebVPN) -eq 0 ]; then
+  if [ ! $(cat ${homedir}/pleb-vpn.conf | grep -c plebVPN) -eq 0 ]; then
     echo "[PLEBVPN]
 version=
 latestversion=
