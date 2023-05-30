@@ -311,6 +311,7 @@ lndconffile=
     sudo ufw allow 2420 comment 'allow Pleb-VPN HTTP'
   fi
   if [ "${nodetype}" = "mynode" ]; then
+    # if installed from install script and not from mynode app store, allow through firewall to persist on restarts
     if [ $(ls /usr/share/mynode_apps | grep -c pleb-vpn) -eq 0 ]; then
       sudo ufw allow 2420 comment 'allow Pleb-VPN HTTP'
       # add new rules to firewallConf
@@ -346,6 +347,7 @@ PrivateTmp=true
 [Install]
 WantedBy=multi-user.target" | sudo tee "/etc/systemd/system/pleb-vpn.service"
   elif [ "${nodetype}" = "mynode" ]; then
+    # create systemd service if no service exists
     if [ $(ls /etc/systemd/system | grep -c pleb-vpn.service) -eq 0 ]; then
       echo "
 # pleb-vpn service
@@ -485,12 +487,15 @@ restore() {
   # allow through firewall
   sudo ufw allow 2420 comment 'allow Pleb-VPN HTTP'
   if [ "${nodetype}" = "mynode" ]; then
-    lineExists=$(cat $firewallConf | grep -c "allow Pleb-VPN HTTP")
-    if [ $lineExists -eq 0 ]; then
-      # add new rules to firewallConf
-      sectionLine=$(cat ${firewallConf} | grep -n "^\# Add firewall rules" | cut -d ":" -f1 | head -n 1)
-      insertLine=$(expr $sectionLine + 1)
-      sed -i "${insertLine}iufw allow 2420 comment 'allow Pleb-VPN HTTP'" ${firewallConf}
+    # if installed from install script and not from mynode app store, allow through firewall to persist on restarts
+    if [ $(ls /usr/share/mynode_apps | grep -c pleb-vpn) -eq 0 ]; then
+      lineExists=$(cat $firewallConf | grep -c "allow Pleb-VPN HTTP")
+      if [ $lineExists -eq 0 ]; then
+        # add new rules to firewallConf
+        sectionLine=$(cat ${firewallConf} | grep -n "^\# Add firewall rules" | cut -d ":" -f1 | head -n 1)
+        insertLine=$(expr $sectionLine + 1)
+        sed -i "${insertLine}iufw allow 2420 comment 'allow Pleb-VPN HTTP'" ${firewallConf}
+      fi
     fi
   fi
 
@@ -544,20 +549,28 @@ PrivateTmp=true
 [Install]
 WantedBy=multi-user.target" | sudo tee "/etc/systemd/system/pleb-vpn.service"
   elif [ "${nodetype}" = "mynode" ]; then
-    # create systemd service
-    echo "
+    # create systemd service if no service exists
+    if [ $(ls /etc/systemd/system | grep -c pleb-vpn.service) -eq 0 ]; then
+      echo "
+# pleb-vpn service
+# /etc/systemd/system/pleb-vpn.service
+
 [Unit]
-Description=Pleb-VPN guincorn app
+Description=pleb-vpn
 Wants=www.service docker_images.service
 After=www.service docker_images.service
 
 [Service]
 WorkingDirectory=/opt/mynode/pleb-vpn
+
 ExecStartPre=/usr/bin/is_not_shutting_down.sh
+ExecStartPre=/bin/bash -c 'if [ -f /usr/bin/service_scripts/pre_pleb-vpn.sh ]; then /bin/bash /usr/bin/service_scripts/pre_pleb-vpn.sh; fi'
 ExecStart=/bin/bash -c \"/opt/mynode/pleb-vpn/.venv/bin/gunicorn -k geventwebsocket.gunicorn.workers.GeventWebSocketWorker -w 1 -b 0.0.0.0:2420 main:app\"
+ExecStartPost=/bin/bash -c 'if [ -f /usr/bin/service_scripts/post_pleb-vpn.sh ]; then /bin/bash /usr/bin/service_scripts/post_pleb-vpn.sh; fi'
+#ExecStop=FILL_IN_EXECSTOP_AND_UNCOMMENT_IF_NEEDED
+
 User=root
 Group=root
-Restart=always
 Type=simple
 TimeoutSec=120
 Restart=always
@@ -568,6 +581,7 @@ SyslogIdentifier=pleb-vpn
 
 [Install]
 WantedBy=multi-user.target" | sudo tee "/etc/systemd/system/pleb-vpn.service"
+    fi
   fi
 
   # enable and start systemd service
