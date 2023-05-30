@@ -61,7 +61,7 @@ on() {
     cd /home/admin/pleb-vpn-tmp
     sudo wget https://github.com/allyourbankarebelongtous/pleb-vpn/archive/refs/tags/${ver}.tar.gz
     sudo tar -xzf ${ver}.tar.gz
-    sudo cp -p -r pleb-vpn-${ver}* /home/admin/pleb-vpn-tmp/pleb-vpn
+    sudo cp -p -r pleb-vpn-* /home/admin/pleb-vpn-tmp/pleb-vpn
     isSuccess=$(ls /home/admin/pleb-vpn-tmp/pleb-vpn | grep -c plebvpn_common)
     if [ ${isSuccess} -eq 0 ]; then
       echo "error: download and unzip failed. Check internet connection and version number and try again."
@@ -83,7 +83,7 @@ on() {
         cd /home/admin/pleb-vpn-tmp
         sudo wget https://github.com/allyourbankarebelongtous/pleb-vpn/archive/refs/tags/${ver}.tar.gz
         sudo tar -xzf ${ver}.tar.gz
-        sudo cp -p -r pleb-vpn-${ver}* /home/admin/pleb-vpn-tmp/pleb-vpn
+        sudo cp -p -r pleb-vpn-* /home/admin/pleb-vpn-tmp/pleb-vpn
         isSuccess=$(ls /home/admin/pleb-vpn-tmp/pleb-vpn | grep -c plebvpn_common)
         if [ ${isSuccess} -eq 0 ]; then
           echo "error: download and unzip failed. Check internet connection and version number and try again."
@@ -402,10 +402,10 @@ update() {
 
   # download zip file into temp directory
   sudo mkdir /home/admin/pleb-vpn-tmp
-  sudo mkdir /home/admin/pleb-vpn-tmp/pleb-vpn
-  cd /home/admin/pleb-vpn-tmp/pleb-vpn
+  cd /home/admin/pleb-vpn-tmp
   sudo wget https://github.com/allyourbankarebelongtous/pleb-vpn/archive/refs/tags/${latestversion}.tar.gz
   sudo tar -xzf ${latestversion}.tar.gz
+  sudo cp -p -r pleb-vpn-* /home/admin/pleb-vpn-tmp/pleb-vpn
   isSuccess=$(ls /home/admin/pleb-vpn-tmp/pleb-vpn | grep -c plebvpn_common)
   if [ ${isSuccess} -eq 0 ]; then
     echo "error: download and unzip failed. Check internet connection and version number and try again."
