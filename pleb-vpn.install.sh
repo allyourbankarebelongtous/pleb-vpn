@@ -60,7 +60,7 @@ on() {
     sudo mkdir pleb-vpn-tmp
     cd pleb-vpn-tmp
     sudo wget https://github.com/allyourbankarebelongtous/pleb-vpn/archive/refs/tags/${ver}.tar.gz
-    sudo tar -xzf pleb-vpn_${ver}.tar.gz
+    sudo tar -xzf ${ver}.tar.gz
     isSuccess=$(ls /home/admin/pleb-vpn-tmp/ | grep -c pleb-vpn)
     if [ ${isSuccess} -eq 0 ]; then
       echo "error: download and unzip failed. Check internet connection and version number and try again."
@@ -77,7 +77,7 @@ on() {
         sudo mkdir pleb-vpn-tmp
         cd pleb-vpn-tmp
         sudo wget https://github.com/allyourbankarebelongtous/pleb-vpn/archive/refs/tags/${ver}.tar.gz
-        sudo tar -xzf pleb-vpn_${ver}.tar.gz
+        sudo tar -xzf ${ver}.tar.gz
         isSuccess=$(ls /home/admin/pleb-vpn-tmp/ | grep -c pleb-vpn)
         if [ ${isSuccess} -eq 0 ]; then
           echo "error: download and unzip failed. Check internet connection and version number and try again."
@@ -401,7 +401,7 @@ update() {
   sudo mkdir /home/admin/pleb-vpn-tmp
   cd /home/admin/pleb-vpn-tmp
   sudo wget https://github.com/allyourbankarebelongtous/pleb-vpn/archive/refs/tags/${latestversion}.tar.gz
-  sudo tar -xzf pleb-vpn_${latestversion}.tar.gz
+  sudo tar -xzf ${latestversion}.tar.gz
   isSuccess=$(ls /home/admin/pleb-vpn-tmp/ | grep -c pleb-vpn)
   if [ ${isSuccess} -eq 0 ]; then
     echo "error: download and unzip failed. Check internet connection and version number and try again."
@@ -440,6 +440,8 @@ update() {
       sudo rm ${execdir}/update_requirements.txt
       sudo rm ${homedir}/update_requirements.txt
     fi
+    # update version in pleb-vpn.conf
+    setting "${plebVPNConf}" "2" "version" "${latestversion}"
     echo "Update success!" 
     sudo systemctl restart pleb-vpn.service
   fi
