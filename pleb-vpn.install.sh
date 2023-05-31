@@ -12,7 +12,7 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   exit 1
 fi
 
-ver="v1.1.0betaRC1"
+ver="v1.0.9beta"
 
 if [ -d "/mnt/hdd/mynode" ]; then
   nodetype="mynode"
@@ -749,6 +749,7 @@ uninstall() {
   fi
 
   # delete files
+  sudo rm -rf ${homedir}
   # these files will be deleted by mynode's uninstaller, so skip if uninstalling via mynode uninstaller
   if [ ! "${mynode_uninstall}" = "1" ]; then
     # these files will be deleted by mynode's uninstaller
@@ -759,7 +760,6 @@ uninstall() {
     sudo systemctl disable pleb-vpn.service
     sudo systemctl stop pleb-vpn.service
   fi
-  sudo rm -rf ${homedir}
 
   exit 0
 }
