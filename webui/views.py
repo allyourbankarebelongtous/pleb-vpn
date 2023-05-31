@@ -92,7 +92,7 @@ def update_scripts():
     global update_available
     update_available = False
     # update pleb-vpn
-    cmd_str = [os.path.join(EXEC_DIR, "pleb-vpn.install.sh") + " update 1"]
+    cmd_str = ["sudo " + os.path.join(EXEC_DIR, "pleb-vpn.install.sh") + " update 1"]
     try:
         result = subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True, timeout=600)
     except subprocess.TimeoutExpired:
@@ -102,7 +102,7 @@ def update_scripts():
 @socketio.on('uninstall-plebvpn')
 def uninstall_plebvpn():
     # update pleb-vpn
-    cmd_str = [os.path.join(EXEC_DIR, "pleb-vpn.install.sh") + " uninstall"]
+    cmd_str = ["sudo " + os.path.join(EXEC_DIR, "pleb-vpn.install.sh") + " uninstall"]
     try:
         result = subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True, timeout=600)
     except subprocess.TimeoutExpired:
