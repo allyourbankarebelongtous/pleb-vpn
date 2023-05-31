@@ -678,19 +678,19 @@ uninstall() {
     sudo ${execdir}/tor.split-tunnel.sh off 1
   fi
   if [ "${lndhybrid}" = "on" ]; then
-    ${execdir}/lnd-hybrid.sh off
+    sudo ${execdir}/lnd-hybrid.sh off
   fi
   if [ "${clnhybrid}" = "on" ]; then
-    ${execdir}/cln-hybrid.sh off
+    sudo ${execdir}/cln-hybrid.sh off
   fi
   if [ "${wireguard}" = "on" ]; then
-    ${execdir}/wg-install.sh off
+    sudo ${execdir}/wg-install.sh off
   fi
   if [ "${plebvpn}" = "on" ]; then
-    ${execdir}/vpn-install.sh off
+    sudo ${execdir}/vpn-install.sh off
   fi
   # delete all payments
-  sudo ${execdir}/payments/managepayments.sh deleteall 1
+  sudo bash ${execdir}/payments/managepayments.sh deleteall 1
   # remove extra line from custom-installs if required
   if [ "${nodetype}" = "raspiblitz" ]; then
     extraLine="# pleb-vpn restore"
