@@ -213,7 +213,7 @@ lndconffile=
       sectionLine=$(cat ${infoBlitz} | grep -n "^${sectionName}" | cut -d ":" -f1)
       insertLine=$(expr $sectionLine + 2)
       echo '  # Pleb-VPN info
-      source <(cat ${plebVPNConf} | sed "1d")
+      source <(cat /mnt/hdd/app-data/pleb-vpn/pleb-vpn.conf | sed "1d")
       if [ "${plebvpn}" = "on" ]; then' | sudo tee /home/admin/pleb-vpn/update.tmp
       echo -e "    currentIP=\$(host myip.opendns.com resolver1.opendns.com 2>/dev/null | awk '/has / {print \$4}') >/dev/null 2>&1" | sudo tee -a /home/admin/pleb-vpn/update.tmp
       echo '    if [ "${currentIP}" = "${vpnip}" ]; then
@@ -279,11 +279,7 @@ WantedBy=multi-user.target" | sudo tee "/etc/systemd/system/pleb-vpn.service"
   # remove git attributes from pleb-vpn folders if present (updates now done via releases)
   if [ -d /home/admin/pleb-vpn/.git ]; then
     sudo rm -rf /home/admin/pleb-vpn/.git
-    sudo rm /home/admin/pleb-vpn/.gitattributes
-    sudo rm /home/admin/pleb-vpn/.gitmodules
     sudo rm -rf /mnt/hdd/app-data/pleb-vpn/.git
-    sudo rm /mnt/hdd/app-data/pleb-vpn/.gitattributes
-    sudo rm /mnt/hdd/app-data/pleb-vpn/.gitmodules
   fi
 
 fi
