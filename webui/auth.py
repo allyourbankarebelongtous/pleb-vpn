@@ -58,7 +58,7 @@ def change_password():
             # copy database to HOME_DIR so new password survives updates and reflashes
             if os.path.exists(os.path.join(HOME_DIR, 'instance')):
                 shutil.rmtree(os.path.join(HOME_DIR, 'instance'))
-            shutil.copytree(os.path.join(EXEC_DIR, 'instance'), HOME_DIR)
+            shutil.copytree(os.path.join(EXEC_DIR, 'instance'), os.path.join(HOME_DIR, 'instance'))
             flash('Password changed successfully!', category='success')
             return redirect(url_for('views.home'))
     

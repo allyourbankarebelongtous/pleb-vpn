@@ -48,7 +48,7 @@ def create_app():
             # copy database to HOME_DIR
             if os.path.exists(os.path.join(HOME_DIR, 'instance')):
                 shutil.rmtree(os.path.join(HOME_DIR, 'instance'))
-            shutil.copytree(os.path.join(EXEC_DIR, 'instance'), HOME_DIR)
+            shutil.copytree(os.path.join(EXEC_DIR, 'instance'), os.path.join(HOME_DIR, 'instance'))
     
     login_manager = LoginManager()
     login_manager.login_view = 'auth.login'
