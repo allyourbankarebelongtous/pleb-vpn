@@ -25,6 +25,12 @@ fi
 plebVPNConf="${homedir}/pleb-vpn.conf"
 source <(cat ${plebVPNConf} | sed '1d')
 
+# check if sudo
+if [ "$EUID" -ne 0 ]; then
+  echo "Please run as root (with sudo)"
+  exit 1
+fi
+
 if [ "${nodetype}" = "raspiblitz" ]; then
   source /mnt/hdd/raspiblitz.conf
 fi
@@ -80,7 +86,7 @@ Use menu to install Pleb-VPN.
       vpnWorking="yes"
     fi 
     firewallOK="yes"
-    killswitchOn=$(sudo ufw status verbose | grep Default | grep -c 'deny (outgoing)')
+    killswitchOn=$(ufw status verbose | grep Default | grep -c 'deny (outgoing)')
     if [ ${killswitchOn} -eq 0 ]; then
       killswitchOn="no"
       firewallOK="no"
@@ -89,7 +95,7 @@ Otherwise you may leak your home IP if VPN drops."
     else
       killswitchOn="yes"
     fi
-    firewallallow=$(sudo ufw status verbose | grep -c 'Anywhere on tun0')
+    firewallallow=$(ufw status verbose | grep -c 'Anywhere on tun0')
     if [ ${firewallallow} -eq 2 ]; then
       firewallallow="yes"
     else
@@ -98,7 +104,7 @@ Otherwise you may leak your home IP if VPN drops."
       message="ERROR: your firewall is not configured properly (must allow in/out on tun0).
 Otherwise you will not be able to send or receive with VPN on."
     fi
-    firewallallowout=$(sudo ufw status verbose | grep "${vpnip} ${vpnport}" | grep -c "ALLOW OUT")
+    firewallallowout=$(ufw status verbose | grep "${vpnip} ${vpnport}" | grep -c "ALLOW OUT")
     if [ ${firewallallowout} -eq 1 ]; then
       firewallallowout="yes"
     else
@@ -110,7 +116,7 @@ Otherwise your VPN will not reach the server and connect."
     serviceExists=$(ls /etc/systemd/system/multi-user.target.wants/ | grep -c openvpn@plebvpn.service)
     if [ ${serviceExists} -eq 0 ]; then
       serviceExists="no"
-      message="ERROR: no service exists. Run 'sudo systemctl enable openvpn@plebvpn' on cmd line"
+      message="ERROR: no service exists. Run 'systemctl enable openvpn@plebvpn' on cmd line"
     else
       serviceExists="yes"
     fi
@@ -142,7 +148,7 @@ on() {
   local keepconfig="${1}"
   local isRestore="${1}"
   local webui="${2}"
-  isconfig=$(sudo ls ${homedir}/openvpn/ | grep -c plebvpn.conf)
+  isconfig=$(ls ${homedir}/openvpn/ | grep -c plebvpn.conf)
   if ! [ ${isconfig} -eq 0 ]; then
     if [ -z "${keepconfig}" ]; then
       if [ ! "{webui}" = "1" ]; then
@@ -162,15 +168,15 @@ on() {
   fi
 
   # install openvpn
-  sudo apt-get -y install openvpn
+  apt-get -y install openvpn
 
   # get config if not webui or selected to keep config
   if [ "${keepconfig}" = "0" ]; then
     if [ ! "{webui}" = "1" ]; then
       # remove old conf file if applicable
-      isfolder=$(sudo ls ${homedir}/ | grep -c openvpn)
+      isfolder=$(ls ${homedir}/ | grep -c openvpn)
       if ! [ ${isfolder} -eq 0 ]; then
-        sudo rm -rf ${homedir}/openvpn
+        rm -rf ${homedir}/openvpn
       fi
       # get new conf file
       # get local ip
@@ -199,7 +205,7 @@ on() {
         echo "PRESS ENTER when upload is done"
         read key
         # check to see if upload was successful
-        isuploaded=$(sudo ls /home/admin/ | grep -c plebvpn.conf)
+        isuploaded=$(ls /home/admin/ | grep -c plebvpn.conf)
         if ! [ $isuploaded -eq 0 ]; then
           filename="plebvpn.conf"
           echo "OK - File found: ${filename}"
@@ -218,8 +224,8 @@ on() {
         fi
       done
       # move plebvpn.conf
-      sudo mkdir ${homedir}/openvpn
-      sudo mv /home/admin/plebvpn.conf ${homedir}/openvpn/plebvpn.conf
+      mkdir ${homedir}/openvpn
+      mv /home/admin/plebvpn.conf ${homedir}/openvpn/plebvpn.conf
     fi
   fi
 
@@ -229,13 +235,13 @@ on() {
   setting ${plebVPNConf} "2" "vpnport" "'${vpnport}'"
   setting ${plebVPNConf} "2" "vpnip" "'${vpnip}'"
   # copy plebvpn.conf to /etc/openvpn
-  sudo cp -p ${homedir}/openvpn/plebvpn.conf /etc/openvpn/
+  cp -p ${homedir}/openvpn/plebvpn.conf /etc/openvpn/
   # fix permissions
-  sudo chown admin:admin /etc/openvpn/plebvpn.conf
-  sudo chmod 644 /etc/openvpn/plebvpn.conf
+  chown admin:admin /etc/openvpn/plebvpn.conf
+  chmod 644 /etc/openvpn/plebvpn.conf
   # enable and start openvpn
-  sudo systemctl enable openvpn@plebvpn
-  sudo systemctl start openvpn@plebvpn
+  systemctl enable openvpn@plebvpn
+  systemctl start openvpn@plebvpn
   # check to see if it works
   sleep 10
   currentIP=$(curl https://api.ipify.org)
@@ -252,20 +258,20 @@ on() {
   echo "configuring firewall"
   LAN=$(ip rou | grep default | cut -d " " -f3 | sed 's/^\(.*\)\.\(.*\)\.\(.*\)\.\(.*\)$/\1\.\2\.\3/g')
   # disable firewall 
-  sudo ufw disable
+  ufw disable
   # allow local lan ssh
-  sudo ufw allow in to ${LAN}.0/24
-  sudo ufw allow out to ${LAN}.0/24
+  ufw allow in to ${LAN}.0/24
+  ufw allow out to ${LAN}.0/24
   # set default policy (killswitch)
-  sudo ufw default deny outgoing
-  sudo ufw default deny incoming
+  ufw default deny outgoing
+  ufw default deny incoming
   # allow out on openvpn
-  sudo ufw allow out to ${vpnip} port ${vpnport} proto udp
+  ufw allow out to ${vpnip} port ${vpnport} proto udp
   # force traffic to use openvpn
-  sudo ufw allow out on tun0 from any to any
-  sudo ufw allow in on tun0 from any to any
+  ufw allow out on tun0 from any to any
+  ufw allow in on tun0 from any to any
   # enable firewall
-  sudo ufw --force enable
+  ufw --force enable
   if [ "${nodetype}" = "mynode" ]; then
     # add new rules to firewallConf
     sectionLine=$(cat ${firewallConf} | grep -n "^\# Add firewall rules" | cut -d ":" -f1 | head -n 1)
@@ -283,7 +289,7 @@ on() {
     if [ ! "${webui}" = "1" ]; then
       echo "checking configuration"
       echo "stop vpn"
-      sudo systemctl stop openvpn@plebvpn
+      systemctl stop openvpn@plebvpn
       echo "vpn stopped"
       echo "checking firewall"
       currentIP=$(curl https://api.ipify.org)
@@ -292,11 +298,11 @@ on() {
         echo "firewall config ok"
       else 
         echo "error...firewall not configured. Clearnet accessible when VPN is off. Uninstall and re-install pleb-vpn"
-        sudo systemctl start openvpn@plebvpn
+        systemctl start openvpn@plebvpn
         exit 1
       fi
       echo "start vpn"
-      sudo systemctl start openvpn@plebvpn
+      systemctl start openvpn@plebvpn
       sleep 10
       currentIP=$(curl https://api.ipify.org)
       if ! [ "${currentIP}" = "${vpnIP}" ]; then
@@ -327,22 +333,22 @@ off() {
   fi
 
   # uninstall openvpn
-  sudo apt-get -y purge openvpn 
-  sudo rm -rf /etc/openvpn
+  apt-get -y purge openvpn 
+  rm -rf /etc/openvpn
   # configure firewall
   echo "configuring firewall"
   # disable firewall 
-  sudo ufw disable
+  ufw disable
   # set default policy
-  sudo ufw default allow outgoing
-  sudo ufw default deny incoming
+  ufw default allow outgoing
+  ufw default deny incoming
   # remove openvpn rule
-  sudo ufw delete allow out to ${vpnip} port ${vpnport} proto udp
+  ufw delete allow out to ${vpnip} port ${vpnport} proto udp
   # delete force traffic to use openvpn
-  sudo ufw delete allow out on tun0 from any to any
-  sudo ufw delete allow in on tun0 from any to any
+  ufw delete allow out on tun0 from any to any
+  ufw delete allow in on tun0 from any to any
   # enable firewall
-  sudo ufw --force enable
+  ufw --force enable
   if [ "${nodetype}" = "mynode" ]; then
     # delete rules from firewallConf
     LAN=$(ip rou | grep default | cut -d " " -f3 | sed 's/^\(.*\)\.\(.*\)\.\(.*\)\.\(.*\)$/\1\.\2\.\3/g')

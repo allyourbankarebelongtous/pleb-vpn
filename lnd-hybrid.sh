@@ -24,6 +24,12 @@ fi
 plebVPNConf="${homedir}/pleb-vpn.conf"
 source <(cat ${plebVPNConf} | sed '1d')
 
+# check if sudo
+if [ "$EUID" -ne 0 ]; then
+  echo "Please run as root (with sudo)"
+  exit 1
+fi
+
 function setting() # FILE LINENUMBER NAME VALUE
 {
   FILE=$1
@@ -36,24 +42,24 @@ function setting() # FILE LINENUMBER NAME VALUE
   if [ "${settingExists}" == "0" ]; then
     echo "# adding setting (${NAME})"
     if [ "${FILE}" = "${lndconffile}" ] && [ "${nodetype}" = "mynode" ]; then
-      sudo -u bitcoin sed -i --follow-symlinks "${LINENUMBER}i${NAME}=" ${FILE}
+      -u bitcoin sed -i --follow-symlinks "${LINENUMBER}i${NAME}=" ${FILE}
     else
-      sudo sed -i --follow-symlinks "${LINENUMBER}i${NAME}=" ${FILE}
+      sed -i --follow-symlinks "${LINENUMBER}i${NAME}=" ${FILE}
     fi
   fi
   echo "# updating setting (${NAME}) with value(${VALUE})"
   if [ "${FILE}" = "${lndconffile}" ] && [ "${nodetype}" = "mynode" ]; then
-    sudo -u bitcoin sed -i --follow-symlinks "s/^${NAME}=.*/${NAME}=${VALUE}/g" ${FILE}
+    -u bitcoin sed -i --follow-symlinks "s/^${NAME}=.*/${NAME}=${VALUE}/g" ${FILE}
   else
-    sudo sed -i --follow-symlinks "s/^${NAME}=.*/${NAME}=${VALUE}/g" ${FILE}
+    sed -i --follow-symlinks "s/^${NAME}=.*/${NAME}=${VALUE}/g" ${FILE}
   fi
 }
 
 status() {
   local webui="${1}"
-  nodeName=$(sudo -u bitcoin lncli getinfo | jq .alias | sed 's/\"//g')
-  nodeID=$(sudo -u bitcoin lncli getinfo | jq .identity_pubkey | sed 's/\"//g')
-  address0=$(sudo -u bitcoin lncli getinfo | jq .uris[0] | sed 's/\"//g' | cut -d "@" -f2)
+  nodeName=$(-u bitcoin lncli getinfo | jq .alias | sed 's/\"//g')
+  nodeID=$(-u bitcoin lncli getinfo | jq .identity_pubkey | sed 's/\"//g')
+  address0=$(-u bitcoin lncli getinfo | jq .uris[0] | sed 's/\"//g' | cut -d "@" -f2)
   istor=$(echo "${address0}" | grep -c onion)
   isv6=$(echo "${address0}" | grep -c :)
   if [ $istor -eq 0 ]; then
@@ -66,7 +72,7 @@ status() {
     address0Type="torv3"
   fi
   if [ "${lndhybrid}" = "on" ]; then
-    address1=$(sudo -u bitcoin lncli getinfo | jq .uris[1] | sed 's/\"//g' | cut -d "@" -f2)
+    address1=$(-u bitcoin lncli getinfo | jq .uris[1] | sed 's/\"//g' | cut -d "@" -f2)
     istor=$(echo "${address1}" | grep -c onion)
     isv6=$(echo "${address1}" | grep -c :)
     if [ $istor -eq 0 ]; then
@@ -154,8 +160,8 @@ on() {
   fi
   if [ "${keepport}" = "0" ]; then
     if [ "${nodetype}" = "raspiblitz" ]; then
-      sudo touch /var/cache/raspiblitz/.tmp
-      sudo chmod 777 /var/cache/raspiblitz/.tmp
+      touch /var/cache/raspiblitz/.tmp
+      chmod 777 /var/cache/raspiblitz/.tmp
       whiptail --title "LND Clearnet Port" --inputbox "Enter the port that is forwarded to your node from the VPS for hybrid mode. If you don't have one, forward one from your VPS or contact your VPS provider to obtain one. (example: 9740)" 12 80 2>/var/cache/raspiblitz/.tmp
       lnport=$(cat /var/cache/raspiblitz/.tmp)
       # check to make sure port isn't already used by CLN or WireGuard
@@ -177,7 +183,7 @@ on() {
 
   # configure firewall
   if ! [ "${lnport}" = "9735" ]; then
-    sudo ufw allow ${lnport} comment "LND Port"
+    ufw allow ${lnport} comment "LND Port"
     if [ "${nodetype}" = "mynode" ]; then
       # add new rules to firewallConf
       sectionLine=$(cat ${firewallConf} | grep -n "^\# Add firewall rules" | cut -d ":" -f1 | head -n 1)
@@ -192,7 +198,7 @@ on() {
     while [ $inc -le 6 ]
     do
       fileLine=$(expr $sectionStart + $inc)
-      sudo sed -i "${fileLine}s/^/#/" /home/admin/config.scripts/lnd.check.sh
+      sed -i "${fileLine}s/^/#/" /home/admin/config.scripts/lnd.check.sh
       ((inc++))
     done
   fi
@@ -201,11 +207,11 @@ on() {
   if [ "${nodetype}" = "mynode" ]; then
     # check for old lndCustomConf and copy to lndCustomConfOld if exists
     if [ -f ${lndCustomConf} ]; then
-      sudo cp -p ${lndCustomConf} ${lndCustomConfOld}
-      sudo rm ${lndCustomConf}
+      cp -p ${lndCustomConf} ${lndCustomConfOld}
+      rm ${lndCustomConf}
     fi
     # copy lnd.conf to lndCustomConf
-    sudo cp -p ${lndconffile} ${lndCustomConf}
+    cp -p ${lndconffile} ${lndCustomConf}
     # Application Options 
     sectionName="Application Options"
     publicIP="${vpnip}"
@@ -219,14 +225,14 @@ on() {
     if [ ${fileLines} -lt ${insertLine} ]; then
       echo "# adding new line for inserts"
       echo "
-    " | sudo tee -a ${lndCustomConf}
+    " | tee -a ${lndCustomConf}
     fi
     echo "# sectionLine(${sectionLine})"
     setting ${lndCustomConf} ${insertLine} "externalip" "${publicIP}:${lnport}"
     setting ${lndCustomConf} ${insertLine} "listen" "0.0.0.0:${lnport}"
     if [ "${wireguard}" = "on" ]; then
       setting ${lndCustomConf} ${insertLine} "tlsextraip" "${wgip}"
-      sudo rm /mnt/hdd/mynode/lnd/tls*
+      rm /mnt/hdd/mynode/lnd/tls*
     fi
 
     # tor
@@ -241,7 +247,7 @@ on() {
     if [ ${fileLines} -lt ${insertLine} ]; then
       echo "# adding new line for inserts"
       echo "
-    " | sudo tee -a ${lndCustomConf}
+    " | tee -a ${lndCustomConf}
     fi
     setting ${lndCustomConf} ${insertLine} "tor.streamisolation" "false"
     setting ${lndCustomConf} ${insertLine} "tor.skip-proxy-for-clearnet-targets" "true"
@@ -261,7 +267,7 @@ on() {
     if [ ${fileLines} -lt ${insertLine} ]; then
       echo "# adding new line for inserts"
       echo "
-    " | sudo tee -a ${lndConfFile}
+    " | tee -a ${lndConfFile}
     fi
     echo "# sectionLine(${sectionLine})"
     setting ${lndConfFile} ${insertLine} "externalip" "${publicIP}:${lnport}"
@@ -279,7 +285,7 @@ on() {
     if [ ${fileLines} -lt ${insertLine} ]; then
       echo "# adding new line for inserts"
       echo "
-    " | sudo tee -a ${lndConfFile}
+    " | tee -a ${lndConfFile}
     fi
     setting ${lndConfFile} ${insertLine} "tor.streamisolation" "false"
     setting ${lndConfFile} ${insertLine} "tor.skip-proxy-for-clearnet-targets" "true"
@@ -297,7 +303,7 @@ on() {
     if [ ${fileLines} -lt ${insertLine} ]; then
       echo "# adding new line for inserts"
       echo "
-    " | sudo tee -a ${raspiConfFile}
+    " | tee -a ${raspiConfFile}
     fi
     setting ${raspiConfFile} ${insertLine} "lndPort" "'${lnport}'"
     setting ${raspiConfFile} ${insertLine} "lndAddress" "'${lndAddress}'"
@@ -305,14 +311,14 @@ on() {
   fi
   # restart lnd (skip this step on restore but not if webui)
   if ! [ "${isRestore}" = "1" ]; then
-    sudo systemctl restart lnd 
+    systemctl restart lnd 
     # restart nginx
-    sudo systemctl restart nginx
+    systemctl restart nginx
   fi
   if [ "${webui}" = "1" ]; then
-    sudo systemctl restart lnd 
+    systemctl restart lnd 
     # restart nginx
-    sudo systemctl restart nginx
+    systemctl restart nginx
   fi
 
   # set lnd-hybrid on in pleb-vpn.conf
@@ -325,7 +331,7 @@ off() {
 
   # configure firewall
   if ! [ "${lnport}" = "9735" ]; then
-    sudo ufw delete allow ${lnport}
+    ufw delete allow ${lnport}
     if [ "${nodetype}" = "mynode" ]; then
       # remove from firewallConf
       while [ $(cat ${firewallConf} | grep -c "ufw allow ${lnport}") -gt 0 ];
@@ -337,15 +343,15 @@ off() {
 
   if [ "${nodetype}" = "mynode" ]; then
     # remove lndCustomConf
-    sudo rm ${lndCustomConf}
+    rm ${lndCustomConf}
     # check if lndCustomConfOld exists and if so, copy back to lndCustomConf
     if [ -f ${lndCustomConfOld} ]; then
-      sudo cp -p ${lndCustomConfOld} ${lndCustomConf}
-      sudo rm ${lndCustomConfOld}
+      cp -p ${lndCustomConfOld} ${lndCustomConf}
+      rm ${lndCustomConfOld}
     fi
     # remove tls.cert and tls.key if wireguard is installed to pick up new tls.cert that doesn't include wireguard ip
     if [ "${wireguard}" = "on" ]; then
-      sudo rm /mnt/hdd/mynode/lnd/tls*
+      rm /mnt/hdd/mynode/lnd/tls*
     fi
 
   elif [ "${nodetype}" = "raspiblitz" ]; then
@@ -355,15 +361,15 @@ off() {
     while [ $inc -le 6 ]
     do
       fileLine=$(expr $sectionStart + $inc)
-      sudo sed -i "${fileLine}s/#//" /home/admin/config.scripts/lnd.check.sh
+      sed -i "${fileLine}s/#//" /home/admin/config.scripts/lnd.check.sh
       ((inc++))
     done
     # edit lnd.conf
     source /mnt/hdd/raspiblitz.conf
     source <(/home/admin/config.scripts/network.aliases.sh getvars lnd)
     # Application Options 
-    sudo sed -i '/^externalip=*/d' ${lndConfFile}
-    sudo sed -i '/^listen=*/d' ${lndConfFile}
+    sed -i '/^externalip=*/d' ${lndConfFile}
+    sed -i '/^listen=*/d' ${lndConfFile}
     # tor
     sectionName="tor"
     echo "# [${sectionName}] config ..."
@@ -376,20 +382,20 @@ off() {
     if [ ${fileLines} -lt ${insertLine} ]; then
       echo "# adding new line for inserts"
       echo "
-    " | sudo tee -a ${lndConfFile}
+    " | tee -a ${lndConfFile}
     fi
     setting ${lndConfFile} ${insertLine} "tor.skip-proxy-for-clearnet-targets" "false"
     # edit raspiblitz.conf
     raspiConfFile="/mnt/hdd/raspiblitz.conf"
-    sudo sed -i '/^lndPort=*/d' ${raspiConfFile}
-    sudo sed -i '/^lndAddress=*/d' ${raspiConfFile}
-    sudo sed -i '/^publicIP=*/d' ${raspiConfFile}
+    sed -i '/^lndPort=*/d' ${raspiConfFile}
+    sed -i '/^lndAddress=*/d' ${raspiConfFile}
+    sed -i '/^publicIP=*/d' ${raspiConfFile}
   fi
   
   # restart lnd
-  sudo systemctl restart lnd
+  systemctl restart lnd
   # restart nginx
-  sudo systemctl restart nginx
+  systemctl restart nginx
   # set lnd-hybrid off in pleb-vpn.conf
   setting ${plebVPNConf} "2" "lndhybrid" "off"
   exit 0

@@ -25,6 +25,12 @@ elif [ -f "/mnt/hdd/raspiblitz.conf" ]; then
   execdir="/home/admin/pleb-vpn"
 fi
 
+# check if sudo
+if [ "$EUID" -ne 0 ]; then
+  echo "Please run as root (with sudo)"
+  exit 1
+fi
+
 function setting() # FILE LINENUMBER NAME VALUE
 {
   FILE=$1
@@ -36,13 +42,13 @@ function setting() # FILE LINENUMBER NAME VALUE
   echo "# ${NAME} exists->(${settingExists})"
   if [ "${settingExists}" == "0" ]; then
     echo "# adding setting (${NAME})"
-    sudo sed -i --follow-symlinks "${LINENUMBER}i${NAME}=" ${FILE}
+    sed -i --follow-symlinks "${LINENUMBER}i${NAME}=" ${FILE}
   fi
   echo "# updating setting (${NAME}) with value(${VALUE})"
   if [[ ${VALUE} == *":"* ]]; then
-    sudo sed -i --follow-symlinks "s/^${NAME}=.*/${NAME}=${VALUE}/g" ${FILE}
+    sed -i --follow-symlinks "s/^${NAME}=.*/${NAME}=${VALUE}/g" ${FILE}
   else
-    sudo sed -i --follow-symlinks "s:^${NAME}=.*:${NAME}=${VALUE}:g" ${FILE}
+    sed -i --follow-symlinks "s:^${NAME}=.*:${NAME}=${VALUE}:g" ${FILE}
   fi
 }
 
@@ -57,77 +63,77 @@ on() {
   # wget tar.gz from github and put in execdir
   if [ "${nodetype}" = "raspiblitz" ]; then
     cd /home/admin
-    sudo mkdir /home/admin/pleb-vpn-tmp
+    mkdir /home/admin/pleb-vpn-tmp
     cd /home/admin/pleb-vpn-tmp
-    sudo wget https://github.com/allyourbankarebelongtous/pleb-vpn/archive/refs/tags/${ver}.tar.gz
-    sudo tar -xzf ${ver}.tar.gz
+    wget https://github.com/allyourbankarebelongtous/pleb-vpn/archive/refs/tags/${ver}.tar.gz
+    tar -xzf ${ver}.tar.gz
     cd pleb-vpn-*
     isSuccess=$(ls | grep -c plebvpn_common)
     if [ ${isSuccess} -eq 0 ]; then
       echo "error: download and unzip failed. Check internet connection and version number and try again."
-      sudo rm -rf /home/admin/pleb-vpn-tmp
+      rm -rf /home/admin/pleb-vpn-tmp
       exit 1
     else
-      sudo rm -rf /home/admin/pleb-vpn-tmp/pleb-vpn/${ver}.tar.gz
-      sudo mkdir ${execdir}
-      sudo cp -p -r . ${execdir}
-      sudo rm -rf /home/admin/pleb-vpn-tmp
+      rm -rf /home/admin/pleb-vpn-tmp/pleb-vpn/${ver}.tar.gz
+      mkdir ${execdir}
+      cp -p -r . ${execdir}
+      rm -rf /home/admin/pleb-vpn-tmp
     fi
   elif [ "${nodetype}" = "mynode" ]; then
     if [ ! -d ${execdir}/plebvpn_common ]; then
       if [ -d ${execdir}/pleb-vpn/plebvpn_common ]; then
-        sudo cp -p -r ${execdir}/pleb-vpn /opt/mynode/
-        sudo rm -rf ${execdir}/pleb-vpn
+        cp -p -r ${execdir}/pleb-vpn /opt/mynode/
+        rm -rf ${execdir}/pleb-vpn
       else
         cd /home/admin
-        sudo mkdir /home/admin/pleb-vpn-tmp
+        mkdir /home/admin/pleb-vpn-tmp
         cd /home/admin/pleb-vpn-tmp
-        sudo wget https://github.com/allyourbankarebelongtous/pleb-vpn/archive/refs/tags/${ver}.tar.gz
-        sudo tar -xzf ${ver}.tar.gz
+        wget https://github.com/allyourbankarebelongtous/pleb-vpn/archive/refs/tags/${ver}.tar.gz
+        tar -xzf ${ver}.tar.gz
         cd pleb-vpn-*
         isSuccess=$(ls | grep -c plebvpn_common)
         if [ ${isSuccess} -eq 0 ]; then
           echo "error: download and unzip failed. Check internet connection and version number and try again."
-          sudo rm -rf /home/admin/pleb-vpn-tmp
+          rm -rf /home/admin/pleb-vpn-tmp
           exit 1
         else
-          sudo rm -rf /home/admin/pleb-vpn-tmp/pleb-vpn/${ver}.tar.gz
-          sudo mkdir ${execdir}
-          sudo cp -p -r . ${execdir}
-          sudo rm -rf /home/admin/pleb-vpn-tmp
+          rm -rf /home/admin/pleb-vpn-tmp/pleb-vpn/${ver}.tar.gz
+          mkdir ${execdir}
+          cp -p -r . ${execdir}
+          rm -rf /home/admin/pleb-vpn-tmp
         fi
       fi
     fi
   fi
-  sudo chown -R admin:admin ${execdir}
-  sudo chmod -R 755 ${execdir}
+  chown -R admin:admin ${execdir}
+  chmod -R 755 ${execdir}
 
   # check for, and if present, remove updates.sh and update_requirements.txt
   isUpdateScript=$(ls ${execdir} | grep -c updates.sh)
   if [ ${isUpdateScript} -eq 1 ]; then
     # only used for updates, not new installs, so remove
-    sudo rm ${execdir}/updates.sh
+    rm ${execdir}/updates.sh
   fi
   isUpdateReqs=$(ls ${execdir} | grep -c update_requirements.txt)
   if [ ${isUpdateReqs} -eq 1 ]; then
     # only used for updates, not new installs, so remove
-    sudo rm ${execdir}/update_requirements.txt
+    rm ${execdir}/update_requirements.txt
   fi
 
   # make payments directory and copy files to hard drive
-  sudo mkdir ${execdir}/payments/keysends
+  mkdir ${execdir}/payments/keysends
   if [ "${nodetype}" = "raspiblitz" ]; then
     # copy the files to /mnt/hdd/app-data/pleb-vpn
-    sudo cp -p -r ${execdir} /mnt/hdd/app-data/
+    cp -p -r ${execdir} /mnt/hdd/app-data/
     # fix permissions
-    sudo chown -R admin:admin ${homedir}
-    sudo chmod -R 755 ${homedir}
+    chown -R admin:admin ${homedir}
+    chmod -R 755 ${homedir}
   elif [ "${nodetype}" = "mynode" ]; then
     # copy the files to /mnt/hdd/mynode/pleb-vpn
-    sudo cp -p -r ${execdir} /mnt/hdd/mynode/
+    cp -p -r ${execdir} /mnt/hdd/mynode/
     # fix permissions
-    sudo chown -R admin:admin ${homedir}
-    sudo chmod -R 755 ${homedir}
+    chown -R admin:admin ${homedir}
+    chmod -R 755 ${homedir}
   fi
   # create and symlink pleb-vpn.conf
   echo "[PLEBVPN]
@@ -164,7 +170,7 @@ lndconffile=
 "| tee ${homedir}/pleb-vpn.conf
 
   # symlink pleb-vpn.conf
-  sudo ln -sf ${homedir}/pleb-vpn.conf ${execdir}/pleb-vpn.conf
+  ln -sf ${homedir}/pleb-vpn.conf ${execdir}/pleb-vpn.conf
   if [ "${nodetype}" = "raspiblitz" ]; then
     # backup critical files and configs
     ${execdir}/pleb-vpn.backup.sh backup
@@ -201,14 +207,14 @@ lndconffile=
 " > ${execdir}/payments/${freq}${node}payments.sh
     ((inc++))
   done
-  sudo cp -p ${execdir}/payments/*lndpayments.sh ${homedir}/payments/
-  sudo cp -p ${execdir}/payments/*clnpayments.sh ${homedir}/payments/
+  cp -p ${execdir}/payments/*lndpayments.sh ${homedir}/payments/
+  cp -p ${execdir}/payments/*clnpayments.sh ${homedir}/payments/
   # fix permissions
-  sudo chown -R admin:admin ${homedir}
-  sudo chmod -R 755 ${homedir}
+  chown -R admin:admin ${homedir}
+  chmod -R 755 ${homedir}
   # fix permissions
-  sudo chown -R admin:admin ${execdir}
-  sudo chmod -R 755 ${execdir}
+  chown -R admin:admin ${execdir}
+  chmod -R 755 ${execdir}
   # initialize pleb-vpn.conf
   plebVPNConf="${homedir}/pleb-vpn.conf"
   # get initial values
@@ -230,7 +236,7 @@ lndconffile=
   setting ${plebVPNConf} "2" "latestversion" "'${ver}'"
   setting ${plebVPNConf} "2" "nodetype" "'${nodetype}'"
 
-  # for raspiblitz menu install
+  # for raspiblitz ssh menu install
   if [ "${nodetype}" = "raspiblitz" ]; then 
 
     # make persistant with custom-installs.sh
@@ -241,7 +247,7 @@ lndconffile=
 /mnt/hdd/app-data/pleb-vpn/pleb-vpn.install.sh restore
 # get latest pleb-vpn update
 /mnt/hdd/app-data/pleb-vpn/pleb-vpn.install.sh update 1
-" | sudo tee -a /mnt/hdd/app-data/custom-installs.sh
+" | tee -a /mnt/hdd/app-data/custom-installs.sh
     fi
 
     # add pleb-vpn to 00mainMenu.sh
@@ -253,20 +259,20 @@ lndconffile=
     insertLine=$(expr $sectionLine + 1)
     echo "# insertLine(${insertLine})"
     Line='OPTIONS+=(PLEB-VPN "Install and manage PLEB-VPN services")'
-    sudo sed -i "${insertLine}i${Line}" ${mainMenu}
+    sed -i "${insertLine}i${Line}" ${mainMenu}
     sectionName="/home/admin/99connectMenu.sh"
     sectionLine=$(cat ${mainMenu} | grep -n "${sectionName}" | cut -d ":" -f1)
     echo "# sectionLine(${sectionLine})"
     insertLine=$(expr $sectionLine + 2)
     echo "# insertLine(${insertLine})"
     Line='PLEB-VPN)'
-    sudo sed -i "${insertLine}i        ${Line}" ${mainMenu}
+    sed -i "${insertLine}i        ${Line}" ${mainMenu}
     insertLine=$(expr $sectionLine + 3)
     Line='/home/admin/pleb-vpn/pleb-vpnMenu.sh'
-    sudo sed -i "${insertLine}i            ${Line}" ${mainMenu}
+    sed -i "${insertLine}i            ${Line}" ${mainMenu}
     insertLine=$(expr $sectionLine + 4)
     Line=';;'
-    sudo sed -i "${insertLine}i            ${Line}" ${mainMenu}
+    sed -i "${insertLine}i            ${Line}" ${mainMenu}
 
     # add pleb-vpn to 00infoBlitz.sh for status check
     infoBlitz="/home/admin/00infoBlitz.sh"
@@ -276,9 +282,9 @@ lndconffile=
       sectionLine=$(cat ${infoBlitz} | grep -n "^${sectionName}" | cut -d ":" -f1)
       insertLine=$(expr $sectionLine + 2)
       echo '  # Pleb-VPN info
-    source /home/admin/pleb-vpn/pleb-vpn.conf
-    if [ "${plebvpn}" = "on" ]; then' | sudo tee /home/admin/pleb-vpn/update.tmp
-      echo -e "    currentIP=\$(host myip.opendns.com resolver1.opendns.com 2>/dev/null | awk '/has / {print \$4}') >/dev/null 2>&1" | sudo tee -a /home/admin/pleb-vpn/update.tmp
+      source <(cat /mnt/hdd/app-data/pleb-vpn/pleb-vpn.conf | sed "1d")
+      if [ "${plebvpn}" = "on" ]; then' | tee /home/admin/pleb-vpn/update.tmp
+      echo -e "    currentIP=\$(host myip.opendns.com resolver1.opendns.com 2>/dev/null | awk '/has / {print \$4}') >/dev/null 2>&1" | tee -a /home/admin/pleb-vpn/update.tmp
       echo '    if [ "${currentIP}" = "${vpnip}" ]; then
       plebVPNstatus="${color_green}OK${color_gray}"
     else
@@ -287,33 +293,33 @@ lndconffile=
       plebVPNline="Pleb-VPN IP ${vpnip} Status ${plebVPNstatus}"
     echo -e "${plebVPNline}"
   fi
-' | sudo tee -a /home/admin/pleb-vpn/update.tmp
+' | tee -a /home/admin/pleb-vpn/update.tmp
       edIsInstalled=$(ed --version 2>/dev/null | grep -c "GNU ed")
       if [ ${edIsInstalled} -eq 0 ]; then
-        sudo apt install -y ed
+        apt install -y ed
       fi
       ed -s ${infoBlitz} <<< "${insertLine}r /home/admin/pleb-vpn/update.tmp"$'\nw'
-      sudo rm /home/admin/pleb-vpn/update.tmp
+      rm /home/admin/pleb-vpn/update.tmp
     fi
   fi
 
   # install webui
   cd ${execdir}
   echo "installing virtualenv..."
-  sudo apt install -y virtualenv
-  sudo virtualenv -p python3 .venv
+  apt install -y virtualenv
+  virtualenv -p python3 .venv
   # install requirements
   echo "installing requirements..."
-  sudo ${execdir}/.venv/bin/pip install -r ${execdir}/requirements.txt
+  ${execdir}/.venv/bin/pip install -r ${execdir}/requirements.txt
 
   # allow through firewall
   if [ "${nodetype}" = "raspiblitz" ]; then
-    sudo ufw allow 2420 comment 'allow Pleb-VPN HTTP'
+    ufw allow 2420 comment 'allow Pleb-VPN HTTP'
   fi
   if [ "${nodetype}" = "mynode" ]; then
     # if installed from install script and not from mynode app store, allow through firewall to persist on restarts
     if [ $(ls /usr/share/mynode_apps | grep -c pleb-vpn) -eq 0 ]; then
-      sudo ufw allow 2420 comment 'allow Pleb-VPN HTTP'
+      ufw allow 2420 comment 'allow Pleb-VPN HTTP'
       # add new rules to firewallConf
       sectionLine=$(cat ${firewallConf} | grep -n "^\# Add firewall rules" | cut -d ":" -f1 | head -n 1)
       insertLine=$(expr $sectionLine + 1)
@@ -333,8 +339,8 @@ After=network.target mnt-hdd.mount
 [Service]
 WorkingDirectory=/home/admin/pleb-vpn
 ExecStart=/home/admin/pleb-vpn/.venv/bin/gunicorn -k geventwebsocket.gunicorn.workers.GeventWebSocketWorker -w 1 -b 0.0.0.0:2420 main:app
-User=admin
-Group=admin
+User=root
+Group=root
 Type=simple
 Restart=always
 StandardOutput=journal
@@ -345,7 +351,7 @@ RestartSec=60
 PrivateTmp=true
 
 [Install]
-WantedBy=multi-user.target" | sudo tee "/etc/systemd/system/pleb-vpn.service"
+WantedBy=multi-user.target" | tee "/etc/systemd/system/pleb-vpn.service"
   elif [ "${nodetype}" = "mynode" ]; then
     # create systemd service if no service exists
     if [ $(ls /etc/systemd/system | grep -c pleb-vpn.service) -eq 0 ]; then
@@ -378,11 +384,173 @@ StandardError=syslog
 SyslogIdentifier=pleb-vpn
 
 [Install]
-WantedBy=multi-user.target" | sudo tee "/etc/systemd/system/pleb-vpn.service"
+WantedBy=multi-user.target" | tee "/etc/systemd/system/pleb-vpn.service"
+    fi
+
+    # create /usr/bin/service_scripts/pre_pleb-vpn.sh if it doesn't exist
+    if [ ! -f /usr/bin/service_scripts/pre_pleb-vpn.sh ]; then
+      echo "#!/bin/bash
+
+# This will run prior to launching the application
+
+# create pleb-vpn.conf and initialize app if not already done
+if [ ! -f /mnt/hdd/mynode/pleb-vpn/pleb-vpn.conf ]; then
+  chmod +x /opt/mynode/pleb-vpn/pleb-vpn.install.sh
+  /opt/mynode/pleb-vpn/pleb-vpn.install.sh on
+fi
+
+# re-initalize app on re-install of mynode
+if [ ! -f /opt/mynode/pleb-vpn/pleb-vpn.conf ]; then
+  chmod +x /mnt/hdd/mynode/pleb-vpn.install.sh
+  /mnt/hdd/mynode/pleb-vpn/pleb-vpn.install.sh restore
+fi
+" | tee /usr/bin/service_scripts/pre_pleb-vpn.sh
     fi
   fi
-  sudo systemctl enable pleb-vpn.service
-  sudo systemctl start pleb-vpn.service
+  systemctl enable pleb-vpn.service
+  systemctl start pleb-vpn.service
+
+  # create nginx files
+  if [ "${nodetype}" = "raspiblitz" ]; then
+    echo "## lndg_ssl.conf
+
+server {
+    listen 2421 ssl http2;
+    listen [::]:2421 ssl http2;
+    server_name _;
+
+    include /etc/nginx/snippets/ssl-params.conf;
+    include /etc/nginx/snippets/ssl-certificate-app-data.conf;
+
+    include /etc/nginx/snippets/gzip-params.conf;
+
+    access_log /var/log/nginx/access_pleb-vpn.log;
+    error_log /var/log/nginx/error_pleb-vpn.log;
+
+    location / {
+        proxy_pass http://127.0.0.1:2420;
+
+        include /etc/nginx/snippets/ssl-proxy-params.conf;
+
+        # WebSocket support
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection \"upgrade\";
+    }
+
+}
+" | tee /etc/nginx/sites-available/pleb-vpn_ssl.conf
+
+    echo "## lndg_tor.conf
+
+server {
+    listen 2422;
+    server_name _;
+
+    include /etc/nginx/snippets/gzip-params.conf;
+
+    access_log /var/log/nginx/access_pleb-vpn.log;
+    error_log /var/log/nginx/error_pleb-vpn.log;
+
+    location / {
+        proxy_pass http://127.0.0.1:2420;
+
+        include /etc/nginx/snippets/ssl-proxy-params.conf;
+        # WebSocket support
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection \"upgrade\";
+    }
+
+}
+" | tee /etc/nginx/sites-available/pleb-vpn_tor.conf
+
+    echo "## lndg_tor_ssl.conf
+
+server {
+    listen 2423 ssl http2;
+    server_name _;
+
+    include /etc/nginx/snippets/ssl-params.conf;
+    include /etc/nginx/snippets/ssl-certificate-app-data.conf;
+
+    include /etc/nginx/snippets/gzip-params.conf;
+
+    access_log /var/log/nginx/access_pleb-vpn.log;
+    error_log /var/log/nginx/error_pleb-vpn.log;
+
+    location / {
+        proxy_pass http://127.0.0.1:2420;
+
+        include /etc/nginx/snippets/ssl-proxy-params.conf;
+        # WebSocket support
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection \"upgrade\";
+    }
+
+}
+" | tee /etc/nginx/sites-available/pleb-vpn_tor_ssl.conf
+
+    # symlink to sites-enabled
+    ln -s /etc/nginx/sites-available/pleb-vpn_ssl.conf /etc/nginx/sites-enabled/pleb-vpn_ssl.conf
+    ln -s /etc/nginx/sites-available/pleb-vpn_tor.conf /etc/nginx/sites-enabled/pleb-vpn_tor.conf      
+    ln -s /etc/nginx/sites-available/pleb-vpn_tor_ssl.conf /etc/nginx/sites-enabled/pleb-vpn_tor_ssl.conf
+
+    # test and reload nginx
+    nginx -t
+    if [ $? -eq 0 ]; then
+      echo "nginx config good"
+      systemctl reload nginx
+    else
+      echo "Error: nginx test config fail"
+      exit 1
+    fi
+
+    # get tor address for Pleb-VPN if tor is active
+    if [ "${runBehindTor}" = "on" ]; then
+      # make sure to keep in sync with tor.network.sh script
+      /home/admin/config.scripts/tor.onion-service.sh pleb-vpn 80 2422 443 2423
+    fi
+
+  elif [ "${nodetype}" = "mynode" ]; then
+    # only used if not installed via the appstore
+    if [ $(ls /usr/share/mynode_apps | grep -c pleb-vpn) -eq 0 ]; then
+      echo "server {
+    listen 2421 ssl;
+    server_name pleb-vpn;
+
+    include /etc/nginx/mynode/mynode_ssl_params.conf;
+    include /etc/nginx/mynode/mynode_ssl_cert_key.conf;
+
+    access_log /var/log/nginx/access_pleb-vpn.log;
+    error_log /var/log/nginx/error_pleb-vpn.log;
+
+    location / {
+        proxy_pass http://127.0.0.1:2420;
+
+        include /etc/nginx/mynode/mynode_ssl_proxy_params.conf;
+
+        # WebSocket support
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+    }
+
+}
+" | tee /etc/nginx/sites-enabled/https_pleb-vpn.conf
+
+    # test and reload nginx
+    nginx -t
+    if [ $? -eq 0 ]; then
+      echo "nginx config good"
+      systemctl reload nginx
+    else
+      echo "Error: nginx test config fail"
+      exit 1
+    fi
+  fi
+
   exit 0
 }
 
@@ -394,7 +562,7 @@ update() {
   # check for new version and update new version if it doesn't exists
   if [ "${latestversion}" = "${version}" ]; then
     # see if there's a newer version
-    latestversion=$(sudo ${execdir}/.venv/bin/python ${execdir}/check_update.py)
+    latestversion=$(${execdir}/.venv/bin/python ${execdir}/check_update.py)
     if [ "${latestversion}" = "${version}" ]; then
       echo "already up to date with the latest version"
       exit 0
@@ -402,10 +570,10 @@ update() {
   fi
 
   # download zip file into temp directory
-  sudo mkdir /home/admin/pleb-vpn-tmp
+  mkdir /home/admin/pleb-vpn-tmp
   cd /home/admin/pleb-vpn-tmp
-  sudo wget https://github.com/allyourbankarebelongtous/pleb-vpn/archive/refs/tags/${latestversion}.tar.gz
-  sudo tar -xzf ${latestversion}.tar.gz
+  wget https://github.com/allyourbankarebelongtous/pleb-vpn/archive/refs/tags/${latestversion}.tar.gz
+  tar -xzf ${latestversion}.tar.gz
   cd pleb-vpn-*
   isSuccess=$(ls | grep -c plebvpn_common)
   if [ ${isSuccess} -eq 0 ]; then
@@ -414,37 +582,37 @@ update() {
       echo "Press ENTER to continue"
       read key </dev/tty
     fi
-    sudo rm -rf /home/admin/pleb-vpn-tmp
+    rm -rf /home/admin/pleb-vpn-tmp
     exit 1
   else
-    sudo cp -p -r . ${execdir}
-    sudo cp -p -r . ${homedir}
+    cp -p -r . ${execdir}
+    cp -p -r . ${homedir}
 
     cd /home/admin
-    sudo rm -rf /home/admin/pleb-vpn-tmp
+    rm -rf /home/admin/pleb-vpn-tmp
     # fix permissions
-    sudo chown -R admin:admin ${homedir}
-    sudo chown -R admin:admin ${execdir}
-    sudo chmod -R 755 ${homedir}
-    sudo chmod -R 755 ${execdir}
+    chown -R admin:admin ${homedir}
+    chown -R admin:admin ${execdir}
+    chmod -R 755 ${homedir}
+    chmod -R 755 ${execdir}
     # check for updates.sh and if exists, run it, then delete it
     isUpdateScript=$(ls ${execdir} | grep -c updates.sh)
     if [ ${isUpdateScript} -eq 1 ]; then
-      sudo ${execdir}/updates.sh
-      sudo rm ${execdir}/updates.sh
-      sudo rm ${homedir}/updates.sh
+      ${execdir}/updates.sh
+      rm ${execdir}/updates.sh
+      rm ${homedir}/updates.sh
     fi
     # check for update_requirements.txt and if it exists, run it, then delete it
     isUpdateReqs=$(ls ${execdir} | grep -c update_requirements.txt)
     if [ ${isUpdateReqs} -eq 1 ]; then
-      sudo ${execdir}/.venv/bin/pip install -r ${execdir}/update_requirements.txt
-      sudo rm ${execdir}/update_requirements.txt
-      sudo rm ${homedir}/update_requirements.txt
+      ${execdir}/.venv/bin/pip install -r ${execdir}/update_requirements.txt
+      rm ${execdir}/update_requirements.txt
+      rm ${homedir}/update_requirements.txt
     fi
     # update version in pleb-vpn.conf
     setting "${plebVPNConf}" "2" "version" "'${latestversion}'"
     echo "Update success!" 
-    sudo systemctl restart pleb-vpn.service
+    systemctl restart pleb-vpn.service
   fi
   if [ ! "${skip_key}" = "1" ]; then
     echo "Press ENTER to continue"
@@ -458,34 +626,34 @@ restore() {
   plebVPNConf="${homedir}/pleb-vpn.conf"
   source <(cat ${plebVPNConf} | sed '1d')
   # fix permissions
-  sudo chown -R admin:admin ${homedir}
-  sudo chmod -R 755 ${homedir}
+  chown -R admin:admin ${homedir}
+  chmod -R 755 ${homedir}
   if [ "${nodetype}" = "raspiblitz" ]; then
-    sudo rm -rf ${homedir}/.backups
+    rm -rf ${homedir}/.backups
     # copy files to /home/admin/pleb-vpn
-    sudo cp -p -r ${homedir} /home/admin/
+    cp -p -r ${homedir} /home/admin/
   elif [ "${nodetype}" = "mynode" ]; then
     # copy files to /opt/mynode/pleb-vpn
-    sudo cp -p -r ${homedir} /opt/mynode/
+    cp -p -r ${homedir} /opt/mynode/
   fi
   # remove and symlink pleb-vpn.conf
-  sudo rm ${execdir}/pleb-vpn.conf
-  sudo ln -s ${homedir}/pleb-vpn.conf ${execdir}/pleb-vpn.conf
+  rm ${execdir}/pleb-vpn.conf
+  ln -s ${homedir}/pleb-vpn.conf ${execdir}/pleb-vpn.conf
   # fix permissions
-  sudo chown -R admin:admin ${execdir}
-  sudo chmod -R 755 ${execdir}
+  chown -R admin:admin ${execdir}
+  chmod -R 755 ${execdir}
 
   # install webui
   cd ${execdir}
   echo "installing virtualenv..."
-  sudo apt install -y virtualenv
-  sudo virtualenv -p python3 .venv
+  apt install -y virtualenv
+  virtualenv -p python3 .venv
   # install requirements
   echo "installing requirements..."
-  sudo ${execdir}/.venv/bin/pip install -r ${execdir}/requirements.txt
+  ${execdir}/.venv/bin/pip install -r ${execdir}/requirements.txt
 
   # allow through firewall
-  sudo ufw allow 2420 comment 'allow Pleb-VPN HTTP'
+  ufw allow 2420 comment 'allow Pleb-VPN HTTP'
   if [ "${nodetype}" = "mynode" ]; then
     # if installed from install script and not from mynode app store, allow through firewall to persist on restarts
     if [ $(ls /usr/share/mynode_apps | grep -c pleb-vpn) -eq 0 ]; then
@@ -511,20 +679,20 @@ restore() {
     insertLine=$(expr $sectionLine + 1)
     echo "# insertLine(${insertLine})"
     Line='OPTIONS+=(PLEB-VPN "Install and manage PLEB-VPN services")'
-    sudo sed -i "${insertLine}i${Line}" ${mainMenu}
+    sed -i "${insertLine}i${Line}" ${mainMenu}
     sectionName="/home/admin/99connectMenu.sh"
     sectionLine=$(cat ${mainMenu} | grep -n "${sectionName}" | cut -d ":" -f1)
     echo "# sectionLine(${sectionLine})"
     insertLine=$(expr $sectionLine + 2)
     echo "# insertLine(${insertLine})"
     Line='PLEB-VPN)'
-    sudo sed -i "${insertLine}i        ${Line}" ${mainMenu}
+    sed -i "${insertLine}i        ${Line}" ${mainMenu}
     insertLine=$(expr $sectionLine + 3)
     Line='/home/admin/pleb-vpn/pleb-vpnMenu.sh'
-    sudo sed -i "${insertLine}i            ${Line}" ${mainMenu}
+    sed -i "${insertLine}i            ${Line}" ${mainMenu}
     insertLine=$(expr $sectionLine + 4)
     Line=';;'
-    sudo sed -i "${insertLine}i            ${Line}" ${mainMenu}
+    sed -i "${insertLine}i            ${Line}" ${mainMenu}
     # create systemd service
     echo "
 [Unit]
@@ -535,8 +703,8 @@ After=network.target mnt-hdd.mount
 [Service]
 WorkingDirectory=/home/admin/pleb-vpn
 ExecStart=/home/admin/pleb-vpn/.venv/bin/gunicorn -k geventwebsocket.gunicorn.workers.GeventWebSocketWorker -w 1 -b 0.0.0.0:2420 main:app
-User=admin
-Group=admin
+User=root
+Group=root
 Type=simple
 Restart=always
 StandardOutput=journal
@@ -547,7 +715,7 @@ RestartSec=60
 PrivateTmp=true
 
 [Install]
-WantedBy=multi-user.target" | sudo tee "/etc/systemd/system/pleb-vpn.service"
+WantedBy=multi-user.target" | tee "/etc/systemd/system/pleb-vpn.service"
   elif [ "${nodetype}" = "mynode" ]; then
     # create systemd service if no service exists
     if [ $(ls /etc/systemd/system | grep -c pleb-vpn.service) -eq 0 ]; then
@@ -580,33 +748,193 @@ StandardError=syslog
 SyslogIdentifier=pleb-vpn
 
 [Install]
-WantedBy=multi-user.target" | sudo tee "/etc/systemd/system/pleb-vpn.service"
+WantedBy=multi-user.target" | tee "/etc/systemd/system/pleb-vpn.service"
+    fi
+    # create /usr/bin/service_scripts/pre_pleb-vpn.sh if it doesn't exist
+    if [ ! -f /usr/bin/service_scripts/pre_pleb-vpn.sh ]; then
+      echo "#!/bin/bash
+
+# This will run prior to launching the application
+
+# create pleb-vpn.conf and initialize app if not already done
+if [ ! -f /mnt/hdd/mynode/pleb-vpn/pleb-vpn.conf ]; then
+  chmod +x /opt/mynode/pleb-vpn/pleb-vpn.install.sh
+  /opt/mynode/pleb-vpn/pleb-vpn.install.sh on
+fi
+
+# re-initalize app on re-install of mynode
+if [ ! -f /opt/mynode/pleb-vpn/pleb-vpn.conf ]; then
+  chmod +x /mnt/hdd/mynode/pleb-vpn.install.sh
+  /mnt/hdd/mynode/pleb-vpn/pleb-vpn.install.sh restore
+fi
+" | tee /usr/bin/service_scripts/pre_pleb-vpn.sh
     fi
   fi
 
   # enable and start systemd service
-  sudo systemctl enable pleb-vpn.service
-  sudo systemctl start pleb-vpn.service
+  systemctl enable pleb-vpn.service
+  systemctl start pleb-vpn.service
+
+  # create nginx files
+  if [ "${nodetype}" = "raspiblitz" ]; then
+    echo "## lndg_ssl.conf
+
+server {
+    listen 2421 ssl http2;
+    listen [::]:2421 ssl http2;
+    server_name _;
+
+    include /etc/nginx/snippets/ssl-params.conf;
+    include /etc/nginx/snippets/ssl-certificate-app-data.conf;
+
+    include /etc/nginx/snippets/gzip-params.conf;
+
+    access_log /var/log/nginx/access_pleb-vpn.log;
+    error_log /var/log/nginx/error_pleb-vpn.log;
+
+    location / {
+        proxy_pass http://127.0.0.1:2420;
+
+        include /etc/nginx/snippets/ssl-proxy-params.conf;
+
+        # WebSocket support
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection \"upgrade\";
+    }
+
+}
+" | tee /etc/nginx/sites-available/pleb-vpn_ssl.conf
+
+    echo "## lndg_tor.conf
+
+server {
+    listen 2422;
+    server_name _;
+
+    include /etc/nginx/snippets/gzip-params.conf;
+
+    access_log /var/log/nginx/access_pleb-vpn.log;
+    error_log /var/log/nginx/error_pleb-vpn.log;
+
+    location / {
+        proxy_pass http://127.0.0.1:2420;
+
+        include /etc/nginx/snippets/ssl-proxy-params.conf;
+        # WebSocket support
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection \"upgrade\";
+    }
+
+}
+" | tee /etc/nginx/sites-available/pleb-vpn_tor.conf
+
+    echo "## lndg_tor_ssl.conf
+
+server {
+    listen 2423 ssl http2;
+    server_name _;
+
+    include /etc/nginx/snippets/ssl-params.conf;
+    include /etc/nginx/snippets/ssl-certificate-app-data.conf;
+
+    include /etc/nginx/snippets/gzip-params.conf;
+
+    access_log /var/log/nginx/access_pleb-vpn.log;
+    error_log /var/log/nginx/error_pleb-vpn.log;
+
+    location / {
+        proxy_pass http://127.0.0.1:2420;
+
+        include /etc/nginx/snippets/ssl-proxy-params.conf;
+        # WebSocket support
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection \"upgrade\";
+    }
+
+}
+" | tee /etc/nginx/sites-available/pleb-vpn_tor_ssl.conf
+
+    # symlink to sites-enabled
+    ln -s /etc/nginx/sites-available/pleb-vpn_ssl.conf /etc/nginx/sites-enabled/pleb-vpn_ssl.conf
+    ln -s /etc/nginx/sites-available/pleb-vpn_tor.conf /etc/nginx/sites-enabled/pleb-vpn_tor.conf      
+    ln -s /etc/nginx/sites-available/pleb-vpn_tor_ssl.conf /etc/nginx/sites-enabled/pleb-vpn_tor_ssl.conf
+
+    # test and reload nginx
+    nginx -t
+    if [ $? -eq 0 ]; then
+      echo "nginx config good"
+      systemctl reload nginx
+    else
+      echo "Error: nginx test config fail"
+      exit 1
+    fi
+
+    # get tor address for Pleb-VPN if tor is active
+    if [ "${runBehindTor}" = "on" ]; then
+      # make sure to keep in sync with tor.network.sh script
+      /home/admin/config.scripts/tor.onion-service.sh pleb-vpn 80 2422 443 2423
+    fi
+
+  elif [ "${nodetype}" = "mynode" ]; then
+    # only used if not installed via the appstore
+    if [ $(ls /usr/share/mynode_apps | grep -c pleb-vpn) -eq 0 ]; then
+      echo "server {
+    listen 2421 ssl;
+    server_name pleb-vpn;
+
+    include /etc/nginx/mynode/mynode_ssl_params.conf;
+    include /etc/nginx/mynode/mynode_ssl_cert_key.conf;
+
+    access_log /var/log/nginx/access_pleb-vpn.log;
+    error_log /var/log/nginx/error_pleb-vpn.log;
+
+    location / {
+        proxy_pass http://127.0.0.1:2420;
+
+        include /etc/nginx/mynode/mynode_ssl_proxy_params.conf;
+
+        # WebSocket support
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+    }
+
+}
+" | tee /etc/nginx/sites-enabled/https_pleb-vpn.conf
+
+    # test and reload nginx
+    nginx -t
+    if [ $? -eq 0 ]; then
+      echo "nginx config good"
+      systemctl reload nginx
+    else
+      echo "Error: nginx test config fail"
+      exit 1
+    fi
+  fi
 
   # step through pleb-vpn.conf and restore services
   source ${plebVPNConf}
   if [ "${plebvpn}" = "on" ]; then
-    sudo ${execdir}/vpn-install.sh on 1
+    ${execdir}/vpn-install.sh on 1
   fi
   if [ "${lndhybrid}" = "on" ]; then
-    sudo ${execdir}/lnd-hybrid.sh on 1
+    ${execdir}/lnd-hybrid.sh on 1
   fi
   if [ "${clnhybrid}" = "on" ]; then
-    sudo ${execdir}/cln-hybrid.sh on 1
+    ${execdir}/cln-hybrid.sh on 1
   fi
   if [ "${wireguard}" = "on" ]; then
-    sudo ${execdir}/wg-install.sh on 1
+    ${execdir}/wg-install.sh on 1
   fi
   if [ "${torsplittunnel}" = "on" ]; then
-    sudo ${execdir}/tor.split-tunnel.sh on
+    ${execdir}/tor.split-tunnel.sh on
   fi
   if [ "${letsencrypt_ssl}" = "on" ]; then
-    sudo ${execdir}/letsencrypt.install.sh on 1 1
+    ${execdir}/letsencrypt.install.sh on 1 1
   fi
   # restore payment services
   inc=1
@@ -636,7 +964,7 @@ WantedBy=multi-user.target" | sudo tee "/etc/systemd/system/pleb-vpn.service"
     paymentExists=$(cat ${execdir}/payments/${freq}${node}payments.sh | grep -c keysend)
     if ! [ ${paymentExists} -eq 0 ]; then
       # check if systemd unit for frequency and node exists, and if not, create it
-      istimer=$(sudo ls /etc/systemd/system/ | grep -c payments-${freq}-${node}.timer)
+      istimer=$(ls /etc/systemd/system/ | grep -c payments-${freq}-${node}.timer)
       if [ ${istimer} -eq 0 ]; then
         # create systemd timer and service
         echo -n "[Unit]
@@ -657,8 +985,8 @@ OnCalendar=${calendarCode}
 [Install]
 WantedBy=timers.target" \
         > /etc/systemd/system/payments-${freq}-${node}.timer
-        sudo systemctl enable payments-${freq}-${node}.timer
-        sudo systemctl start payments-${freq}-${node}.timer
+        systemctl enable payments-${freq}-${node}.timer
+        systemctl start payments-${freq}-${node}.timer
       fi
     fi
     ((inc++))
@@ -672,74 +1000,74 @@ uninstall() {
   source <(cat ${plebVPNConf} | sed '1d')
   # first uninstall services
   if [ "${letsencrypt_ssl}" = "on" ]; then
-    sudo ${execdir}/letsencrypt.install.sh off
+    ${execdir}/letsencrypt.install.sh off
   fi
   if [ "${torsplittunnel}" = "on" ]; then
-    sudo ${execdir}/tor.split-tunnel.sh off 1
+    ${execdir}/tor.split-tunnel.sh off 1
   fi
   if [ "${lndhybrid}" = "on" ]; then
-    sudo ${execdir}/lnd-hybrid.sh off
+    ${execdir}/lnd-hybrid.sh off
   fi
   if [ "${clnhybrid}" = "on" ]; then
-    sudo ${execdir}/cln-hybrid.sh off
+    ${execdir}/cln-hybrid.sh off
   fi
   if [ "${wireguard}" = "on" ]; then
-    sudo ${execdir}/wg-install.sh off
+    ${execdir}/wg-install.sh off
   fi
   if [ "${plebvpn}" = "on" ]; then
-    sudo ${execdir}/vpn-install.sh off
+    ${execdir}/vpn-install.sh off
   fi
   # delete all payments
-  sudo bash ${execdir}/payments/managepayments.sh deleteall 1
+  ${execdir}/payments/managepayments.sh deleteall 1
   # remove extra line from custom-installs if required
   if [ "${nodetype}" = "raspiblitz" ]; then
     extraLine="# pleb-vpn restore"
-    lineExists=$(sudo cat /mnt/hdd/app-data/custom-installs.sh | grep -c "${extraLine}")
+    lineExists=$(cat /mnt/hdd/app-data/custom-installs.sh | grep -c "${extraLine}")
     if ! [ ${lineExists} -eq 0 ]; then
-      sudo sed -i "s:^${extraLine}.*::g" /mnt/hdd/app-data/custom-installs.sh
+      sed -i "s:^${extraLine}.*::g" /mnt/hdd/app-data/custom-installs.sh
     fi
     extraLine="/mnt/hdd/app-data/pleb-vpn/pleb-vpn.install.sh"
-    lineExists=$(sudo cat /mnt/hdd/app-data/custom-installs.sh | grep -c "${extraLine}")
+    lineExists=$(cat /mnt/hdd/app-data/custom-installs.sh | grep -c "${extraLine}")
     if ! [ ${lineExists} -eq 0 ]; then
-      sudo sed -i "s:^${extraLine}.*::g" /mnt/hdd/app-data/custom-installs.sh
+      sed -i "s:^${extraLine}.*::g" /mnt/hdd/app-data/custom-installs.sh
     fi
 
     # remove extra lines from 00mainMenu.sh if required
     extraLine='OPTIONS+=(PLEB-VPN "Install and manage PLEB-VPN services")'
-    lineExists=$(sudo cat /home/admin/00mainMenu.sh | grep -c "${extraLine}")
+    lineExists=$(cat /home/admin/00mainMenu.sh | grep -c "${extraLine}")
     if ! [ ${lineExists} -eq 0 ]; then
-      sudo sed -i "s:.*${extraLine}.*::g" /home/admin/00mainMenu.sh
+      sed -i "s:.*${extraLine}.*::g" /home/admin/00mainMenu.sh
     fi
     extraLine='PLEB-VPN)'
-    lineExists=$(sudo cat /home/admin/00mainMenu.sh | grep -c "${extraLine}")
+    lineExists=$(cat /home/admin/00mainMenu.sh | grep -c "${extraLine}")
     if ! [ ${lineExists} -eq 0 ]; then
-      sudo sed -i "s:.*${extraLine}.*::g" /home/admin/00mainMenu.sh
+      sed -i "s:.*${extraLine}.*::g" /home/admin/00mainMenu.sh
     fi
     extraLine='/home/admin/pleb-vpn/pleb-vpnMenu.sh'
-    lineExists=$(sudo cat /home/admin/00mainMenu.sh | grep -c "${extraLine}")
+    lineExists=$(cat /home/admin/00mainMenu.sh | grep -c "${extraLine}")
     if ! [ ${lineExists} -eq 0 ]; then
-      sectionLine=$(sudo cat /home/admin/00mainMenu.sh | grep -n "${extraLine}" | cut -d ":" -f1)
+      sectionLine=$(cat /home/admin/00mainMenu.sh | grep -n "${extraLine}" | cut -d ":" -f1)
       nextLine=$(expr $sectionLine + 1)
-      sudo sed -i "${nextLine}d" /home/admin/00mainMenu.sh
-      sudo sed -i "s:.*${extraLine}.*::g" /home/admin/00mainMenu.sh
+      sed -i "${nextLine}d" /home/admin/00mainMenu.sh
+      sed -i "s:.*${extraLine}.*::g" /home/admin/00mainMenu.sh
     fi
 
     # remove extra lines from 00infoBlitz.sh if required
     extraLine='  # Pleb-VPN info'
-    lineExists=$(sudo cat /home/admin/00infoBlitz.sh | grep -c "${extraLine}")
+    lineExists=$(cat /home/admin/00infoBlitz.sh | grep -c "${extraLine}")
     if ! [ ${lineExists} -eq 0 ]; then
-      sectionLine=$(sudo cat /home/admin/00infoBlitz.sh | grep -n "${extraLine}" | cut -d ":" -f1)
+      sectionLine=$(cat /home/admin/00infoBlitz.sh | grep -n "${extraLine}" | cut -d ":" -f1)
       inc=1
       while [ $inc -le 13 ]
       do
-        sudo sed -i "${sectionLine}d" /home/admin/00infoBlitz.sh
+        sed -i "${sectionLine}d" /home/admin/00infoBlitz.sh
         ((inc++))
       done
     fi
   fi
 
   # remove rules from firewall
-  sudo ufw delete allow 2420
+  ufw delete allow 2420
   if [ "${nodetype}" = "mynode" ]; then
     # remove from firewallConf
     while [ $(cat ${firewallConf} | grep -c "ufw allow 2420 comment 'allow Pleb-VPN HTTP'") -gt 0 ];
@@ -749,16 +1077,16 @@ uninstall() {
   fi
 
   # delete files
-  sudo rm -rf ${homedir}
+  rm -rf ${homedir}
   # these files will be deleted by mynode's uninstaller, so skip if uninstalling via mynode uninstaller
   if [ ! "${mynode_uninstall}" = "1" ]; then
     # these files will be deleted by mynode's uninstaller
-    sudo rm -rf ${execdir}
+    rm -rf ${execdir}
 
     # stop and remove pleb-vpn.service
-    sudo rm /etc/systemd/system/pleb-vpn.service
-    sudo systemctl disable pleb-vpn.service
-    sudo systemctl stop pleb-vpn.service
+    rm /etc/systemd/system/pleb-vpn.service
+    systemctl disable pleb-vpn.service
+    systemctl stop pleb-vpn.service
   fi
 
   exit 0

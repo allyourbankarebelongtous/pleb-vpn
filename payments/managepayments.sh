@@ -21,6 +21,14 @@ fi
 plebVPNConf="${homedir}/pleb-vpn.conf"
 source <(cat ${plebVPNConf} | sed '1d')
 
+# check if sudo
+if [ "$EUID" -ne 0 ]; then
+  echo "Please run as root (with sudo)"
+  exit 1
+fi
+
+if [ "$EUID" -ne 0 ]; then
+
 if [ "${nodetype}" = "raspiblitz" ]; then
   source /mnt/hdd/raspiblitz.conf
 fi
@@ -40,15 +48,15 @@ function getpaymentinfo()
 {
   local webui="${1}"
   if [ ! "${webui}" = "1" ]; then
-    sudo touch ${execdir}/payments/displaypayments.tmp
-    sudo chmod 777 ${execdir}/payments/displaypayments.tmp
-    sudo touch ${execdir}/payments/selectpayments.tmp
-    sudo chmod 777 ${execdir}/payments/selectpayments.tmp
+    touch ${execdir}/payments/displaypayments.tmp
+    chmod 777 ${execdir}/payments/displaypayments.tmp
+    touch ${execdir}/payments/selectpayments.tmp
+    chmod 777 ${execdir}/payments/selectpayments.tmp
     echo "PAYMENTS=()" >${execdir}/payments/selectpayments.tmp
     echo -e "PAYMENT_ID \t\tDESTINATION \t\tAMOUNT--DENOMINATION \t\tMESSSAGE" >>${execdir}/payments/displaypayments.tmp
   else
-    sudo touch ${execdir}/payments/current_payments.tmp
-    sudo chmod 777 ${execdir}/payments/current_payments.tmp
+    touch ${execdir}/payments/current_payments.tmp
+    chmod 777 ${execdir}/payments/current_payments.tmp
   fi
   inc=1
   if [ "${nodetype}" = "raspiblitz" ]; then
@@ -101,7 +109,7 @@ ${FREQ} PAYMENTS" >>${execdir}/payments/displaypayments.tmp
         if [ ! "${webui}" = "1" ]; then
           echo -e "${short_node_id}_${freq}_${node} \t$node_id \t${value} \t${message}" >>${execdir}/payments/displaypayments.tmp
           echo "PAYMENTS+=(${short_node_id}_${freq}_${node}" >>${execdir}/payments/selectpayments.tmp
-          sudo sed -i "s/${short_node_id}_${freq}_${node}.*/${short_node_id}_${freq}_${node} \"send to ${short_node_id} ${value} ${freq} from ${node}\"\)/g" ${execdir}/payments/selectpayments.tmp
+          sed -i "s/${short_node_id}_${freq}_${node}.*/${short_node_id}_${freq}_${node} \"send to ${short_node_id} ${value} ${freq} from ${node}\"\)/g" ${execdir}/payments/selectpayments.tmp
         else
           echo -e "${freq} ${short_node_id}_${freq}_${node} ${node} ${pubkey} ${amount} ${denomination} \"${message}\"" >>${execdir}/payments/current_payments.tmp
         fi
@@ -162,8 +170,8 @@ status() {
   else
     getpaymentinfo
     dialog --title "Current Scheduled Payments" --cr-wrap --textbox ${execdir}/payments/displaypayments.tmp 35 140
-    sudo rm ${execdir}/payments/displaypayments.tmp
-    sudo rm ${execdir}/payments/selectpayments.tmp
+    rm ${execdir}/payments/displaypayments.tmp
+    rm ${execdir}/payments/selectpayments.tmp
   fi
   exit 0
 }
@@ -172,7 +180,7 @@ status() {
 newpayment() {
   local freq="${1}"
   if [ -z "${freq}" ]; then
-    sudo ${execdir}/payments/blitz.recurringpayment.sh
+    ${execdir}/payments/blitz.recurringpayment.sh
     exit 0
   else
     local node="${2}"
@@ -216,7 +224,7 @@ newpayment() {
     fi
 
     # check if systemd unit for frequency and node exists, and if not, create it
-    istimer=$(sudo ls /etc/systemd/system/ | grep -c payments-${freq}-${node}.timer)
+    istimer=$(ls /etc/systemd/system/ | grep -c payments-${freq}-${node}.timer)
     if [ ${istimer} -eq 0 ]; then
       # create systemd timer and service
       echo -n "[Unit]
@@ -240,8 +248,8 @@ WantedBy=timers.target" \
     fi
 
     # enable and start service and timer
-    sudo systemctl enable payments-${freq}-${node}.timer
-    sudo systemctl start payments-${freq}-${node}.timer
+    systemctl enable payments-${freq}-${node}.timer
+    systemctl start payments-${freq}-${node}.timer
     exit 0
   fi
 }
@@ -267,8 +275,8 @@ No payments found to delete.
         getpaymentinfo
         source ${execdir}/payments/selectpayments.tmp
         dialog_menu payment_selection "Payments" "Delete Payments" "Select a payment to Delete" PAYMENTS[@]
-        sudo rm ${execdir}/payments/selectpayments.tmp
-        sudo rm ${execdir}/payments/displaypayments.tmp
+        rm ${execdir}/payments/selectpayments.tmp
+        rm ${execdir}/payments/displaypayments.tmp
       else
         echo "Error: When executing from webui, argument 1 must be a valid payment selected to delete."
         exit 1
@@ -278,22 +286,22 @@ No payments found to delete.
     # remove keysend script
     script_name="${execdir}/payments/keysends/_${selection}_keysend.sh"
     script_backup_name="${homedir}/payments/keysends/_${selection}_keysend.sh"
-    sudo rm ${script_backup_name}
-    sudo rm ${script_name}
+    rm ${script_backup_name}
+    rm ${script_name}
     # remove script from execution list
     freq=$(echo "${selection}" | cut -d "_" -f2)
     node=$(echo "${selection}" | cut -d "_" -f3)
     subscriptionlist="${execdir}/payments/${freq}${node}payments.sh"
     subscriptionbackuplist="${homedir}/payments/${freq}${node}payments.sh"
-    sudo sed -i "s:${script_name}::g" ${subscriptionbackuplist}
-    sudo sed -i "s:${script_name}::g" ${subscriptionlist}
+    sed -i "s:${script_name}::g" ${subscriptionbackuplist}
+    sed -i "s:${script_name}::g" ${subscriptionlist}
     # check for any other ${freq} payments and, if none, remove systemd service and timer
     paymentExists=$(cat ${execdir}/payments/${freq}${node}* | grep -c keysends)
     if [ $paymentExists -eq 0 ]; then
-      sudo systemctl stop payments-$freq-${node}.timer
-      sudo systemctl disable payments-$freq-${node}.timer
-      sudo rm /etc/systemd/system/payments-$freq-${node}.timer
-      sudo rm /etc/systemd/system/payments-$freq-${node}.service
+      systemctl stop payments-$freq-${node}.timer
+      systemctl disable payments-$freq-${node}.timer
+      rm /etc/systemd/system/payments-$freq-${node}.timer
+      rm /etc/systemd/system/payments-$freq-${node}.service
     fi
   fi
   exit 0
@@ -316,15 +324,15 @@ Are you sure you want to delete all payments? This cannot be undone.
   fi
   if [ "${delAll}" = "yes" ]; then
     # delete all keysend scripts and backups
-    sudo rm -rf ${execdir}/payments/keysends
-    sudo mkdir ${execdir}/payments/keysends
-    sudo rm -rf ${homedir}/payments/keysends
-    sudo mkdir ${homedir}/payments/keysends
+    rm -rf ${execdir}/payments/keysends
+    mkdir ${execdir}/payments/keysends
+    rm -rf ${homedir}/payments/keysends
+    mkdir ${homedir}/payments/keysends
     # delete and recreate all subscription lists
-    sudo rm ${execdir}/payments/*lndpayments.sh
-    sudo rm ${execdir}/payments/*clnpayments.sh
-    sudo rm ${homedir}/payments/*lndpayments.sh
-    sudo rm ${homedir}/payments/*clnpayments.sh
+    rm ${execdir}/payments/*lndpayments.sh
+    rm ${execdir}/payments/*clnpayments.sh
+    rm ${homedir}/payments/*lndpayments.sh
+    rm ${homedir}/payments/*clnpayments.sh
     echo -n "#!/bin/bash
 
 # daily payments (at 00:00:00 UTC)
@@ -357,24 +365,24 @@ Are you sure you want to delete all payments? This cannot be undone.
 
 # yearly payments (1st of January)
 " > ${execdir}/payments/yearlyclnpayments.sh
-    sudo cp -p ${execdir}/payments/*lndpayments.sh ${homedir}/payments/
-    sudo cp -p ${execdir}/payments/*clnpayments.sh ${homedir}/payments/
+    cp -p ${execdir}/payments/*lndpayments.sh ${homedir}/payments/
+    cp -p ${execdir}/payments/*clnpayments.sh ${homedir}/payments/
 
     # delete all systemd files and remove services
-    sudo systemctl disable --now payments-daily-cln.timer > /dev/null 2>&1 &
-    sudo systemctl disable --now payments-daily-lnd.timer > /dev/null 2>&1 &
-    sudo systemctl disable --now payments-monthly-cln.timer > /dev/null 2>&1 &
-    sudo systemctl disable --now payments-monthly-lnd.timer > /dev/null 2>&1 &
-    sudo systemctl disable --now payments-weekly-cln.timer > /dev/null 2>&1 &
-    sudo systemctl disable --now payments-weekly-lnd.timer > /dev/null 2>&1 &
-    sudo systemctl disable --now payments-yearly-cln.timer > /dev/null 2>&1 &
-    sudo systemctl disable --now payments-yearly-lnd.timer > /dev/null 2>&1 &
-    sudo rm /etc/systemd/system/payments-* > /dev/null 2>&1 &
+    systemctl disable --now payments-daily-cln.timer > /dev/null 2>&1 &
+    systemctl disable --now payments-daily-lnd.timer > /dev/null 2>&1 &
+    systemctl disable --now payments-monthly-cln.timer > /dev/null 2>&1 &
+    systemctl disable --now payments-monthly-lnd.timer > /dev/null 2>&1 &
+    systemctl disable --now payments-weekly-cln.timer > /dev/null 2>&1 &
+    systemctl disable --now payments-weekly-lnd.timer > /dev/null 2>&1 &
+    systemctl disable --now payments-yearly-cln.timer > /dev/null 2>&1 &
+    systemctl disable --now payments-yearly-lnd.timer > /dev/null 2>&1 &
+    rm /etc/systemd/system/payments-* > /dev/null 2>&1 &
     # fix permissions on new files
-    sudo chown -R admin:admin ${execdir}/payments
-    sudo chmod -R 755 ${execdir}/payments
-    sudo chown -R admin:admin ${homedir}/payments
-    sudo chmod -R 755 ${homedir}/payments
+    chown -R admin:admin ${execdir}/payments
+    chmod -R 755 ${execdir}/payments
+    chown -R admin:admin ${homedir}/payments
+    chmod -R 755 ${homedir}/payments
   fi
   exit 0
 }

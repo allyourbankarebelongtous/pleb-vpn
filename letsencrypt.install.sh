@@ -31,11 +31,17 @@ function setting() # FILE LINENUMBER NAME VALUE
   echo "# ${NAME} exists->(${settingExists})"
   if [ "${settingExists}" == "0" ]; then
     echo "# adding setting (${NAME})"
-    sudo sed -i --follow-symlinks "${LINENUMBER}i${NAME}=" ${FILE}
+    sed -i --follow-symlinks "${LINENUMBER}i${NAME}=" ${FILE}
   fi
   echo "# updating setting (${NAME}) with value(${VALUE})"
-  sudo sed -i --follow-symlinks "s/^${NAME}=.*/${NAME}=${VALUE}/g" ${FILE}
+  sed -i --follow-symlinks "s/^${NAME}=.*/${NAME}=${VALUE}/g" ${FILE}
 }
+
+# check if sudo
+if [ "$EUID" -ne 0 ]; then
+  echo "Please run as root (with sudo)"
+  exit 1
+fi
 
 on() {
   if [ "${nodetype}" = "raspiblitz" ]; then
@@ -48,7 +54,7 @@ on() {
   local letsencryptlnbits="${5}"
   local letsencryptdomain1="${6}"
   local letsencryptdomain2="${7}"
-  sudo apt install -y certbot
+  apt install -y certbot
   if [ ! "${webui}" = "1" ]; then
     if [ ! "${keepExisting}" = "1" ]; then
       # check for existing challenge
@@ -95,25 +101,25 @@ Are you ready to continue?
     fi
 
     # set up acme dns challenge
-    sudo mkdir ${homedir}/letsencrypt
-    sudo wget https://github.com/joohoi/acme-dns-certbot-joohoi/raw/master/acme-dns-auth.py
-    sudo mv acme-dns-auth.py ${homedir}/letsencrypt
+    mkdir ${homedir}/letsencrypt
+    wget https://github.com/joohoi/acme-dns-certbot-joohoi/raw/master/acme-dns-auth.py
+    mv acme-dns-auth.py ${homedir}/letsencrypt
     if [ "${nodetype}" = "mynode" ]; then
       # force script to use python3
       sed -i 's/env python/env python3/' ${homedir}/letsencrypt/acme-dns-auth.py
     fi
-    sudo cp ${homedir}/letsencrypt/acme-dns-auth.py /etc/letsencrypt/
-    sudo chmod 755 /etc/letsencrypt/acme-dns-auth.py
+    cp ${homedir}/letsencrypt/acme-dns-auth.py /etc/letsencrypt/
+    chmod 755 /etc/letsencrypt/acme-dns-auth.py
 
     # clean up failed/old installs
     if [ $(ls /etc/letsencrypt | grep -c acmedns.json) -gt 0 ]; then
-      sudo rm -rf /etc/letsencrypt/accounts &> /dev/null
-      sudo rm /etc/letsencrypt/acmedns.json &> /dev/null
-      sudo rm -rf /etc/letsencrypt/archive &> /dev/null
-      sudo rm -rf /etc/letsencrypt/csr &> /dev/null
-      sudo rm -rf /etc/letsencrypt/keys &> /dev/null
-      sudo rm -rf /etc/letsencrypt/live &> /dev/null
-      sudo rm -rf /etc/letsencrypt/renew* &> /dev/null
+      rm -rf /etc/letsencrypt/accounts &> /dev/null
+      rm /etc/letsencrypt/acmedns.json &> /dev/null
+      rm -rf /etc/letsencrypt/archive &> /dev/null
+      rm -rf /etc/letsencrypt/csr &> /dev/null
+      rm -rf /etc/letsencrypt/keys &> /dev/null
+      rm -rf /etc/letsencrypt/live &> /dev/null
+      rm -rf /etc/letsencrypt/renew* &> /dev/null
     fi
 
     if [ ! "${webui}" = "1" ]; then
@@ -157,8 +163,8 @@ Are you ready to continue?
       fi
 
       # get domain names
-      sudo touch ${execdir}/.tmp
-      sudo chmod 777 ${execdir}/.tmp
+      touch ${execdir}/.tmp
+      chmod 777 ${execdir}/.tmp
       whiptail --title "Enter Domain" --inputbox "Enter the first domain name that you wish to secure (example: btcpay.mydomain.com)" 11 80 2>${execdir}/.tmp
       letsencryptdomain1=$(cat ${execdir}/.tmp)
       # check first domain name
@@ -253,9 +259,9 @@ Contact allyourbankarebelongtous with any questions or issues.
     fi
     # get certs
     if [ ! "${letsencryptdomain2}" = "" ]; then
-      sudo certbot certonly --manual --manual-auth-hook /etc/letsencrypt/acme-dns-auth.py --preferred-challenges dns --register-unsafely-without-email --agree-tos --debug-challenges -d ${letsencryptdomain1} -d ${letsencryptdomain2}
+      certbot certonly --manual --manual-auth-hook /etc/letsencrypt/acme-dns-auth.py --preferred-challenges dns --register-unsafely-without-email --agree-tos --debug-challenges -d ${letsencryptdomain1} -d ${letsencryptdomain2}
     else
-      sudo certbot certonly --manual --manual-auth-hook /etc/letsencrypt/acme-dns-auth.py --preferred-challenges dns --register-unsafely-without-email --agree-tos --debug-challenges -d ${letsencryptdomain1}
+      certbot certonly --manual --manual-auth-hook /etc/letsencrypt/acme-dns-auth.py --preferred-challenges dns --register-unsafely-without-email --agree-tos --debug-challenges -d ${letsencryptdomain1}
     fi
     sleep 5
 
@@ -269,9 +275,9 @@ Contact allyourbankarebelongtous with any questions or issues.
     fi
 
     # link certs to ${homedir}/letsencrypt
-    sudo chmod -R 755 /etc/letsencrypt
-    sudo ln -s /etc/letsencrypt/live/"${letsencryptdomain1}"/fullchain.pem "${homedir}"/letsencrypt/tls.cert
-    sudo ln -s /etc/letsencrypt/live/"${letsencryptdomain1}"/privkey.pem "${homedir}"/letsencrypt/tls.key
+    chmod -R 755 /etc/letsencrypt
+    ln -s /etc/letsencrypt/live/"${letsencryptdomain1}"/fullchain.pem "${homedir}"/letsencrypt/tls.cert
+    ln -s /etc/letsencrypt/live/"${letsencryptdomain1}"/privkey.pem "${homedir}"/letsencrypt/tls.key
 
     # create letsencrypt ssl snippet
     if [ "${nodetype}" = "raspiblitz" ]; then
@@ -279,18 +285,18 @@ Contact allyourbankarebelongtous with any questions or issues.
 
 ssl_certificate ${homedir}/letsencrypt/tls.cert;
 ssl_certificate_key ${homedir}/letsencrypt/tls.key;
-" | sudo tee /etc/nginx/snippets/ssl-certificate-app-data-letsencrypt.conf
+" | tee /etc/nginx/snippets/ssl-certificate-app-data-letsencrypt.conf
 
       # fix btcpay_ssl.conf
       if [ "${letsencryptbtcpay}" = "on" ]; then
-        sudo sed -i 's/ssl-certificate-app-data.conf/ssl-certificate-app-data-letsencrypt.conf/' /etc/nginx/sites-available/btcpay_ssl.conf
-        sudo sed -i 's/ssl-certificate-app-data.conf/ssl-certificate-app-data-letsencrypt.conf/' /home/admin/assets/nginx/sites-available/btcpay_ssl.conf
+        sed -i 's/ssl-certificate-app-data.conf/ssl-certificate-app-data-letsencrypt.conf/' /etc/nginx/sites-available/btcpay_ssl.conf
+        sed -i 's/ssl-certificate-app-data.conf/ssl-certificate-app-data-letsencrypt.conf/' /home/admin/assets/nginx/sites-available/btcpay_ssl.conf
       fi
 
       # fix lnbits_ssl.conf
       if [ "${letsencryptlnbits}" = "on" ]; then
-        sudo sed -i 's/ssl-certificate-app-data.conf/ssl-certificate-app-data-letsencrypt.conf/' /etc/nginx/sites-available/lnbits_ssl.conf
-        sudo sed -i 's/ssl-certificate-app-data.conf/ssl-certificate-app-data-letsencrypt.conf/' /home/admin/assets/nginx/sites-available/lnbits_ssl.conf
+        sed -i 's/ssl-certificate-app-data.conf/ssl-certificate-app-data-letsencrypt.conf/' /etc/nginx/sites-available/lnbits_ssl.conf
+        sed -i 's/ssl-certificate-app-data.conf/ssl-certificate-app-data-letsencrypt.conf/' /home/admin/assets/nginx/sites-available/lnbits_ssl.conf
       fi
 
     elif [ "${nodetype}" = "mynode" ]; then
@@ -298,14 +304,14 @@ ssl_certificate_key ${homedir}/letsencrypt/tls.key;
 
 ssl_certificate ${homedir}/letsencrypt/tls.cert;
 ssl_certificate_key ${homedir}/letsencrypt/tls.key;
-" | sudo tee /etc/nginx/mynode/mynode_ssl_cert_key_letsencrypt.conf
+" | tee /etc/nginx/mynode/mynode_ssl_cert_key_letsencrypt.conf
 
       # first create and enable systemd service to check for any changes to localip and update the nginx conf file with the new ip address
       echo "#!/bin/bash
 
 sed '1d' /mnt/hdd/mynode/pleb-vpn/pleb-vpn.conf > /mnt/hdd/mynode/pleb-vpn/pleb-vpn.conf.tmp
 source /mnt/hdd/mynode/pleb-vpn/pleb-vpn.conf.tmp
-sudo rm /mnt/hdd/mynode/pleb-vpn/pleb-vpn.conf.tmp
+rm /mnt/hdd/mynode/pleb-vpn/pleb-vpn.conf.tmp
 
 localip=\$(hostname -I | awk '{print \$1}')
 if [ \"\${letsencryptbtcpay}\" = \"on\" ]; then
@@ -318,9 +324,9 @@ if [ \"\${letsencryptlnbits}\" = \"on\" ]; then
 fi
 
 systemctl reload nginx
-" | sudo tee ${homedir}/letsencrypt/set_nginx_localip.sh
-      sudo chown admin:admin ${homedir}/letsencrypt/set_nginx_localip.sh
-      sudo chmod 755 ${homedir}/letsencrypt/set_nginx_localip.sh
+" | tee ${homedir}/letsencrypt/set_nginx_localip.sh
+      chown admin:admin ${homedir}/letsencrypt/set_nginx_localip.sh
+      chmod 755 ${homedir}/letsencrypt/set_nginx_localip.sh
 
       echo "[Unit]
 Description=Add localip to nginx btcpayserver and lnbits for ssl proxy
@@ -333,24 +339,24 @@ Restart=on-failure
 RestartSec=5s
 [Install]
 WantedBy=multi-user.target
-" | sudo tee /etc/systemd/system/pleb-vpn-letsencrypt-config.service
+" | tee /etc/systemd/system/pleb-vpn-letsencrypt-config.service
     fi
 
     # save acme authenticaton
-    sudo cp -p /etc/letsencrypt/acmedns.json ${homedir}/letsencrypt/
+    cp -p /etc/letsencrypt/acmedns.json ${homedir}/letsencrypt/
 
   else
     # use existing DNS authenticaton
 
     # copy acme-dns-auth.py and acmedns.json
-    sudo cp ${homedir}/letsencrypt/acme-dns-auth.py /etc/letsencrypt/
-    sudo cp ${homedir}/letsencrypt/acmedns.json /etc/letsencrypt/
-    sudo chmod -R 755 /etc/letsencrypt
+    cp ${homedir}/letsencrypt/acme-dns-auth.py /etc/letsencrypt/
+    cp ${homedir}/letsencrypt/acmedns.json /etc/letsencrypt/
+    chmod -R 755 /etc/letsencrypt
 
     # check for domain name(s) in pleb-vpn.conf and if not present, get them from acmedns.json
     if [ "${letsencryptdomain1}" = "" ]; then
-      domains=$(sudo cat ${homedir}/letsencrypt/acmedns.json | jq . | grep ": {" | cut -d ":" -f1)
-      domainCount=$(sudo cat ${homedir}/letsencrypt/acmedns.json | jq . | grep -c ": {")
+      domains=$(cat ${homedir}/letsencrypt/acmedns.json | jq . | grep ": {" | cut -d ":" -f1)
+      domainCount=$(cat ${homedir}/letsencrypt/acmedns.json | jq . | grep -c ": {")
       letsencryptdomain1=$(echo "${domains}" | sed -n "1p" | sed 's/ //g' | sed 's/\"//g')
       if [ ${domainCount} -gt 1 ]; then
         letsencryptdomain2=$(echo "${domains}" | sed -n "2p" | sed 's/ //g' | sed 's/\"//g')
@@ -422,17 +428,17 @@ Is the information correct?
 
     # get certs
     if [ ! "${letsencryptdomain2}" = "" ]; then
-      sudo certbot certonly --noninteractive --agree-tos --manual --manual-auth-hook /etc/letsencrypt/acme-dns-auth.py --preferred-challenges dns --register-unsafely-without-email --agree-tos -d ${letsencryptdomain1} -d ${letsencryptdomain2}
+      certbot certonly --noninteractive --agree-tos --manual --manual-auth-hook /etc/letsencrypt/acme-dns-auth.py --preferred-challenges dns --register-unsafely-without-email --agree-tos -d ${letsencryptdomain1} -d ${letsencryptdomain2}
     else
-      sudo certbot certonly --noninteractive --agree-tos --manual --manual-auth-hook /etc/letsencrypt/acme-dns-auth.py --preferred-challenges dns --register-unsafely-without-email --agree-tos -d ${letsencryptdomain1}
+      certbot certonly --noninteractive --agree-tos --manual --manual-auth-hook /etc/letsencrypt/acme-dns-auth.py --preferred-challenges dns --register-unsafely-without-email --agree-tos -d ${letsencryptdomain1}
     fi
 
     # link certs to ${homedir}/letsencrypt
-    sudo chmod -R 755 /etc/letsencrypt
-    sudo rm ${homedir}/letsencrypt/tls.cert &> /dev/null
-    sudo rm ${homedir}/letsencrypt/tls.key &> /dev/null
-    sudo ln -s /etc/letsencrypt/live/"${letsencryptdomain1}"/fullchain.pem ${homedir}/letsencrypt/tls.cert
-    sudo ln -s /etc/letsencrypt/live/"${letsencryptdomain1}"/privkey.pem ${homedir}/letsencrypt/tls.key
+    chmod -R 755 /etc/letsencrypt
+    rm ${homedir}/letsencrypt/tls.cert &> /dev/null
+    rm ${homedir}/letsencrypt/tls.key &> /dev/null
+    ln -s /etc/letsencrypt/live/"${letsencryptdomain1}"/fullchain.pem ${homedir}/letsencrypt/tls.cert
+    ln -s /etc/letsencrypt/live/"${letsencryptdomain1}"/privkey.pem ${homedir}/letsencrypt/tls.key
 
     # create letsencrypt ssl snippet
     if [ "${nodetype}" = "raspiblitz" ]; then
@@ -440,18 +446,18 @@ Is the information correct?
 
 ssl_certificate ${homedir}/letsencrypt/tls.cert;
 ssl_certificate_key ${homedir}/letsencrypt/tls.key;
-" | sudo tee /etc/nginx/snippets/ssl-certificate-app-data-letsencrypt.conf
+" | tee /etc/nginx/snippets/ssl-certificate-app-data-letsencrypt.conf
 
       # fix btcpay_ssl.conf
       if [ "${letsencryptbtcpay}" = "on" ]; then
-        sudo sed -i 's/ssl-certificate-app-data.conf/ssl-certificate-app-data-letsencrypt.conf/' /etc/nginx/sites-available/btcpay_ssl.conf
-        sudo sed -i 's/ssl-certificate-app-data.conf/ssl-certificate-app-data-letsencrypt.conf/' /home/admin/assets/nginx/sites-available/btcpay_ssl.conf
+        sed -i 's/ssl-certificate-app-data.conf/ssl-certificate-app-data-letsencrypt.conf/' /etc/nginx/sites-available/btcpay_ssl.conf
+        sed -i 's/ssl-certificate-app-data.conf/ssl-certificate-app-data-letsencrypt.conf/' /home/admin/assets/nginx/sites-available/btcpay_ssl.conf
       fi
 
       # fix lnbits_ssl.conf
       if [ "${letsencryptlnbits}" = "on" ]; then
-        sudo sed -i 's/ssl-certificate-app-data.conf/ssl-certificate-app-data-letsencrypt.conf/' /etc/nginx/sites-available/lnbits_ssl.conf
-        sudo sed -i 's/ssl-certificate-app-data.conf/ssl-certificate-app-data-letsencrypt.conf/' /home/admin/assets/nginx/sites-available/lnbits_ssl.conf
+        sed -i 's/ssl-certificate-app-data.conf/ssl-certificate-app-data-letsencrypt.conf/' /etc/nginx/sites-available/lnbits_ssl.conf
+        sed -i 's/ssl-certificate-app-data.conf/ssl-certificate-app-data-letsencrypt.conf/' /home/admin/assets/nginx/sites-available/lnbits_ssl.conf
       fi
 
     elif [ "${nodetype}" = "mynode" ]; then
@@ -459,14 +465,14 @@ ssl_certificate_key ${homedir}/letsencrypt/tls.key;
 
 ssl_certificate ${homedir}/letsencrypt/tls.cert;
 ssl_certificate_key ${homedir}/letsencrypt/tls.key;
-" | sudo tee /etc/nginx/mynode/mynode_ssl_cert_key_letsencrypt.conf
+" | tee /etc/nginx/mynode/mynode_ssl_cert_key_letsencrypt.conf
 
       # first create and enable systemd service to check for any changes to localip and update the nginx conf file with the new ip address
       echo "#!/bin/bash
 
 sed '1d' /mnt/hdd/mynode/pleb-vpn/pleb-vpn.conf > /mnt/hdd/mynode/pleb-vpn/pleb-vpn.conf.tmp
 source /mnt/hdd/mynode/pleb-vpn/pleb-vpn.conf.tmp
-sudo rm /mnt/hdd/mynode/pleb-vpn/pleb-vpn.conf.tmp
+rm /mnt/hdd/mynode/pleb-vpn/pleb-vpn.conf.tmp
 
 localip=\$(hostname -I | awk '{print \$1}')
 if [ \"\${letsencryptbtcpay}\" = \"on\" ]; then
@@ -479,9 +485,9 @@ if [ \"\${letsencryptlnbits}\" = \"on\" ]; then
 fi
 
 systemctl reload nginx
-" | sudo tee ${homedir}/letsencrypt/set_nginx_localip.sh
-      sudo chown admin:admin ${homedir}/letsencrypt/set_nginx_localip.sh
-      sudo chmod 755 ${homedir}/letsencrypt/set_nginx_localip.sh
+" | tee ${homedir}/letsencrypt/set_nginx_localip.sh
+      chown admin:admin ${homedir}/letsencrypt/set_nginx_localip.sh
+      chmod 755 ${homedir}/letsencrypt/set_nginx_localip.sh
 
       echo "[Unit]
 Description=Add localip to nginx btcpayserver and lnbits for ssl proxy
@@ -494,7 +500,7 @@ Restart=on-failure
 RestartSec=5s
 [Install]
 WantedBy=multi-user.target
-" | sudo tee /etc/systemd/system/pleb-vpn-letsencrypt-config.service
+" | tee /etc/systemd/system/pleb-vpn-letsencrypt-config.service
     fi
 
   fi
@@ -513,35 +519,35 @@ off() {
   if [ "${nodetype}" = "raspiblitz" ]; then
     source /mnt/hdd/raspiblitz.conf
   fi
-  sudo rm -rf /etc/letsencrypt/live
-  sudo apt purge -y certbot
-  sudo rm ${homedir}/letsencrypt/tls.cert
-  sudo rm ${homedir}/letsencrypt/tls.key
+  rm -rf /etc/letsencrypt/live
+  apt purge -y certbot
+  rm ${homedir}/letsencrypt/tls.cert
+  rm ${homedir}/letsencrypt/tls.key
 
   if [ "${nodetype}" = "raspiblitz" ]; then
-    sudo rm /etc/nginx/snippets/ssl-certificate-app-data-letsencrypt.conf
-    sudo sed -i 's/ssl-certificate-app-data-letsencrypt.conf/ssl-certificate-app-data.conf/' /etc/nginx/sites-available/btcpay_ssl.conf
-    sudo sed -i 's/ssl-certificate-app-data-letsencrypt.conf/ssl-certificate-app-data.conf/' /home/admin/assets/nginx/sites-available/btcpay_ssl.conf
-    sudo sed -i 's/ssl-certificate-app-data-letsencrypt.conf/ssl-certificate-app-data.conf/' /etc/nginx/sites-available/lnbits_ssl.conf
-    sudo sed -i 's/ssl-certificate-app-data-letsencrypt.conf/ssl-certificate-app-data.conf/' /home/admin/assets/nginx/sites-available/lnbits_ssl.conf
+    rm /etc/nginx/snippets/ssl-certificate-app-data-letsencrypt.conf
+    sed -i 's/ssl-certificate-app-data-letsencrypt.conf/ssl-certificate-app-data.conf/' /etc/nginx/sites-available/btcpay_ssl.conf
+    sed -i 's/ssl-certificate-app-data-letsencrypt.conf/ssl-certificate-app-data.conf/' /home/admin/assets/nginx/sites-available/btcpay_ssl.conf
+    sed -i 's/ssl-certificate-app-data-letsencrypt.conf/ssl-certificate-app-data.conf/' /etc/nginx/sites-available/lnbits_ssl.conf
+    sed -i 's/ssl-certificate-app-data-letsencrypt.conf/ssl-certificate-app-data.conf/' /home/admin/assets/nginx/sites-available/lnbits_ssl.conf
   elif [ "${nodetype}" = "mynode" ]; then
-    sudo rm /etc/nginx/mynode/mynode_ssl_cert_key_letsencrypt.conf
-    sudo systemctl disable pleb-vpn-letsencrypt-config.service
-    sudo rm ${homedir}/letsencrypt/set_nginx_localip.sh
-    sudo rm /etc/systemd/system/pleb-vpn-letsencrypt-config.service
-    sudo sed -i "s/\(proxy_pass http:\/\/\).*/\1127.0.0.1:49392;/" /etc/nginx/sites-enabled/https_btcpayserver.conf
-    sudo sed -i 's/mynode_ssl_cert_key_letsencrypt.conf/mynode_ssl_cert_key.conf/' /etc/nginx/sites-enabled/https_btcpayserver.conf
-    sudo sed -i "s/\(proxy_pass http:\/\/\).*/\1127.0.0.1:49392;/" /etc/nginx/sites-enabled/https_lnbits.conf
-    sudo sed -i 's/mynode_ssl_cert_key_letsencrypt.conf/mynode_ssl_cert_key.conf/' /etc/nginx/sites-enabled/https_lnbits.conf
+    rm /etc/nginx/mynode/mynode_ssl_cert_key_letsencrypt.conf
+    systemctl disable pleb-vpn-letsencrypt-config.service
+    rm ${homedir}/letsencrypt/set_nginx_localip.sh
+    rm /etc/systemd/system/pleb-vpn-letsencrypt-config.service
+    sed -i "s/\(proxy_pass http:\/\/\).*/\1127.0.0.1:49392;/" /etc/nginx/sites-enabled/https_btcpayserver.conf
+    sed -i 's/mynode_ssl_cert_key_letsencrypt.conf/mynode_ssl_cert_key.conf/' /etc/nginx/sites-enabled/https_btcpayserver.conf
+    sed -i "s/\(proxy_pass http:\/\/\).*/\1127.0.0.1:49392;/" /etc/nginx/sites-enabled/https_lnbits.conf
+    sed -i 's/mynode_ssl_cert_key_letsencrypt.conf/mynode_ssl_cert_key.conf/' /etc/nginx/sites-enabled/https_lnbits.conf
   fi
 
   # reload nginx
-  sudo nginx -t
+  nginx -t
   if [ ! $? -eq 0 ]; then
     echo "ERROR: nginx config error"
     exit 1
   fi
-  sudo systemctl reload nginx
+  systemctl reload nginx
 
   # update pleb-vpn.conf
   setting ${plebVPNConf} "2" "letsencryptdomain2" ""

@@ -69,10 +69,10 @@ if [ ${check} -eq 1 ]; then choice="on"; fi
 if [ "${plebvpn}" != "${choice}" ]; then
   echo "PlebVPN Setting changed .."
   anychange=1
-  sudo -u admin /home/admin/pleb-vpn/vpn-install.sh ${choice}
+  sudo /home/admin/pleb-vpn/vpn-install.sh ${choice}
   source ${plebVPNConf}
   if [ "${choice}" =  "on" ]; then
-    sudo -u admin /home/admin/pleb-vpn/vpn-install.sh status
+    sudo /home/admin/pleb-vpn/vpn-install.sh status
   fi
 else
   echo "plebvpn unchanged."
@@ -84,10 +84,10 @@ if [ ${check} -eq 1 ]; then choice="on"; fi
 if [ "${wireguard}" != "${choice}" ]; then
   echo "WireGuard Setting changed .."
   anychange=1
-  sudo -u admin /home/admin/pleb-vpn/wg-install.sh ${choice}
+  sudo /home/admin/pleb-vpn/wg-install.sh ${choice}
   source ${plebVPNConf}
   if [ "${choice}" =  "on" ]; then
-    sudo -u admin /home/admin/pleb-vpn/wg-install.sh status
+    sudo /home/admin/pleb-vpn/wg-install.sh status
   fi
 else
   echo "WireGuard unchanged."
@@ -99,7 +99,7 @@ if [ ${check} -eq 1 ]; then choice="on"; fi
 if [ "${clnhybrid}" != "${choice}" ]; then
   echo "CLN Hybrid Setting changed .."
   anychange=1
-  sudo -u admin /home/admin/pleb-vpn/cln-hybrid.sh ${choice}
+  sudo /home/admin/pleb-vpn/cln-hybrid.sh ${choice}
   source <(/home/admin/_cache.sh get ln_default_locked)
   if [ "${clEncryptedHSM}" = "off" ]; then
     # wait until wallet unlocked
@@ -110,7 +110,7 @@ if [ "${clnhybrid}" != "${choice}" ]; then
     /home/admin/config.scripts/cl.hsmtool.sh unlock
     sleep 5
   fi
-  sudo -u admin /home/admin/pleb-vpn/cln-hybrid.sh status
+  sudo /home/admin/pleb-vpn/cln-hybrid.sh status
 else
   echo "CLN Hybrid unchanged."
 fi
@@ -121,7 +121,7 @@ if [ ${check} -eq 1 ]; then choice="on"; fi
 if [ "${lndhybrid}" != "${choice}" ]; then
   echo "LND Hybrid Setting changed .."
   anychange=1
-  sudo -u admin /home/admin/pleb-vpn/lnd-hybrid.sh ${choice}
+  sudo /home/admin/pleb-vpn/lnd-hybrid.sh ${choice}
   if [ "${autoUnlock}" = "on" ]; then
     # wait until wallet unlocked
     echo "waiting for wallet unlock (takes some time)..."
@@ -132,7 +132,7 @@ if [ "${lndhybrid}" != "${choice}" ]; then
     echo "waiting for wallet unlock (takes some time)..."
     sleep 5
   fi
-  sudo -u admin /home/admin/pleb-vpn/lnd-hybrid.sh status
+  sudo /home/admin/pleb-vpn/lnd-hybrid.sh status
 else
   echo "LND Hybrid unchanged."
 fi

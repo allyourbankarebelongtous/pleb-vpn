@@ -36,7 +36,7 @@ CHOICE=$(dialog --clear \
 
 case $CHOICE in
   UPDATE)
-    /home/admin/pleb-vpn/pleb-vpn.install.sh update
+    sudo /home/admin/pleb-vpn/pleb-vpn.install.sh update
     ;;
   UNINSTALL)
     whiptail --title "Completely Uninstall Pleb-VPN" --yes-button "Cancel" --no-button "Uninstall" --yesno "
@@ -50,7 +50,7 @@ and you will be asked if you wish to reuse them or use different
 ones should you re-install.
       " 16 75
     if [ $? -eq 1 ]; then
-      /home/admin/pleb-vpn/pleb-vpn.install.sh uninstall
+      sudo /home/admin/pleb-vpn/pleb-vpn.install.sh uninstall
       exit 0
     fi
     ;;

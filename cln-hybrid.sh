@@ -21,6 +21,12 @@ fi
 plebVPNConf="${homedir}/pleb-vpn.conf"
 source <(cat ${plebVPNConf} | sed '1d')
 
+# check if sudo
+if [ "$EUID" -ne 0 ]; then
+  echo "Please run as root (with sudo)"
+  exit 1
+fi
+
 function setting() # FILE LINENUMBER NAME VALUE
 {
   FILE=$1
@@ -32,24 +38,24 @@ function setting() # FILE LINENUMBER NAME VALUE
   echo "# ${NAME} exists->(${settingExists})"
   if [ "${settingExists}" == "0" ]; then
     echo "# adding setting (${NAME})"
-    sudo sed -i --follow-symlinks "${LINENUMBER}i${NAME}=" ${FILE}
+    sed -i --follow-symlinks "${LINENUMBER}i${NAME}=" ${FILE}
   fi
   echo "# updating setting (${NAME}) with value(${VALUE})"
-  sudo sed -i --follow-symlinks "s/^${NAME}=.*/${NAME}=${VALUE}/g" ${FILE}
+  sed -i --follow-symlinks "s/^${NAME}=.*/${NAME}=${VALUE}/g" ${FILE}
 }
 
 status() {
   # show current Core Lightning status
   local webui="${1}"
-  nodeName=$(sudo -u bitcoin lightning-cli getinfo | jq .alias | sed 's/\"//g')
-  nodeID=$(sudo -u bitcoin lightning-cli getinfo | jq .id | sed 's/\"//g')
-  address0Type=$(sudo -u bitcoin lightning-cli getinfo | jq .address[0].type | sed 's/\"//g')
-  address0Port=$(sudo -u bitcoin lightning-cli getinfo | jq .address[0].port | sed 's/\"//g')
-  address0=$(sudo -u bitcoin lightning-cli getinfo | jq .address[0].address | sed 's/\"//g')
+  nodeName=$(-u bitcoin lightning-cli getinfo | jq .alias | sed 's/\"//g')
+  nodeID=$(-u bitcoin lightning-cli getinfo | jq .id | sed 's/\"//g')
+  address0Type=$(-u bitcoin lightning-cli getinfo | jq .address[0].type | sed 's/\"//g')
+  address0Port=$(-u bitcoin lightning-cli getinfo | jq .address[0].port | sed 's/\"//g')
+  address0=$(-u bitcoin lightning-cli getinfo | jq .address[0].address | sed 's/\"//g')
   if [ "${clnhybrid}" = "on" ]; then
-    address1Type=$(sudo -u bitcoin lightning-cli getinfo | jq .address[1].type | sed 's/\"//g')
-    address1Port=$(sudo -u bitcoin lightning-cli getinfo | jq .address[1].port | sed 's/\"//g')
-    address1=$(sudo -u bitcoin lightning-cli getinfo | jq .address[1].address | sed 's/\"//g')
+    address1Type=$(-u bitcoin lightning-cli getinfo | jq .address[1].type | sed 's/\"//g')
+    address1Port=$(-u bitcoin lightning-cli getinfo | jq .address[1].port | sed 's/\"//g')
+    address1=$(-u bitcoin lightning-cli getinfo | jq .address[1].address | sed 's/\"//g')
     if [ "${webui}" = "1" ]; then
       echo "Alias='${nodeName}'
 Node_ID='${nodeID}'
@@ -130,8 +136,8 @@ on() {
   fi
   if [ "${keepport}" = "0" ]; then
     if [ "${nodetype}" = "raspiblitz" ]; then
-      sudo touch /var/cache/raspiblitz/.tmp
-      sudo chmod 777 /var/cache/raspiblitz/.tmp
+      touch /var/cache/raspiblitz/.tmp
+      chmod 777 /var/cache/raspiblitz/.tmp
       whiptail --title "Core Lightning Clearnet Port" --inputbox "Enter the clearnet port assigned to your Core Lightning node. If you don't have one, forward one from your VPS or contact your VPS provider to obtain one. (example: 9740)" 12 80 2>/var/cache/raspiblitz/.tmp
       clnport=$(cat /var/cache/raspiblitz/.tmp)
       # check to make sure port isn't already used by LND or WireGuard
@@ -151,7 +157,7 @@ on() {
     fi
   fi
   # configure firewall
-  sudo ufw allow ${clnport} comment "CLN Port"
+  ufw allow ${clnport} comment "CLN Port"
   # edit CLN config
   # Tor settings
   sectionName="Tor settings"
@@ -165,7 +171,7 @@ on() {
   if [ ${fileLines} -lt ${insertLine} ]; then
     echo "# adding new line for inserts"
     echo "
-  " | sudo tee -a ${clnconffile}
+  " | tee -a ${clnconffile}
   fi
   echo "# sectionLine(${sectionLine})"
   setting ${clnconffile} ${insertLine} "always-use-proxy" "false"
@@ -178,7 +184,7 @@ on() {
     echo "# adding section # Clearnet settings"
     echo "
 # Clearnet settings
-" | sudo tee -a ${clnconffile}
+" | tee -a ${clnconffile}
   fi
   sectionLine=$(cat ${clnconffile} | grep -n "^\# ${sectionName}" | cut -d ":" -f1)
   echo "# sectionLine(${sectionLine})"
@@ -189,23 +195,23 @@ on() {
   if [ ${fileLines} -lt ${insertLine} ]; then
     echo "# adding new line for inserts"
     echo "
-  " | sudo tee -a ${clnconffile}
+  " | tee -a ${clnconffile}
   fi
   echo "# sectionLine(${sectionLine})"
   isBindaddr=$(cat ${clnconffile} | grep -c "bind-addr=0.0.0.0:")
   if [ ${isBindaddr} -eq 0 ]; then
-    sudo sed -i "${insertLine}ibind-addr=0.0.0.0:${clnport}" ${clnconffile}
+    sed -i "${insertLine}ibind-addr=0.0.0.0:${clnport}" ${clnconffile}
   else
-    sudo sed -i "s/bind-addr=0\.0\.0\.0:.*/bind-addr=0\.0\.0\.0:${clnport}/" ${clnconffile}
+    sed -i "s/bind-addr=0\.0\.0\.0:.*/bind-addr=0\.0\.0\.0:${clnport}/" ${clnconffile}
   fi
   setting ${clnconffile} ${insertLine} "announce-addr" "${vpnIP}:${clnport}"
 
   # restart CLN (skip this step on restore but not if webui)
   if ! [ "${isRestore}" = "1" ]; then
-    sudo systemctl restart lightningd.service
+    systemctl restart lightningd.service
   fi
   if [ "${webui}" = "1" ]; then
-    sudo systemctl restart lightningd.service
+    systemctl restart lightningd.service
   fi
   # set cln-hybrid on in pleb-vpn.conf
   setting ${plebVPNConf} "2" "clnHybrid" "on"
@@ -226,7 +232,7 @@ off() {
   if [ ${fileLines} -lt ${insertLine} ]; then
     echo "# adding new line for inserts"
     echo "
-" | sudo tee -a ${clnconffile}
+" | tee -a ${clnconffile}
   fi
   echo "# sectionLine(${sectionLine})"
   setting ${clnconffile} ${insertLine} "always-use-proxy" "true"
@@ -234,15 +240,15 @@ off() {
   sectionName="Clearnet settings"
   echo "# ${sectionName} config ..."
   echo "removing Clearnet settings ..."
-  sudo sed -i '/Clearnet settings/d' ${clnconffile}
-  sudo sed -i '/bind-addr=0.0.0.0/d' ${clnconffile}
-  sudo sed -i '/announce-addr/d' ${clnconffile}
+  sed -i '/Clearnet settings/d' ${clnconffile}
+  sed -i '/bind-addr=0.0.0.0/d' ${clnconffile}
+  sed -i '/announce-addr/d' ${clnconffile}
   # configure firewall
   if [ ! "${clnport}" = "9736" ] && [ ! "${clnport}" = "9735" ]; then
-    sudo ufw delete allow ${clnport}
+    ufw delete allow ${clnport}
   fi
   # restart CLN
-  sudo systemctl restart lightningd.service
+  systemctl restart lightningd.service
   # set cln-hybrid off in pleb-vpn.conf
   setting ${plebVPNConf} "2" "clnHybrid" "off"
   exit 0

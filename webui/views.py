@@ -92,7 +92,7 @@ def update_scripts():
     global update_available
     update_available = False
     # update pleb-vpn
-    cmd_str = ["sudo " + os.path.join(EXEC_DIR, "pleb-vpn.install.sh") + " update 1"]
+    cmd_str = [os.path.join(EXEC_DIR, "pleb-vpn.install.sh") + " update 1"]
     try:
         result = subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True, timeout=600)
     except subprocess.TimeoutExpired:
@@ -102,7 +102,7 @@ def update_scripts():
 @socketio.on('uninstall-plebvpn')
 def uninstall_plebvpn():
     # update pleb-vpn
-    cmd_str = ["sudo " + os.path.join(EXEC_DIR, "pleb-vpn.install.sh") + " uninstall"]
+    cmd_str = [os.path.join(EXEC_DIR, "pleb-vpn.install.sh") + " uninstall"]
     try:
         result = subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True, timeout=600)
     except subprocess.TimeoutExpired:
@@ -159,7 +159,7 @@ def set_plebVPN():
     if user:
         if user.id == current_user.id:
             if setting['plebvpn'] == 'on':
-                cmd_str = ["sudo " + os.path.join(EXEC_DIR, "vpn-install.sh") + " off 1"]
+                cmd_str = [os.path.join(EXEC_DIR, "vpn-install.sh") + " off 1"]
                 try:
                     result = subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True, timeout=600)
                 except subprocess.TimeoutExpired:
@@ -173,7 +173,7 @@ def set_plebVPN():
                 else:
                     flash('An unknown error occured!', category='error')
             else:
-                cmd_str = ["sudo " + os.path.join(EXEC_DIR, "vpn-install.sh") + " on 1 1"]
+                cmd_str = [os.path.join(EXEC_DIR, "vpn-install.sh") + " on 1 1"]
                 try:
                     result = subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True, timeout=600)
                 except subprocess.TimeoutExpired:
@@ -277,7 +277,7 @@ def set_lndHybrid():
     if user:
         if user.id == current_user.id:
             if setting['lndhybrid'] == 'on':
-                cmd_str = ["sudo " + os.path.join(EXEC_DIR, "lnd-hybrid.sh") + " off"]
+                cmd_str = [os.path.join(EXEC_DIR, "lnd-hybrid.sh") + " off"]
                 try:
                     result = subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True, timeout=600)
                 except subprocess.TimeoutExpired:
@@ -291,7 +291,7 @@ def set_lndHybrid():
                 else:
                     flash('An unknown error occured!', category='error')
             else:
-                cmd_str = ["sudo " + os.path.join(EXEC_DIR, "lnd-hybrid.sh") + " on 1 1"]
+                cmd_str = [os.path.join(EXEC_DIR, "lnd-hybrid.sh") + " on 1 1"]
                 try:
                     result = subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True, timeout=600)
                 except subprocess.TimeoutExpired:
@@ -318,7 +318,7 @@ def set_clnHybrid():
     if user:
         if user.id == current_user.id:
             if setting['clnhybrid'] == 'on':
-                cmd_str = ["sudo " + os.path.join(EXEC_DIR, "cln-hybrid.sh") + " off"]
+                cmd_str = [os.path.join(EXEC_DIR, "cln-hybrid.sh") + " off"]
                 try:
                     result = subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True, timeout=600)
                 except subprocess.TimeoutExpired:
@@ -332,7 +332,7 @@ def set_clnHybrid():
                 else:
                     flash('An unknown error occured!', category='error')
             else:
-                cmd_str = ["sudo " + os.path.join(EXEC_DIR, "cln-hybrid.sh") + " on 1 1"]
+                cmd_str = [os.path.join(EXEC_DIR, "cln-hybrid.sh") + " on 1 1"]
                 try:
                     result = subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True, timeout=600)
                 except subprocess.TimeoutExpired:
@@ -400,7 +400,7 @@ def payments():
         is_valid = valid_payment(frequency, node, pubkey, amount, denomination)
         if is_valid == "0":
             if old_payment_id is not None:
-                cmd_str = ["sudo bash " + os.path.join(EXEC_DIR, "payments/managepayments.sh") + " deletepayment " + old_payment_id + " 1"]
+                cmd_str = [os.path.join(EXEC_DIR, "payments/managepayments.sh") + " deletepayment " + old_payment_id + " 1"]
                 try:
                     result = subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True, timeout=60)
                 except subprocess.TimeoutExpired:
@@ -412,7 +412,7 @@ def payments():
                 payment_string = frequency + " " + node + " " + pubkey + " " + amount + " " + denomination + " \"" + message + "\""
             else:
                 payment_string = frequency + " " + node + " " + pubkey + " " + amount + " " + denomination
-            cmd_str = ["sudo bash " + os.path.join(EXEC_DIR, "payments/managepayments.sh") + " newpayment " + payment_string]
+            cmd_str = [os.path.join(EXEC_DIR, "payments/managepayments.sh") + " newpayment " + payment_string]
             print(cmd_str) # for debug purposes only
             try:
                 result = subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True, timeout=60)
@@ -435,7 +435,7 @@ def payments():
 def delete_payment():
     payment_id = json.loads(request.data)
     payment_id = payment_id['payment_id']
-    cmd_str = ["sudo bash " + os.path.join(EXEC_DIR, "payments/managepayments.sh") + " deletepayment " + payment_id + " 1"]
+    cmd_str = [os.path.join(EXEC_DIR, "payments/managepayments.sh") + " deletepayment " + payment_id + " 1"]
     try:
         result = subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True, timeout=60)
     except subprocess.TimeoutExpired:
@@ -453,7 +453,7 @@ def delete_payment():
 # delete all payments
 @views.route('/delete_all_payments', methods=['POST'])
 def delete_all_payments():
-    cmd_str = ["sudo bash " + os.path.join(EXEC_DIR, "payments/managepayments.sh") + " deleteall 1"]
+    cmd_str = [os.path.join(EXEC_DIR, "payments/managepayments.sh") + " deleteall 1"]
     try:
         result = subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True, timeout=60)
     except subprocess.TimeoutExpired:
@@ -485,7 +485,7 @@ def send_payment():
     else:
         flash('An unknown error occured!', category='error')
     parts = payment_id.split("_")
-    cmd_str = ["sudo systemctl enable payments-" + parts[1] + "-" + parts[2] + ".timer"]
+    cmd_str = ["systemctl enable payments-" + parts[1] + "-" + parts[2] + ".timer"]
     try:
         result = subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True, timeout=60)
     except subprocess.TimeoutExpired:
@@ -493,7 +493,7 @@ def send_payment():
         return jsonify({})
     # for debug purposes
     print(result.stdout, result.stderr)
-    cmd_str = ["sudo systemctl start payments-" + parts[1] + "-" + parts[2] + ".timer"]
+    cmd_str = ["systemctl start payments-" + parts[1] + "-" + parts[2] + ".timer"]
     try:
         result = subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True, timeout=60)
     except subprocess.TimeoutExpired:
@@ -606,7 +606,7 @@ def set_wireguard():
     if user:
         if user.id == current_user.id:
             if setting['wireguard'] == 'on':
-                cmd_str = ["sudo " + os.path.join(EXEC_DIR, "wg-install.sh") + " off"]
+                cmd_str = [os.path.join(EXEC_DIR, "wg-install.sh") + " off"]
                 try:
                     result = subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True, timeout=600)
                 except subprocess.TimeoutExpired:
@@ -630,12 +630,12 @@ def set_wireguard():
                             break
                     conf_file.set_option('wgip', new_wgIP)
                     conf_file.write()
-                    cmd_str = ["sudo " + os.path.join(EXEC_DIR, "wg-install.sh") + " on 0 1 1"]
+                    cmd_str = [os.path.join(EXEC_DIR, "wg-install.sh") + " on 0 1 1"]
                 else:
                     if os.path.isfile(os.path.join(HOME_DIR, 'wireguard/wg0.conf')):
-                        cmd_str = ["sudo " + os.path.join(EXEC_DIR, "wg-install.sh") + " on 1 0 1"]
+                        cmd_str = [os.path.join(EXEC_DIR, "wg-install.sh") + " on 1 0 1"]
                     else:
-                        cmd_str = ["sudo " + os.path.join(EXEC_DIR, "wg-install.sh") + " on 0 1 1"]
+                        cmd_str = [os.path.join(EXEC_DIR, "wg-install.sh") + " on 0 1 1"]
                 try:
                     result = subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True, timeout=600)
                 except subprocess.TimeoutExpired:
@@ -733,7 +733,7 @@ def set_torsplittunnel():
     if user:
         if user.id == current_user.id:
             if setting['torsplittunnel'] == 'on':
-                cmd_str = ["sudo " + os.path.join(EXEC_DIR, "tor.split-tunnel.sh") + " off 1"]
+                cmd_str = [os.path.join(EXEC_DIR, "tor.split-tunnel.sh") + " off 1"]
                 try:
                     result = subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True, timeout=600)
                 except subprocess.TimeoutExpired:
@@ -747,7 +747,7 @@ def set_torsplittunnel():
                 else:
                     flash('An unknown error occured!', category='error')
             else:
-                cmd_str = ["sudo " + os.path.join(EXEC_DIR, "tor.split-tunnel.sh") + " on 1"]
+                cmd_str = [os.path.join(EXEC_DIR, "tor.split-tunnel.sh") + " on 1"]
                 try:
                     result = subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True, timeout=900)
                 except subprocess.TimeoutExpired:
@@ -830,7 +830,7 @@ def set_letsencrypt_on(formData):
     if exit_code == 0:
         if setting['nodetype'] == "mynode":
             # start service to ensure nginx config is correct
-            cmd_str = ["sudo systemctl start pleb-vpn-letsencrypt-config.service"]
+            cmd_str = ["systemctl start pleb-vpn-letsencrypt-config.service"]
             try:
                 result = subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True, timeout=900)
             except subprocess.TimeoutExpired:
@@ -1044,7 +1044,7 @@ def get_lnd_hybrid_status():
     # get status of lnd hybrid mode
     global lnd_hybrid_status
     lnd_hybrid_status = {}
-    cmd_str = ["sudo " + os.path.join(EXEC_DIR, "lnd-hybrid.sh") + " status 1"]
+    cmd_str = [os.path.join(EXEC_DIR, "lnd-hybrid.sh") + " status 1"]
     try:
         subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True, timeout=100)
     except subprocess.TimeoutExpired:
@@ -1064,7 +1064,7 @@ def get_cln_hybrid_status():
     # get status of CLN hybrid mode
     global cln_hybrid_status
     cln_hybrid_status = {}
-    cmd_str = ["sudo " + os.path.join(EXEC_DIR, "cln-hybrid.sh") + " status 1"]
+    cmd_str = [os.path.join(EXEC_DIR, "cln-hybrid.sh") + " status 1"]
     try:
         subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True, timeout=100)
     except subprocess.TimeoutExpired:
@@ -1084,7 +1084,7 @@ def get_wireguard_status():
     # get status of wireguard service
     global wireguard_status
     wireguard_status = {}
-    cmd_str = ["sudo " + os.path.join(EXEC_DIR, "wg-install.sh") + " status 1"]
+    cmd_str = [os.path.join(EXEC_DIR, "wg-install.sh") + " status 1"]
     try:
         subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True, timeout=100)
     except subprocess.TimeoutExpired:
@@ -1103,7 +1103,7 @@ def get_wireguard_status():
 def get_payments():
     # get current payments
     current_payments = {}
-    cmd_str = ["sudo bash " + os.path.join(EXEC_DIR, "payments/managepayments.sh") + " status 1"]
+    cmd_str = [os.path.join(EXEC_DIR, "payments/managepayments.sh") + " status 1"]
     try:
         subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True, timeout=100)
     except subprocess.TimeoutExpired:
@@ -1141,7 +1141,7 @@ def get_torsplittunnel_status():
     # get status of tor split-tunnel service
     global torsplittunnel_status
     torsplittunnel_status = {}
-    cmd_str = ["sudo " + os.path.join(EXEC_DIR, "tor.split-tunnel.sh") + " status 1 1 1"]
+    cmd_str = [os.path.join(EXEC_DIR, "tor.split-tunnel.sh") + " status 1 1 1"]
     try:
         subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True, timeout=100)
     except subprocess.TimeoutExpired:
@@ -1167,7 +1167,7 @@ def get_torsplittunnel_test_status():
         if user.id == current_user.id:
             global torsplittunnel_test_status
             torsplittunnel_test_status = {}
-            cmd_str = ["sudo " + os.path.join(EXEC_DIR, "tor.split-tunnel.sh") + " status 1 0 1"]
+            cmd_str = [os.path.join(EXEC_DIR, "tor.split-tunnel.sh") + " status 1 0 1"]
             try:
                 subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True, timeout=900)
             except subprocess.TimeoutExpired:

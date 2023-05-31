@@ -50,16 +50,16 @@ CHOICE=$(dialog --clear \
 
 case $CHOICE in
   PLEB-VPN)
-    /home/admin/pleb-vpn/vpn-install.sh status
+    sudo /home/admin/pleb-vpn/vpn-install.sh status
     ;;
   WIREGUARD)
-    /home/admin/pleb-vpn/wg-install.sh status
+    sudo /home/admin/pleb-vpn/wg-install.sh status
     ;;
   CLN-HYBRID)
-    /home/admin/pleb-vpn/cln-hybrid.sh status
+    sudo /home/admin/pleb-vpn/cln-hybrid.sh status
     ;;
   LND-HYBRID)
-    /home/admin/pleb-vpn/lnd-hybrid.sh status
+    sudo /home/admin/pleb-vpn/lnd-hybrid.sh status
     ;;
   TOR-SPLIT-TUNNEL)
     sudo /home/admin/pleb-vpn/tor.split-tunnel.sh status

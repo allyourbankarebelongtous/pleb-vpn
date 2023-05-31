@@ -20,6 +20,12 @@ fi
 plebVPNConf="${homedir}/pleb-vpn.conf"
 source <(cat ${plebVPNConf} | sed '1d')
 
+# check if sudo
+if [ "$EUID" -ne 0 ]; then
+  echo "Please run as root (with sudo)"
+  exit 1
+fi
+
 function setting() # FILE LINENUMBER NAME VALUE
 {
   FILE=$1
@@ -31,10 +37,10 @@ function setting() # FILE LINENUMBER NAME VALUE
   echo "# ${NAME} exists->(${settingExists})"
   if [ "${settingExists}" == "0" ]; then
     echo "# adding setting (${NAME})"
-    sudo sed -i --follow-symlinks "${LINENUMBER}i${NAME}=" ${FILE}
+    sed -i --follow-symlinks "${LINENUMBER}i${NAME}=" ${FILE}
   fi
   echo "# updating setting (${NAME}) with value(${VALUE})"
-  sudo sed -i --follow-symlinks "s:^${NAME}=.*:${NAME}=${VALUE}:g" ${FILE}
+  sed -i --follow-symlinks "s:^${NAME}=.*:${NAME}=${VALUE}:g" ${FILE}
 }
 
 # only run this part for raspiblitz updates.
@@ -42,10 +48,10 @@ if [ "${nodetype}" = "raspiblitz" ]; then
 
   # fix nginx assets to reflect status of letsencrypt
   if [ "${letsencryptBTCPay}" = "on" ]; then
-    sudo sed -i 's/ssl-certificate-app-data.conf/ssl-certificate-app-data-letsencrypt.conf/' /home/admin/assets/nginx/sites-available/btcpay_ssl.conf
+    sed -i 's/ssl-certificate-app-data.conf/ssl-certificate-app-data-letsencrypt.conf/' /home/admin/assets/nginx/sites-available/btcpay_ssl.conf
   fi
   if [ "${letsencryptLNBits}" = "on" ]; then
-    sudo sed -i 's/ssl-certificate-app-data.conf/ssl-certificate-app-data-letsencrypt.conf/' /home/admin/assets/nginx/sites-available/lnbits_ssl.conf
+    sed -i 's/ssl-certificate-app-data.conf/ssl-certificate-app-data-letsencrypt.conf/' /home/admin/assets/nginx/sites-available/lnbits_ssl.conf
   fi
 
   # add updates to pleb-vpn on new installs
@@ -53,14 +59,14 @@ if [ "${nodetype}" = "raspiblitz" ]; then
   if [ ${custominstallUpdate} -eq 0 ]; then
     echo "# get latest pleb-vpn update
   /mnt/hdd/app-data/pleb-vpn/pleb-vpn.install.sh update
-  " | sudo tee -a /mnt/hdd/app-data/custom-installs.sh
+  " | tee -a /mnt/hdd/app-data/custom-installs.sh
   fi
 
   # change names of wireguard clients for webui
   if [ -f /mnt/hdd/app-data/pleb-vpn/wireguard/clients/desktop.conf ]; then
-    sudo mv /mnt/hdd/app-data/pleb-vpn/wireguard/clients/mobile.conf /mnt/hdd/app-data/pleb-vpn/wireguard/clients/client1.conf
-    sudo mv /mnt/hdd/app-data/pleb-vpn/wireguard/clients/laptop.conf /mnt/hdd/app-data/pleb-vpn/wireguard/clients/client2.conf
-    sudo mv /mnt/hdd/app-data/pleb-vpn/wireguard/clients/desktop.conf /mnt/hdd/app-data/pleb-vpn/wireguard/clients/client3.conf
+    mv /mnt/hdd/app-data/pleb-vpn/wireguard/clients/mobile.conf /mnt/hdd/app-data/pleb-vpn/wireguard/clients/client1.conf
+    mv /mnt/hdd/app-data/pleb-vpn/wireguard/clients/laptop.conf /mnt/hdd/app-data/pleb-vpn/wireguard/clients/client2.conf
+    mv /mnt/hdd/app-data/pleb-vpn/wireguard/clients/desktop.conf /mnt/hdd/app-data/pleb-vpn/wireguard/clients/client3.conf
   fi
 
   # change pleb-vpn.conf values to lowercase for webui
@@ -185,23 +191,23 @@ lndconffile=
     fi
     setting ${newConf} "2" "lndconffile" "'${LndConfFile}'"
     # remove old pleb-vpn.conf and replace with new file
-    sudo rm ${homedir}/pleb-vpn.conf
-    sudo mv ${homedir}/pleb-vpn.conf.new ${homedir}/pleb-vpn.conf
-    sudo chown admin:admin ${homedir}/pleb-vpn.conf
-    sudo chmod 755 ${homedir}/pleb-vpn.conf
+    rm ${homedir}/pleb-vpn.conf
+    mv ${homedir}/pleb-vpn.conf.new ${homedir}/pleb-vpn.conf
+    chown admin:admin ${homedir}/pleb-vpn.conf
+    chmod 755 ${homedir}/pleb-vpn.conf
   fi
 
   if [ $(cat /home/admin/00infoBlitz.sh | grep -c "{plebvpn}") -eq 0 ]; then
     # change pleb-vpn.conf values to lowercase on 00infoBlitz status check screen
     # remove extra lines from 00infoBlitz.sh if required
     extraLine='  # Pleb-VPN info'
-    lineExists=$(sudo cat /home/admin/00infoBlitz.sh | grep -c "${extraLine}")
+    lineExists=$(cat /home/admin/00infoBlitz.sh | grep -c "${extraLine}")
     if ! [ ${lineExists} -eq 0 ]; then
-      sectionLine=$(sudo cat /home/admin/00infoBlitz.sh | grep -n "${extraLine}" | cut -d ":" -f1)
+      sectionLine=$(cat /home/admin/00infoBlitz.sh | grep -n "${extraLine}" | cut -d ":" -f1)
       inc=1
       while [ $inc -le 13 ]
       do
-        sudo sed -i "${sectionLine}d" /home/admin/00infoBlitz.sh
+        sed -i "${sectionLine}d" /home/admin/00infoBlitz.sh
         ((inc++))
       done
     fi
@@ -214,8 +220,8 @@ lndconffile=
       insertLine=$(expr $sectionLine + 2)
       echo '  # Pleb-VPN info
       source <(cat /mnt/hdd/app-data/pleb-vpn/pleb-vpn.conf | sed "1d")
-      if [ "${plebvpn}" = "on" ]; then' | sudo tee /home/admin/pleb-vpn/update.tmp
-      echo -e "    currentIP=\$(host myip.opendns.com resolver1.opendns.com 2>/dev/null | awk '/has / {print \$4}') >/dev/null 2>&1" | sudo tee -a /home/admin/pleb-vpn/update.tmp
+      if [ "${plebvpn}" = "on" ]; then' | tee /home/admin/pleb-vpn/update.tmp
+      echo -e "    currentIP=\$(host myip.opendns.com resolver1.opendns.com 2>/dev/null | awk '/has / {print \$4}') >/dev/null 2>&1" | tee -a /home/admin/pleb-vpn/update.tmp
       echo '    if [ "${currentIP}" = "${vpnip}" ]; then
       plebVPNstatus="${color_green}OK${color_gray}"
     else
@@ -224,13 +230,13 @@ lndconffile=
       plebVPNline="Pleb-VPN IP ${vpnip} Status ${plebVPNstatus}"
     echo -e "${plebVPNline}"
   fi
-' | sudo tee -a /home/admin/pleb-vpn/update.tmp
+' | tee -a /home/admin/pleb-vpn/update.tmp
       edIsInstalled=$(ed --version 2>/dev/null | grep -c "GNU ed")
       if [ ${edIsInstalled} -eq 0 ]; then
-        sudo apt install -y ed
+        apt install -y ed
       fi
       ed -s ${infoBlitz} <<< "${insertLine}r /home/admin/pleb-vpn/update.tmp"$'\nw'
-      sudo rm /home/admin/pleb-vpn/update.tmp
+      rm /home/admin/pleb-vpn/update.tmp
     fi
   fi
 
@@ -238,14 +244,14 @@ lndconffile=
     # Add webui to raspiblitz
     cd ${execdir}
     echo "installing virtualenv..."
-    sudo apt install -y virtualenv
-    sudo virtualenv -p python3 .venv
+    apt install -y virtualenv
+    virtualenv -p python3 .venv
     # install requirements
     echo "installing requirements..."
-    sudo ${execdir}/.venv/bin/pip install -r ${execdir}/requirements.txt
+    ${execdir}/.venv/bin/pip install -r ${execdir}/requirements.txt
     cd /home/admin
     # allow through firewall
-    sudo ufw allow 2420 comment 'allow Pleb-VPN HTTP'
+    ufw allow 2420 comment 'allow Pleb-VPN HTTP'
     # create pleb-vpn.service
     if [ ! -f /etc/systemd/system/pleb-vpn.service ]; then
       echo "
@@ -257,29 +263,133 @@ After=network.target mnt-hdd.mount
 [Service]
 WorkingDirectory=/home/admin/pleb-vpn
 ExecStart=/home/admin/pleb-vpn/.venv/bin/gunicorn -k geventwebsocket.gunicorn.workers.GeventWebSocketWorker -w 1 -b 0.0.0.0:2420 main:app
-User=admin
-Group=admin
+User=root
+Group=root
 Type=simple
 Restart=always
-StandardOutput=journal
-StandardError=journal
+StandardOutput=append:/var/log/pleb-vpn.log
+StandardError=append:/var/log/pleb-vpn.log
 RestartSec=60
 
 # Hardening
 PrivateTmp=true
 
 [Install]
-WantedBy=multi-user.target" | sudo tee "/etc/systemd/system/pleb-vpn.service"
+WantedBy=multi-user.target" | tee "/etc/systemd/system/pleb-vpn.service"
     fi
     # enable and start systemd service
-    sudo systemctl enable pleb-vpn.service
-    sudo systemctl start pleb-vpn.service
+    systemctl enable pleb-vpn.service
+    systemctl start pleb-vpn.service
+    # add nginx service for tor and https access to pleb-vpn
+    if [ ! -f /etc/nginx/sites-available/pleb-vpn_ssl.conf ]; then
+      echo "## lndg_ssl.conf
+
+server {
+    listen 2421 ssl http2;
+    listen [::]:2421 ssl http2;
+    server_name _;
+
+    include /etc/nginx/snippets/ssl-params.conf;
+    include /etc/nginx/snippets/ssl-certificate-app-data.conf;
+
+    include /etc/nginx/snippets/gzip-params.conf;
+
+    access_log /var/log/nginx/access_pleb-vpn.log;
+    error_log /var/log/nginx/error_pleb-vpn.log;
+
+    location / {
+        proxy_pass http://127.0.0.1:2420;
+
+        include /etc/nginx/snippets/ssl-proxy-params.conf;
+
+        # WebSocket support
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection \"upgrade\";
+    }
+
+}
+" | tee /etc/nginx/sites-available/pleb-vpn_ssl.conf
+
+      echo "## lndg_tor.conf
+
+server {
+    listen 2422;
+    server_name _;
+
+    include /etc/nginx/snippets/gzip-params.conf;
+
+    access_log /var/log/nginx/access_pleb-vpn.log;
+    error_log /var/log/nginx/error_pleb-vpn.log;
+
+    location / {
+        proxy_pass http://127.0.0.1:2420;
+
+        include /etc/nginx/snippets/ssl-proxy-params.conf;
+        # WebSocket support
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection \"upgrade\";
+    }
+
+}
+" | tee /etc/nginx/sites-available/pleb-vpn_tor.conf
+
+      echo "## lndg_tor_ssl.conf
+
+server {
+    listen 2423 ssl http2;
+    server_name _;
+
+    include /etc/nginx/snippets/ssl-params.conf;
+    include /etc/nginx/snippets/ssl-certificate-app-data.conf;
+
+    include /etc/nginx/snippets/gzip-params.conf;
+
+    access_log /var/log/nginx/access_pleb-vpn.log;
+    error_log /var/log/nginx/error_pleb-vpn.log;
+
+    location / {
+        proxy_pass http://127.0.0.1:2420;
+
+        include /etc/nginx/snippets/ssl-proxy-params.conf;
+        # WebSocket support
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection \"upgrade\";
+    }
+
+}
+" | tee /etc/nginx/sites-available/pleb-vpn_tor_ssl.conf
+
+      # symlink to sites-enabled
+      ln -s /etc/nginx/sites-available/pleb-vpn_ssl.conf /etc/nginx/sites-enabled/pleb-vpn_ssl.conf
+      ln -s /etc/nginx/sites-available/pleb-vpn_tor.conf /etc/nginx/sites-enabled/pleb-vpn_tor.conf      
+      ln -s /etc/nginx/sites-available/pleb-vpn_tor_ssl.conf /etc/nginx/sites-enabled/pleb-vpn_tor_ssl.conf
+
+      # test and reload nginx
+      nginx -t
+      if [ $? -eq 0 ]; then
+        echo "nginx config good"
+        systemctl reload nginx
+      else
+        echo "Error: nginx test config fail"
+        exit 1
+      fi
+
+      # get tor address for Pleb-VPN if tor is active
+      if [ "${runBehindTor}" = "on" ]; then
+        # make sure to keep in sync with tor.network.sh script
+        /home/admin/config.scripts/tor.onion-service.sh pleb-vpn 80 2422 443 2423
+      fi
+
+    fi
   fi
 
   # remove git attributes from pleb-vpn folders if present (updates now done via releases)
   if [ -d /home/admin/pleb-vpn/.git ]; then
-    sudo rm -rf /home/admin/pleb-vpn/.git
-    sudo rm -rf /mnt/hdd/app-data/pleb-vpn/.git
+    rm -rf /home/admin/pleb-vpn/.git
+    rm -rf /mnt/hdd/app-data/pleb-vpn/.git
   fi
 
 fi

@@ -42,15 +42,15 @@ CHOICE=$(dialog --clear \
 
 case $CHOICE in
   NEW)
-    /home/admin/pleb-vpn/payments/managepayments.sh newpayment
+    sudo /home/admin/pleb-vpn/payments/managepayments.sh newpayment
     ;;
   VIEW)
-    /home/admin/pleb-vpn/payments/managepayments.sh status
+    sudo /home/admin/pleb-vpn/payments/managepayments.sh status
     ;;
   DELETE)
-    /home/admin/pleb-vpn/payments/managepayments.sh deletepayment
+    sudo /home/admin/pleb-vpn/payments/managepayments.sh deletepayment
     ;;
   DELETE-ALL)
-    /home/admin/pleb-vpn/payments/managepayments.sh deleteall
+    sudo /home/admin/pleb-vpn/payments/managepayments.sh deleteall
     ;;
 esac

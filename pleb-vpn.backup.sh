@@ -21,34 +21,40 @@ elif [ -f "/mnt/hdd/raspiblitz.conf" ]; then
   execdir="/home/admin/pleb-vpn"
 fi
 
+# check if sudo
+if [ "$EUID" -ne 0 ]; then
+  echo "Please run as root (with sudo)"
+  exit 1
+fi
+
 backup() {
   # currently only used for raspiblitz
   if [ "${nodetype}" = "raspiblitz" ]; then
     # backs up critical files to /mnt/hdd/app-data/pleb-vpn/.backups
-    sudo mkdir /mnt/hdd/app-data/pleb-vpn/.backups
-    sudo chown admin:admin /mnt/hdd/app-data/pleb-vpn/.backups
-    sudo chmod 755 /mnt/hdd/app-data/pleb-vpn/.backups
+    mkdir /mnt/hdd/app-data/pleb-vpn/.backups
+    chown admin:admin /mnt/hdd/app-data/pleb-vpn/.backups
+    chmod 755 /mnt/hdd/app-data/pleb-vpn/.backups
     # backup custom-installs.sh
-    sudo cp -p /mnt/hdd/app-data/custom-installs.sh /mnt/hdd/app-data/pleb-vpn/.backups/
+    cp -p /mnt/hdd/app-data/custom-installs.sh /mnt/hdd/app-data/pleb-vpn/.backups/
     # backup ufw settings
-    sudo cp -p -r /etc/ufw/ /mnt/hdd/app-data/pleb-vpn/.backups/
+    cp -p -r /etc/ufw/ /mnt/hdd/app-data/pleb-vpn/.backups/
     # backup raspiblitz.conf
-    sudo cp -p /mnt/hdd/raspiblitz.conf /mnt/hdd/app-data/pleb-vpn/.backups/
+    cp -p /mnt/hdd/raspiblitz.conf /mnt/hdd/app-data/pleb-vpn/.backups/
     # backup lnd.check.sh
-    sudo cp -p /home/admin/config.scripts/lnd.check.sh /mnt/hdd/app-data/pleb-vpn/.backups/
+    cp -p /home/admin/config.scripts/lnd.check.sh /mnt/hdd/app-data/pleb-vpn/.backups/
     # backup 00mainMenu.sh
-    sudo cp -p /home/admin/00mainMenu.sh /mnt/hdd/app-data/pleb-vpn/.backups/
+    cp -p /home/admin/00mainMenu.sh /mnt/hdd/app-data/pleb-vpn/.backups/
     # backup sysctl.conf
-    sudo cp -p /etc/sysctl.conf /mnt/hdd/app-data/pleb-vpn/.backups/
+    cp -p /etc/sysctl.conf /mnt/hdd/app-data/pleb-vpn/.backups/
     # backup lnd.conf (if exists)
-    lndconfExists=$(sudo ls /mnt/hdd/lnd | grep -c lnd.conf)
+    lndconfExists=$(ls /mnt/hdd/lnd | grep -c lnd.conf)
     if ! [ ${lndconfExists} -eq 0 ]; then
-      sudo cp -p /mnt/hdd/lnd/lnd.conf /mnt/hdd/app-data/pleb-vpn/.backups/
+      cp -p /mnt/hdd/lnd/lnd.conf /mnt/hdd/app-data/pleb-vpn/.backups/
     fi
     # backup .lightning/config (if exists)
-    clnconfExists=$(sudo ls /home/bitcoin/.lightning/ | grep -c config)
+    clnconfExists=$(ls /home/bitcoin/.lightning/ | grep -c config)
     if ! [ ${clnconfExists} -eq 0 ]; then
-      sudo cp -p /home/bitcoin/.lightning/config /mnt/hdd/app-data/pleb-vpn/.backups/
+      cp -p /home/bitcoin/.lightning/config /mnt/hdd/app-data/pleb-vpn/.backups/
     fi
   fi
   exit 0
@@ -59,44 +65,44 @@ restore() {
   if [ "${nodetype}" = "raspiblitz" ]; then
     # restores critical files from /mnt/hdd/app-data/pleb-vpn/.backups
     # restore custom installs
-    sudo cp -p /mnt/hdd/app-data/pleb-vpn/.backups/custom-installs.sh /mnt/hdd/app-data/
-    sudo chown root:root /mnt/hdd/app-data/custom-installs.sh
-    sudo chmod 755 /mnt/hdd/app-data/custom-installs.sh
+    cp -p /mnt/hdd/app-data/pleb-vpn/.backups/custom-installs.sh /mnt/hdd/app-data/
+    chown root:root /mnt/hdd/app-data/custom-installs.sh
+    chmod 755 /mnt/hdd/app-data/custom-installs.sh
     # restore ufw settings
-    sudo ufw disable
-    sudo cp -p -r /mnt/hdd/app-data/pleb-vpn/.backups/ufw/ /etc/
-    sudo chmod 640 /etc/ufw/*
-    sudo chmod 755 /etc/ufw/applications.d
-    sudo chmod 644 /etc/ufw/sysctl.conf
-    sudo chmod 644 /etc/ufw/ufw.conf
-    sudo chmod 644 /etc/ufw/applications.d/*
-    sudo chown -R root:root /etc/ufw/
-    sudo ufw --force enable
+    ufw disable
+    cp -p -r /mnt/hdd/app-data/pleb-vpn/.backups/ufw/ /etc/
+    chmod 640 /etc/ufw/*
+    chmod 755 /etc/ufw/applications.d
+    chmod 644 /etc/ufw/sysctl.conf
+    chmod 644 /etc/ufw/ufw.conf
+    chmod 644 /etc/ufw/applications.d/*
+    chown -R root:root /etc/ufw/
+    ufw --force enable
     # restore raspiblitz.conf
-    sudo cp -p /mnt/hdd/app-data/pleb-vpn/.backups/raspiblitz.conf /mnt/hdd/
-    sudo chown root:sudo /mnt/hdd/raspiblitz.conf
-    sudo chmod 664 /mnt/hdd/raspiblitz.conf
+    cp -p /mnt/hdd/app-data/pleb-vpn/.backups/raspiblitz.conf /mnt/hdd/
+    chown root:/mnt/hdd/raspiblitz.conf
+    chmod 664 /mnt/hdd/raspiblitz.conf
     # restore lnd.check.sh
-    sudo cp -p /mnt/hdd/app-data/pleb-vpn/.backups/lnd.check.sh /home/admin/config.scripts/
+    cp -p /mnt/hdd/app-data/pleb-vpn/.backups/lnd.check.sh /home/admin/config.scripts/
     # restore 00mainMenu.sh
-    sudo cp -p /mnt/hdd/app-data/pleb-vpn/.backups/00mainMenu.sh /home/admin/
+    cp -p /mnt/hdd/app-data/pleb-vpn/.backups/00mainMenu.sh /home/admin/
     # restore sysctl.conf
-    sudo cp -p /mnt/hdd/app-data/pleb-vpn/.backups/sysctl.conf /etc/
-    sudo chown root:root /etc/sysctl.conf
-    sudo chmod 644 /etc/sysctl.conf
+    cp -p /mnt/hdd/app-data/pleb-vpn/.backups/sysctl.conf /etc/
+    chown root:root /etc/sysctl.conf
+    chmod 644 /etc/sysctl.conf
     # restore lnd.conf (if exists)
-    lndconfExists=$(sudo ls /mnt/hdd/app-data/pleb-vpn/.backups | grep -c lnd.conf)
+    lndconfExists=$(ls /mnt/hdd/app-data/pleb-vpn/.backups | grep -c lnd.conf)
     if ! [ ${lndconfExists} -eq 0 ]; then
-      sudo cp -p /mnt/hdd/app-data/pleb-vpn/.backups/lnd.conf /mnt/hdd/lnd/
-      sudo chown bitcoin:bitcoin /mnt/hdd/lnd/lnd.conf
-      sudo chmod 644 /mnt/hdd/lnd/lnd.conf
+      cp -p /mnt/hdd/app-data/pleb-vpn/.backups/lnd.conf /mnt/hdd/lnd/
+      chown bitcoin:bitcoin /mnt/hdd/lnd/lnd.conf
+      chmod 644 /mnt/hdd/lnd/lnd.conf
     fi
     # restore .lightning/config (if exists)
-    clnconfExists=$(sudo ls /mnt/hdd/app-data/pleb-vpn/.backups | grep -c config)
+    clnconfExists=$(ls /mnt/hdd/app-data/pleb-vpn/.backups | grep -c config)
     if ! [ ${clnconfExists} -eq 0 ]; then
-      sudo cp -p /mnt/hdd/app-data/pleb-vpn/.backups/config /home/bitcoin/.lightning/
-      sudo chown bitcoin:bitcoin /home/bitcoin/.lightning/config
-      sudo chmod 644 /home/bitcoin/.lightning/config
+      cp -p /mnt/hdd/app-data/pleb-vpn/.backups/config /home/bitcoin/.lightning/
+      chown bitcoin:bitcoin /home/bitcoin/.lightning/config
+      chmod 644 /home/bitcoin/.lightning/config
     fi
   fi
   exit 0

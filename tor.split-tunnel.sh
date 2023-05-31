@@ -20,6 +20,12 @@ fi
 plebVPNConf="${homedir}/pleb-vpn.conf"
 source <(cat ${plebVPNConf} | sed '1d')
 
+# check if sudo
+if [ "$EUID" -ne 0 ]; then
+  echo "Please run as root (with sudo)"
+  exit 1
+fi
+
 function setting() # FILE LINENUMBER NAME VALUE
 {
   FILE=$1
@@ -31,10 +37,10 @@ function setting() # FILE LINENUMBER NAME VALUE
   echo "# ${NAME} exists->(${settingExists})"
   if [ "${settingExists}" == "0" ]; then
     echo "# adding setting (${NAME})"
-    sudo sed -i --follow-symlinks "${LINENUMBER}i${NAME}=" ${FILE}
+    sed -i --follow-symlinks "${LINENUMBER}i${NAME}=" ${FILE}
   fi
   echo "# updating setting (${NAME}) with value(${VALUE})"
-  sudo sed -i --follow-symlinks "s/^${NAME}=.*/${NAME}=${VALUE}/g" ${FILE}
+  sed -i --follow-symlinks "s/^${NAME}=.*/${NAME}=${VALUE}/g" ${FILE}
 }
 
 status() {
@@ -43,7 +49,7 @@ status() {
   local webui="${3}"
   if [ ! "${skipWhiptail}" = "1" ]; then
     whiptail --title "Tor Split-Tunnel status check" --msgbox "If you interrupt this test (Ctrl + C) then you should make sure your VPN is active with 
-'sudo systemctl start openvpn@plebvpn' before resuming operations. This test will temporarily 
+'systemctl start openvpn@plebvpn' before resuming operations. This test will temporarily 
 deactivate the VPN to see if tor can connect without the VPN operational. 
 
 This test can take some time. 
@@ -53,7 +59,7 @@ it could be that tor is down or having issues.
 " 15 100
   fi
   echo "NOTE: If you interrupt this test (Ctrl + C) then you should make sure your VPN is active with 
-'sudo systemctl start openvpn@plebvpn' before resuming operations. This test will temporarily 
+'systemctl start openvpn@plebvpn' before resuming operations. This test will temporarily 
 deactivate the VPN to see if tor can connect without the VPN operational. This test can take some time. 
 A failure of this test does not necessarily indicate that split-tunneling is not active, it could be 
 that tor is down or having issues."
@@ -339,7 +345,7 @@ on() {
     done
 
     # create group novpn
-    sudo groupadd novpn
+    groupadd novpn
 
     # create routing table
     if [ ! -d /etc/iproute2/rt_tables.d ]; then
@@ -544,7 +550,7 @@ WantedBy=multi-user.target
     done
 
     # create group novpn
-    sudo groupadd novpn
+    groupadd novpn
 
     # create routing table
     if [ ! -d /etc/iproute2/rt_tables.d ]; then
@@ -919,7 +925,7 @@ off() {
   rm -rf ${homedir}/split-tunnel
 
   # remove group novpn
-  sudo groupdel novpn
+  groupdel novpn
 
   # restart tor
   echo "starting tor..."

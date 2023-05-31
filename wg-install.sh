@@ -24,6 +24,12 @@ fi
 plebVPNConf="${homedir}/pleb-vpn.conf"
 source <(cat ${plebVPNConf} | sed '1d')
 
+# check if sudo
+if [ "$EUID" -ne 0 ]; then
+  echo "Please run as root (with sudo)"
+  exit 1
+fi
+
 function setting() # FILE LINENUMBER NAME VALUE
 {
   FILE=$1
@@ -35,10 +41,10 @@ function setting() # FILE LINENUMBER NAME VALUE
   echo "# ${NAME} exists->(${settingExists})"
   if [ "${settingExists}" == "0" ]; then
     echo "# adding setting (${NAME})"
-    sudo sed -i --follow-symlinks "${LINENUMBER}i${NAME}=" ${FILE}
+    sed -i --follow-symlinks "${LINENUMBER}i${NAME}=" ${FILE}
   fi
   echo "# updating setting (${NAME}) with value(${VALUE})"
-  sudo sed -i --follow-symlinks "s/^${NAME}=.*/${NAME}=${VALUE}/g" ${FILE}
+  sed -i --follow-symlinks "s/^${NAME}=.*/${NAME}=${VALUE}/g" ${FILE}
 }
 
 function validWgIP() {
@@ -66,7 +72,7 @@ status() {
   if [ "${wireguard}" = "off" ]; then
     message="Wireguard not installed. Install wireguard in the services menu."
     if [ -d "${homedir}/wireguard" ]; then
-      isConfig=$(sudo ls ${homedir}/wireguard | grep -c wg0.conf)
+      isConfig=$(ls ${homedir}/wireguard | grep -c wg0.conf)
     else
       isConfig="0"
     fi
@@ -87,7 +93,7 @@ Use menu to install wireguard.
     fi
   else
     checkwgIP=$(ip addr | grep wg0 | grep inet | cut -d " " -f6 | cut -d "/" -f1)
-    isConfig=$(sudo ls /etc/wireguard | grep -c wg0.conf)
+    isConfig=$(ls /etc/wireguard | grep -c wg0.conf)
     if [ ${isConfig} -eq 0 ]; then
       isConfig="no"
       clientIPs="error: no wg0.conf file found in /etc/wireguard"
@@ -96,19 +102,19 @@ Use menu to install wireguard.
       message="ERROR: no wg0.conf file found. Uninstall and reinstall WireGuard using the menu."
     else
       isConfig="yes"
-      clientIPs=$(sudo cat /etc/wireguard/wg0.conf | grep AllowedIPs | cut -d " " -f3 | cut -d "/" -f1)
+      clientIPs=$(cat /etc/wireguard/wg0.conf | grep AllowedIPs | cut -d " " -f3 | cut -d "/" -f1)
       clientIPselect=($clientIPs)
     fi
     if [ "${wgip}" = "${checkwgIP}" ]; then
       isrunning="yes"
     else
       isrunning="no"
-      message="ERROR: not started. Run 'sudo systemctl enable --now wg-quick@wg0' on cmd line"
+      message="ERROR: not started. Run 'systemctl enable --now wg-quick@wg0' on cmd line"
     fi
     serviceExists=$(ls /etc/systemd/system/multi-user.target.wants/ | grep -c wg-quick@wg0)
     if [ ${serviceExists} -eq 0 ]; then
       serviceExists="no"
-      message="ERROR: no service exists. Run 'sudo systemctl enable --now wg-quick@wg0' on cmd line"
+      message="ERROR: no service exists. Run 'systemctl enable --now wg-quick@wg0' on cmd line"
     else
       serviceExists="yes"
     fi
@@ -197,7 +203,7 @@ on() {
   if [ "${new_config}" = "1" ]; then
     keepconfig="0"
   else
-    isconfig=$(sudo ls ${homedir}/pleb-vpn/wireguard/ | grep -c wg0.conf)
+    isconfig=$(ls ${homedir}/pleb-vpn/wireguard/ | grep -c wg0.conf)
     if ! [ ${isconfig} -eq 0 ]; then 
       if [ -z "${keepconfig}" ]; then
         whiptail --title "Use Existing Configuration?" \
@@ -216,27 +222,27 @@ on() {
   fi
 
   # install wireguard
-  sudo apt install -y wireguard
+  apt install -y wireguard
 
   if [ "${keepconfig}" = "0" ]; then
     # configure wireguard keys
-    sudo chmod -R 777 /etc/wireguard
-    sudo wg genkey | sudo tee /etc/wireguard/server_private_key | wg pubkey > /etc/wireguard/server_public_key
-    serverPrivateKey=$(sudo cat /etc/wireguard/server_private_key)
-    serverPublicKey=$(sudo cat /etc/wireguard/server_public_key)
-    sudo wg genkey | sudo tee /etc/wireguard/client1_private_key | wg pubkey > /etc/wireguard/client1_public_key
-    client1PrivateKey=$(sudo cat /etc/wireguard/client1_private_key)
-    client1PublicKey=$(sudo cat /etc/wireguard/client1_public_key)
-    sudo wg genkey | sudo tee /etc/wireguard/client2_private_key | wg pubkey > /etc/wireguard/client2_public_key
-    client2PrivateKey=$(sudo cat /etc/wireguard/client2_private_key)
-    client2PublicKey=$(sudo cat /etc/wireguard/client2_public_key)
-    sudo wg genkey | sudo tee /etc/wireguard/client3_private_key | wg pubkey > /etc/wireguard/client3_public_key
-    client3PrivateKey=$(sudo cat /etc/wireguard/client3_private_key)
-    client3PublicKey=$(sudo cat /etc/wireguard/client3_public_key)
+    chmod -R 777 /etc/wireguard
+    wg genkey | tee /etc/wireguard/server_private_key | wg pubkey > /etc/wireguard/server_public_key
+    serverPrivateKey=$(cat /etc/wireguard/server_private_key)
+    serverPublicKey=$(cat /etc/wireguard/server_public_key)
+    wg genkey | tee /etc/wireguard/client1_private_key | wg pubkey > /etc/wireguard/client1_public_key
+    client1PrivateKey=$(cat /etc/wireguard/client1_private_key)
+    client1PublicKey=$(cat /etc/wireguard/client1_public_key)
+    wg genkey | tee /etc/wireguard/client2_private_key | wg pubkey > /etc/wireguard/client2_public_key
+    client2PrivateKey=$(cat /etc/wireguard/client2_private_key)
+    client2PublicKey=$(cat /etc/wireguard/client2_public_key)
+    wg genkey | tee /etc/wireguard/client3_private_key | wg pubkey > /etc/wireguard/client3_public_key
+    client3PrivateKey=$(cat /etc/wireguard/client3_private_key)
+    client3PublicKey=$(cat /etc/wireguard/client3_public_key)
     if [ ! "${webui}" = "1" ]; then
       if [ "${nodetype}" = "raspiblitz" ]; then
-        sudo touch /var/cache/raspiblitz/.tmp
-        sudo chmod 777 /var/cache/raspiblitz/.tmp
+        touch /var/cache/raspiblitz/.tmp
+        chmod 777 /var/cache/raspiblitz/.tmp
         whiptail --title "Wireguard LAN address" --inputbox "Enter your desired wireguard LAN IP, chosing from 10.0.0.0 to 10.255.255.252. Do not use the same IP as your LAN." 11 83 2>/var/cache/raspiblitz/.tmp
         wgip=$(cat /var/cache/raspiblitz/.tmp)
         validWgIP ${wgip}
@@ -293,9 +299,9 @@ AllowedIPs = ${client2ip}/32
 [Peer]
 PublicKey = ${client3PublicKey}
 AllowedIPs = ${client3ip}/32
-" | sudo tee /etc/wireguard/wg0.conf
+" | tee /etc/wireguard/wg0.conf
     # configure client
-    sudo mkdir /etc/wireguard/clients
+    mkdir /etc/wireguard/clients
     echo "[Interface]
 Address = ${client1ip}/32
 PrivateKey = ${client1PrivateKey}
@@ -304,7 +310,7 @@ PrivateKey = ${client1PrivateKey}
 PublicKey = ${serverPublicKey}
 Endpoint = ${vpnip}:${wgport}
 AllowedIPs = ${wglan}.0/24, ${LAN}.0/24
-" | sudo tee /etc/wireguard/clients/client1.conf
+" | tee /etc/wireguard/clients/client1.conf
     echo "[Interface]
 Address = ${client2ip}/32
 PrivateKey = ${client2PrivateKey}
@@ -313,7 +319,7 @@ PrivateKey = ${client2PrivateKey}
 PublicKey = ${serverPublicKey}
 Endpoint = ${vpnip}:${wgport}
 AllowedIPs = ${wglan}.0/24, ${LAN}.0/24
-" | sudo tee /etc/wireguard/clients/client2.conf
+" | tee /etc/wireguard/clients/client2.conf
     echo "[Interface]
 Address = ${client3ip}/32
 PrivateKey = ${client3PrivateKey}
@@ -322,7 +328,7 @@ PrivateKey = ${client3PrivateKey}
 PublicKey = ${serverPublicKey}
 Endpoint = ${vpnip}:${wgport}
 AllowedIPs = ${wglan}.0/24, ${LAN}.0/24
-" | sudo tee /etc/wireguard/clients/client3.conf
+" | tee /etc/wireguard/clients/client3.conf
 
     if [ ! "${webui}" = "1" ]; then
       playstorelink="https://play.google.com/store/apps/details?id=com.wireguard.android"
@@ -342,10 +348,10 @@ ${appstoreLink}\n
     fi
 
     # copy keys and config
-    sudo rm -rf ${homedir}/wireguard
-    sudo cp -p -r /etc/wireguard/ ${homedir}/
-    sudo chown -R admin:admin ${homedir}/wireguard
-    sudo chmod -R 755 ${homedir}/wireguard
+    rm -rf ${homedir}/wireguard
+    cp -p -r /etc/wireguard/ ${homedir}/
+    chown -R admin:admin ${homedir}/wireguard
+    chmod -R 755 ${homedir}/wireguard
 
   else
     # update pleb-vpn.conf
@@ -356,15 +362,15 @@ ${appstoreLink}\n
     setting ${plebVPNConf} "2" "wglan" "'${wglan}'"
     setting ${plebVPNConf} "2" "wgip" "'${wgip}'"
     # copy keys and config  
-    sudo cp -p -r ${homedir}/wireguard/ /etc/
+    cp -p -r ${homedir}/wireguard/ /etc/
   fi
 
   # open firewall ports
-  sudo ufw allow ${wgport}/udp comment "wireguard port"
-  sudo ufw allow out on wg0 from any to any
-  sudo ufw allow in on wg0 from any to any
-  sudo ufw allow in to ${wglan}.0/24
-  sudo ufw allow out to ${wglan}.0/24
+  ufw allow ${wgport}/udp comment "wireguard port"
+  ufw allow out on wg0 from any to any
+  ufw allow in on wg0 from any to any
+  ufw allow in to ${wglan}.0/24
+  ufw allow out to ${wglan}.0/24
 
   if [ "${nodetype}" = "mynode" ]; then
   # add new rules to firewallConf
@@ -378,16 +384,16 @@ ${appstoreLink}\n
   fi
 
   # enable ip forward
-  sudo sed -i '/net.ipv4.ip_forward/ s/#//' /etc/sysctl.conf
+  sed -i '/net.ipv4.ip_forward/ s/#//' /etc/sysctl.conf
   # enable systemd and fix permissions
-  sudo systemctl enable wg-quick@wg0
-  sudo systemctl start wg-quick@wg0
-  sudo chown -R root:root /etc/wireguard/
-  sudo chmod -R 755 /etc/wireguard/
+  systemctl enable wg-quick@wg0
+  systemctl start wg-quick@wg0
+  chown -R root:root /etc/wireguard/
+  chmod -R 755 /etc/wireguard/
   # start wireguard
   echo "Ok, wireguard installed and configured. Wait 10 seconds before enable..."
   sleep 10
-  sudo systemctl restart wg-quick@wg0
+  systemctl restart wg-quick@wg0
 
   # add wgip to lnd.conf for tls.cert and pick up new tls.cert
   if [ "${nodetype}" = "raspiblitz" ]; then
@@ -411,9 +417,9 @@ ${appstoreLink}\n
         echo "# sectionLine(${sectionLine})"
         setting ${lndConfFile} ${insertLine} "tlsextraip" "${wgip}"
         # remove old tls.cert and tls.key
-        sudo rm /mnt/hdd/lnd/tls*
+        rm /mnt/hdd/lnd/tls*
         # restart lnd
-        sudo systemctl restart lnd
+        systemctl restart lnd
         if [ "${autoUnlock}" = "on" ]; then
           # wait until wallet unlocked
           echo "waiting for wallet unlock (takes some time)..."
@@ -425,7 +431,7 @@ ${appstoreLink}\n
           sleep 5
         fi
         # restart nginx
-        sudo systemctl restart nginx
+        systemctl restart nginx
       fi
     fi
   elif [ "${nodetype}" = "mynode" ]; then
@@ -443,17 +449,17 @@ ${appstoreLink}\n
         if [ ${fileLines} -lt ${insertLine} ]; then
           echo "# adding new line for inserts"
           echo "
-        " | sudo tee -a ${lndCustomConf}
+        " | tee -a ${lndCustomConf}
         fi
         echo "# sectionLine(${sectionLine})"
         setting ${lndCustomConf} ${insertLine} "tlsextraip" "${wgip}"
         # remove old tls.cert and tls.key
-        sudo rm /mnt/hdd/mynode/lnd/tls*
+        rm /mnt/hdd/mynode/lnd/tls*
         # restart lnd
-        sudo systemctl restart lnd
+        systemctl restart lnd
         sleep 5
         # restart nginx
-        sudo systemctl restart nginx
+        systemctl restart nginx
       fi
     fi
   fi
@@ -467,16 +473,16 @@ off() {
   # uninstall wireguard
 
   # disable service
-  sudo systemctl disable wg-quick@wg0
-  sudo systemctl stop wg-quick@wg0
+  systemctl disable wg-quick@wg0
+  systemctl stop wg-quick@wg0
   # uninstall wireguard
-  sudo apt purge -y wireguard
+  apt purge -y wireguard
   # close firewall ports
-  sudo ufw delete allow ${wgport}/udp
-  sudo ufw delete allow out on wg0 from any to any
-  sudo ufw delete allow in on wg0 from any to any
-  sudo ufw delete allow in to ${wglan}.0/24
-  sudo ufw delete allow out to ${wglan}.0/24
+  ufw delete allow ${wgport}/udp
+  ufw delete allow out on wg0 from any to any
+  ufw delete allow in on wg0 from any to any
+  ufw delete allow in to ${wglan}.0/24
+  ufw delete allow out to ${wglan}.0/24
   if [ "${nodetype}" = "mynode" ]; then
   # remove from firewallConf
     while [ $(cat ${firewallConf} | grep -c "ufw allow ${wgport}") -gt 0 ];
@@ -505,23 +511,23 @@ off() {
   if [ "${nodetype}" = "raspiblitz" ]; then
     source /mnt/hdd/raspiblitz.conf
     if [ "${lnd}" = "on" ]; then
-      sudo sed -i "/^tlsextraip=${wgip}/d" ${lndConfFile}
+      sed -i "/^tlsextraip=${wgip}/d" ${lndConfFile}
       # remove tls.cert and tls.key if wireguard is installed to pick up new tls.cert that doesn't include wireguard ip
-      sudo rm /mnt/hdd/lnd/tls*
+      rm /mnt/hdd/lnd/tls*
       # restart lnd
-      sudo systemctl restart lnd
+      systemctl restart lnd
       # restart nginx
-      sudo systemctl restart nginx
+      systemctl restart nginx
     fi
   elif [ "${nodetype}" = "mynode" ]; then
     if [ "${lndhybrid}" = "on" ]; then
-      sudo sed -i "/^tlsextraip=${wgip}/d" ${lndCustomConf}
+      sed -i "/^tlsextraip=${wgip}/d" ${lndCustomConf}
       # remove tls.cert and tls.key if wireguard is installed to pick up new tls.cert that doesn't include wireguard ip
-      sudo rm /mnt/hdd/mynode/lnd/tls*
+      rm /mnt/hdd/mynode/lnd/tls*
       # restart lnd
-      sudo systemctl restart lnd
+      systemctl restart lnd
       # restart nginx
-      sudo systemctl restart nginx
+      systemctl restart nginx
     fi
   fi
 
