@@ -3,9 +3,17 @@ from .models import User
 from werkzeug.security import generate_password_hash, check_password_hash
 from . import db
 from flask_login import login_user, login_required, logout_user, current_user
+import os, shutil
 
 
 auth = Blueprint('auth', __name__)
+
+if os.path.exists('/mnt/hdd/mynode/'):
+    HOME_DIR = str('/mnt/hdd/mynode/pleb-vpn')
+    EXEC_DIR = str('/opt/mynode/pleb-vpn')
+if os.path.exists('/mnt/hdd/raspiblitz.conf'):
+    HOME_DIR = str('/mnt/hdd/app-data/pleb-vpn')
+    EXEC_DIR = str('/home/admin/pleb-vpn')
 
 @auth.route('/login', methods=['GET', 'POST'])
 def login():
@@ -47,6 +55,10 @@ def change_password():
             newHash = generate_password_hash(password1, method='sha256')
             User.query.filter_by(id=current_user.id).update(dict(password=newHash))
             db.session.commit() 
+            # copy database to HOME_DIR so new password survives updates and reflashes
+            if os.path.exists(os.path.join(HOME_DIR, 'instance')):
+                shutil.rmtree(os.path.join(HOME_DIR, 'instance'))
+            shutil.copytree(os.path.join(EXEC_DIR, 'instance'), HOME_DIR)
             flash('Password changed successfully!', category='success')
             return redirect(url_for('views.home'))
     

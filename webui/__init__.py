@@ -2,10 +2,16 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
 from werkzeug.security import generate_password_hash
-import secrets, os
+import secrets, os, shutil
 
 db = SQLAlchemy()
 DB_NAME = "pleb-vpn.db"
+if os.path.exists('/mnt/hdd/mynode/'):
+    HOME_DIR = str('/mnt/hdd/mynode/pleb-vpn')
+    EXEC_DIR = str('/opt/mynode/pleb-vpn')
+if os.path.exists('/mnt/hdd/raspiblitz.conf'):
+    HOME_DIR = str('/mnt/hdd/app-data/pleb-vpn')
+    EXEC_DIR = str('/home/admin/pleb-vpn')
 
 def create_app():
     app = Flask(__name__)
@@ -38,7 +44,11 @@ def create_app():
         if not user:
             new_user = User(user_name = 'admin', password = generate_password_hash('plebvpn', method='sha256'))
             db.session.add(new_user)
-            db.session.commit()    
+            db.session.commit()
+            # copy database to HOME_DIR
+            if os.path.exists(os.path.join(HOME_DIR, 'instance')):
+                shutil.rmtree(os.path.join(HOME_DIR, 'instance'))
+            shutil.copytree(os.path.join(EXEC_DIR, 'instance'), HOME_DIR)
     
     login_manager = LoginManager()
     login_manager.login_view = 'auth.login'
