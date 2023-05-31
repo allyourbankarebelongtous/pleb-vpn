@@ -12,7 +12,7 @@ if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
   exit 1
 fi
 
-ver="v1.0.9beta"
+ver="v1.1.0betaRC1"
 
 if [ -d "/mnt/hdd/mynode" ]; then
   nodetype="mynode"
