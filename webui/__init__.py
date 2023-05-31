@@ -36,7 +36,7 @@ def create_app():
     with app.app_context():
         user = User.query.filter_by(user_name='admin').first()
         if not user:
-            new_user = User(user_name = 'admin', password = generate_password_hash('asdfasdf', method='sha256'))
+            new_user = User(user_name = 'admin', password = generate_password_hash('plebvpn', method='sha256'))
             db.session.add(new_user)
             db.session.commit()    
     
