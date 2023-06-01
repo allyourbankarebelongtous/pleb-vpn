@@ -1018,6 +1018,7 @@ def get_plebVPN_status():
     global plebVPN_status
     global update_available
     plebVPN_status = {}
+    conf_file = config.PlebConfig(conf_file_location)
     cmd_str = [os.path.join(EXEC_DIR, "vpn-install.sh") + " status 1"]
     try:
         subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True, timeout=100)
@@ -1033,9 +1034,12 @@ def get_plebVPN_status():
                 plebVPN_status[name] = str(value).rstrip().strip('\'\'')
     os.remove(os.path.join(EXEC_DIR, 'pleb-vpn_status.tmp'))
     setting=get_conf()
-    latest_version = get_latest_version()
+    # check for new version of pleb-vpn
+    latest_version = str(get_latest_version())
     if latest_version is not None:
-        if setting['version'] != latest_version: 
+        if setting['version'] != latest_version:
+            conf_file.set_option('latestversion', latest_version)
+            conf_file.write()
             update_available = True
 
 

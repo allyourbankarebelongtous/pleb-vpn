@@ -32,5 +32,5 @@ def get_latest_version():
 
     return None  # Return None if no versions found or API request failed
     
-latestversion = get_latest_version() # for testing purposes
+latestversion = get_latest_version() # if run by bash scripts, check for updates and return latest version
 print(latestversion)

@@ -191,6 +191,12 @@
             <th scope="row">Current Version</th>
             <td>{{ setting['version'] }}</td>
           </tr>
+          {% if update_available == True %}
+          <tr>
+            <th scope="row">New Version</th>
+            <td>{{ setting['latestversion'] }}</td>
+          </tr>
+          {% endif %}
         </tbody>
       </table>
     </div>
