@@ -3,13 +3,6 @@
 # backs up on initial install of pleb-vpn and on raspiblitz updates
 # restores on RESTORE-DEFAULTS or UNINSTALL-ALL from menu
 
-# command info
-if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
-  echo "config script to backup or restore critical files before installing or after uninstalling pleb-vpn"
-  echo "pleb-vpn.backup.sh [backup|restore]"
-  exit 1
-fi
-
 if [ -d "/mnt/hdd/mynode" ]; then
   nodetype="mynode"
   homedir="/mnt/hdd/mynode/pleb-vpn"
@@ -111,5 +104,5 @@ restore() {
 case "${1}" in
   backup) backup ;;
   restore) restore ;;
-  *) echo "err=Unknown action: ${1}" ; exit 1 ;;
+  *) echo "config script to backup or restore critical files before installing or after uninstalling pleb-vpn"; echo "pleb-vpn.backup.sh [backup|restore]"; exit 1 ;;
 esac

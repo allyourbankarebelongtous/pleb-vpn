@@ -2,13 +2,6 @@
 
 # script to enable split-tunneling of tor on or off for pleb-vpn
 
-# command info
-if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
-  echo "config script to turn tor split-tunnelng on or off"
-  echo "tor.split-tunnel.sh [on|off|status]"
-  exit 1
-fi
-
 # find home directory based on node implementation
 if [ -d "/mnt/hdd/mynode/pleb-vpn/" ]; then
   homedir="/mnt/hdd/mynode/pleb-vpn"
@@ -1002,4 +995,5 @@ case "${1}" in
   on) on "${2}" ;;
   off) off "${2}" ;;
   status) status "${2}" "${3}" "${4}" ;;
+  *) echo "config script to turn tor split-tunnelng on or off"; echo "tor.split-tunnel.sh [on|off|status]"; exit 1 ;;
 esac

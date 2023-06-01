@@ -2,13 +2,6 @@
 
 # script to turn letsencrypt for BTCPayServer or LNBits on or off
 
-# command info
-if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
-  echo "config script to turn letsencrypt for BTCPayServer or LNBits on or off"
-  echo "letsencrypt.install.sh [on|off]"
-  exit 1
-fi
-
 # find home directory based on node implementation
 if [ -d "/mnt/hdd/mynode/pleb-vpn/" ]; then
   homedir="/mnt/hdd/mynode/pleb-vpn"
@@ -561,4 +554,5 @@ off() {
 case "${1}" in
   on) on "${2}" "${3}" "${4}" "${5}" "${6}" "${7}" "${8}" ;;
   off) off ;;
+  *) echo "config script to turn letsencrypt for BTCPayServer or LNBits on or off"; echo "letsencrypt.install.sh [on|off]"; exit 1 ;;
 esac

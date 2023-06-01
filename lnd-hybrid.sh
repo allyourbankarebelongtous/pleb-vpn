@@ -3,13 +3,6 @@
 # turn LND node hybrid mode on or off
 # example: "lnd-hybrid.sh on"
 
-# command info
-if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
-  echo "config script to turn LND hybrid mode on or off"
-  echo "lnd-hybrid.sh [status|on|off]"
-  exit 1
-fi
-
 # find home directory based on node implementation
 if [ -d "/mnt/hdd/mynode/pleb-vpn/" ]; then
   homedir="/mnt/hdd/mynode/pleb-vpn"
@@ -405,5 +398,5 @@ case "${1}" in
   status) status "${2}" ;;
   on) on "${2}" "${3}" ;;
   off) off ;;
-  *) echo "err=Unknown action: ${1}" ; exit 1 ;;
+  *) echo "config script to turn LND hybrid mode on or off"; echo "lnd-hybrid.sh [status|on|off]"; exit 1 ;;
 esac

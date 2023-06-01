@@ -6,13 +6,6 @@
 # to install and automatically keep current configuration
 # use "vpn-install.sh on 1"
 
-# command info
-if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
-  echo "config script to install and configure or uninstall openvpn"
-  echo "vpn-install.sh [on|off|status]"
-  exit 1
-fi
-
 # find home directory based on node implementation
 if [ -d "/mnt/hdd/mynode/pleb-vpn/" ]; then
   homedir="/mnt/hdd/mynode/pleb-vpn"
@@ -384,5 +377,5 @@ case "${1}" in
   status) status "${2}" ;;
   on) on "${2}" "${3}" ;;
   off) off "${2}" ;;
-  *) echo "err=Unknown action: ${1}" ; exit 1 ;;
+  *) echo "config script to install and configure or uninstall openvpn"; echo "vpn-install.sh [on|off|status]"; exit 1 ;;
 esac 

@@ -5,13 +5,6 @@
 # establishes system configuration backups using pleb-vpn.backup.sh and restores on uninstall
 # sets initial values in pleb-vpn.conf, including LAN, lndConfFile, CLNConfFile
 
-# command info
-if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
-  echo "install script for installing, updating, restoring after blitz update, or uninstalling pleb-vpn"
-  echo "pleb-vpn.install.sh [on|update|uninstall]"
-  exit 1
-fi
-
 ver="v1.1.0betaRC1"
 
 if [ -d "/mnt/hdd/mynode" ]; then
@@ -1097,5 +1090,5 @@ case "${1}" in
   update) update "${2}" ;;
   restore) restore ;;
   uninstall) uninstall "${2}" ;;
-  *) echo "err=Unknown action: ${1}" ; exit 1 ;;
+  *) echo "install script for installing, updating, restoring after blitz update, or uninstalling pleb-vpn"; echo "pleb-vpn.install.sh [on|update|uninstall]"; exit 1 ;;
 esac

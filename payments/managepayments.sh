@@ -3,13 +3,6 @@
 # pleb-vpn script for managing payments
 # managepayments.sh deleteall will recreate subscription lists
 
-# command info
-if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
-  echo "config script to view, add, or delete payments"
-  echo "managepayments.sh [status|newpayment|deletepayment|deleteall]"
-  exit 1
-fi
-
 # find home directory based on node implementation
 if [ -d "/mnt/hdd/mynode/pleb-vpn/" ]; then
   homedir="/mnt/hdd/mynode/pleb-vpn"
@@ -392,5 +385,5 @@ case "${1}" in
   newpayment) newpayment "${2}" "${3}" "${4}" "${5}" "${6}" "${7}" ;;
   deletepayment) deletepayment "${2}" "${3}" ;;
   deleteall) deleteall "${2}" ;;
-  *) echo "err=Unknown action: ${1}" ; exit 1 ;;
+  *) echo "config script to view, add, or delete payments"; echo "managepayments.sh [status|newpayment|deletepayment|deleteall]"; exit 1 ;;
 esac 

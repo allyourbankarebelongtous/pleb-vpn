@@ -4,13 +4,6 @@
 # to install and automatically keep current config
 # use "wg-install.sh on 1"
 
-# command info
-if [ $# -eq 0 ] || [ "$1" = "-h" ] || [ "$1" = "-help" ]; then
-  echo "config script to install, configure, get config files, or uninstall wireguard"
-  echo "wg-install.sh [on|off|status|connect]"
-  exit 1
-fi
-
 # find home directory based on node implementation
 if [ -d "/mnt/hdd/mynode/pleb-vpn/" ]; then
   homedir="/mnt/hdd/mynode/pleb-vpn"
@@ -541,5 +534,5 @@ case "${1}" in
   connect) connect ;;
   on) on "${2}" "${3}" "${4}" ;;
   off) off ;;
-  *) echo "err=Unknown action: ${1}" ; exit 1 ;;
+  *) echo "config script to install, configure, get config files, or uninstall wireguard"; echo "wg-install.sh [on|off|status|connect]"; exit 1 ;;
 esac 
