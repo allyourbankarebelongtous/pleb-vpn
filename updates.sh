@@ -382,7 +382,6 @@ server {
         # make sure to keep in sync with tor.network.sh script
         /home/admin/config.scripts/tor.onion-service.sh pleb-vpn 80 2422 443 2423
       fi
-
     fi
   fi
 

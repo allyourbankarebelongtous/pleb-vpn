@@ -5,7 +5,7 @@
 # establishes system configuration backups using pleb-vpn.backup.sh and restores on uninstall
 # sets initial values in pleb-vpn.conf, including LAN, lndConfFile, CLNConfFile
 
-ver="v1.1.0betaRC1"
+ver="v1.1.0betaRC1" 
 
 if [ -d "/mnt/hdd/mynode" ]; then
   nodetype="mynode"
@@ -533,6 +533,7 @@ server {
 
 }
 " | tee /etc/nginx/sites-enabled/https_pleb-vpn.conf
+    fi
 
     # test and reload nginx
     nginx -t
@@ -900,6 +901,7 @@ server {
 
 }
 " | tee /etc/nginx/sites-enabled/https_pleb-vpn.conf
+    fi
 
     # test and reload nginx
     nginx -t
