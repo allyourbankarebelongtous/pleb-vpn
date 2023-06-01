@@ -408,7 +408,8 @@ def payments():
                     return render_template('payments.html', user=current_user, current_payments=get_payments(), lnd=lnd, cln=cln)
             if message is not None:
                 # fix message so dollar signs are sent as literall $ and not values
-                message = message.replace('$', r'\$')
+                if '$' in message:
+                    message = message.replace('$', r'\$')
                 payment_string = frequency + " " + node + " " + pubkey + " " + amount + " " + denomination + " \"" + message + "\""
             else:
                 payment_string = frequency + " " + node + " " + pubkey + " " + amount + " " + denomination

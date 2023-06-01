@@ -20,8 +20,6 @@ if [ "$EUID" -ne 0 ]; then
   exit 1
 fi
 
-if [ "$EUID" -ne 0 ]; then
-
 if [ "${nodetype}" = "raspiblitz" ]; then
   source /mnt/hdd/raspiblitz.conf
 fi

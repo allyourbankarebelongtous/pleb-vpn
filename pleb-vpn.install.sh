@@ -705,8 +705,8 @@ User=root
 Group=root
 Type=simple
 Restart=always
-StandardOutput=journal
-StandardError=journal
+StandardOutput=append:/var/log/pleb-vpn.log
+StandardError=append:/var/log/pleb-vpn.log
 RestartSec=60
 
 # Hardening
@@ -1077,11 +1077,17 @@ uninstall()
   fi
 
   # delete files
+  if [ "${nodetype}" = "raspiblitz" ]; then
+    # delete nginx files
+    sudo rm /etc/nginx/sites-available/pleb-vpn*
+    sudo rm /etc/nginx/sites-enabled/pleb-vpn*
+  fi
   rm -rf ${homedir}
   # these files will be deleted by mynode's uninstaller, so skip if uninstalling via mynode uninstaller
   if [ ! "${mynode_uninstall}" = "1" ]; then
-    # these files will be deleted by mynode's uninstaller
     rm -rf ${execdir}
+    rm /etc/nginx/sites-enabled/https_pleb-vpn.conf
+    rm /usr/bin/service_scripts/pre_pleb-vpn.sh
 
     # stop and remove pleb-vpn.service
     rm /etc/systemd/system/pleb-vpn.service
