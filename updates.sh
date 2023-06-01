@@ -304,7 +304,7 @@ server {
 
         # WebSocket support
         proxy_http_version 1.1;
-        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Upgrade \$http_upgrade;
         proxy_set_header Connection \"upgrade\";
     }
 
@@ -328,7 +328,7 @@ server {
         include /etc/nginx/snippets/ssl-proxy-params.conf;
         # WebSocket support
         proxy_http_version 1.1;
-        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Upgrade \$http_upgrade;
         proxy_set_header Connection \"upgrade\";
     }
 
@@ -355,7 +355,7 @@ server {
         include /etc/nginx/snippets/ssl-proxy-params.conf;
         # WebSocket support
         proxy_http_version 1.1;
-        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Upgrade \$http_upgrade;
         proxy_set_header Connection \"upgrade\";
     }
 

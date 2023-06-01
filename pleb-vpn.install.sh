@@ -45,7 +45,8 @@ function setting() # FILE LINENUMBER NAME VALUE
   fi
 }
 
-on() {
+on() 
+{
   # only for new install
 
   # check if sudo
@@ -427,7 +428,7 @@ server {
 
         # WebSocket support
         proxy_http_version 1.1;
-        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Upgrade \$http_upgrade;
         proxy_set_header Connection \"upgrade\";
     }
 
@@ -451,7 +452,7 @@ server {
         include /etc/nginx/snippets/ssl-proxy-params.conf;
         # WebSocket support
         proxy_http_version 1.1;
-        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Upgrade \$http_upgrade;
         proxy_set_header Connection \"upgrade\";
     }
 
@@ -478,7 +479,7 @@ server {
         include /etc/nginx/snippets/ssl-proxy-params.conf;
         # WebSocket support
         proxy_http_version 1.1;
-        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Upgrade \$http_upgrade;
         proxy_set_header Connection \"upgrade\";
     }
 
@@ -526,8 +527,8 @@ server {
 
         # WebSocket support
         proxy_http_version 1.1;
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection "upgrade";
+        proxy_set_header Upgrade \$http_upgrade;
+        proxy_set_header Connection \"upgrade\";
     }
 
 }
@@ -547,7 +548,8 @@ server {
   exit 0
 }
 
-update() {
+update() 
+{
   local skip_key="${1}"
   plebVPNConf="${homedir}/pleb-vpn.conf"
   source <(cat ${plebVPNConf} | sed '1d')
@@ -615,7 +617,8 @@ update() {
   exit 0
 }
 
-restore() { 
+restore() 
+{ 
   plebVPNConf="${homedir}/pleb-vpn.conf"
   source <(cat ${plebVPNConf} | sed '1d')
   # fix permissions
@@ -792,7 +795,7 @@ server {
 
         # WebSocket support
         proxy_http_version 1.1;
-        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Upgrade \$http_upgrade;
         proxy_set_header Connection \"upgrade\";
     }
 
@@ -816,7 +819,7 @@ server {
         include /etc/nginx/snippets/ssl-proxy-params.conf;
         # WebSocket support
         proxy_http_version 1.1;
-        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Upgrade \$http_upgrade;
         proxy_set_header Connection \"upgrade\";
     }
 
@@ -843,7 +846,7 @@ server {
         include /etc/nginx/snippets/ssl-proxy-params.conf;
         # WebSocket support
         proxy_http_version 1.1;
-        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Upgrade \$http_upgrade;
         proxy_set_header Connection \"upgrade\";
     }
 
@@ -891,8 +894,8 @@ server {
 
         # WebSocket support
         proxy_http_version 1.1;
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection "upgrade";
+        proxy_set_header Upgrade \$http_upgrade;
+        proxy_set_header Connection \"upgrade\";
     }
 
 }
@@ -987,7 +990,8 @@ WantedBy=timers.target" \
   exit 0
 }
 
-uninstall() { 
+uninstall() 
+{ 
   local mynode_uninstall="${1}"
   plebVPNConf="${homedir}/pleb-vpn.conf"
   source <(cat ${plebVPNConf} | sed '1d')
