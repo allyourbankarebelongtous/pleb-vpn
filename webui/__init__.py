@@ -2,7 +2,7 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
 from werkzeug.security import generate_password_hash
-import secrets, os, shutil
+import secrets, os, shutil, subprocess
 
 db = SQLAlchemy()
 DB_NAME = "pleb-vpn.db"
@@ -42,7 +42,13 @@ def create_app():
     with app.app_context():
         user = User.query.filter_by(user_name='admin').first()
         if not user:
-            new_user = User(user_name = 'admin', password = generate_password_hash('plebvpn', method='sha256'))
+            if os.path.exists('/mnt/hdd/raspiblitz.conf'): # for raspiblitz, use passwordB
+                cmd_str = "cat /mnt/hdd/bitcoin/bitcoin.conf | grep rpcpassword | cut -c 13-"
+                new_password = subprocess.check_output(cmd_str, shell=True)
+                new_password = new_password.decode().strip()
+            else: # otherwise default password is plebvpn
+                new_password = 'plebvpn'
+            new_user = User(user_name = 'admin', password = generate_password_hash(new_password, method='sha256'))
             db.session.add(new_user)
             db.session.commit()
             # copy database to HOME_DIR

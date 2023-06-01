@@ -45,6 +45,10 @@ function setting() # FILE LINENUMBER NAME VALUE
 
 # only run this part for raspiblitz updates.
 if [ "${nodetype}" = "raspiblitz" ]; then
+  # get values for raspiblitz
+  source /mnt/admin/raspiblitz.info
+  source /mnt/hdd/raspiblitz.conf
+
 
   # fix nginx assets to reflect status of letsencrypt
   if [ "${letsencryptBTCPay}" = "on" ]; then
@@ -253,6 +257,7 @@ lndconffile=
     cd /home/admin
     # allow through firewall
     ufw allow 2420 comment 'allow Pleb-VPN HTTP'
+    ufw allow 2421 commment 'allow Pleb-VPN HTTPS'
     # create pleb-vpn.service
     if [ ! -f /etc/systemd/system/pleb-vpn.service ]; then
       echo "
@@ -305,10 +310,15 @@ server {
 
         include /etc/nginx/snippets/ssl-proxy-params.conf;
 
-        # WebSocket support
+    }
+
+    location /socket.io {
+        include proxy_params;
         proxy_http_version 1.1;
+        proxy_buffering off;
         proxy_set_header Upgrade \$http_upgrade;
-        proxy_set_header Connection \"upgrade\";
+        proxy_set_header Connection \"Upgrade\";
+        proxy_pass http://127.0.0.1:2420/socket.io;
     }
 
 }
@@ -329,10 +339,16 @@ server {
         proxy_pass http://127.0.0.1:2420;
 
         include /etc/nginx/snippets/ssl-proxy-params.conf;
-        # WebSocket support
+
+    }
+
+    location /socket.io {
+        include proxy_params;
         proxy_http_version 1.1;
+        proxy_buffering off;
         proxy_set_header Upgrade \$http_upgrade;
-        proxy_set_header Connection \"upgrade\";
+        proxy_set_header Connection \"Upgrade\";
+        proxy_pass http://127.0.0.1:2420/socket.io;
     }
 
 }
@@ -356,10 +372,16 @@ server {
         proxy_pass http://127.0.0.1:2420;
 
         include /etc/nginx/snippets/ssl-proxy-params.conf;
-        # WebSocket support
+
+    }
+
+    location /socket.io {
+        include proxy_params;
         proxy_http_version 1.1;
+        proxy_buffering off;
         proxy_set_header Upgrade \$http_upgrade;
-        proxy_set_header Connection \"upgrade\";
+        proxy_set_header Connection \"Upgrade\";
+        proxy_pass http://127.0.0.1:2420/socket.io;
     }
 
 }

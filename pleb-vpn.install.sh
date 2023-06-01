@@ -309,15 +309,18 @@ lndconffile=
   # allow through firewall
   if [ "${nodetype}" = "raspiblitz" ]; then
     ufw allow 2420 comment 'allow Pleb-VPN HTTP'
+    ufw allow 2421 commment 'allow Pleb-VPN HTTPS'
   fi
   if [ "${nodetype}" = "mynode" ]; then
     # if installed from install script and not from mynode app store, allow through firewall to persist on restarts
     if [ $(ls /usr/share/mynode_apps | grep -c pleb-vpn) -eq 0 ]; then
       ufw allow 2420 comment 'allow Pleb-VPN HTTP'
+      ufw allow 2421 commment 'allow Pleb-VPN HTTPS'
       # add new rules to firewallConf
       sectionLine=$(cat ${firewallConf} | grep -n "^\# Add firewall rules" | cut -d ":" -f1 | head -n 1)
       insertLine=$(expr $sectionLine + 1)
       sed -i "${insertLine}iufw allow 2420 comment 'allow Pleb-VPN HTTP'" ${firewallConf}
+      sed -i "${insertLine}iufw allow 2421 comment 'allow Pleb-VPN HTTPS'" ${firewallConf}
     fi
   fi
 
@@ -426,10 +429,15 @@ server {
 
         include /etc/nginx/snippets/ssl-proxy-params.conf;
 
-        # WebSocket support
+    }
+
+    location /socket.io {
+        include proxy_params;
         proxy_http_version 1.1;
+        proxy_buffering off;
         proxy_set_header Upgrade \$http_upgrade;
-        proxy_set_header Connection \"upgrade\";
+        proxy_set_header Connection \"Upgrade\";
+        proxy_pass http://127.0.0.1:2420/socket.io;
     }
 
 }
@@ -450,10 +458,16 @@ server {
         proxy_pass http://127.0.0.1:2420;
 
         include /etc/nginx/snippets/ssl-proxy-params.conf;
-        # WebSocket support
+
+    }
+
+    location /socket.io {
+        include proxy_params;
         proxy_http_version 1.1;
+        proxy_buffering off;
         proxy_set_header Upgrade \$http_upgrade;
-        proxy_set_header Connection \"upgrade\";
+        proxy_set_header Connection \"Upgrade\";
+        proxy_pass http://127.0.0.1:2420/socket.io;
     }
 
 }
@@ -477,10 +491,16 @@ server {
         proxy_pass http://127.0.0.1:2420;
 
         include /etc/nginx/snippets/ssl-proxy-params.conf;
-        # WebSocket support
+
+    }
+
+    location /socket.io {
+        include proxy_params;
         proxy_http_version 1.1;
+        proxy_buffering off;
         proxy_set_header Upgrade \$http_upgrade;
-        proxy_set_header Connection \"upgrade\";
+        proxy_set_header Connection \"Upgrade\";
+        proxy_pass http://127.0.0.1:2420/socket.io;
     }
 
 }
@@ -525,10 +545,15 @@ server {
 
         include /etc/nginx/mynode/mynode_ssl_proxy_params.conf;
 
-        # WebSocket support
+    }
+
+    location /socket.io {
+        include proxy_params;
         proxy_http_version 1.1;
+        proxy_buffering off;
         proxy_set_header Upgrade \$http_upgrade;
-        proxy_set_header Connection \"upgrade\";
+        proxy_set_header Connection \"Upgrade\";
+        proxy_pass http://127.0.0.1:2420/socket.io;
     }
 
 }
@@ -652,6 +677,7 @@ restore()
 
   # allow through firewall
   ufw allow 2420 comment 'allow Pleb-VPN HTTP'
+  ufw allow 2421 commment 'allow Pleb-VPN HTTPS'
   if [ "${nodetype}" = "mynode" ]; then
     # if installed from install script and not from mynode app store, allow through firewall to persist on restarts
     if [ $(ls /usr/share/mynode_apps | grep -c pleb-vpn) -eq 0 ]; then
@@ -661,6 +687,7 @@ restore()
         sectionLine=$(cat ${firewallConf} | grep -n "^\# Add firewall rules" | cut -d ":" -f1 | head -n 1)
         insertLine=$(expr $sectionLine + 1)
         sed -i "${insertLine}iufw allow 2420 comment 'allow Pleb-VPN HTTP'" ${firewallConf}
+        sed -i "${insertLine}iufw allow 2421 comment 'allow Pleb-VPN HTTPS'" ${firewallConf}
       fi
     fi
   fi
@@ -795,10 +822,15 @@ server {
 
         include /etc/nginx/snippets/ssl-proxy-params.conf;
 
-        # WebSocket support
+    }
+
+    location /socket.io {
+        include proxy_params;
         proxy_http_version 1.1;
+        proxy_buffering off;
         proxy_set_header Upgrade \$http_upgrade;
-        proxy_set_header Connection \"upgrade\";
+        proxy_set_header Connection \"Upgrade\";
+        proxy_pass http://127.0.0.1:2420/socket.io;
     }
 
 }
@@ -819,10 +851,16 @@ server {
         proxy_pass http://127.0.0.1:2420;
 
         include /etc/nginx/snippets/ssl-proxy-params.conf;
-        # WebSocket support
+
+    }
+
+    location /socket.io {
+        include proxy_params;
         proxy_http_version 1.1;
+        proxy_buffering off;
         proxy_set_header Upgrade \$http_upgrade;
-        proxy_set_header Connection \"upgrade\";
+        proxy_set_header Connection \"Upgrade\";
+        proxy_pass http://127.0.0.1:2420/socket.io;
     }
 
 }
@@ -846,10 +884,16 @@ server {
         proxy_pass http://127.0.0.1:2420;
 
         include /etc/nginx/snippets/ssl-proxy-params.conf;
-        # WebSocket support
+
+    }
+
+    location /socket.io {
+        include proxy_params;
         proxy_http_version 1.1;
+        proxy_buffering off;
         proxy_set_header Upgrade \$http_upgrade;
-        proxy_set_header Connection \"upgrade\";
+        proxy_set_header Connection \"Upgrade\";
+        proxy_pass http://127.0.0.1:2420/socket.io;
     }
 
 }
@@ -894,10 +938,15 @@ server {
 
         include /etc/nginx/mynode/mynode_ssl_proxy_params.conf;
 
-        # WebSocket support
+    }
+
+    location /socket.io {
+        include proxy_params;
         proxy_http_version 1.1;
+        proxy_buffering off;
         proxy_set_header Upgrade \$http_upgrade;
-        proxy_set_header Connection \"upgrade\";
+        proxy_set_header Connection \"Upgrade\";
+        proxy_pass http://127.0.0.1:2420/socket.io;
     }
 
 }
@@ -1068,11 +1117,16 @@ uninstall()
 
   # remove rules from firewall
   ufw delete allow 2420
+  ufw delete allow 2421
   if [ "${nodetype}" = "mynode" ]; then
     # remove from firewallConf
     while [ $(cat ${firewallConf} | grep -c "ufw allow 2420 comment 'allow Pleb-VPN HTTP'") -gt 0 ];
     do
       sed -i "/ufw allow 2420 comment 'allow Pleb-VPN HTTP'/d" ${firewallConf}
+    done
+    while [ $(cat ${firewallConf} | grep -c "ufw allow 2421 comment 'allow Pleb-VPN HTTPS'") -gt 0 ];
+    do
+      sed -i "/ufw allow 2421 comment 'allow Pleb-VPN HTTPS'/d" ${firewallConf}
     done
   fi
 
