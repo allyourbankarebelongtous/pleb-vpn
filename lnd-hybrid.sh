@@ -35,14 +35,14 @@ function setting() # FILE LINENUMBER NAME VALUE
   if [ "${settingExists}" == "0" ]; then
     echo "# adding setting (${NAME})"
     if [ "${FILE}" = "${lndconffile}" ] && [ "${nodetype}" = "mynode" ]; then
-      -u bitcoin sed -i --follow-symlinks "${LINENUMBER}i${NAME}=" ${FILE}
+      sudo -u bitcoin sed -i --follow-symlinks "${LINENUMBER}i${NAME}=" ${FILE}
     else
       sed -i --follow-symlinks "${LINENUMBER}i${NAME}=" ${FILE}
     fi
   fi
   echo "# updating setting (${NAME}) with value(${VALUE})"
   if [ "${FILE}" = "${lndconffile}" ] && [ "${nodetype}" = "mynode" ]; then
-    -u bitcoin sed -i --follow-symlinks "s/^${NAME}=.*/${NAME}=${VALUE}/g" ${FILE}
+    sudo -u bitcoin sed -i --follow-symlinks "s/^${NAME}=.*/${NAME}=${VALUE}/g" ${FILE}
   else
     sed -i --follow-symlinks "s/^${NAME}=.*/${NAME}=${VALUE}/g" ${FILE}
   fi
@@ -50,9 +50,9 @@ function setting() # FILE LINENUMBER NAME VALUE
 
 status() {
   local webui="${1}"
-  nodeName=$(-u bitcoin lncli getinfo | jq .alias | sed 's/\"//g')
-  nodeID=$(-u bitcoin lncli getinfo | jq .identity_pubkey | sed 's/\"//g')
-  address0=$(-u bitcoin lncli getinfo | jq .uris[0] | sed 's/\"//g' | cut -d "@" -f2)
+  nodeName=$(sudo -u bitcoin lncli getinfo | jq .alias | sed 's/\"//g')
+  nodeID=$(sudo -u bitcoin lncli getinfo | jq .identity_pubkey | sed 's/\"//g')
+  address0=$(sudo -u bitcoin lncli getinfo | jq .uris[0] | sed 's/\"//g' | cut -d "@" -f2)
   istor=$(echo "${address0}" | grep -c onion)
   isv6=$(echo "${address0}" | grep -c :)
   if [ $istor -eq 0 ]; then
@@ -65,7 +65,7 @@ status() {
     address0Type="torv3"
   fi
   if [ "${lndhybrid}" = "on" ]; then
-    address1=$(-u bitcoin lncli getinfo | jq .uris[1] | sed 's/\"//g' | cut -d "@" -f2)
+    address1=$(sudo -u bitcoin lncli getinfo | jq .uris[1] | sed 's/\"//g' | cut -d "@" -f2)
     istor=$(echo "${address1}" | grep -c onion)
     isv6=$(echo "${address1}" | grep -c :)
     if [ $istor -eq 0 ]; then

@@ -40,15 +40,15 @@ function setting() # FILE LINENUMBER NAME VALUE
 status() {
   # show current Core Lightning status
   local webui="${1}"
-  nodeName=$(-u bitcoin lightning-cli getinfo | jq .alias | sed 's/\"//g')
-  nodeID=$(-u bitcoin lightning-cli getinfo | jq .id | sed 's/\"//g')
-  address0Type=$(-u bitcoin lightning-cli getinfo | jq .address[0].type | sed 's/\"//g')
-  address0Port=$(-u bitcoin lightning-cli getinfo | jq .address[0].port | sed 's/\"//g')
-  address0=$(-u bitcoin lightning-cli getinfo | jq .address[0].address | sed 's/\"//g')
+  nodeName=$(sudo -u bitcoin lightning-cli getinfo | jq .alias | sed 's/\"//g')
+  nodeID=$(sudo -u bitcoin lightning-cli getinfo | jq .id | sed 's/\"//g')
+  address0Type=$(sudo -u bitcoin lightning-cli getinfo | jq .address[0].type | sed 's/\"//g')
+  address0Port=$(sudo -u bitcoin lightning-cli getinfo | jq .address[0].port | sed 's/\"//g')
+  address0=$(sudo -u bitcoin lightning-cli getinfo | jq .address[0].address | sed 's/\"//g')
   if [ "${clnhybrid}" = "on" ]; then
-    address1Type=$(-u bitcoin lightning-cli getinfo | jq .address[1].type | sed 's/\"//g')
-    address1Port=$(-u bitcoin lightning-cli getinfo | jq .address[1].port | sed 's/\"//g')
-    address1=$(-u bitcoin lightning-cli getinfo | jq .address[1].address | sed 's/\"//g')
+    address1Type=$(sudo -u bitcoin lightning-cli getinfo | jq .address[1].type | sed 's/\"//g')
+    address1Port=$(sudo -u bitcoin lightning-cli getinfo | jq .address[1].port | sed 's/\"//g')
+    address1=$(sudo -u bitcoin lightning-cli getinfo | jq .address[1].address | sed 's/\"//g')
     if [ "${webui}" = "1" ]; then
       echo "Alias='${nodeName}'
 Node_ID='${nodeID}'

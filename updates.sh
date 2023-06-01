@@ -240,6 +240,7 @@ lndconffile=
     fi
   fi
 
+  # add webui to raspiblitz
   if [ $(ls /etc/systemd/system | grep -c pleb-vpn.service) -eq 0 ]; then
     # Add webui to raspiblitz
     cd ${execdir}
@@ -280,9 +281,11 @@ WantedBy=multi-user.target" | tee "/etc/systemd/system/pleb-vpn.service"
     # enable and start systemd service
     systemctl enable pleb-vpn.service
     systemctl start pleb-vpn.service
-    # add nginx service for tor and https access to pleb-vpn
-    if [ ! -f /etc/nginx/sites-available/pleb-vpn_ssl.conf ]; then
-      echo "## lndg_ssl.conf
+  fi
+
+  # add nginx service for tor and https access to pleb-vpn
+  if [ ! -f /etc/nginx/sites-available/pleb-vpn_ssl.conf ]; then
+    echo "## pleb-vpn_ssl.conf
 
 server {
     listen 2421 ssl http2;
@@ -311,7 +314,7 @@ server {
 }
 " | tee /etc/nginx/sites-available/pleb-vpn_ssl.conf
 
-      echo "## lndg_tor.conf
+    echo "## pleb-vpn_tor.conf
 
 server {
     listen 2422;
@@ -335,7 +338,7 @@ server {
 }
 " | tee /etc/nginx/sites-available/pleb-vpn_tor.conf
 
-      echo "## lndg_tor_ssl.conf
+    echo "## pleb-vpn_tor_ssl.conf
 
 server {
     listen 2423 ssl http2;
@@ -362,26 +365,25 @@ server {
 }
 " | tee /etc/nginx/sites-available/pleb-vpn_tor_ssl.conf
 
-      # symlink to sites-enabled
-      ln -s /etc/nginx/sites-available/pleb-vpn_ssl.conf /etc/nginx/sites-enabled/pleb-vpn_ssl.conf
-      ln -s /etc/nginx/sites-available/pleb-vpn_tor.conf /etc/nginx/sites-enabled/pleb-vpn_tor.conf      
-      ln -s /etc/nginx/sites-available/pleb-vpn_tor_ssl.conf /etc/nginx/sites-enabled/pleb-vpn_tor_ssl.conf
+    # symlink to sites-enabled
+    ln -s /etc/nginx/sites-available/pleb-vpn_ssl.conf /etc/nginx/sites-enabled/pleb-vpn_ssl.conf
+    ln -s /etc/nginx/sites-available/pleb-vpn_tor.conf /etc/nginx/sites-enabled/pleb-vpn_tor.conf      
+    ln -s /etc/nginx/sites-available/pleb-vpn_tor_ssl.conf /etc/nginx/sites-enabled/pleb-vpn_tor_ssl.conf
 
-      # test and reload nginx
-      nginx -t
-      if [ $? -eq 0 ]; then
-        echo "nginx config good"
-        systemctl reload nginx
-      else
-        echo "Error: nginx test config fail"
-        exit 1
-      fi
+    # test and reload nginx
+    nginx -t
+    if [ $? -eq 0 ]; then
+      echo "nginx config good"
+      systemctl reload nginx
+    else
+      echo "Error: nginx test config fail"
+      exit 1
+    fi
 
-      # get tor address for Pleb-VPN if tor is active
-      if [ "${runBehindTor}" = "on" ]; then
-        # make sure to keep in sync with tor.network.sh script
-        /home/admin/config.scripts/tor.onion-service.sh pleb-vpn 80 2422 443 2423
-      fi
+    # get tor address for Pleb-VPN if tor is active
+    if [ "${runBehindTor}" = "on" ]; then
+      # make sure to keep in sync with tor.network.sh script
+      /home/admin/config.scripts/tor.onion-service.sh pleb-vpn 80 2422 443 2423
     fi
   fi
 

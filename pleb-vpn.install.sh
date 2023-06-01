@@ -406,7 +406,7 @@ fi
 
   # create nginx files
   if [ "${nodetype}" = "raspiblitz" ]; then
-    echo "## lndg_ssl.conf
+    echo "## pleb-vpn_ssl.conf
 
 server {
     listen 2421 ssl http2;
@@ -435,7 +435,7 @@ server {
 }
 " | tee /etc/nginx/sites-available/pleb-vpn_ssl.conf
 
-    echo "## lndg_tor.conf
+    echo "## pleb-vpn_tor.conf
 
 server {
     listen 2422;
@@ -459,7 +459,7 @@ server {
 }
 " | tee /etc/nginx/sites-available/pleb-vpn_tor.conf
 
-    echo "## lndg_tor_ssl.conf
+    echo "## pleb-vpn_tor_ssl.conf
 
 server {
     listen 2423 ssl http2;
@@ -607,6 +607,7 @@ update()
     fi
     # update version in pleb-vpn.conf
     setting "${plebVPNConf}" "2" "version" "'${latestversion}'"
+    setting "${plebVPNConf}" "2" "latestversion" "'${latestversion}'"
     echo "Update success!" 
     systemctl restart pleb-vpn.service
   fi
@@ -774,7 +775,7 @@ fi
 
   # create nginx files
   if [ "${nodetype}" = "raspiblitz" ]; then
-    echo "## lndg_ssl.conf
+    echo "## pleb-vpn_ssl.conf
 
 server {
     listen 2421 ssl http2;
@@ -803,7 +804,7 @@ server {
 }
 " | tee /etc/nginx/sites-available/pleb-vpn_ssl.conf
 
-    echo "## lndg_tor.conf
+    echo "## pleb-vpn_tor.conf
 
 server {
     listen 2422;
@@ -827,7 +828,7 @@ server {
 }
 " | tee /etc/nginx/sites-available/pleb-vpn_tor.conf
 
-    echo "## lndg_tor_ssl.conf
+    echo "## pleb-vpn_tor_ssl.conf
 
 server {
     listen 2423 ssl http2;
