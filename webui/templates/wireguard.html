@@ -148,11 +148,7 @@ content %}
         <p>Turn on Wireguard private LAN <small>(takes some time)</small></p>
       </div>
       <div class="col">
-        <button
-          id="wireguard_on"
-          type="button"
-          class="btn btn-success"
-        >
+        <button id="wireguard_on" type="button" class="btn btn-success">
           Activate
         </button>
         <button
@@ -317,7 +313,7 @@ content %}
   <br />
   <div class="row">
     <div class="col text-center">
-      <h5">Deactivate Wireguard private LAN</h5>
+      <h5>Deactivate Wireguard private LAN</h5>
     </div>
   </div>
   <form method="POST">
@@ -326,11 +322,7 @@ content %}
         <p>Dectivate Wireguard <small>(takes some time)</small></p>
       </div>
       <div class="col">
-        <button
-          id="wireguard_off"
-          type="button"
-          class="btn btn-danger"
-        >
+        <button id="wireguard_off" type="button" class="btn btn-danger">
           Dectivate
         </button>
         <button
@@ -350,7 +342,7 @@ content %}
     </div>
   </form>
 </div>
-{% endif %} {% endif %} 
+{% endif %} {% endif %}
 <script>
   var socket = io.connect(
     location.protocol + "//" + document.domain + ":" + location.port
