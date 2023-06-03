@@ -431,8 +431,15 @@ server {
 
     }
 
+    location /static/ {
+        alias /home/admin/pleb-vpn/webui/static/;
+        # for debug purposes, never expire
+        expires off;
+        # expires 30d;
+    }
+
     location /socket.io {
-        include proxy_params;
+        include /etc/nginx/snippets/ssl-proxy-params.conf;
         proxy_http_version 1.1;
         proxy_buffering off;
         proxy_set_header Upgrade \$http_upgrade;
@@ -461,8 +468,15 @@ server {
 
     }
 
+    location /static/ {
+        alias /home/admin/pleb-vpn/webui/static/;
+        # for debug purposes, never expire
+        expires off;
+        # expires 30d;
+    }
+
     location /socket.io {
-        include proxy_params;
+        include /etc/nginx/snippets/ssl-proxy-params.conf;
         proxy_http_version 1.1;
         proxy_buffering off;
         proxy_set_header Upgrade \$http_upgrade;
@@ -494,8 +508,15 @@ server {
 
     }
 
+    location /static/ {
+        alias /home/admin/pleb-vpn/webui/static/;
+        # for debug purposes, never expire
+        expires off;
+        # expires 30d;
+    }
+
     location /socket.io {
-        include proxy_params;
+        include /etc/nginx/snippets/ssl-proxy-params.conf;
         proxy_http_version 1.1;
         proxy_buffering off;
         proxy_set_header Upgrade \$http_upgrade;
@@ -547,8 +568,15 @@ server {
 
     }
 
+    location /static/ {
+        alias /opt/mynode/pleb-vpn/webui/static/;
+        # for debug purposes, always expire
+        expires off;
+        # expires 30d;
+    }
+
     location /socket.io {
-        include proxy_params;
+        include /etc/nginx/mynode/mynode_ssl_proxy_params.conf;
         proxy_http_version 1.1;
         proxy_buffering off;
         proxy_set_header Upgrade \$http_upgrade;
@@ -824,8 +852,15 @@ server {
 
     }
 
+    location /static/ {
+        alias /home/admin/pleb-vpn/webui/static/;
+        # for debug purposes, never expire
+        expires off;
+        # expires 30d;
+    }
+
     location /socket.io {
-        include proxy_params;
+        include /etc/nginx/snippets/ssl-proxy-params.conf;
         proxy_http_version 1.1;
         proxy_buffering off;
         proxy_set_header Upgrade \$http_upgrade;
@@ -854,8 +889,15 @@ server {
 
     }
 
+    location /static/ {
+        alias /home/admin/pleb-vpn/webui/static/;
+        # for debug purposes, never expire
+        expires off;
+        # expires 30d;
+    }
+
     location /socket.io {
-        include proxy_params;
+        include /etc/nginx/snippets/ssl-proxy-params.conf;
         proxy_http_version 1.1;
         proxy_buffering off;
         proxy_set_header Upgrade \$http_upgrade;
@@ -887,8 +929,15 @@ server {
 
     }
 
+    location /static/ {
+        alias /home/admin/pleb-vpn/webui/static/;
+        # for debug purposes, never expire
+        expires off;
+        # expires 30d;
+    }
+
     location /socket.io {
-        include proxy_params;
+        include /etc/nginx/snippets/ssl-proxy-params.conf;
         proxy_http_version 1.1;
         proxy_buffering off;
         proxy_set_header Upgrade \$http_upgrade;
@@ -940,8 +989,15 @@ server {
 
     }
 
+    location /static/ {
+        alias /opt/mynode/pleb-vpn/webui/static/;
+        # for debug purposes, never expire
+        expires off;
+        # expires 30d;
+    }
+
     location /socket.io {
-        include proxy_params;
+        include /etc/nginx/mynode/mynode_ssl_proxy_params.conf;
         proxy_http_version 1.1;
         proxy_buffering off;
         proxy_set_header Upgrade \$http_upgrade;

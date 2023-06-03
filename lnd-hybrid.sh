@@ -201,10 +201,10 @@ on() {
     # check for old lndCustomConf and copy to lndCustomConfOld if exists
     if [ -f ${lndCustomConf} ]; then
       cp -p ${lndCustomConf} ${lndCustomConfOld}
-      rm ${lndCustomConf}
+    else
+      # copy lnd.conf to lndCustomConf
+      cp -p ${lndconffile} ${lndCustomConf}
     fi
-    # copy lnd.conf to lndCustomConf
-    cp -p ${lndconffile} ${lndCustomConf}
     # Application Options 
     sectionName="Application Options"
     publicIP="${vpnip}"

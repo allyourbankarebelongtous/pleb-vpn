@@ -1,50 +1,56 @@
 <!-- omit in toc -->
-# ![Pleb-VPN](pictures/Pleb-VPN_logo.png)  
+# ![Pleb-VPN](pictures/full-logo cutout-orange.png)  
 ![Pleb-VPN](pictures/raspilogo_tile_400px.png)
+![Pleb-VPN](pictures/mynode_logo_dark.png)
 
 # Pleb-VPN  
-_Easy VPS sharing for cheaper hybrid solution for Plebs...built for Raspiblitz._
+_Easy VPS sharing for cheaper hybrid solution for Plebs..._
 
-`Version 1.0 including LND/CLN hybrid, WireGuard private VPN, tor split-tunneling, BTCPayServer/LNBits LetsEncrypt, and recurring payments with keysend messages`
+`Version 1.1.0 with a Web User Interface and mynode integration`
 
-**Pleb-VPN is a Raspiblitz tool set that allows you to easily take your node
+**Pleb-VPN is a lightning node networking tool set that allows you to easily take your node
 from a tor-only node to a hybrid solution with a public Virtual Private Server, _either yours 
 or someone elses!_ It also includes a number of tools to facilitate this, including an 
 easy-to-install implementation of WireGuard for private, secure VPN access to your node 
 anywhere, anytime, the ability to take BTCPayServer and/or LNBits public, and the ability to 
 automatically send recurring payments over lightning via keysend and include a message in the 
-payment. Pleb-VPN works with both LND and Core Lightning node implementations.**
+payment. Pleb-VPN works with both LND and Core Lightning node implementations and currently 
+works for both Raspiblitz and MyNode node implementations.**
 
 Pleb-VPN was born out of the realization that tor was always going to be
 insufficient for routing nodes, and that most plebs either won't afford
 or can't set up (or both) a VPS with a VPN and enable hybrid mode on their
 node. Enter Pleb-VPN! This enables easy VPS sharing and lowers the cost of
-going clearnet for Plebs.
+going clearnet for Plebs as well as making networking configuration changes as 
+easy as clicking a button.
 
-Pleb-VPN is a free open-source Raspiblitz integration of OpenVPN and WireGuard, 
+Pleb-VPN is a free open-source node networking management toolset which uses OpenVPN to connect to a VPS, 
 and includes scripts to configure either LND or Core Lightning (or both!) for 
 hybrid mode. It also includes the abiliy to take BTCPayServer and/or LNBits public using 
 LetsEncrypt for any DNS provider that allows a CNAME record. You may use this in conjunction 
 with your own VPS set up as an OpenVPN server, or you may subscribe to @allyourbankarebelongtous 
 and use our VPS setups for the cheapest price, easiest setup, and great service! Details below.
 
-If there are any other Plebs who want to share their VPS for a small fee, feel free
-to advertise and direct interested parties here for the easy-to-implement Raspiblitz
+If there are any other Plebs who want to share their VPS for a small fee, feel free 
+to advertise and direct interested parties here for the easy-to-implement 
 hybrid option! This will work with any public VPN (in the sense that the IP of the VPS 
 is for public access) that uses OpenVPN for its connection and allows port forwarding.
 
-**You can also set up your VPS to share with others as a VPN if you like to help
+**You can also set up your VPS to share with others as a VPN if you'd like to help 
 increase the availability of clearnet/hybrid nodes on the lightning network!**
 
 ---
 <!-- omit in toc -->
-## Table of Contents
+## Table of Contents  
 
   - [How it works](#how-it-works)
   - [FAQ](#faq)
   - [Subscription info](#subscription-info)
   - [Install instructions](#install-instructions)
+    - [Raspiblitz](#raspiblitz)
+    - [MyNode](#mynode)
   - [Getting started](#getting-started)
+    - [Change your password](#change-your-password)
     - [Connect the VPN](#connect-the-vpn)
     - [Go Hybrid](#go-hybrid)
     - [LetsEncrypt for BTCPay and/or LNBits](#letsencrypt-for-btcpay-and-lnbits)
@@ -56,44 +62,45 @@ increase the availability of clearnet/hybrid nodes on the lightning network!**
 ---
 
 ## How it Works  
-Pleb-VPN uses OpenVPN to connect to a Virtual Private Server (VPS) and configures
-Raspiblitz to only use that connection to go to the outside world (your home LAN
-remains unaffected and can access the blitz still). At this point, your public
-facing IP address becomes the IP address of the VPS. The connection between the VPS
-and the Raspiblitz is encrypted by the OpenVPN protocol. From there, going to a
+Pleb-VPN uses OpenVPN to connect to a Virtual Private Server (VPS) and configures 
+your node to only use that connection to go to the outside world (your home LAN 
+remains unaffected and can access the node still). At this point, your public 
+facing IP address becomes the IP address of the VPS. The connection between the VPS 
+and the node is encrypted by the OpenVPN protocol. From there, going to a 
 hybrid or clearnet solution for LND or Core Lightning is more private as you 
-will not release your home IP to the outside world.
+will not release your home IP to the outside world. It also makes it easy to get 
+a secure, fast public domain with https ssl certificates to your BtcPayServer or LNBits 
+instance.
 
-Pleb-VPN provides easy Raspiblitz menu access to install and configure OpenVPN,
-and then configure hybrid mode on or off for either LND or Core Lightning (or
-both). Pleb-VPN configures the node such that if the VPS goes offline you will
-not accidentally release your home IP (called a killswitch). Pleb-VPN also allows
+Pleb-VPN provides an easy-to-use WebUI to install and configure OpenVPN, 
+and then configure hybrid mode on or off for either LND or Core Lightning (or 
+both). Pleb-VPN configures the node such that if the VPS goes offline you will 
+not accidentally release your home IP (called a killswitch). Pleb-VPN also allows 
 as of version 0.9.1 for you to optionally split-tunnel tor off of the VPN. See FAQ 
 and Split-Tunneling Tor below for more details.
 
-Pleb-VPN also includes easy Raspiblitz menu access to install and configure WireGuard,
-a private VPN service that will run through the VPS, encrypted end-to-end from the
-Raspiblitz to any client connected to the blitz that you configure, giving you 
-a secure, simulated LAN that allows you to securely access all features of your
-Raspiblitz as if you were home from anywhere in the world. This feature is entirely
-set up locally on the Raspiblitz, so **even if you are sharing a VPS with someone you 
-don't know, they'll never get access to your Raspiblitz.**
+Pleb-VPN's WebUI also provides access to install and configure WireGuard, 
+a private VPN service that will run through the VPS, encrypted end-to-end from the 
+node to any client connected to the node that you configure, giving you 
+a secure, simulated LAN that allows you to securely access all features of your 
+node as if you were home from anywhere in the world. This feature is entirely 
+set up locally on the node, so **even if you are sharing a VPS with someone you 
+don't know, they'll never get access to your node.**
 
-Additionally, Pleb-VPN provides a script to easily enable LetsEncrypt for BTCPayServer and/or 
+Additionally, Pleb-VPN's WebUI allows you to easily enable LetsEncrypt for BTCPayServer and/or 
 LNBits using your VPS and any domain name that allows CNAME record entry (most DNS providers). 
-This has an advantage over the regular Raspiblitz LetsEncrypt, which only supports token 
-authentication through DuckDNS. Your LetsEncrypt certs are generated locally and the 
-key will never leave your node, ensuring your traffic through the VPS is encrypted. 
+Your LetsEncrypt certs are generated locally and the key will never leave your node, ensuring 
+your traffic through the VPS is encrypted. 
 
 Finally, Pleb-VPN comes with the ability to automatically send recurring payments 
 over lightning via keysend. _(credit to m00ninite's excellent scripts, found here: 
 https://github.com/rootzoll/raspiblitz/pull/2404)._
 
 **Pleb-VPN also ensures that all configurations will remain when you reflash the SD 
-card for Raspiblitz updates.**
+card for updates.**
 
 ## FAQ  
-**How much does it cost?**
+**How much does it cost?**  
 Pleb-VPN is free. What you will need to pay for is a server (in this guide referred to as a 
 VPS-Virtual Private Server) and bandwidth, to tunnel your traffic to and fro so your home IP isn't released. 
 The server is what costs money. You can rent your own VPS and manage the server yourself; 
@@ -105,9 +112,9 @@ the cost, or share with three and lower the cost further! Another alternative is
 mine, the details are below and the basic service is $2.00 US per month. 
 
 **How is this different than TunnelSats?**  
-Good question. It's really not that much different. TunnelSats uses one or more
-shared servers and provides you with a cert to connect to them, only it uses WireGuard
-instead of OpenVPN for the connection. TunnelSats configures split-tunneling such that
+Good question. It's really not that much different. TunnelSats uses one or more 
+shared servers and provides you with a cert to connect to them, only it uses WireGuard 
+instead of OpenVPN for the connection. TunnelSats configures split-tunneling such that 
 the node's clearnet lightning traffic is the ONLY thing going through the VPN, whereas Pleb-VPN 
 by default sends ALL TRAFFIC through the VPN, and gives you the option to configure 
 split-tunneling so that tor is the only thing ALLOWED TO BYPASS the VPN. This allows 
@@ -116,7 +123,7 @@ Pleb-VPN's other advantage is the ability to take BTCPayServer and/or LNBits pub
 to grant easy, secure access to your LNBits implementation or to easily provide payment services 
 through BTCPayServer to the outside world. TunnelSats cannot do this.
 
-TunnelSats is also available for other node implementations easily, like Umbrel or MyNode. 
+TunnelSats is also available for other node implementations easily, like Umbrel. 
 However, Pleb-VPN is cheaper, and encourages Plebs to collaborate to make the lightning network 
 more decentralized (less reliance on one or two providers) and more robust (more 
 hybrid/clearnet nodes). Plus, it comes with a private VPN already integrated in WireGuard.
@@ -127,18 +134,18 @@ a hybrid node, Wireguard private LAN, and BTCPay or LNBits public IP with SSL en
 Details are found in the subscription section.
 
 **How secure is this?**  
-It's as secure as any VPN. The OpenVPN encryption is AES-256-CBC, and WireGuard uses
-Curve25519 point multiplication as its primary method of private key/public key
-encryption. The owner of the VPS (this is true regardless of if you run it yourself,
+It's as secure as any VPN. The OpenVPN encryption is AES-256-CBC, and WireGuard uses 
+Curve25519 point multiplication as its primary method of private key/public key 
+encryption. The owner of the VPS (this is true regardless of if you run it yourself, 
 or if you share, or if you use TunnelSats) _will_ know your home IP address. They will _NOT_ 
 have access to your LAN, your WireGuard virtual LAN, or your Raspiblitz itself. A bonus of 
-sharing a VPS is that there is no KYC required...the only knowledge the VPS owner will have
+sharing a VPS is that there is no KYC required...the only knowledge the VPS owner will have 
 that the rest of the world doesn't have is your home IP address. _This is true whether you rent 
 your own VPS, use TunnelSats, or use Pleb-VPN with @allyourbankarebelongtous or share with 
 another pleb!_
 
-**Can I use this on an Umbrel/MyNode/Raspibolt/etc implementation?**  
-Sort of. The actual software here on GitHub is only for Raspiblitz (for now), but if you
+**Can I use this on an Umbrel/Citadel/Raspibolt/etc implementation?**  
+Sort of. The actual software here on GitHub only works for Raspiblitz and MyNode (for now), but if you
 can find a guide to install OpenVPN and take your node clearnet on your own nothing
 is stopping you from contacting @allyourbankarebelongtous or anyone else willing to
 share a VPS and paying them a small monthly fee to gain a clearnet IP and a couple of forwarded
@@ -149,19 +156,28 @@ ports. You will have to figure out how to:
 There are numerous guides on how to do this.
 
 **I want to update my node. What do I need to do?**  
-Update like normal according to Raspiblitz instructions. Pleb-VPN will automatically
-reinstall and reconfigure to match what you had before, including any recurring 
-payments scheduled or LetsEncrypt certs for BTCPay or LNBits.
+For Raspiblitz, update like normal according to your node implementation's instructions. 
+Pleb-VPN will automatically reinstall and reconfigure to match 
+what you had before, including any recurring payments scheduled or LetsEncrypt 
+certs for BTCPay or LNBits. 
+
+For MyNode, if you did a manual install you will have to run one command to restore your 
+settings. See the **Updating my Node** instructions below for more details.
+
+**Can I still use the SSH menu for Raspiblitz, or do I have to use the WebUI?**  
+Yes. This version preserves all of the original menu functionality of Pleb-VPN v1.0. 
+To see the walkthrough using the ssh menu for Raspiblitz, click 
+[here](https://github.com/allyourbankarebelongtous/pleb-vpn/blob/v1.0beta/README.md).
 
 **Can I remove Pleb-VPN?**  
-Yes. The menu provides an option to completely uninstall and restore the original
+Yes. The WebUI provides an option to completely uninstall and restore the original 
 node configuration at any time.
 
-**What if Pleb-VPN scripts are updated? How do I update mine?**  
-The menu has an option to update the scripts by pulling them from GitHub. It takes about 
-a half a second and keeps all of your settings. See the walkthrough below for details.
+**What if Pleb-VPN is updated to a new version? How do I update mine?**  
+When a new version is available, the WebUI will automatically detect it and display an update button. 
+It takes about a minute and keeps all of your settings. See the walkthrough below for details.
 
-## Subscription Info
+## Subscription Info  
 To subscribe to @allyourbankarebelongtous's VPS services, contact me on TG @allyourbankarebelongtous 
 or via email: allyourbankarebelongtous@protonmail.com. The basic service is $2.00 US per month, sent 
 via the included recurring payments (see walkthrough below) or some other method with a message that 
@@ -189,81 +205,88 @@ If you miss a payment, I will ping you and give you seven days to pay. If you do
 of the month, your access to the VPS will be regretfully shut off. 
 
 ## Install Instructions:  
-1. Exit to command line from the menu (you should be in directory /home/admin).  
-2. From /home/admin, clone the repository by copying and pasting the following command:  
-   `git clone https://github.com/allyourbankarebelongtous/pleb-vpn.git`  
-3. Fix the permissions, copy, paste into the command line, and run:  
-   `sudo chmod -R 755 /home/admin/pleb-vpn`  
-4. Run the install script by copying and pasting:  
-   `/home/admin/pleb-vpn/pleb-vpn.install.sh on`  
 
-Access Pleb-VPN from the menu and try it out!
+### Raspiblitz  
+1. ssh into the node.  
+2. Exit to command line from the menu.  
+3. Get the install script from gitub and run it by copying and pasting the following command:  
+   `sudo wget https://raw.githubusercontent.com/allyourbankarebelongtous/pleb-vpn/main/pleb-vpn.install.sh && sudo bash pleb-vpn.install.sh on`  
+You can access all of Pleb-VPN's functionality from the ssh menu, and you can also use the WebUI.
 
-## Getting Started:  
-After install you should have a menu that looks like this:  
-![MainMenu](pictures/mainmenu.png)
+### MyNode  
+Until the application gets added to the app store, you'll have to do a manual install by following the instructions below.   
+1. ssh into the node.  
+2. Get the install script from gitub and run it by copying and pasting the following command:  
+   `sudo wget https://raw.githubusercontent.com/allyourbankarebelongtous/pleb-vpn/main/pleb-vpn.install.sh && sudo bash pleb-vpn.install.sh on`  
 
-Select "PLEB-VPN" to enter the Pleb-VPN Main Menu:  
-![Pleb-VPNMenu](pictures/pleb-vpnmenu.png)
+Access Pleb-VPN from the WebUI and try it out!
 
-Here there are five options available, although you will initially only see four.  
-These options are:  
-STATUS - Get the current status of installed services  
-SERVICES - Install and configure VPNs and hybrid mode  
-PAYMENTS - Manage, add, or remove recurring payments  
-WIREGUARD-CONNECT - Get WireGuard config files for clients (only shows when WireGuard installed)  
-PLEB-VPN - Uninstall or update Pleb-VPN  
+## Getting Started  
+After install you can access the WebUI by opening your computer browser and going to ip.ip.ip.ip:2420 (use port 2421 for https),
+where ip.ip.ip.ip is your node's home LAN ip address. After you do that you will see the login page:  
+![Login](pictures/webui_login.png)
+
+Your username is "admin" and your initial password depends on your node implementation:  
+Raspiblitz - use your password B.  
+MyNode - first login uses password "plebvpn".    
+
+Once you've logged on you'll see the home screen, which displays the current status of services, 
+the current version, and (if Pleb-VPN detects a new version) an Update button. It also displays 
+an Uninstall button for removing Pleb-VPN from your node.
+![HomepageNew](pictures/webui_homepage_new.png)
+
+Each page has a "Refresh Data" button at the top of the screen. This button refreshes the values 
+displayed by each screen's status checks. Data is refreshed when you change a setting or when you 
+click the "Refresh Data" button for each screen.
+
+### Change your password  
+The menu bar has an option to change your password. If you logged on for the first time with the 
+default "plebvpn" password, you should change it now using this link.
 
 ### Connect the VPN
-Looking at the SERVICES menu, you will only see one option initially:  
-![ServicesMenuInitial](pictures/servicesmenuinitial.png)
+In the Services dropdown menu, you will have five options:  
+![ServicesMenu](pictures/webui_services_menu.png)
 
-Initially the only thing you can activate is Pleb-VPN, which is the OpenVPN connection
-to the VPS that gives you a public IP different than your home IP. Activating the other
-services without this will only dox your home IP (WireGuard wouldn't, but unless you
-have a static home IP, which is unlikely, you'd have to constantly re-configure WireGuard).
+These options take you to pages where you can manage your settings and view the status of each 
+of the various services. Without an active connection to your VPS, none of the services can be 
+enabled yet, so step one is to enable the Pleb-VPN connection to the VPS by clicking on "Pleb-VPN" 
+in the Services dropdown menu, which takes you to this page:  
+![PlebVPNpage](pictures/webui_plebvpn_off.png)
 
-After activating Pleb-VPN, you are asked to send the OpenVPN config file (called plebvpn.conf)
-to the node using scp. The node gives you the command to run. If you already have uploaded
-it and are just re-enabling Pleb-VPN, it will find the old .conf file and ask if you
-want to keep it or upload a new one.  
-![UploadplebVPNConf](pictures/uploadplebvpnconf.png)
+You will first have to upload the OpenVPN config file (called plebvpn.conf) 
+to the node. If you already have uploaded it and are just re-enabling Pleb-VPN, it will find the 
+old .conf file. Once you have a .conf file uploaded you can enable Pleb-VPN:  
+![PlebVPNenable](pictures/webui_plebvpn_enable.png)
 
-Once the script has run, it will check the status of the VPN connection and display the
+Once the script has run, it will check the status of the VPN connection and display the 
 status screen:  
-![Pleb-VPNStatusScreen](pictures/plebvpnstatusscreen.png)
+![PlebVPNstatus](pictures/webui_plebvpn_on.png)
 
-Once your VPN is connected it will automatically restart every time the Raspiblitz
-starts up. If for some reason you want to manually disconnect without uninstalling,
-you can use the command line:  
-Stop (service will still start on boot): `sudo systemctl stop openvpn@plebvpn`  
-Disable (service will not start on boot): `sudo systemctl disable openvpn@plebvpn`  
-Enable (autostart on boot): `sudo systemctl enable openvpn@plebvpn`  
-Start (start now): `sudo systemctl start openvpn@plebvpn`  
+Once your VPN is connected it will automatically restart every time the node 
+starts up.Now that your VPN connection to the VPS is up, you will be able to activate 
+the other services!
 
 ### Go Hybrid
-Now that your VPN connection to the VPS is up, the SERVICES menu shows more options:  
-![ServicesMenuInstalled](pictures/servicesmenuinstalled.png)
+Navigate to the "Hybrid Mode" page under the Services dropdown. Here you will see your node 
+implementation (either LND or Core Lightning). If your node runs both you will see both 
+node types. The first thing you have to do is enter a port to use. This is because to share 
+a server, the nodes have to use different ports. If you got your plebvpn.conf from 
+another pleb, you should also get a port to use for your node. This is where you enter 
+the port (this page shows LND, it's the same for Core Lightning):  
+![LNDHybridport](pictures/webui_hybrid_port.png)
 
-From here, it should show the option to enable hybrid mode on whichever node implementation
-is active on your node. If the service detects that both are installed, it will display
-both, as shown here. Lets activate hybrid mode for LND (the steps are identical for Core Lightning).
-
-The first thing the script will do is ask for a port to use. This is because to share
-a server, the nodes have to use different ports. If you got your plebvpn.conf from
-another pleb, you should also get a port to use for your node. This is where you enter
-the port:  
-![LNDHybridport](pictures/lndhybridport.png)
-
-If you've already entered a port, the script will use the port already entered (i.e., for
-re-enabling hybrid after turning it off). The process is the same for Core Lightning.  
+Once you've entered a port, the "Activate" button appears. To activate hybrid mode, just click it!  
+![LNDHybridActivate](pictures/webui_hybrid_port_entered.png)
 _Note: If you use both node implementations side by side, they MUST use different ports!_
 
-After it finishes the configuration and the wallet is unlocked, the script displays the 
-status which should now show your new clearnet address and port. If you have channels 
-connected, this data should reflect on lightning explorers such as amboss.space within 
-an hour (takes time for the gossip data to propagate).  
-![LNDHybridStatus](pictures/lndhybridstatus.png)
+After it finishes the configuration, your node implementation (LND or CLN) will be restarted, 
+and the screen displays the status which should now show your new clearnet address and port. 
+If it doesn't yet, then refresh the data with the "Refresh Data" button.  
+_Note: It's possible that you may have to unlock your wallet 
+before the data is available._  
+If you have channels connected, this data should reflect on lightning explorers such as 
+amboss.space within an hour (takes time for the gossip data to propagate).  
+![LNDHybridStatus](pictures/webui_hybrid_on.png)
 
 BOOM! You now have a hybrid node with a VPS!
 
@@ -271,7 +294,7 @@ BOOM! You now have a hybrid node with a VPS!
 The LetsEncrypt service will show under the SERVICES Pleb-VPN menu only if it detects that either 
 BTCPayServer or LNBits is installed. 
 
-If you have a VPS that is capable of forwarding port 443 to your raspiblitz, you can point a 
+If you have a VPS that is capable of forwarding port 443 to your node, you can point a 
 domain to your VPS IP and forward it to BTCPay or LNBits, allowing you to accept payments from 
 customers on BTCPay and/or allow others to access your LNBits instance. It takes a bit more 
 work to enable both on your own VPS, but it's doable. If you subscribe to @allyourbankarebelongtous, 

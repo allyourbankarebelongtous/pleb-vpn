@@ -497,6 +497,16 @@ WantedBy=multi-user.target
     fi
 
   fi
+
+  # test and reload nginx
+  nginx -t
+  if [ $? -eq 0 ]; then
+    echo "nginx config good"
+    systemctl reload nginx
+  else
+    echo "Error: nginx test config fail"
+    exit 1
+  fi
   # update pleb-vpn.conf
   if [ ! "${letsencryptdomain2}" = "" ]; then
     setting ${plebVPNConf} "2" "letsencryptdomain2" "'${letsencryptdomain2}'"

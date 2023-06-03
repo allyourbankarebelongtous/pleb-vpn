@@ -201,14 +201,53 @@
       </table>
     </div>
   </div>
-  {% if update_available == True %}
+  {% if update_available == True %} {% if "alpha" in setting['latestversion'] %}
   <div class="row">
     <div class="col text-center">
       <p>
-        A Pleb-VPN update is available. To update, click "Update Pleb-VPN".
-        Pleb-VPN will update and restart. Your settings will be unaffected. You
+        An <strong>UNSTABLE ALPHA RELEASE</strong> Pleb-VPN update is available
+        for testing. To update, click "Update Pleb-VPN". Pleb-VPN will update
+        and restart. Your settings <strong>SHOULD</strong> be unaffected. You
         will have to refresh the page once the update is complete (usually about
         a minute).
+      </p>
+      <p>
+        <strong
+          >WARNING: undoing the update is not possible using the webui at this
+          time and requires ssh access. Contact @allyourbankarebelongtous on
+          telegram for support if needed.</strong
+        >
+      </p>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col text-center">
+      <button id="update-scripts" type="button" class="btn btn-danger">
+        Update Pleb-VPN
+      </button>
+      <button
+        id="update-scripts_loading"
+        class="btn btn-danger d-none"
+        type="button"
+        disabled
+      >
+        <span
+          class="spinner-grow spinner-grow-sm"
+          role="status"
+          aria-hidden="true"
+        ></span>
+        Loading...
+      </button>
+    </div>
+  </div>
+  {% elif "beta" in setting['latestversion'] %}
+  <div class="row">
+    <div class="col text-center">
+      <p>
+        A Pleb-VPN <strong>beta</strong> release update is available. To update,
+        click "Update Pleb-VPN". Pleb-VPN will update and restart. Your settings
+        will be unaffected. You will have to refresh the page once the update is
+        complete (usually about a minute).
       </p>
     </div>
   </div>
@@ -232,7 +271,39 @@
       </button>
     </div>
   </div>
-  {% endif %}
+
+  {% else %}
+  <div class="row">
+    <div class="col text-center">
+      <p>
+        A Pleb-VPN stable release update is available. To update, click "Update
+        Pleb-VPN". Pleb-VPN will update and restart. Your settings will be
+        unaffected. You will have to refresh the page once the update is
+        complete (usually about a minute).
+      </p>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col text-center">
+      <button id="update-scripts" type="button" class="btn btn-primary">
+        Update Pleb-VPN
+      </button>
+      <button
+        id="update-scripts_loading"
+        class="btn btn-primary d-none"
+        type="button"
+        disabled
+      >
+        <span
+          class="spinner-grow spinner-grow-sm"
+          role="status"
+          aria-hidden="true"
+        ></span>
+        Loading...
+      </button>
+    </div>
+  </div>
+  {% endif %} {% endif %}
   <div class="row">
     <div class="col text-center">
       <h5>Uninstall Pleb-VPN</h5>
@@ -260,7 +331,9 @@
   </div>
 </div>
 <script>
-  var socket = io.connect("http://" + document.domain + ":" + location.port);
+  var socket = io.connect(
+    location.protocol + "//" + document.domain + ":" + location.port
+  );
   $("#update-scripts").click(function () {
     event.preventDefault(event);
     if (

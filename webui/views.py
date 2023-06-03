@@ -2,11 +2,12 @@ from flask import Blueprint, render_template, request, flash, jsonify, redirect,
 from flask_login import login_required, current_user
 from werkzeug.utils import secure_filename
 from socket_io import socketio
+from flask_socketio import disconnect
 from check_update import get_latest_version
 from plebvpn_common import config
 from .models import User
 from . import db
-import json, os, subprocess, time, pexpect, random, qrcode, io, base64, shutil, re, socket, requests, re
+import json, os, subprocess, time, pexpect, random, qrcode, io, base64, shutil, re, socket, requests, re, signal, functools
 
 views = Blueprint('views', __name__)
 
@@ -28,6 +29,17 @@ torsplittunnel_status = {}
 torsplittunnel_test_status = {}
 update_available = False
 enter_input = False
+
+
+# socketio authentication check
+def authenticated_only(f):
+    @functools.wraps(f)
+    def wrapped(*args, **kwargs):
+        if not current_user.is_authenticated:
+            disconnect()
+        else:
+            return f(*args, **kwargs)
+    return wrapped
 
 ########################
 ### Home Page routes ###
@@ -87,6 +99,7 @@ def refresh_plebVPN_data():
 
 # to update plebvpn
 @socketio.on('update_scripts')
+@authenticated_only
 def update_scripts():
     # reset update_available
     global update_available
@@ -100,6 +113,7 @@ def update_scripts():
     print(result.stdout, result.stderr)
 
 @socketio.on('uninstall-plebvpn')
+@authenticated_only
 def uninstall_plebvpn():
     # update pleb-vpn
     cmd_str = [os.path.join(EXEC_DIR, "pleb-vpn.install.sh") + " uninstall"]
@@ -150,6 +164,7 @@ def pleb_VPN():
 
 # turn pleb-vpn on or off
 @views.route('/set_plebVPN', methods=['POST'])
+@login_required
 def set_plebVPN():
     # turns pleb-vpn connection to vps on or off
     setting = get_conf()
@@ -191,6 +206,7 @@ def set_plebVPN():
 
 # delete pleb-vpn conf file
 @views.route('/delete_plebvpn_conf', methods=['POST'])
+@login_required
 def delete_plebvpn_conf():
     # delete plebvpn.conf from pleb-vpn/openvpn
     user = json.loads(request.data)
@@ -246,9 +262,9 @@ def hybrid():
         if "lnPort" in request.form:
             lnPort = request.form.get('lnPort')
             if not lnPort.isdigit():
-                flash('Error! LND Hybrid Port must be four numbers (example: 9739)', category='error')
-            elif len(lnPort) != 4:
-                flash('Error! LND Hybrid Port must be four numbers (example: 9739)', category='error')
+                flash('Error! LND Hybrid Port must be four or five numbers (example: 9739)', category='error')
+            elif len(lnPort) not in [4, 5]:
+                flash('Error! LND Hybrid Port must be four or five numbers (example: 9739)', category='error')
             else:
                 conf_file.set_option('lnport', lnPort)
                 conf_file.write()
@@ -256,18 +272,19 @@ def hybrid():
         if "clnPort" in request.form:
             clnPort = request.form.get('clnPort')
             if not clnPort.isdigit():
-                flash('Error! CLN Hybrid Port must be four numbers (example: 9739)', category='error')
-            elif len(clnPort) != 4:
-                flash('Error! CLN Hybrid Port must be four numbers (example: 9739)', category='error')
+                flash('Error! CLN Hybrid Port must be four or five numbers (example: 9739)', category='error')
+            elif len(clnPort) not in [4, 5]:
+                flash('Error! CLN Hybrid Port must be four or five numbers (example: 9739)', category='error')
             else:
                 conf_file.set_option('clnport', clnPort)
                 conf_file.write()
-                flash('Received new LND Port: ' + clnPort, category='success') 
+                flash('Received new CLN Port: ' + clnPort, category='success') 
 
     return render_template('hybrid.html', user=current_user, setting=get_conf(), lnd_hybrid_status=lnd_hybrid_status, cln_hybrid_status=cln_hybrid_status, lnd=lnd, cln=cln)
 
 # turn lnd hybrid mode on or off
 @views.route('/set_lndHybrid', methods=['POST'])
+@login_required
 def set_lndHybrid():
     # turns lnd hybrid mode on or off
     setting = get_conf()
@@ -309,6 +326,7 @@ def set_lndHybrid():
 
 # turn cln hybrid mode on or off
 @views.route('/set_clnHybrid', methods=['POST'])
+@login_required
 def set_clnHybrid():
     # turns cln hybrid mode on or off
     setting = get_conf()
@@ -433,6 +451,7 @@ def payments():
 
 # delete payment
 @views.route('/delete_payment', methods=['POST'])
+@login_required
 def delete_payment():
     payment_id = json.loads(request.data)
     payment_id = payment_id['payment_id']
@@ -453,6 +472,7 @@ def delete_payment():
 
 # delete all payments
 @views.route('/delete_all_payments', methods=['POST'])
+@login_required
 def delete_all_payments():
     cmd_str = [os.path.join(EXEC_DIR, "payments/managepayments.sh") + " deleteall 1"]
     try:
@@ -470,6 +490,7 @@ def delete_all_payments():
 
 # send payment now
 @views.route('/send_payment', methods=['POST'])
+@login_required
 def send_payment():
     payment_id = json.loads(request.data)
     payment_id = payment_id['payment_id']
@@ -548,9 +569,9 @@ def wireguard():
         if "wgPort" in request.form:
             wgPort = request.form.get('wgPort')
             if not wgPort.isdigit():
-                flash('Error! Wireguard Port must be four numbers (example: 9739)', category='error')
-            elif len(wgPort) != 4:
-                flash('Error! Wireguard Port must be four numbers (example: 9739)', category='error')
+                flash('Error! Wireguard Port must be four or five numbers (example: 9739)', category='error')
+            elif len(wgPort) not in [4, 5]:
+                flash('Error! Wireguard Port must be four or five numbers (example: 9739)', category='error')
             else:
                 conf_file.set_option('wgport', wgPort)
                 conf_file.write()
@@ -560,6 +581,7 @@ def wireguard():
 
 # get wireguard client qr code
 @views.route('/wireguard/clientqrcode', methods=['POST'])
+@login_required
 def generate_qr_code():
     filename = json.loads(request.data)
     filename = filename['filename']
@@ -587,6 +609,7 @@ def generate_qr_code():
 
 # download wireguard client file
 @views.route('/wireguard/download_client')
+@login_required
 def download_file():
     # Get the filename from the URL query string
     filename = request.args.get('filename')
@@ -598,6 +621,7 @@ def download_file():
 
 # set wireguard on or off
 @views.route('/set_wireguard', methods=['POST'])
+@login_required
 def set_wireguard():
     # turns wireguard on or off
     setting = get_conf()
@@ -725,6 +749,7 @@ def torsplittunnel():
 
 # set tor split-tunneling on or off
 @views.route('/set_torsplittunnel', methods=['POST'])
+@login_required
 def set_torsplittunnel():
     # turns tor split-tunneling on or off
     setting = get_conf()
@@ -792,6 +817,7 @@ def letsencrypt():
 
 # turn letsencrypt on and get certs
 @socketio.on('set_letsencrypt_on')
+@authenticated_only
 def set_letsencrypt_on(formData):
     setting=get_conf()
     # get ssl certs
@@ -851,6 +877,9 @@ def set_letsencrypt_on(formData):
     elif exit_code == int(42069):
         message = 'Script exited with unknown status.'
         category = 'info'
+    elif exit_code == int(420):
+        message = 'Script timed out.'
+        category = 'error'
     else:
         message = 'LetsEncrypt certificate install unsuccessful. Please check your domain name(s) and try again, ensuring you enter the CNAME record correctly.'
         category = 'error'
@@ -858,6 +887,7 @@ def set_letsencrypt_on(formData):
 
 # turn letsencrypt off and delete certs
 @socketio.on('set_letsencrypt_off')
+@authenticated_only
 def set_letsencrypt_off():
     cmd_str = [os.path.join(EXEC_DIR, "letsencrypt.install.sh") + " off"]
     try:
@@ -887,10 +917,13 @@ def get_certs(cmd_str, suppress_output = True, suppress_input = True):
     enter_count = 0
     end_script = False
     capture_output = False
-    capture_output_trigger = str("Output from acme-dns-auth.py")
+    capture_output_trigger = str("Output from")
     capture_output_trigger_off = str("Waiting for verification...")
     enter_yes_trigger = str("(Y)es/(N)o:")
     child = pexpect.spawn('/bin/bash')
+    # Set up the timeout signal handler
+    signal.signal(signal.SIGALRM, timeout_handler)
+    signal.alarm(600)  # Set the alarm for 10 minutes
     try:
         child.expect(['\r\n', pexpect.EOF, pexpect.TIMEOUT], timeout=0.1)
         output = child.before.decode('utf-8')
@@ -927,19 +960,26 @@ def get_certs(cmd_str, suppress_output = True, suppress_input = True):
                     if yes_count < 1:
                         enter_yes = True
                     print("enter_yes_trigger received: " + output + "\n enter_yes=" + str(enter_yes), file=debug_inout) # for debug purposes only
-                if suppress_output == False: 
+                if not suppress_output: 
                     if capture_output:
                         socketio.emit('CNAMEoutput', output.strip().replace(cmd_line, ''))
                         if capture_output_trigger_off in output:
                             print("capture_output_off received: " + output, file=debug_inout) # for debug purposes only
                             capture_output = False
-                            print("capture_output set to: " + str(capture_output), file=debug_inout) # for debug purposes only
+                            print("capture_output sent to child: " + str(capture_output), file=debug_inout) # for debug purposes only
                             socketio.emit('CNAMEoutput', str('First update the CNAME record(s) of your domain(s) as shown above. After the CNAME records are updated, press "Enter" below.'))
         except pexpect.TIMEOUT:
             pass
+        except TimeoutError:
+            print("Command execution timed out", file=debug_inout) # for debug purposes only
+            child.close()
+            debug_file.close() # debug purposes only
+            debug_inout.close() # debug purposes only
+            signal.alarm(0)
+            return int(420)
         if not suppress_input:
             if enter_yes:
-                # print("Sending to terminal: Y", file=debug_file) # for debut only
+                # print("Sending to terminal: Y", file=debug_file) # for debug only
                 if yes_count < 1:
                     child.sendline("Y")
                     yes_count += 1
@@ -952,9 +992,9 @@ def get_certs(cmd_str, suppress_output = True, suppress_input = True):
                     child.sendline('')
                     enter_count += 1
                     socketio.emit('wait_for_confirmation')
-                print('sent enter from enter_input to child', file=debug_inout)
-                enter_input = False
-                print("enter_input set to: " + str(enter_input), file=debug_inout) # for debug purposes only
+                    print('sent enter from enter_input to child', file=debug_inout)
+                    enter_input = False
+                    print("enter_input set to: " + str(enter_input), file=debug_inout) # for debug purposes only
         if child.eof() or end_script:
             break
     time.sleep(0.1)
@@ -977,7 +1017,9 @@ def get_certs(cmd_str, suppress_output = True, suppress_input = True):
         exit_code = int(42069)
     print('Exit code = ', exit_code, file=debug_file) # for debug purposes only
     child.close()
+    signal.alarm(0)
     debug_file.close() # for debug purposes only
+    debug_inout.close() # debug purposes only
     
     return exit_code
 
@@ -1037,6 +1079,7 @@ def get_plebVPN_status():
     setting=get_conf()
     # check for new version of pleb-vpn
     latest_version = str(get_latest_version())
+    update_available = False
     if latest_version is not None:
         if setting['version'] != latest_version:
             conf_file.set_option('latestversion', latest_version)
@@ -1163,6 +1206,7 @@ def get_torsplittunnel_status():
 
 # run test of tor split-tunneling service
 @views.route('/get_torsplittunnel_test_status', methods=['POST'])
+@login_required
 def get_torsplittunnel_test_status():
     # test status of tor split-tunnel service
     user = json.loads(request.data)
@@ -1191,9 +1235,14 @@ def get_torsplittunnel_test_status():
 
 # get enter input for commands run using pexpect (needed for letsencrypt script)
 @socketio.on('enter_input')
+@authenticated_only
 def set_enter_input():
     debug_file = open(os.path.abspath('./debug_enter.txt'), "w") # for debug purposes only
     global enter_input
     enter_input = True
     print("set_enter_input: !ENTER!", str(enter_input), file=debug_file) # debug purposes only
     debug_file.close() # for debug purposes only
+
+# timeout handler for running commands using pexpect
+def timeout_handler(signum, frame):
+    raise TimeoutError("Command execution timed out")
