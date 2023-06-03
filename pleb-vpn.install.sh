@@ -5,7 +5,7 @@
 # establishes system configuration backups using pleb-vpn.backup.sh and restores on uninstall
 # sets initial values in pleb-vpn.conf, including LAN, lndConfFile, CLNConfFile
 
-ver="v1.1.0-alpha.3" 
+ver="v1.1.0-alpha.4" 
 
 if [ -d "/mnt/hdd/mynode" ]; then
   nodetype="mynode"
@@ -335,7 +335,7 @@ After=network.target mnt-hdd.mount
 
 [Service]
 WorkingDirectory=/home/admin/pleb-vpn
-ExecStart=/home/admin/pleb-vpn/.venv/bin/gunicorn -k geventwebsocket.gunicorn.workers.GeventWebSocketWorker -w 1 -b 0.0.0.0:2420 main:app
+ExecStart=/home/admin/pleb-vpn/.venv/bin/gunicorn --capture-output -k geventwebsocket.gunicorn.workers.GeventWebSocketWorker -w 1 -b 0.0.0.0:2420 main:app
 User=root
 Group=root
 Type=simple
@@ -366,7 +366,7 @@ WorkingDirectory=/opt/mynode/pleb-vpn
 
 ExecStartPre=/usr/bin/is_not_shutting_down.sh
 ExecStartPre=/bin/bash -c 'if [ -f /usr/bin/service_scripts/pre_pleb-vpn.sh ]; then /bin/bash /usr/bin/service_scripts/pre_pleb-vpn.sh; fi'
-ExecStart=/bin/bash -c \"/opt/mynode/pleb-vpn/.venv/bin/gunicorn -k geventwebsocket.gunicorn.workers.GeventWebSocketWorker -w 1 -b 0.0.0.0:2420 main:app\"
+ExecStart=/bin/bash -c \"/opt/mynode/pleb-vpn/.venv/bin/gunicorn --capture-output -k geventwebsocket.gunicorn.workers.GeventWebSocketWorker -w 1 -b 0.0.0.0:2420 main:app\"
 ExecStartPost=/bin/bash -c 'if [ -f /usr/bin/service_scripts/post_pleb-vpn.sh ]; then /bin/bash /usr/bin/service_scripts/post_pleb-vpn.sh; fi'
 #ExecStop=FILL_IN_EXECSTOP_AND_UNCOMMENT_IF_NEEDED
 

@@ -3,7 +3,9 @@ from webui import create_app
 from socket_io import socketio
 from gevent import monkey
 from werkzeug.middleware.proxy_fix import ProxyFix
+import logging
 
+logging.basicConfig(level=logging.DEBUG)
 app = create_app()
 
 # Enable CORS for the Flask app

@@ -1,10 +1,13 @@
 <!-- omit in toc -->
 # ![Pleb-VPN](pictures/full-logo-cutout-orange.png)  
-![Pleb-VPN](pictures/raspilogo_tile_400px.png)  
-![Pleb-VPN](pictures/mynode_logo_dark.png)
 
 # Pleb-VPN  
-_Easy VPS sharing for cheaper hybrid solution for Plebs..._
+
+_Easy VPS sharing for cheaper hybrid solution for Plebs..._  
+
+**Available for**  
+![Pleb-VPN](pictures/raspilogo_tile_400px.png)  
+![Pleb-VPN](pictures/mynode_logo_dark.png)
 
 `Version 1.1.0 with a Web User Interface and mynode integration`
 
@@ -253,8 +256,9 @@ enabled yet, so step one is to enable the Pleb-VPN connection to the VPS by clic
 in the Services dropdown menu, which takes you to this page:  
 ![PlebVPNpage](pictures/webui_plebvpn_off.png)
 
-You will first have to upload the OpenVPN config file (called plebvpn.conf) 
-to the node. If you already have uploaded it and are just re-enabling Pleb-VPN, it will find the 
+You will first have to upload the OpenVPN config file (called plebvpn.conf) to the node. 
+This file is what gives the node the keys and information it needs to make a secure connection 
+to the VPS. If you already have uploaded it and are just re-enabling Pleb-VPN, it should find the 
 old .conf file. Once you have a .conf file uploaded you can enable Pleb-VPN:  
 ![PlebVPNenable](pictures/webui_plebvpn_enable.png)
 
@@ -263,7 +267,7 @@ status screen:
 ![PlebVPNstatus](pictures/webui_plebvpn_on.png)
 
 Once your VPN is connected it will automatically restart every time the node 
-starts up.Now that your VPN connection to the VPS is up, you will be able to activate 
+starts up. Now that your VPN connection to the VPS is up, you will be able to activate 
 the other services!
 
 ### Go Hybrid
@@ -275,9 +279,13 @@ another pleb, you should also get a port to use for your node. This is where you
 the port (this page shows LND, it's the same for Core Lightning):  
 ![LNDHybridport](pictures/webui_hybrid_port.png)
 
-Once you've entered a port, the "Activate" button appears. To activate hybrid mode, just click it!  
+Once you've entered a port, the "Activate" button appears. You can also change the 
+port if you entered the wrong one or decide to change it. To activate hybrid mode, 
+just click the "Activate" button!  
 ![LNDHybridActivate](pictures/webui_hybrid_port_entered.png)
 _Note: If you use both node implementations side by side, they MUST use different ports!_
+
+You can also change the port if you entered the wrong one or decide to change it. 
 
 After it finishes the configuration, your node implementation (LND or CLN) will be restarted, 
 and the screen displays the status which should now show your new clearnet address and port. 
@@ -291,8 +299,9 @@ amboss.space within an hour (takes time for the gossip data to propagate).
 BOOM! You now have a hybrid node with a VPS!
 
 ### LetsEncrypt for BTCPay and LNBits
-The LetsEncrypt service will show under the SERVICES Pleb-VPN menu only if it detects that either 
-BTCPayServer or LNBits is installed. 
+To get a cert for clearnet https access from the outside world to your BTCPayServer and/or LNBits 
+instance, you should first ensure that they are installed in your node. Follow your node implementation's 
+install instructions for BTCPayServer and/or LNBits.
 
 If you have a VPS that is capable of forwarding port 443 to your node, you can point a 
 domain to your VPS IP and forward it to BTCPay or LNBits, allowing you to accept payments from 
@@ -301,102 +310,78 @@ work to enable both on your own VPS, but it's doable. If you subscribe to @allyo
 for an extra $1.00 US per month per service I will forward you port 443 to each service.
 
 Once you have a domain that can reach your LNBits or BTCPayServer from the public internet over 
-port 443 through your VPS, it's time to get some SSL certs! This is where this service comes in 
-handy. This script configures LetsEncrypt on your Raspiblitz for either BTCPay, LNBits, or both, using 
+port 443 through your VPS, it's time to get an SSL cert! This is where this service comes in 
+handy. This configures LetsEncrypt on your node for either BTCPay, LNBits, or both, using 
 CNAME authentication over your domain, so it works with any domain you have that allows you to enter 
 a CNAME record. If you're not sure you can enter a CNAME record, contact your DNS provider to ask. 
 
 Step 1: Have a domain name for each service you intend to secure (one for BTCPayServer and another for LNBits).  
 Step 2: Have forwarded port 443 from your VPS (or contact your VPS provider to get them to forward the port).  
-  _Note: If you want to enable both services from the same VPS, you'll need a reverse proxy on the VPS to decide which service receives traffic._  
+  _Note: If you want to enable both services from the same VPS, you'll need a reverse proxy on the 
+VPS to decide which service receives traffic._  
 Step 3: Have updated the A record of each domain to point to your VPS IP.  
 Step 4: Ensure that you know how to and are ready to update the CNAME record of your domain.   
 
-Once all of these are accomplished, go ahead and run this script. When you first run the script, 
-it will display these instructions. Here's what it looks like:
-![letsencryptinstructions](pictures/letsencryptinstructions.png)
-_Note: The IP the script tells you to set the A record to will be your VPS's IP_
+Once all of these are accomplished, head to the LetsEncrypt BTCPay/LNBits page under the Services dropdown menu to get your cert:  
+![letsencryptinstructions](pictures/webui_letsencrypt_start.png)
+_Note: The IP the instructions tell you to set the A record to will be your VPS's IP_
 
-You can tell you are ready to run the script if each domain you have (one for BTCPay and/or one 
+You can tell you are ready to install certs if each domain you have (one for BTCPay and/or one 
 for LNBits) can access your instance and the only issue you have is it's warning you that your 
-connection is not trusted. You must also be ready to update the CNAME record of each domain.
+connection is not trusted. You must also be ready to update the CNAME record of each domain. Once 
+you're ready, enter your domain(s), select which service(s) you want to activate, and click Get Certs.
 
-After you acknowledge the instructions, the script will install Certbot, which will guide you 
-through the install. Then the script has to gather some more information.
+The "Loading..." icon will appear as the program is running. Once it reaches the point where it 
+has challenges loaded it will pause and display your challenges like this:
+![CNAME_Challenges](pictures/webui_letsencrypt_CNAME_challenge.png)
 
-Next you will be asked which service you want to install. The script will only display services you 
-have already installed on your node. If you intend to install LetsEncrypt for both BTCPayServer 
-and LNBits, it is recommended that you do so at the same time, as you will only get one cert, so 
-if you add another service at a different time you will have to re-do the cert and update both 
-CNAME records. Here's what it looks like if you have both BTCPayServer and LNBits installed on your node: 
-![letsencryptselectservices](pictures/letsencryptselectservices.png)
-
-Once you have selected the service(s) that will be encrypted, the script asks for one (or both) 
-domain names. In this case, I have selected both. Here's domain entry No. 1:
-![letsencryptdomain1](pictures/letsencryptdomain1.png)
-
-If you selected both services, you'll need two separate domain names. The script will ask for a second 
-domain name if you selected both BTCPayServer and LNBits. Here's domain entry No. 2:
-![letsencryptdomain2](pictures/letsencryptdomain2.png)
-
-After this, the script displays instructions on entering the CNAME record. It looks like this: 
-![Certbot_instructions](pictures/Certbot_instructions.png)
-
-Then Certbot starts to run and will ask you if you agree to the terms:
-![Certbot_terms](pictures/Certbot_terms.png)
-
-Once you agree, it will finish and display this screen:
-![CNAME_Challenges](pictures/CNAME_Challenges.png)
-
-**IMPORTANT! You must update your CNAME records before pressing enter!**  
-Here I have to enter my CNAME records for both btcpay.allyourbank.ink and lnbits.allyourbank.ink 
+**IMPORTANT! You must update your CNAME record(s) before pressing enter!**  
+Now I have to add my CNAME records for both btcpay.allyourbank.ink and lnbits.allyourbank.ink 
 to demonstrate that I own those domains. Here's what my DNS service looks like after the update 
-(this is using name.com, which has good prices and a good reputation):
+(this is using name.com):
 ![CNAME_Entry](pictures/CNAME_Entry.png)
 
 You can see that I have updated my CNAME host name for btcpay.allyourbank.ink to 
 "_acme-challenge.btcpay.allyourbank.ink" and my ANSWER for CNAME as 
-"293917e1-b8a6-4792-8a9f-935c260eaa64.auth.acme-dns.io" as instructed by the script.  
+"f22d7652-dd6d-4db6-8401-5caa323cf09d.auth.acme-dns.io" as instructed.
 
 I did the same for my second domain, "lnbits.allyourbank.ink".
 
-After you update your CNAME record(s), wait a bit for the update to propagate (a minute is more 
-than enough usually), and then hit enter. The script should finish installing the certs and you should 
-be good to go!
+After you update your CNAME record(s), wait a few seconds for the update to propagate, and 
+then hit enter. The script should finish installing the cert and you should be good to go!  
+![CertsInstalled](pictures/webui_letsencrypt_certs_installed.png)  
+_Note: If your first attempt fails in a way that the background install program is still running, 
+you can either reboot the node and try again or wait 15 minutes and the process will be terminated 
+automatically, allowing you to try again._
 
-Here's my BTCPayServer and LNBits from the example above showing a secure connection:
-![btcpayssl](pictures/btcpayssl.png)
-![lnbitsssl](pictures/lnbitsssl.png)
-
-_Note: If you have already installed LetsEncrypt previously and are re-enabling it after turning it off, 
-the script will detect a previous configuration and ask you if you want to keep it. Only select "Use Existing" 
-if you haven't changed anything about the domains, including the CNAME record you established when first 
-enabling LetsEncrypt._
+Here's my BTCPayServer and LNBits from the example above showing a secure connection:  
+![btcpayssl](pictures/btcpayssl.png)  
+![lnbitsssl](pictures/lnbitsssl.png)  
 
 Certbot will auto-update the certs when necessary, and Pleb-VPN should preserve the certs through 
-Raspiblitz updates or sd card reflashes.
+node updates or sd card reflashes.
 
 ### Installing WireGuard
-Let's install WireGuard next. Using the services menu, toggle WireGuard on.
-The first thing the script will ask is for you to chose an ip address for the node. This
-is a private IP address, and can be anything in the range of 10.0.0.0 to 10.255.255.252
-(the reason for it only going to 252 is that there are three client IPs which need to
-be added).  
-![WireGuardIP](pictures/wireguardip.png)
+Wireguard is provided with Pleb-VPN because zerotier (which is implemented on many nodes as 
+a private LAN option) doesn't work well with the restrictive firewall that is configured to 
+force traffic through the VPS and prevent doxing your home IP. Navigate to the Wireguard 
+page under the Services dropdown menu. The page looks like this with Wireguard private LAN 
+not installed:  
+![WireguardInstall](pictures/webui_wireguard_not_installed.png)  
 
-Next the script will ask you for a port, just like the hybrid mode script. 
-Your VPS provider (or yourself, if you run your own server) can give you this port 
-as well. Enter it here. _Do not use the same port as your node!_  
+You will have to provide a port that is forwarded from your VPS, just like you did in the 
+Hybrid mode page. Your VPS provider (or yourself, if you run your own server) can give 
+you this port as well. Enter it here. _Do not use the same port you used for hybrid mode!_  
 
-After that's done, the script will instruct you to download the WireGuard client app
-from the google or apple app store. With that app, scan the QR code that will display
-on the screen. This will give your phone the private key it needs to securely connect
-with your node (these keys are generated locally and never leave your node until you 
-download them via the WIREGUARD-CONNECT menu option). Once install is finished, the 
-script will present you with the status of your connection, which will look like this:
-![WireGuardStatus](pictures/wireguardstatus.png)
-In this example I chose 10.0.0.0, so that's the IP I will use to connect to my apps on
-the Raspiblitz.
+Once you've entered a port and clicked "Set Wireguard Port", the "Activate" button appears. 
+You can also change the port if you entered the wrong one or decide to change it. 
+To install your Wireguard private LAN and gain private node access from anywhere, 
+just click the "Activate" button!    
+![WireguardPortInstalled](pictures/webui_wireguard_port_installed.png)
+
+After that's done, the page will present you with your wireguard status and client connection 
+information:
+![WireGuardStatus](pictures/webui_wireguard_installed.png)
 
 You can also obtain the WireGuard client conf files from the WIREGUARD-CONNECT menu
 within the main Pleb-VPN menu. You will get three files, one (mobile.conf) is also

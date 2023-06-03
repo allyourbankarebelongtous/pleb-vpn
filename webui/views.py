@@ -7,7 +7,7 @@ from check_update import get_latest_version
 from plebvpn_common import config
 from .models import User
 from . import db
-import json, os, subprocess, time, pexpect, random, qrcode, io, base64, shutil, re, socket, requests, re, signal, functools
+import json, os, subprocess, time, pexpect, random, qrcode, io, base64, shutil, re, socket, requests, re, signal, functools, logging
 
 views = Blueprint('views', __name__)
 
@@ -71,7 +71,7 @@ def home():
     message = request.args.get('message') # for when activiating a script with SocketIO, to flash messages after redirecting to home page
     category = request.args.get('category') # for when activiating a script with SocketIO, to flash messages after redirecting to home page
     if message is not None:
-        print('flashing message: ', message) # for debug purposes only
+        logging.debug('flashing message: ', message) # for debug purposes only
         flash(message, category=category)
     return render_template("home.html", 
                            user=current_user, 
@@ -94,7 +94,7 @@ def refresh_plebVPN_data():
     get_cln_hybrid_status()
     get_wireguard_status()
     get_torsplittunnel_status()
-    socketio.emit('letsencrypt_set_on')
+    socketio.emit('plebVPN_data_refreshed')
 
 # to update plebvpn
 @socketio.on('update_scripts')
@@ -108,8 +108,8 @@ def update_scripts():
     try:
         result = subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True, timeout=600)
     except subprocess.TimeoutExpired:
-        print("Error: script timed out")
-    print(result.stdout, result.stderr)
+        logging.error("Error: pleb-vpn.install.sh update script timed out")
+    logging.info(result.stdout, result.stderr)
 
 @socketio.on('uninstall-plebvpn')
 @authenticated_only
@@ -119,8 +119,8 @@ def uninstall_plebvpn():
     try:
         result = subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True, timeout=600)
     except subprocess.TimeoutExpired:
-        print("Error: script timed out")
-    print(result.stdout, result.stderr)
+        logging.error("Error: pleb-vpn.install.sh uninstall script timed out")
+    logging.info(result.stdout, result.stderr)
 
 # get pleb-vpn config file values
 def get_conf():
@@ -153,7 +153,7 @@ def pleb_VPN():
     message = request.args.get('message')
     category = request.args.get('category')
     if message is not None:
-        print('flashing message: ', message) # for debug purposes only
+        logging.debug('flashing message: ', message) # for debug purposes only
         flash(message, category=category)
     # upload plebvpn.conf file
     if request.method == 'POST':
@@ -188,12 +188,13 @@ def set_plebVPN():
         try:
             result = subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True, timeout=600)
         except subprocess.TimeoutExpired:
-            message = 'Error: script timed out'
+            logging.error("Error: vpn-install.sh off script timed out")
+            message = 'Error: vpn-install.sh off script timed out'
             category = 'error'
             socketio.emit('plebVPN_set', {'message': message, 'category': category})
             return
         # for debug purposes
-        print(result.stdout, result.stderr)
+        logging.info(result.stdout, result.stderr)
         get_plebVPN_status()
         if result.returncode == 0:
             message = 'Pleb-VPN disconnected.'
@@ -207,11 +208,12 @@ def set_plebVPN():
         try:
             result = subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True, timeout=600)
         except subprocess.TimeoutExpired:
-            message = 'Error: script timed out'
+            logging.error("Error: vpn-install.sh on script timed out")
+            message = 'Error: vpn-install.sh on script timed out'
             category = 'error'
             return jsonify({})
         # for debug purposes
-        print(result.stdout, result.stderr)
+        logging.info(result.stdout, result.stderr)
         get_plebVPN_status()
         if result.returncode == 0:
             message = 'Pleb-VPN connected!'
@@ -265,7 +267,7 @@ def get_plebVPN_status():
     except subprocess.TimeoutExpired:
         if os.path.exists(os.path.join(EXEC_DIR, 'pleb-vpn_status.tmp')):
             os.remove(os.path.join(EXEC_DIR, 'pleb-vpn_status.tmp'))
-        print('Error: script timed out')
+        logging.error('Error: vpn-install.sh status script timed out')
         return
     with open(os.path.join(EXEC_DIR, 'pleb-vpn_status.tmp')) as status:
         for line in status:
@@ -308,7 +310,7 @@ def hybrid():
     message = request.args.get('message')
     category = request.args.get('category')
     if message is not None:
-        print('flashing message: ', message) # for debug purposes only
+        logging.debug('flashing message: ', message) # for debug purposes only
         flash(message, category=category)
     # get new LND or CLN port
     if request.method == 'POST':
@@ -347,12 +349,13 @@ def set_lndHybrid():
         try:
             result = subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True, timeout=600)
         except subprocess.TimeoutExpired:
-            message = 'Error: script timed out'
+            logging.error("Error: lnd-hybrid.sh off script timed out")
+            message = 'Error: lnd-hybrid.sh off script timed out'
             category = 'error'
             socketio.emit('lndHybrid_set', {'message': message, 'category': category})
             return
         # for debug purposes
-        print(result.stdout, result.stderr)
+        logging.info(result.stdout, result.stderr)
         get_plebVPN_status()
         if result.returncode == 0:
             message = 'LND Hybrid mode disabled.'
@@ -366,12 +369,13 @@ def set_lndHybrid():
         try:
             result = subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True, timeout=600)
         except subprocess.TimeoutExpired:
-            message = 'Error: script timed out'
+            logging.error("Error: lnd-hybrid.sh on script timed out")
+            message = 'Error: lnd-hybrid.sh on script timed out'
             category = 'error'
             socketio.emit('lndHybrid_set', {'message': message, 'category': category})
             return
         # for debug purposes
-        print(result.stdout, result.stderr)
+        logging.info(result.stdout, result.stderr)
         get_plebVPN_status()
         if result.returncode == 0:
             message = 'LND Hybred mode enabled!'
@@ -392,12 +396,13 @@ def set_clnHybrid():
         try:
             result = subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True, timeout=600)
         except subprocess.TimeoutExpired:
-            message = 'Error: script timed out'
+            logging.error("Error: cln-hybrid.sh off script timed out")
+            message = 'Error: cln-hybrid.sh off script timed out'
             category = 'error'
             socketio.emit('clnHybrid_set', {'message': message, 'category': category})
             return
         # for debug purposes
-        print(result.stdout, result.stderr)
+        logging.info(result.stdout, result.stderr)
         get_plebVPN_status()
         if result.returncode == 0:
             message = 'Core Lightning Hybrid mode disabled.'
@@ -411,12 +416,13 @@ def set_clnHybrid():
         try:
             result = subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True, timeout=600)
         except subprocess.TimeoutExpired:
-            message = 'Error: script timed out'
+            logging.error("Error: cln-hybrid.sh onf script timed out")
+            message = 'Error: cln-hybrid.sh on script timed out'
             category = 'error'
             socketio.emit('clnHybrid_set', {'message': message, 'category': category})
             return
         # for debug purposes
-        print(result.stdout, result.stderr)
+        logging.info(result.stdout, result.stderr)
         get_plebVPN_status()
         if result.returncode == 0:
             message = 'Core Lightning Hybrid mode enabled!'
@@ -482,7 +488,8 @@ def payments():
                 try:
                     result = subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True, timeout=60)
                 except subprocess.TimeoutExpired:
-                    flash('Error: script timed out', category='error')
+                    logging.error("Error: managepayments.sh deletepayment script timed out")
+                    flash('Error: managepayments.sh deletepayment script timed out', category='error')
                     return render_template('payments.html', user=current_user, current_payments=get_payments(), lnd=lnd, cln=cln)
             if message is not None:
                 # fix message so dollar signs are sent as literall $ and not values
@@ -492,14 +499,15 @@ def payments():
             else:
                 payment_string = frequency + " " + node + " " + pubkey + " " + amount + " " + denomination
             cmd_str = [os.path.join(EXEC_DIR, "payments/managepayments.sh") + " newpayment " + payment_string]
-            print(cmd_str) # for debug purposes only
+            logging.debug("newpayment command string sent: ", cmd_str) # for debug purposes only
             try:
                 result = subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True, timeout=60)
             except subprocess.TimeoutExpired:
-                flash('Error: script timed out', category='error')
+                logging.error("Error: managepayments.sh newpayment script timed out")
+                flash('Error: managepayments.sh newpayment script timed out', category='error')
                 return render_template('payments.html', user=current_user, current_payments=get_payments(), lnd=lnd, cln=cln)
             # for debug purposes
-            print(result.stdout, result.stderr)
+            logging.info(result.stdout, result.stderr)
             if result.returncode == 0:
                 flash('Payment saved and scheduled!', category='success')
             else:
@@ -519,10 +527,11 @@ def delete_payment():
     try:
         result = subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True, timeout=60)
     except subprocess.TimeoutExpired:
-        flash('Error: script timed out', category='error')
+        logging.error("Error: managepayments.sh deletepayment script timed out") 
+        flash('Error: managepayments.sh deletepayment script timed out', category='error')
         return jsonify({})
     # for debug purposes
-    print(result.stdout, result.stderr)
+    logging.info(result.stdout, result.stderr)
     if result.returncode == 0:
         flash('Payment deleted!', category='success')
     else:
@@ -538,9 +547,11 @@ def delete_all_payments():
     try:
         result = subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True, timeout=60)
     except subprocess.TimeoutExpired:
-        print("Error: script timed out")
+        logging.error("Error: managepayments.sh deleteall script timed out")
+        flash('Error: managepayments.sh deleteall script timed out', category='error')
+        return jsonify({})
     # for debug purposes
-    print(result.stdout, result.stderr)
+    logging.info(result.stdout, result.stderr)
     if result.returncode == 0:
         flash('All payments deleted!', category='success')
     else:
@@ -558,10 +569,11 @@ def send_payment():
     try:
         result = subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True, timeout=300)
     except subprocess.TimeoutExpired:
-        flash('Error: script timed out', category='error')
+        logging.error("Error: keysend payment script timed out")
+        flash('Error: keysend payment script timed out', category='error')
         return jsonify({})
     # for debug purposes
-    print(result.stdout, result.stderr)
+    logging.info(result.stdout, result.stderr)
     if result.returncode == 0:
         flash('Payment sent!', category='success')
     else:
@@ -571,18 +583,20 @@ def send_payment():
     try:
         result = subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True, timeout=60)
     except subprocess.TimeoutExpired:
-        flash('Error: script timed out', category='error')
+        logging.error("Error: enable payment timer command timed out")
+        flash('Error: enable payment timer command timed out', category='error')
         return jsonify({})
     # for debug purposes
-    print(result.stdout, result.stderr)
+    logging.info(result.stdout, result.stderr)
     cmd_str = ["systemctl start payments-" + parts[1] + "-" + parts[2] + ".timer"]
     try:
         result = subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True, timeout=60)
     except subprocess.TimeoutExpired:
-        flash('Error: script timed out', category='error')
+        logging.error("Error: start payment timer command timed out")
+        flash('Error: start payment timer command timed out', category='error')
         return jsonify({})
     # for debug purposes
-    print(result.stdout, result.stderr)
+    logging.info(result.stdout, result.stderr)
 
     return jsonify({})
 
@@ -628,7 +642,7 @@ def wireguard():
     message = request.args.get('message')
     category = request.args.get('category')
     if message is not None:
-        print('flashing message: ', message) # for debug purposes only
+        logging.debug('flashing message: ', message) # for debug purposes only
         flash(message, category=category)
     # get port
     if request.method == 'POST':
@@ -697,19 +711,20 @@ def set_wireguard():
         try:
             result = subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True, timeout=600)
         except subprocess.TimeoutExpired:
-            message = 'Error: script timed out'
+            logging.error("Error: wg-install.sh off script timed out")
+            message = 'Error: wg-install.sh off script timed out'
             category = 'error'
             socketio.emit('wireguard_set', {'message': message, 'category': category})
             return
-        # for debug purposes
-        print(result.stdout, result.stderr)
-        get_wireguard_status()
         if result.returncode == 0:
             message = 'Wireguard disabled.'
             category = 'success'
         else:
             message = 'An unknown error occured!'
             category = 'error'
+        # for debug purposes
+        logging.info(result.stdout, result.stderr)
+        get_wireguard_status()
         socketio.emit('wireguard_set', {'message': message, 'category': category})
     else:
         # check if no wireguard IP in pleb-vpn.conf, and if not, generate one
@@ -717,7 +732,7 @@ def set_wireguard():
             conf_file = config.PlebConfig(conf_file_location)
             while True:
                 new_wgIP = '10.' + str(random.randint(0, 255)) + '.' + str(random.randint(0, 255)) + '.' + str(random.randint(0, 252))
-                print(new_wgIP) # for debug purposes only
+                logging.debug(new_wgIP) # for debug purposes only
                 if is_valid_ip(new_wgIP):
                     break
             conf_file.set_option('wgip', new_wgIP)
@@ -731,13 +746,11 @@ def set_wireguard():
         try:
             result = subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True, timeout=600)
         except subprocess.TimeoutExpired:
-            message = 'Error: script timed out'
+            logging.error("Error: wg-install.sh on script timed out")
+            message = 'Error: wg-install.sh on script timed out'
             category = 'error'
             socketio.emit('wireguard_set', {'message': message, 'category': category})
             return
-        # for debug purposes
-        print(result.stdout, result.stderr)
-        get_wireguard_status()
         if result.returncode == 0:
             message = 'Wireguard private LAN enabled!'
             category = 'success'
@@ -747,6 +760,9 @@ def set_wireguard():
         else:
             message = 'An unknown error occured!'
             category = 'error'
+                # for debug purposes
+        logging.info(result.stdout, result.stderr)
+        get_wireguard_status()
         socketio.emit('wireguard_set', {'message': message, 'category': category})
 
 # delete wireguard conf files
@@ -819,7 +835,6 @@ def torsplittunnel():
     message = request.args.get('message')
     category = request.args.get('category')
     if message is not None:
-        print('flashing message: ', message) # for debug purposes only
         flash(message, category=category)
 
     return render_template('tor-split-tunnel.html', user=current_user, setting=get_conf(), torsplittunnel_status=torsplittunnel_status, torsplittunnel_test_status=torsplittunnel_test_status)
@@ -835,12 +850,13 @@ def set_torsplittunnel():
         try:
             result = subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True, timeout=600)
         except subprocess.TimeoutExpired:
-            message = 'Error: script timed out'
+            logging.error("Error: tor.split-tunnel.sh off script timed out")
+            message = 'Error: tor.split-tunnel.sh off script timed out'
             category = 'error'
             socketio.emit('torsplittunnel_set', {'message': message, 'category': category})
             return
         # for debug purposes
-        print(result.stdout, result.stderr)
+        logging.info(result.stdout, result.stderr)
         get_torsplittunnel_status()
         if result.returncode == 0:
             message = 'tor split-tunneling disabled.'
@@ -854,12 +870,13 @@ def set_torsplittunnel():
         try:
             result = subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True, timeout=900)
         except subprocess.TimeoutExpired:
-            message = 'Error: script timed out'
+            logging.error("Error: tor.split-tunnel.sh on script timed out")
+            message = 'Error: tor.split-tunnel.sh on script timed out'
             category = 'error'
             socketio.emit('torsplittunnel_set', {'message': message, 'category': category})
             return
         # for debug purposes
-        print(result.stdout, result.stderr)
+        logging.info(result.stdout, result.stderr)
         get_torsplittunnel_status()
         if result.returncode == 0:
             message = 'tor split-tunneling enabled!'
@@ -891,6 +908,7 @@ def get_torsplittunnel_test_status():
     except subprocess.TimeoutExpired:
         if os.path.exists(os.path.join(EXEC_DIR, 'split-tunnel_status.tmp')):
             os.remove(os.path.join(EXEC_DIR, 'split-tunnel_status.tmp'))
+        logging.error("Error: tor.split-tunnel.sh test script timed out")
         message = 'Tor split-tunnel test timed out'
         category = 'info'
         socketio.emit('torsplittunnel_test_complete', {'message': message, 'category': category})
@@ -913,14 +931,28 @@ def get_torsplittunnel_test_status():
 @views.route('/letsencrypt', methods=['GET'])
 @login_required
 def letsencrypt():
+    setting = get_conf()
+    # if user is on raspiblitz, determine if btcpay and/or lnbits are installed, otherwise assume true
+    if setting['nodetype'] == 'raspiblitz':
+        with open('/mnt/hdd/raspiblitz.conf', 'r') as file:
+            config_data = file.read()
+        # Extract the values using regular expressions
+        lnbits_match = re.search(r'LNBits=(\w+)', config_data)
+        btcpay_match = re.search(r'BTCPayServer=(\w+)', config_data)
+        # Set variables based on the extracted values
+        lnbits_on = lnbits_match.group(1) == 'on' if lnbits_match else False
+        btcpay_on = btcpay_match.group(1) == 'on' if btcpay_match else False
+    else:
+        btcpay_on = True
+        lnbits_on = True
     # get message to flash if exists
     message = request.args.get('message')
     category = request.args.get('category')
     if message is not None:
-        print('flashing message: ', message) # for debug purposes only
+        logging.debug('flashing message: ', message) # for debug purposes only
         flash(message, category=category)
 
-    return render_template('letsencrypt.html', user=current_user, setting=get_conf())
+    return render_template('letsencrypt.html', user=current_user, setting=setting, btcpay_on=btcpay_on, lnbits_on=lnbits_on)
 
 # turn letsencrypt on and get certs
 @socketio.on('set_letsencrypt_on')
@@ -968,7 +1000,8 @@ def set_letsencrypt_on(formData):
             try:
                 result = subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True, timeout=900)
             except subprocess.TimeoutExpired:
-                message = 'Error: script timed out'
+                logging.error("Error: start pleb-vpn-letsencrypt-config.service command timed out")
+                message = 'Error: start pleb-vpn-letsencrypt-config.service command timed out'
                 category = 'error'
                 socketio.emit('letsencrypt_set_on', {'message': message, 'category': category})
                 return
@@ -1000,12 +1033,13 @@ def set_letsencrypt_off():
     try:
         result = subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True, timeout=600)
     except subprocess.TimeoutExpired:
-        message = 'Error: script timed out'
+        logging.error("Error: letsencrypt.install.sh off script timed out")
+        message = 'Error: letsencrypt.install.sh off script timed out'
         category = 'error'
         socketio.emit('letsencrypt_set_off', {'message': message, 'category': category})
         return
     # for debug purposes
-    print(result.stdout, result.stderr)
+    logging.info(result.stdout, result.stderr)
     if result.returncode == 0:
         message = 'LetsEncrypt certificates deleted, origninal config restored.'
         category = 'success'
@@ -1016,8 +1050,6 @@ def set_letsencrypt_off():
 
 # execute letsencrypt script with pexpect interactively
 def get_certs(cmd_str, suppress_output = True, suppress_input = True):
-    debug_file = open(os.path.abspath('./debug_output.txt'), "w") # for debug purposes only
-    debug_inout = open(os.path.abspath('./debug_inout.txt'), "w") # for debug purposes only
     global enter_input
     enter_yes = False
     yes_count = 0
@@ -1030,14 +1062,14 @@ def get_certs(cmd_str, suppress_output = True, suppress_input = True):
     child = pexpect.spawn('/bin/bash')
     # Set up the timeout signal handler
     signal.signal(signal.SIGALRM, timeout_handler)
-    signal.alarm(600)  # Set the alarm for 10 minutes
+    signal.alarm(900)  # Set the alarm for 15 minutes
     try:
         child.expect(['\r\n', pexpect.EOF, pexpect.TIMEOUT], timeout=0.1)
         output = child.before.decode('utf-8')
         cmd_line = output.strip()
-        print('cmd_line: ', cmd_line, file=debug_file) # for debug purposes only
+        logging.debug('cmd_line from pexpect: ', cmd_line) # for debug purposes only
         if output: # for debug purposes only
-            print('first output: ', output.strip(), file=debug_file) # for debug purposes only
+            logging.debug('pexpect first output: ', output.strip()) # for debug purposes only
     except pexpect.TIMEOUT:
         pass
     child.sendline(cmd_str)
@@ -1047,7 +1079,7 @@ def get_certs(cmd_str, suppress_output = True, suppress_input = True):
         output1 = output1.replace(cmd_line, '')
         if output1 != output: 
             output = output1
-            print(output.strip(), file=debug_file) # for debug purposes only
+            logging.info(output.strip()) # for debug purposes only
     except pexpect.TIMEOUT:
         pass
     while True:
@@ -1058,50 +1090,46 @@ def get_certs(cmd_str, suppress_output = True, suppress_input = True):
                 end_script = True
             if output1 != output:
                 output = output1
-                print(output.strip(), file=debug_file) # for debug purposes only
+                logging.info(output.strip()) # for debug purposes only
                 if capture_output_trigger in output:
-                    print("capture_output_trigger received: " + output, file=debug_inout) # for debug purposes only
+                    logging.debug("capture_output_trigger received: " + output) # for debug purposes only
                     capture_output = True
-                    print("capture_output set to: " + str(capture_output), file=debug_inout) # for debug purposes only
+                    logging.debug("capture_output set to: " + str(capture_output)) # for debug purposes only
                 if enter_yes_trigger in output:
                     if yes_count < 1:
                         enter_yes = True
-                    print("enter_yes_trigger received: " + output + "\n enter_yes=" + str(enter_yes), file=debug_inout) # for debug purposes only
+                    logging.debug("enter_yes_trigger received: " + output + "\n enter_yes=" + str(enter_yes)) # for debug purposes only
                 if not suppress_output: 
                     if capture_output:
                         socketio.emit('CNAMEoutput', output.strip().replace(cmd_line, ''))
                         if capture_output_trigger_off in output:
-                            print("capture_output_off received: " + output, file=debug_inout) # for debug purposes only
+                            logging.debug("capture_output_off received: " + output) # for debug purposes only
                             capture_output = False
-                            print("capture_output sent to child: " + str(capture_output), file=debug_inout) # for debug purposes only
+                            logging.debug("capture_output sent to child: " + str(capture_output)) # for debug purposes only
                             socketio.emit('CNAMEoutput', str('First update the CNAME record(s) of your domain(s) as shown above. After the CNAME records are updated, press "Enter" below.'))
         except pexpect.TIMEOUT:
             pass
         except TimeoutError:
-            print("Command execution timed out", file=debug_inout) # for debug purposes only
+            logging.debug("Letsencrypt pexpect ommand execution timed out") # for debug purposes only
             child.close()
-            debug_file.close() # debug purposes only
-            debug_inout.close() # debug purposes only
             signal.alarm(0)
             return int(420)
         if not suppress_input:
             if enter_yes:
-                # print("Sending to terminal: Y", file=debug_file) # for debug only
                 if yes_count < 1:
                     child.sendline("Y")
                     yes_count += 1
-                    print('sent Y to child', file=debug_inout)
+                    logging.debug('sent Y to child')
                     enter_yes = False
-                    print("enter_yes set to: " + str(enter_yes), file=debug_inout) # for debug purposes only
+                    logging.debug("enter_yes set to: " + str(enter_yes)) # for debug purposes only
             if enter_input:
-                # print("Sending ENTER to terminal", file=debug_file) # for debug purposes only
                 if enter_count < 1:
                     child.sendline('')
                     enter_count += 1
                     socketio.emit('wait_for_confirmation')
-                    print('sent enter from enter_input to child', file=debug_inout)
+                    logging.debug('sent enter from enter_input to child')
                     enter_input = False
-                    print("enter_input set to: " + str(enter_input), file=debug_inout) # for debug purposes only
+                    logging.debug("enter_input set to: " + str(enter_input)) # for debug purposes only
         if child.eof() or end_script:
             break
     time.sleep(0.1)
@@ -1117,16 +1145,14 @@ def get_certs(cmd_str, suppress_output = True, suppress_input = True):
         pass
     output = child.before.decode('utf-8')
     # Parse the output to extract the $? value
-    print('Exit code command result: ', output.strip().replace(cmd_line, ''), file=debug_file) # for debug purposes only
+    logging.debug('Exit code command result: ', output.strip().replace(cmd_line, '')) # for debug purposes only
     if output.strip().replace(cmd_line, '').startswith("exit_code="):
         exit_code = int(output.strip().replace(cmd_line, '').split("=")[-1])
     else:
         exit_code = int(42069)
-    print('Exit code = ', exit_code, file=debug_file) # for debug purposes only
+    logging.debug('Exit code = ', exit_code) # for debug purposes only
     child.close()
     signal.alarm(0)
-    debug_file.close() # for debug purposes only
-    debug_inout.close() # debug purposes only
     
     return exit_code
 
@@ -1152,11 +1178,9 @@ def check_domain(domain):
 @socketio.on('enter_input')
 @authenticated_only
 def set_enter_input():
-    debug_file = open(os.path.abspath('./debug_enter.txt'), "w") # for debug purposes only
     global enter_input
     enter_input = True
-    print("set_enter_input: !ENTER!", str(enter_input), file=debug_file) # debug purposes only
-    debug_file.close() # for debug purposes only
+    logging.debug("set_enter_input for pexpect commands:", str(enter_input)) # debug purposes only
 
 # timeout handler for running commands using pexpect
 def timeout_handler(signum, frame):
@@ -1177,7 +1201,7 @@ def get_lnd_hybrid_status():
     except subprocess.TimeoutExpired:
         if os.path.exists(os.path.join(EXEC_DIR, 'lnd_hybrid_status.tmp')):
             os.remove(os.path.join(EXEC_DIR, 'lnd_hybrid_status.tmp'))
-        print('Error: script timed out')
+        logging.error('Error: lnd-hybrid.sh status script timed out')
         return
     with open(os.path.join(EXEC_DIR, 'lnd_hybrid_status.tmp')) as status:
         for line in status:
@@ -1197,7 +1221,7 @@ def get_cln_hybrid_status():
     except subprocess.TimeoutExpired:
         if os.path.exists(os.path.join(EXEC_DIR, 'cln_hybrid_status.tmp')):
             os.remove(os.path.join(EXEC_DIR, 'cln_hybrid_status.tmp'))
-        print('Error: script timed out')
+        logging.error('Error: cln_hybrid.sh status script timed out')
         return
     with open(os.path.join(EXEC_DIR, 'cln_hybrid_status.tmp')) as status:
         for line in status:
@@ -1217,7 +1241,7 @@ def get_wireguard_status():
     except subprocess.TimeoutExpired:
         if os.path.exists(os.path.join(EXEC_DIR, 'wireguard_status.tmp')):
             os.remove(os.path.join(EXEC_DIR, 'wireguard_status.tmp'))
-        print('Error: script timed out')
+        logging.error('Error: wg-install.sh status script timed out')
         return
     with open(os.path.join(EXEC_DIR, 'wireguard_status.tmp')) as status:
         for line in status:
@@ -1236,7 +1260,7 @@ def get_payments():
     except subprocess.TimeoutExpired:
         if os.path.exists(os.path.join(EXEC_DIR, 'payments/current_payments.tmp')):
             os.remove(os.path.join(EXEC_DIR, 'payments/current_payments.tmp'))
-        print('Error: script timed out')
+        logging.error('Error: managepayments.sh status script timed out')
         return
     with open(os.path.join(EXEC_DIR, 'payments/current_payments.tmp')) as payments:
         for line in payments:
@@ -1258,7 +1282,7 @@ def get_payments():
                     current_payments[category] = []
                 current_payments[category].append((id, node, pubkey, amount, denomination, message))
             except IndexError:
-                print("Error: Not enough elements in line_parts for line: ", line)
+                logging.error("Error: When looking up current_payments.tmp, not enough elements in line_parts for line: ", line)
 
     os.remove(os.path.join(EXEC_DIR, 'payments/current_payments.tmp'))
     return current_payments
@@ -1274,7 +1298,7 @@ def get_torsplittunnel_status():
     except subprocess.TimeoutExpired:
         if os.path.exists(os.path.join(EXEC_DIR, 'split-tunnel_status.tmp')):
             os.remove(os.path.join(EXEC_DIR, 'split-tunnel_status.tmp'))
-        print('Error: script timed out')
+        logging.error('Error: tor.split-tunnel.sh status script timed out')
         return
     with open(os.path.join(EXEC_DIR, 'split-tunnel_status.tmp')) as status:
         for line in status:

@@ -16,7 +16,18 @@
     </div>
   </div>
 </div>
-{% else %} {% if setting['letsencrypt_ssl'] != "on" %}
+{% else %} {% if not btcpay_on and not lnbits_on %}
+<div class="container">
+  <div class="row">
+    <div class="col text-center">
+      <h5>
+        Pleb-VPN cannot detect either BTCPayServer or LNBits installed in your
+        node. Install BTCPayServer or LNBits to get a cert for your domain.
+      </h5>
+    </div>
+  </div>
+</div>
+{% endif %} {% if setting['letsencrypt_ssl'] != "on" %}
 <div class="container">
   <div class="row">
     <div class="col text-center">
@@ -38,6 +49,7 @@
             </tr>
           </thead>
           <tbody>
+            {% if btcpay_on %}
             <tr>
               <th scope="row">BTCPayServer</th>
               <td>
@@ -60,6 +72,7 @@
                 </div>
               </td>
             </tr>
+            {% endif %} {% if lnbits_on %}
             <tr>
               <th scope="row">LNBits</th>
               <td>
@@ -82,6 +95,7 @@
                 </div>
               </td>
             </tr>
+            {% endif %}
           </tbody>
         </table>
       </div>
@@ -94,9 +108,9 @@
             <p>
               Before continuing you must ensure your domain(s) above are
               pointing to {{ setting['vpnip'] }}, you must ensure your domain(s)
-              are forwarded to the services requested, and you must be ready to
-              update the CNAME record of each domain you are requesting a cert
-              for.
+              are forwarded to the services requested at the VPS, and you must
+              be ready to update the CNAME record of each domain you are
+              requesting a cert for.
             </p>
           </div>
         </div>

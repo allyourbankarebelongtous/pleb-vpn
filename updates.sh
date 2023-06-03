@@ -5,7 +5,7 @@
 # make sure updates can be re-run multiple times
 # keep updates present until most users have had the chance to update
 
-ver="v1.1.0-alpha.3"
+ver="v1.1.0-alpha.4"
 
 # get node info# find home directory based on node implementation
 if [ -d "/mnt/hdd/mynode/pleb-vpn/" ]; then
@@ -268,7 +268,7 @@ After=network.target mnt-hdd.mount
 
 [Service]
 WorkingDirectory=/home/admin/pleb-vpn
-ExecStart=/home/admin/pleb-vpn/.venv/bin/gunicorn -k geventwebsocket.gunicorn.workers.GeventWebSocketWorker -w 1 -b 0.0.0.0:2420 main:app
+ExecStart=/home/admin/pleb-vpn/.venv/bin/gunicorn --capture-output -k geventwebsocket.gunicorn.workers.GeventWebSocketWorker -w 1 -b 0.0.0.0:2420 main:app
 User=root
 Group=root
 Type=simple
