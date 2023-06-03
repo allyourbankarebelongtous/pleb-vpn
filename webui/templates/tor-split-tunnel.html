@@ -24,16 +24,11 @@ block content %}
         <p>Enable tor split-tunneling for redundency in case VPN goes down</p>
       </div>
       <div class="col">
-        <button
-          id="activate"
-          type="button"
-          class="btn btn-success"
-          onClick="settorsplittunnel_on({{ current_user.id }})"
-        >
+        <button id="torsplittunnel_on" type="button" class="btn btn-success">
           Activate
         </button>
         <button
-          id="activate_loading"
+          id="torsplittunnel_on_loading"
           class="btn btn-success d-none"
           type="button"
           disabled
@@ -158,16 +153,11 @@ block content %}
         <p>Test tor split-tunneling config</p>
       </div>
       <div class="col">
-        <button
-          id="test"
-          type="button"
-          class="btn btn-primary"
-          onClick="test_torsplittunnel({{ current_user.id }})"
-        >
+        <button id="torsplittunnel_test" type="button" class="btn btn-primary">
           Test
         </button>
         <button
-          id="test_loading"
+          id="torsplittunnel_test_loading"
           class="btn btn-primary d-none"
           type="button"
           disabled
@@ -191,16 +181,11 @@ block content %}
         <p>Disable tor split-tunneling</p>
       </div>
       <div class="col">
-        <button
-          id="deactivate"
-          type="button"
-          class="btn btn-danger"
-          onClick="settorsplittunnel_off({{ current_user.id }})"
-        >
+        <button id="torsplittunnel_off" type="button" class="btn btn-danger">
           Deactivate
         </button>
         <button
-          id="deactivate_loading"
+          id="torsplittunnel_off_loading"
           class="btn btn-danger d-none"
           type="button"
           disabled
@@ -216,4 +201,121 @@ block content %}
     </div>
   </form>
 </div>
-{% endif %} {% endif %} {% endblock %}
+{% endif %} {% endif %}
+<script>
+  var socket = io.connect(
+    location.protocol + "//" + document.domain + ":" + location.port
+  );
+  $("#torsplittunnel_on").click(function (event) {
+    event.preventDefault();
+    if (
+      confirm_dialog(
+        (message = "Are you sure you want to enable tor split-tunneling?")
+      ) == true
+    ) {
+      var splittunnelonBtn = document.getElementById("torsplittunnel_on");
+      if (splittunnelonBtn !== null) {
+        splittunnelonBtn.classList.add("d-none");
+      }
+      var splittunnelonLoading = document.getElementById(
+        "torsplittunnel_on_loading"
+      );
+      if (splittunnelonLoading !== null) {
+        splittunnelonLoading.classList.remove("d-none");
+      }
+      socket.emit("set_torsplittunnel");
+    }
+  });
+  $("#torsplittunnel_off").click(function (event) {
+    event.preventDefault();
+    if (
+      confirm_dialog(
+        (message = "Are you sure you want to disable tor split-tunneling?")
+      ) == true
+    ) {
+      var splittunneloffBtn = document.getElementById("torsplittunnel_off");
+      if (splittunneloffBtn !== null) {
+        splittunneloffBtn.classList.add("d-none");
+      }
+      var splittunneloffLoading = document.getElementById(
+        "torsplittunnel_off_loading"
+      );
+      if (splittunneloffLoading !== null) {
+        splittunneloffLoading.classList.remove("d-none");
+      }
+      socket.emit("set_torsplittunnel");
+    }
+  });
+  socket.on("torsplittunnel_set", function (data) {
+    var splittunnelonBtn = document.getElementById("torsplittunnel_on");
+    if (splittunnelonBtn !== null) {
+      splittunnelonBtn.classList.remove("d-none");
+    }
+    var splittunnelonLoading = document.getElementById(
+      "torsplittunnel_on_loading"
+    );
+    if (splittunnelonLoading !== null) {
+      splittunnelonLoading.classList.add("d-none");
+    }
+    var splittunneloffBtn = document.getElementById("torsplittunnel_off");
+    if (splittunneloffBtn !== null) {
+      splittunneloffBtn.classList.remove("d-none");
+    }
+    var splittunneloffLoading = document.getElementById(
+      "torsplittunnel_off_loading"
+    );
+    if (splittunneloffLoading !== null) {
+      splittunneloffLoading.classList.add("d-none");
+    }
+    var message = data.message;
+    var category = data.category;
+    var url =
+      "/torsplittunnel?message=" +
+      encodeURIComponent(message) +
+      "&category=" +
+      encodeURIComponent(category);
+    window.location.href = url;
+  });
+  $("#torsplittunnel_test").click(function (event) {
+    event.preventDefault();
+    if (
+      confirm_dialog(
+        (message =
+          "This test will temporarily deactivate the VPN to see if tor can connect without the VPN operational. This test can take up to 10 minutes. A failure of this test does not necessarily indicate that split-tunneling is not active, it could be that tor is down or having issues. Are you sure you want to test tor split-tunneling?")
+      ) == true
+    ) {
+      var splittunneltestBtn = document.getElementById("torsplittunnel_test");
+      if (splittunneltestBtn !== null) {
+        splittunneltestBtn.classList.add("d-none");
+      }
+      var splittunneltestLoading = document.getElementById(
+        "torsplittunnel_test_loading"
+      );
+      if (splittunneltestLoading !== null) {
+        splittunneltestLoading.classList.remove("d-none");
+      }
+      socket.emit("test_torsplittunnel");
+    }
+  });
+  socket.on("torsplittunnel_test_complete", function (data) {
+    var splittunneltestBtn = document.getElementById("torsplittunnel_test");
+    if (splittunneltestBtn !== null) {
+      splittunneltestBtn.classList.remove("d-none");
+    }
+    var splittunneltestLoading = document.getElementById(
+      "torsplittunnel_test_loading"
+    );
+    if (splittunneltestLoading !== null) {
+      splittunneltestLoading.classList.add("d-none");
+    }
+    var message = data.message;
+    var category = data.category;
+    var url =
+      "/torsplittunnel?message=" +
+      encodeURIComponent(message) +
+      "&category=" +
+      encodeURIComponent(category);
+    window.location.href = url;
+  });
+</script>
+{% endblock %}

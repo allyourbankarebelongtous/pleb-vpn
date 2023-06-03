@@ -46,7 +46,7 @@ def authenticated_only(f):
 ########################
 
 # home page
-@views.route('/', methods=['GET', 'POST'])
+@views.route('/', methods=['GET'])
 @login_required
 def home():
     # determine whether LND, CLN, or both node implementations are available
@@ -85,8 +85,8 @@ def home():
                            update_available=update_available)
 
 # home page data refresh
-@views.route('/refresh_plebVPN_data', methods=['POST'])
-@login_required
+@socketio.on('refresh_plebVPN_data')
+@authenticated_only
 def refresh_plebVPN_data():
     # refresh pleb-vpn status of connection to vps
     get_plebVPN_status()
@@ -94,8 +94,7 @@ def refresh_plebVPN_data():
     get_cln_hybrid_status()
     get_wireguard_status()
     get_torsplittunnel_status()
-
-    return jsonify({})
+    socketio.emit('letsencrypt_set_on')
 
 # to update plebvpn
 @socketio.on('update_scripts')
@@ -122,6 +121,16 @@ def uninstall_plebvpn():
     except subprocess.TimeoutExpired:
         print("Error: script timed out")
     print(result.stdout, result.stderr)
+
+# get pleb-vpn config file values
+def get_conf():
+    setting = {}
+    with open(os.path.join(HOME_DIR, 'pleb-vpn.conf')) as conf:
+        for line in conf:
+            if "=" in line:
+                name, value = line.split("=")
+                setting[name] = str(value).rstrip().strip('\'\'')
+    return setting
 
 ##############################
 ### pleb-vpn config routes ###
@@ -163,46 +172,48 @@ def pleb_VPN():
     return render_template("pleb-vpn.html", user=current_user, setting=get_conf(), plebVPN_status=plebVPN_status, lnd=lnd, cln=cln)
 
 # turn pleb-vpn on or off
-@views.route('/set_plebVPN', methods=['POST'])
-@login_required
+@socketio.on('set_plebVPN')
+@authenticated_only
 def set_plebVPN():
     # turns pleb-vpn connection to vps on or off
     setting = get_conf()
-    user = json.loads(request.data)
-    userId = user['userId']
-    user = User.query.get(userId)
-    if user:
-        if user.id == current_user.id:
-            if setting['plebvpn'] == 'on':
-                cmd_str = [os.path.join(EXEC_DIR, "vpn-install.sh") + " off 1"]
-                try:
-                    result = subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True, timeout=600)
-                except subprocess.TimeoutExpired:
-                    flash('Error: script timed out', category='error')
-                    return jsonify({})
-                # for debug purposes
-                print(result.stdout, result.stderr)
-                get_plebVPN_status()
-                if result.returncode == 0:
-                    flash('Pleb-VPN disconnected.', category='success')
-                else:
-                    flash('An unknown error occured!', category='error')
-            else:
-                cmd_str = [os.path.join(EXEC_DIR, "vpn-install.sh") + " on 1 1"]
-                try:
-                    result = subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True, timeout=600)
-                except subprocess.TimeoutExpired:
-                    flash('Error: script timed out', category='error')
-                    return jsonify({})
-                # for debug purposes
-                print(result.stdout, result.stderr)
-                get_plebVPN_status()
-                if result.returncode == 0:
-                    flash('Pleb-VPN connected!', category='success')
-                else:
-                    flash('An unknown error occured!', category='error')
-
-    return jsonify({})
+    if setting['plebvpn'] == 'on':
+        cmd_str = [os.path.join(EXEC_DIR, "vpn-install.sh") + " off 1"]
+        try:
+            result = subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True, timeout=600)
+        except subprocess.TimeoutExpired:
+            message = 'Error: script timed out'
+            category = 'error'
+            socketio.emit('plebVPN_set', {'message': message, 'category': category})
+            return
+        # for debug purposes
+        print(result.stdout, result.stderr)
+        get_plebVPN_status()
+        if result.returncode == 0:
+            message = 'Pleb-VPN disconnected.'
+            category = 'success'
+        else:
+            message = 'An unknown error occured!'
+            category = 'error'
+        socketio.emit('plebVPN_set', {'message': message, 'category': category})
+    else:
+        cmd_str = [os.path.join(EXEC_DIR, "vpn-install.sh") + " on 1 1"]
+        try:
+            result = subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True, timeout=600)
+        except subprocess.TimeoutExpired:
+            message = 'Error: script timed out'
+            category = 'error'
+            return jsonify({})
+        # for debug purposes
+        print(result.stdout, result.stderr)
+        get_plebVPN_status()
+        if result.returncode == 0:
+            message = 'Pleb-VPN connected!'
+            category = 'success'
+        else:
+            message = 'An unknown error occured!'
+            category = 'error'
+        socketio.emit('plebVPN_set', {'message': message, 'category': category})
 
 # delete pleb-vpn conf file
 @views.route('/delete_plebvpn_conf', methods=['POST'])
@@ -234,6 +245,37 @@ def refresh_VPN_data():
 def allowed_file(filename):
     return '.' in filename and \
         filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+# get status of openvpn connection
+def get_plebVPN_status():
+    # get status of pleb-vpn connection to vps
+    global plebVPN_status
+    global update_available
+    plebVPN_status = {}
+    conf_file = config.PlebConfig(conf_file_location)
+    cmd_str = [os.path.join(EXEC_DIR, "vpn-install.sh") + " status 1"]
+    try:
+        subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True, timeout=100)
+    except subprocess.TimeoutExpired:
+        if os.path.exists(os.path.join(EXEC_DIR, 'pleb-vpn_status.tmp')):
+            os.remove(os.path.join(EXEC_DIR, 'pleb-vpn_status.tmp'))
+        print('Error: script timed out')
+        return
+    with open(os.path.join(EXEC_DIR, 'pleb-vpn_status.tmp')) as status:
+        for line in status:
+            if "=" in line:
+                name, value = line.split("=")
+                plebVPN_status[name] = str(value).rstrip().strip('\'\'')
+    os.remove(os.path.join(EXEC_DIR, 'pleb-vpn_status.tmp'))
+    setting=get_conf()
+    # check for new version of pleb-vpn
+    latest_version = str(get_latest_version())
+    update_available = False
+    if latest_version is not None:
+        if setting['version'] != latest_version:
+            conf_file.set_option('latestversion', latest_version)
+            conf_file.write()
+            update_available = True 
 
 #########################
 ### Hybrid routes ###
@@ -283,88 +325,94 @@ def hybrid():
     return render_template('hybrid.html', user=current_user, setting=get_conf(), lnd_hybrid_status=lnd_hybrid_status, cln_hybrid_status=cln_hybrid_status, lnd=lnd, cln=cln)
 
 # turn lnd hybrid mode on or off
-@views.route('/set_lndHybrid', methods=['POST'])
-@login_required
+@socketio.on('set_lndHybrid')
+@authenticated_only
 def set_lndHybrid():
     # turns lnd hybrid mode on or off
     setting = get_conf()
-    user = json.loads(request.data)
-    userId = user['userId']
-    user = User.query.get(userId)
-    if user:
-        if user.id == current_user.id:
-            if setting['lndhybrid'] == 'on':
-                cmd_str = [os.path.join(EXEC_DIR, "lnd-hybrid.sh") + " off"]
-                try:
-                    result = subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True, timeout=600)
-                except subprocess.TimeoutExpired:
-                    flash('Error: script timed out', category='error')
-                    return jsonify({})
-                # for debug purposes
-                print(result.stdout, result.stderr)
-                get_plebVPN_status()
-                if result.returncode == 0:
-                    flash('LND Hybrid mode disabled.', category='success')
-                else:
-                    flash('An unknown error occured!', category='error')
-            else:
-                cmd_str = [os.path.join(EXEC_DIR, "lnd-hybrid.sh") + " on 1 1"]
-                try:
-                    result = subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True, timeout=600)
-                except subprocess.TimeoutExpired:
-                    flash('Error: script timed out', category='error')
-                    return jsonify({})
-                # for debug purposes
-                print(result.stdout, result.stderr)
-                get_plebVPN_status()
-                if result.returncode == 0:
-                    flash('LND Hybrid mode enabled!', category='success')
-                else:
-                    flash('An unknown error occured!', category='error')
-
-    return jsonify({})
+    if setting['lndhybrid'] == 'on':
+        cmd_str = [os.path.join(EXEC_DIR, "lnd-hybrid.sh") + " off"]
+        try:
+            result = subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True, timeout=600)
+        except subprocess.TimeoutExpired:
+            message = 'Error: script timed out'
+            category = 'error'
+            socketio.emit('lndHybrid_set', {'message': message, 'category': category})
+            return
+        # for debug purposes
+        print(result.stdout, result.stderr)
+        get_plebVPN_status()
+        if result.returncode == 0:
+            message = 'LND Hybrid mode disabled.'
+            category = 'success'
+        else:
+            message = 'An unknown error occured!'
+            category = 'error'
+        socketio.emit('lndHybrid_set', {'message': message, 'category': category})
+    else:
+        cmd_str = [os.path.join(EXEC_DIR, "lnd-hybrid.sh") + " on 1 1"]
+        try:
+            result = subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True, timeout=600)
+        except subprocess.TimeoutExpired:
+            message = 'Error: script timed out'
+            category = 'error'
+            socketio.emit('lndHybrid_set', {'message': message, 'category': category})
+            return
+        # for debug purposes
+        print(result.stdout, result.stderr)
+        get_plebVPN_status()
+        if result.returncode == 0:
+            message = 'Pleb-VPN connected!'
+            category = 'success'
+        else:
+            message = 'An unknown error occured!'
+            category = 'error'
+        socketio.emit('lndHybrid_set', {'message': message, 'category': category})
 
 # turn cln hybrid mode on or off
-@views.route('/set_clnHybrid', methods=['POST'])
-@login_required
+@socketio.on('set_clnHybrid')
+@authenticated_only
 def set_clnHybrid():
     # turns cln hybrid mode on or off
     setting = get_conf()
-    user = json.loads(request.data)
-    userId = user['userId']
-    user = User.query.get(userId)
-    if user:
-        if user.id == current_user.id:
-            if setting['clnhybrid'] == 'on':
-                cmd_str = [os.path.join(EXEC_DIR, "cln-hybrid.sh") + " off"]
-                try:
-                    result = subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True, timeout=600)
-                except subprocess.TimeoutExpired:
-                    flash('Error: script timed out', category='error')
-                    return jsonify({})
-                # for debug purposes
-                print(result.stdout, result.stderr)
-                get_plebVPN_status()
-                if result.returncode == 0:
-                    flash('Core Lightning Hybrid mode disabled.', category='success')
-                else:
-                    flash('An unknown error occured!', category='error')
-            else:
-                cmd_str = [os.path.join(EXEC_DIR, "cln-hybrid.sh") + " on 1 1"]
-                try:
-                    result = subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True, timeout=600)
-                except subprocess.TimeoutExpired:
-                    flash('Error: script timed out', category='error')
-                    return jsonify({})
-                # for debug purposes
-                print(result.stdout, result.stderr)
-                get_plebVPN_status()
-                if result.returncode == 0:
-                    flash('Core Lightning Hybrid mode enabled!', category='success')
-                else:
-                    flash('An unknown error occured!', category='error')
-
-    return jsonify({})
+    if setting['clnhybrid'] == 'on':
+        cmd_str = [os.path.join(EXEC_DIR, "cln-hybrid.sh") + " off"]
+        try:
+            result = subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True, timeout=600)
+        except subprocess.TimeoutExpired:
+            message = 'Error: script timed out'
+            category = 'error'
+            socketio.emit('clnHybrid_set', {'message': message, 'category': category})
+            return
+        # for debug purposes
+        print(result.stdout, result.stderr)
+        get_plebVPN_status()
+        if result.returncode == 0:
+            message = 'Core Lightning Hybrid mode disabled.'
+            category = 'success'
+        else:
+            message = 'An unknown error occured!'
+            category = 'error'
+        socketio.emit('clnHybrid_set', {'message': message, 'category': category})
+    else:
+        cmd_str = [os.path.join(EXEC_DIR, "cln-hybrid.sh") + " on 1 1"]
+        try:
+            result = subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True, timeout=600)
+        except subprocess.TimeoutExpired:
+            message = 'Error: script timed out'
+            category = 'error'
+            socketio.emit('clnHybrid_set', {'message': message, 'category': category})
+            return
+        # for debug purposes
+        print(result.stdout, result.stderr)
+        get_plebVPN_status()
+        if result.returncode == 0:
+            message = 'Core Lightning Hybrid mode enabled!'
+            category = 'success'
+        else:
+            message = 'An unknown error occured!'
+            category = 'error'
+        socketio.emit('clnHybrid_set', {'message': message, 'category': category})
 
 # refresh hybrid data
 @views.route('/refresh_hybrid_data', methods=['POST'])
@@ -620,63 +668,67 @@ def download_file():
     return send_file(path, as_attachment=True)
 
 # set wireguard on or off
-@views.route('/set_wireguard', methods=['POST'])
-@login_required
+@socketio.on('set_wireguard')
+@authenticated_only
 def set_wireguard():
     # turns wireguard on or off
     setting = get_conf()
-    user = json.loads(request.data)
-    userId = user['userId']
-    user = User.query.get(userId)
-    if user:
-        if user.id == current_user.id:
-            if setting['wireguard'] == 'on':
-                cmd_str = [os.path.join(EXEC_DIR, "wg-install.sh") + " off"]
-                try:
-                    result = subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True, timeout=600)
-                except subprocess.TimeoutExpired:
-                    flash('Error: script timed out', category='error')
-                    return jsonify({})
-                # for debug purposes
-                print(result.stdout, result.stderr)
-                get_wireguard_status()
-                if result.returncode == 0:
-                    flash('Wireguard disabled.', category='success')
-                else:
-                    flash('An unknown error occured!', category='error')
+    if setting['wireguard'] == 'on':
+        cmd_str = [os.path.join(EXEC_DIR, "wg-install.sh") + " off"]
+        try:
+            result = subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True, timeout=600)
+        except subprocess.TimeoutExpired:
+            message = 'Error: script timed out'
+            category = 'error'
+            socketio.emit('wireguard_set', {'message': message, 'category': category})
+            return
+        # for debug purposes
+        print(result.stdout, result.stderr)
+        get_wireguard_status()
+        if result.returncode == 0:
+            message = 'Wireguard disabled.'
+            category = 'success'
+        else:
+            message = 'An unknown error occured!'
+            category = 'error'
+        socketio.emit('wireguard_set', {'message': message, 'category': category})
+    else:
+        # check if no wireguard IP in pleb-vpn.conf, and if not, generate one
+        if not is_valid_ip(setting['wgip']):
+            conf_file = config.PlebConfig(conf_file_location)
+            while True:
+                new_wgIP = '10.' + str(random.randint(0, 255)) + '.' + str(random.randint(0, 255)) + '.' + str(random.randint(0, 252))
+                print(new_wgIP) # for debug purposes only
+                if is_valid_ip(new_wgIP):
+                    break
+            conf_file.set_option('wgip', new_wgIP)
+            conf_file.write()
+            cmd_str = [os.path.join(EXEC_DIR, "wg-install.sh") + " on 0 1 1"]
+        else:
+            if os.path.isfile(os.path.join(HOME_DIR, 'wireguard/wg0.conf')):
+                cmd_str = [os.path.join(EXEC_DIR, "wg-install.sh") + " on 1 0 1"]
             else:
-                # check if no wireguard IP in pleb-vpn.conf, and if not, generate one
-                if not is_valid_ip(setting['wgip']):
-                    conf_file = config.PlebConfig(conf_file_location)
-                    while True:
-                        new_wgIP = '10.' + str(random.randint(0, 255)) + '.' + str(random.randint(0, 255)) + '.' + str(random.randint(0, 252))
-                        print(new_wgIP) # for debug purposes only
-                        if is_valid_ip(new_wgIP):
-                            break
-                    conf_file.set_option('wgip', new_wgIP)
-                    conf_file.write()
-                    cmd_str = [os.path.join(EXEC_DIR, "wg-install.sh") + " on 0 1 1"]
-                else:
-                    if os.path.isfile(os.path.join(HOME_DIR, 'wireguard/wg0.conf')):
-                        cmd_str = [os.path.join(EXEC_DIR, "wg-install.sh") + " on 1 0 1"]
-                    else:
-                        cmd_str = [os.path.join(EXEC_DIR, "wg-install.sh") + " on 0 1 1"]
-                try:
-                    result = subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True, timeout=600)
-                except subprocess.TimeoutExpired:
-                    flash('Error: script timed out', category='error')
-                    return jsonify({})
-                # for debug purposes
-                print(result.stdout, result.stderr)
-                get_wireguard_status()
-                if result.returncode == 0:
-                    flash('Wireguard private LAN enabled!', category='success')
-                elif result.returncode == 10:
-                    flash('Error: unable to find conf files. Create new conf files and re-enable wireguard.', category='error') 
-                else:
-                    flash('An unknown error occured!', category='error')
-
-    return jsonify({})
+                cmd_str = [os.path.join(EXEC_DIR, "wg-install.sh") + " on 0 1 1"]
+        try:
+            result = subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True, timeout=600)
+        except subprocess.TimeoutExpired:
+            message = 'Error: script timed out'
+            category = 'error'
+            socketio.emit('wireguard_set', {'message': message, 'category': category})
+            return
+        # for debug purposes
+        print(result.stdout, result.stderr)
+        get_wireguard_status()
+        if result.returncode == 0:
+            message = 'Wireguard private LAN enabled!'
+            category = 'success'
+        elif result.returncode == 10:
+            message = 'Error: unable to find conf files. Create new conf files and re-enable wireguard.'
+            category = 'error'
+        else:
+            message = 'An unknown error occured!'
+            category = 'error'
+        socketio.emit('wireguard_set', {'message': message, 'category': category})
 
 # delete wireguard conf files
 @views.route('/delete_wireguard_conf', methods=['POST'])
@@ -748,46 +800,49 @@ def torsplittunnel():
     return render_template('tor-split-tunnel.html', user=current_user, setting=get_conf(), torsplittunnel_status=torsplittunnel_status, torsplittunnel_test_status=torsplittunnel_test_status)
 
 # set tor split-tunneling on or off
-@views.route('/set_torsplittunnel', methods=['POST'])
-@login_required
+@socketio.on('set_torsplittunnel')
+@authenticated_only
 def set_torsplittunnel():
     # turns tor split-tunneling on or off
     setting = get_conf()
-    user = json.loads(request.data)
-    userId = user['userId']
-    user = User.query.get(userId)
-    if user:
-        if user.id == current_user.id:
-            if setting['torsplittunnel'] == 'on':
-                cmd_str = [os.path.join(EXEC_DIR, "tor.split-tunnel.sh") + " off 1"]
-                try:
-                    result = subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True, timeout=600)
-                except subprocess.TimeoutExpired:
-                    flash('Error: script timed out', category='error')
-                    return jsonify({})
-                # for debug purposes
-                print(result.stdout, result.stderr)
-                get_torsplittunnel_status()
-                if result.returncode == 0:
-                    flash('tor split-tunneling disabled.', category='success')
-                else:
-                    flash('An unknown error occured!', category='error')
-            else:
-                cmd_str = [os.path.join(EXEC_DIR, "tor.split-tunnel.sh") + " on 1"]
-                try:
-                    result = subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True, timeout=900)
-                except subprocess.TimeoutExpired:
-                    flash('Error: script timed out', category='error')
-                    return jsonify({})
-                # for debug purposes
-                print(result.stdout, result.stderr)
-                get_torsplittunnel_status()
-                if result.returncode == 0:
-                    flash('tor split-tunneling enabled!', category='success')
-                else:
-                    flash('An unknown error occured!', category='error')
-
-    return jsonify({})
+    if setting['torsplittunnel'] == 'on':
+        cmd_str = [os.path.join(EXEC_DIR, "tor.split-tunnel.sh") + " off 1"]
+        try:
+            result = subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True, timeout=600)
+        except subprocess.TimeoutExpired:
+            message = 'Error: script timed out'
+            category = 'error'
+            socketio.emit('torsplittunnel_set', {'message': message, 'category': category})
+            return
+        # for debug purposes
+        print(result.stdout, result.stderr)
+        get_torsplittunnel_status()
+        if result.returncode == 0:
+            message = 'tor split-tunneling disabled.'
+            category = 'success'
+        else:
+            message = 'An unknown error occured!'
+            category = 'error'
+        socketio.emit('torsplittunnel_set', {'message': message, 'category': category})
+    else:
+        cmd_str = [os.path.join(EXEC_DIR, "tor.split-tunnel.sh") + " on 1"]
+        try:
+            result = subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True, timeout=900)
+        except subprocess.TimeoutExpired:
+            message = 'Error: script timed out'
+            category = 'error'
+            socketio.emit('torsplittunnel_set', {'message': message, 'category': category})
+            return
+        # for debug purposes
+        print(result.stdout, result.stderr)
+        get_torsplittunnel_status()
+        if result.returncode == 0:
+            message = 'tor split-tunneling enabled!'
+            category = 'success'
+        else:
+            message = 'An unknown error occured!'
+            category = 'error'
+        socketio.emit('torsplittunnel_set', {'message': message, 'category': category})
 
 # tor split-tunnel data refresh
 @views.route('/refresh_torsplittunnel_data', methods=['POST'])
@@ -797,6 +852,33 @@ def refresh_torsplittunnel_data():
     get_torsplittunnel_status()
 
     return jsonify({})
+
+# run test of tor split-tunneling service
+@socketio.on('test_torsplittunnel')
+@authenticated_only
+def get_torsplittunnel_test_status():
+    # test status of tor split-tunnel service
+    global torsplittunnel_test_status
+    torsplittunnel_test_status = {}
+    cmd_str = [os.path.join(EXEC_DIR, "tor.split-tunnel.sh") + " status 1 0 1"]
+    try:
+        subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True, timeout=900)
+    except subprocess.TimeoutExpired:
+        if os.path.exists(os.path.join(EXEC_DIR, 'split-tunnel_status.tmp')):
+            os.remove(os.path.join(EXEC_DIR, 'split-tunnel_status.tmp'))
+        message = 'Tor split-tunnel test timed out'
+        category = 'info'
+        socketio.emit('torsplittunnel_test_complete', {'message': message, 'category': category})
+        return
+    with open(os.path.join(EXEC_DIR, 'split-tunnel_test_status.tmp')) as status:
+        for line in status:
+            if "=" in line:
+                name, value = line.split("=")
+                torsplittunnel_test_status[name] = str(value).rstrip().strip('\'\'')
+    os.remove(os.path.join(EXEC_DIR, 'split-tunnel_test_status.tmp'))
+    message = 'Tor split-tunnel test complete.'
+    category = 'info'
+    socketio.emit('torsplittunnel_test_complete', {'message': message, 'category': category})
 
 ##########################
 ### letsencrypt routes ###
@@ -1041,51 +1123,23 @@ def check_domain(domain):
     except socket.gaierror:
         return False
 
+# get enter input for commands run using pexpect (needed for letsencrypt script)
+@socketio.on('enter_input')
+@authenticated_only
+def set_enter_input():
+    debug_file = open(os.path.abspath('./debug_enter.txt'), "w") # for debug purposes only
+    global enter_input
+    enter_input = True
+    print("set_enter_input: !ENTER!", str(enter_input), file=debug_file) # debug purposes only
+    debug_file.close() # for debug purposes only
+
+# timeout handler for running commands using pexpect
+def timeout_handler(signum, frame):
+    raise TimeoutError("Command execution timed out")
+
 ############################################
 ### status, config, and helper functions ###
 ############################################
-
-# get pleb-vpn config file values
-def get_conf():
-    setting = {}
-    with open(os.path.join(HOME_DIR, 'pleb-vpn.conf')) as conf:
-        for line in conf:
-            if "=" in line:
-                name, value = line.split("=")
-                setting[name] = str(value).rstrip().strip('\'\'')
-    return setting
-
-# get status of openvpn connection
-def get_plebVPN_status():
-    # get status of pleb-vpn connection to vps
-    global plebVPN_status
-    global update_available
-    plebVPN_status = {}
-    conf_file = config.PlebConfig(conf_file_location)
-    cmd_str = [os.path.join(EXEC_DIR, "vpn-install.sh") + " status 1"]
-    try:
-        subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True, timeout=100)
-    except subprocess.TimeoutExpired:
-        if os.path.exists(os.path.join(EXEC_DIR, 'pleb-vpn_status.tmp')):
-            os.remove(os.path.join(EXEC_DIR, 'pleb-vpn_status.tmp'))
-        print('Error: script timed out')
-        return
-    with open(os.path.join(EXEC_DIR, 'pleb-vpn_status.tmp')) as status:
-        for line in status:
-            if "=" in line:
-                name, value = line.split("=")
-                plebVPN_status[name] = str(value).rstrip().strip('\'\'')
-    os.remove(os.path.join(EXEC_DIR, 'pleb-vpn_status.tmp'))
-    setting=get_conf()
-    # check for new version of pleb-vpn
-    latest_version = str(get_latest_version())
-    update_available = False
-    if latest_version is not None:
-        if setting['version'] != latest_version:
-            conf_file.set_option('latestversion', latest_version)
-            conf_file.write()
-            update_available = True
-
 
 # get status of lnd hybrid mode
 def get_lnd_hybrid_status():
@@ -1204,45 +1258,4 @@ def get_torsplittunnel_status():
                 torsplittunnel_status[name] = str(value).rstrip().strip('\'\'')
     os.remove(os.path.join(EXEC_DIR, 'split-tunnel_status.tmp'))
 
-# run test of tor split-tunneling service
-@views.route('/get_torsplittunnel_test_status', methods=['POST'])
-@login_required
-def get_torsplittunnel_test_status():
-    # test status of tor split-tunnel service
-    user = json.loads(request.data)
-    userId = user['userId']
-    user = User.query.get(userId)
-    if user:
-        if user.id == current_user.id:
-            global torsplittunnel_test_status
-            torsplittunnel_test_status = {}
-            cmd_str = [os.path.join(EXEC_DIR, "tor.split-tunnel.sh") + " status 1 0 1"]
-            try:
-                subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True, timeout=900)
-            except subprocess.TimeoutExpired:
-                if os.path.exists(os.path.join(EXEC_DIR, 'split-tunnel_status.tmp')):
-                    os.remove(os.path.join(EXEC_DIR, 'split-tunnel_status.tmp'))
-                print('Error: script timed out')
-                return jsonify({})
-            with open(os.path.join(EXEC_DIR, 'split-tunnel_test_status.tmp')) as status:
-                for line in status:
-                    if "=" in line:
-                        name, value = line.split("=")
-                        torsplittunnel_test_status[name] = str(value).rstrip().strip('\'\'')
-            os.remove(os.path.join(EXEC_DIR, 'split-tunnel_test_status.tmp'))
-
     return jsonify({})
-
-# get enter input for commands run using pexpect (needed for letsencrypt script)
-@socketio.on('enter_input')
-@authenticated_only
-def set_enter_input():
-    debug_file = open(os.path.abspath('./debug_enter.txt'), "w") # for debug purposes only
-    global enter_input
-    enter_input = True
-    print("set_enter_input: !ENTER!", str(enter_input), file=debug_file) # debug purposes only
-    debug_file.close() # for debug purposes only
-
-# timeout handler for running commands using pexpect
-def timeout_handler(signum, frame):
-    raise TimeoutError("Command execution timed out")

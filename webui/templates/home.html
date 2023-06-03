@@ -13,16 +13,11 @@
   </div>
   <div class="row">
     <div class="col text-center">
-      <button
-        id="activate"
-        type="button"
-        class="btn btn-success"
-        onClick="refreshplebVPNdata({{ current_user.id }})"
-      >
+      <button id="refresh_data" type="button" class="btn btn-success">
         Refesh Data
       </button>
       <button
-        id="activate_loading"
+        id="refresh_data_loading"
         class="btn btn-success d-none"
         type="button"
         disabled
@@ -334,8 +329,8 @@
   var socket = io.connect(
     location.protocol + "//" + document.domain + ":" + location.port
   );
-  $("#update-scripts").click(function () {
-    event.preventDefault(event);
+  $("#update-scripts").click(function (event) {
+    event.preventDefault();
     if (
       confirm_dialog(
         (message =
@@ -373,6 +368,30 @@
       }
       socket.emit("uninstall-plebvpn");
     }
+  });
+  $("#refresh_data").click(function (event) {
+    event.preventDefault();
+    var refreshBtn = document.getElementById("refresh_data");
+    if (refreshBtn !== null) {
+      refreshBtn.classList.add("d-none");
+    }
+    var refreshLoading = document.getElementById("refresh_data_loading");
+    if (refreshLoading !== null) {
+      refreshLoading.classList.remove("d-none");
+    }
+    socket.emit("refresh_plebVPN_data");
+  });
+  socket.on("plebVPN_data_refreshed", function () {
+    var refreshBtn = document.getElementById("refresh_data");
+    if (refreshBtn !== null) {
+      refreshBtn.classList.remove("d-none");
+    }
+    var refreshLoading = document.getElementById("refresh_data_loading");
+    if (refreshLoading !== null) {
+      refreshLoading.classList.add("d-none");
+    }
+    var url = "/";
+    window.location.href = url;
   });
 </script>
 {% endblock %}

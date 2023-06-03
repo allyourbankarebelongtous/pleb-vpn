@@ -167,12 +167,7 @@
         </p>
       </div>
       <div class="col">
-        <button
-          id="lnd_activate"
-          type="button"
-          class="btn btn-success"
-          onClick="setlndHybrid_on({{ current_user.id }})"
-        >
+        <button id="lnd_activate" type="button" class="btn btn-success">
           Activate
         </button>
         <button
@@ -247,12 +242,7 @@
         <p>Dectivate LND Hybrid</p>
       </div>
       <div class="col">
-        <button
-          id="lnd_deactivate"
-          type="button"
-          class="btn btn-danger"
-          onClick="setlndHybrid_off({{ current_user.id }})"
-        >
+        <button id="lnd_deactivate" type="button" class="btn btn-danger">
           Dectivate
         </button>
         <button
@@ -396,12 +386,7 @@
         </p>
       </div>
       <div class="col">
-        <button
-          id="cln_activate"
-          type="button"
-          class="btn btn-success"
-          onClick="setclnHybrid_on({{ current_user.id }})"
-        >
+        <button id="cln_activate" type="button" class="btn btn-success">
           Activate
         </button>
         <button
@@ -476,12 +461,7 @@
         <p>Dectivate CLN Hybrid</p>
       </div>
       <div class="col">
-        <button
-          id="cln_deactivate"
-          type="button"
-          class="btn btn-danger"
-          onClick="setclnHybrid_off({{ current_user.id }})"
-        >
+        <button id="cln_deactivate" type="button" class="btn btn-danger">
           Dectivate
         </button>
         <button
@@ -512,4 +492,136 @@
     </div>
   </div>
 </div>
-{% endif %} {% endif %} {% endblock %}
+{% endif %} {% endif %}
+<script>
+  var socket = io.connect(
+    location.protocol + "//" + document.domain + ":" + location.port
+  );
+  $("#lnd_activate").click(function (event) {
+    event.preventDefault();
+    if (
+      confirm_dialog(
+        (message = "Use the current LND port and enable LND hybrid mode?")
+      ) == true
+    ) {
+      var lndonBtn = document.getElementById("lnd_activate");
+      if (lndonBtn !== null) {
+        lndonBtn.classList.add("d-none");
+      }
+      var lndonLoading = document.getElementById("lnd_activate_loading");
+      if (lndonLoading !== null) {
+        lndonLoading.classList.remove("d-none");
+      }
+      socket.emit("set_lndHybrid");
+    }
+  });
+  $("#lnd_deactivate").click(function (event) {
+    event.preventDefault();
+    if (
+      confirm_dialog(
+        (message = "Are you sure you want to disable LND hybrid mode?")
+      ) == true
+    ) {
+      var lndoffBtn = document.getElementById("lnd_deactivate");
+      if (lndoffBtn !== null) {
+        lndoffBtn.classList.add("d-none");
+      }
+      var lndoffLoading = document.getElementById("lnd_deactivate_loading");
+      if (lndoffLoading !== null) {
+        lndoffLoading.classList.remove("d-none");
+      }
+      socket.emit("set_lndHybrid");
+    }
+  });
+  socket.on("lndHybrid_set", function (data) {
+    var lndonBtn = document.getElementById("lnd_activate");
+    if (lndonBtn !== null) {
+      lndonBtn.classList.remove("d-none");
+    }
+    var lndonLoading = document.getElementById("lnd_activate_loading");
+    if (lndonLoading !== null) {
+      lndonLoading.classList.add("d-none");
+    }
+    var lndoffBtn = document.getElementById("lnd_deactivate");
+    if (lndoffBtn !== null) {
+      lndoffBtn.classList.remove("d-none");
+    }
+    var lndoffLoading = document.getElementById("lnd_deactivate_loading");
+    if (lndoffLoading !== null) {
+      lndoffLoading.classList.add("d-none");
+    }
+    var message = data.message;
+    var category = data.category;
+    var url =
+      "/hybrid?message=" +
+      encodeURIComponent(message) +
+      "&category=" +
+      encodeURIComponent(category);
+    window.location.href = url;
+  });
+  $("#cln_activate").click(function (event) {
+    event.preventDefault();
+    if (
+      confirm_dialog(
+        (message =
+          "Use the current CLN port and enable Core Lightning hybrid mode?")
+      ) == true
+    ) {
+      var clnonBtn = document.getElementById("cln_activate");
+      if (clnonBtn !== null) {
+        clnonBtn.classList.add("d-none");
+      }
+      var clnonLoading = document.getElementById("cln_activate_loading");
+      if (clnonLoading !== null) {
+        clnonLoading.classList.remove("d-none");
+      }
+      socket.emit("set_clnHybrid");
+    }
+  });
+  $("#cln_deactivate").click(function (event) {
+    event.preventDefault();
+    if (
+      confirm_dialog(
+        (message =
+          "Are you sure you want to disable Core Lightning hybrid mode?")
+      ) == true
+    ) {
+      var clnoffBtn = document.getElementById("cln_deactivate");
+      if (clnoffBtn !== null) {
+        clnoffBtn.classList.add("d-none");
+      }
+      var clnoffLoading = document.getElementById("cln_deactivate_loading");
+      if (clnoffLoading !== null) {
+        clnoffLoading.classList.remove("d-none");
+      }
+      socket.emit("set_clnHybrid");
+    }
+  });
+  socket.on("clnHybrid_set", function (data) {
+    var clnonBtn = document.getElementById("cln_activate");
+    if (clnonBtn !== null) {
+      clnonBtn.classList.remove("d-none");
+    }
+    var clnonLoading = document.getElementById("cln_activate_loading");
+    if (clnonLoading !== null) {
+      clnonLoading.classList.add("d-none");
+    }
+    var clnoffBtn = document.getElementById("cln_deactivate");
+    if (clnoffBtn !== null) {
+      clnoffBtn.classList.remove("d-none");
+    }
+    var clnoffLoading = document.getElementById("cln_deactivate_loading");
+    if (clnoffLoading !== null) {
+      clnoffLoading.classList.add("d-none");
+    }
+    var message = data.message;
+    var category = data.category;
+    var url =
+      "/hybrid?message=" +
+      encodeURIComponent(message) +
+      "&category=" +
+      encodeURIComponent(category);
+    window.location.href = url;
+  });
+</script>
+{% endblock %}

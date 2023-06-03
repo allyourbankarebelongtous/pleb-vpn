@@ -187,16 +187,11 @@ plebVPN_status['config_exists'] != "yes" %}
         <p>Activate Pleb-VPN</p>
       </div>
       <div class="col">
-        <button
-          id="activate"
-          type="button"
-          class="btn btn-success"
-          onClick="setplebVPN_on({{ current_user.id }})"
-        >
+        <button id="plebvpn_on" type="button" class="btn btn-success">
           Activate
         </button>
         <button
-          id="activate_loading"
+          id="plebvpn_on_loading"
           class="btn btn-success d-none"
           type="button"
           disabled
@@ -239,16 +234,11 @@ plebVPN_status['config_exists'] != "yes" %}
         <p>Dectivate Pleb-VPN</p>
       </div>
       <div class="col">
-        <button
-          id="deactivate"
-          type="button"
-          class="btn btn-danger"
-          onClick="setplebVPN_off({{ current_user.id }})"
-        >
+        <button id="plebvpn_off" type="button" class="btn btn-danger">
           Dectivate
         </button>
         <button
-          id="deactivate_loading"
+          id="plebvpn_off_loading"
           class="btn btn-danger d-none"
           type="button"
           disabled
@@ -264,4 +254,74 @@ plebVPN_status['config_exists'] != "yes" %}
     </div>
   </form>
 </div>
-{% endif %} {% endif %} {% endblock %}
+{% endif %} {% endif %}
+<script>
+  var socket = io.connect(
+    location.protocol + "//" + document.domain + ":" + location.port
+  );
+  $("#plebvpn_on").click(function (event) {
+    event.preventDefault();
+    if (
+      confirm_dialog(
+        (message =
+          "Are you sure you want to use your currently uploaded conf file and enable Pleb-VPN?")
+      ) == true
+    ) {
+      var onBtn = document.getElementById("plebvpn_on");
+      if (onBtn !== null) {
+        onBtn.classList.add("d-none");
+      }
+      var onLoading = document.getElementById("plebvpn_on_loading");
+      if (onLoading !== null) {
+        onLoading.classList.remove("d-none");
+      }
+      socket.emit("set_plebVPN");
+    }
+  });
+  $("#plebvpn_off").click(function (event) {
+    event.preventDefault();
+    if (
+      confirm_dialog(
+        (message =
+          "Are you sure you want to disconnect your VPN and disable Pleb-VPN?")
+      ) == true
+    ) {
+      var offBtn = document.getElementById("plebvpn_off");
+      if (offBtn !== null) {
+        offBtn.classList.add("d-none");
+      }
+      var offLoading = document.getElementById("plebvpn_off_loading");
+      if (offLoading !== null) {
+        offLoading.classList.remove("d-none");
+      }
+      socket.emit("set_plebVPN");
+    }
+  });
+  socket.on("plebVPN_set", function (data) {
+    var onBtn = document.getElementById("plebvpn_on");
+    if (onBtn !== null) {
+      onBtn.classList.remove("d-none");
+    }
+    var onLoading = document.getElementById("plebvpn_on_loading");
+    if (onLoading !== null) {
+      onLoading.classList.add("d-none");
+    }
+    var offBtn = document.getElementById("plebvpn_off");
+    if (offBtn !== null) {
+      offBtn.classList.remove("d-none");
+    }
+    var offLoading = document.getElementById("plebvpn_off_loading");
+    if (offLoading !== null) {
+      offLoading.classList.add("d-none");
+    }
+    var message = data.message;
+    var category = data.category;
+    var url =
+      "/pleb-VPN?message=" +
+      encodeURIComponent(message) +
+      "&category=" +
+      encodeURIComponent(category);
+    window.location.href = url;
+  });
+</script>
+{% endblock %}

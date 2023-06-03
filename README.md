@@ -1,6 +1,6 @@
 <!-- omit in toc -->
-# ![Pleb-VPN](pictures/full-logo cutout-orange.png)  
-![Pleb-VPN](pictures/raspilogo_tile_400px.png)
+# ![Pleb-VPN](pictures/full-logo-cutout-orange.png)  
+![Pleb-VPN](pictures/raspilogo_tile_400px.png)  
 ![Pleb-VPN](pictures/mynode_logo_dark.png)
 
 # Pleb-VPN  
