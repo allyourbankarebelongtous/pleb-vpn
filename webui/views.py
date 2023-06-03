@@ -149,6 +149,12 @@ def pleb_VPN():
         lnd = True
     if os.path.exists(clnpath):
         cln = True
+    # get message to flash if exists
+    message = request.args.get('message')
+    category = request.args.get('category')
+    if message is not None:
+        print('flashing message: ', message) # for debug purposes only
+        flash(message, category=category)
     # upload plebvpn.conf file
     if request.method == 'POST':
         # check if the post request has the file part
@@ -298,6 +304,12 @@ def hybrid():
         get_lnd_hybrid_status()
     if cln_hybrid_status == {}:
         get_cln_hybrid_status()
+    # get message to flash if exists
+    message = request.args.get('message')
+    category = request.args.get('category')
+    if message is not None:
+        print('flashing message: ', message) # for debug purposes only
+        flash(message, category=category)
     # get new LND or CLN port
     if request.method == 'POST':
         conf_file = config.PlebConfig(conf_file_location)
@@ -362,7 +374,7 @@ def set_lndHybrid():
         print(result.stdout, result.stderr)
         get_plebVPN_status()
         if result.returncode == 0:
-            message = 'Pleb-VPN connected!'
+            message = 'LND Hybred mode enabled!'
             category = 'success'
         else:
             message = 'An unknown error occured!'
@@ -612,6 +624,13 @@ def wireguard():
     # get new Wireguard port
     if wireguard_status == {}:
         get_wireguard_status()
+    # get message to flash if exists
+    message = request.args.get('message')
+    category = request.args.get('category')
+    if message is not None:
+        print('flashing message: ', message) # for debug purposes only
+        flash(message, category=category)
+    # get port
     if request.method == 'POST':
         conf_file = config.PlebConfig(conf_file_location)
         if "wgPort" in request.form:
@@ -796,6 +815,12 @@ def torsplittunnel():
     # tor split-tunneling
     if torsplittunnel_status == {}:
         get_torsplittunnel_status()
+    # get message to flash if exists
+    message = request.args.get('message')
+    category = request.args.get('category')
+    if message is not None:
+        print('flashing message: ', message) # for debug purposes only
+        flash(message, category=category)
 
     return render_template('tor-split-tunnel.html', user=current_user, setting=get_conf(), torsplittunnel_status=torsplittunnel_status, torsplittunnel_test_status=torsplittunnel_test_status)
 
@@ -888,9 +913,9 @@ def get_torsplittunnel_test_status():
 @views.route('/letsencrypt', methods=['GET'])
 @login_required
 def letsencrypt():
+    # get message to flash if exists
     message = request.args.get('message')
     category = request.args.get('category')
-
     if message is not None:
         print('flashing message: ', message) # for debug purposes only
         flash(message, category=category)
