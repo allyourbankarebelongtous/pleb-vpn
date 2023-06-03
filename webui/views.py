@@ -71,7 +71,7 @@ def home():
     message = request.args.get('message') # for when activiating a script with SocketIO, to flash messages after redirecting to home page
     category = request.args.get('category') # for when activiating a script with SocketIO, to flash messages after redirecting to home page
     if message is not None:
-        logging.debug('flashing message: ', message) # for debug purposes only
+        logging.debug('flashing message: ' + message) # for debug purposes only
         flash(message, category=category)
     return render_template("home.html", 
                            user=current_user, 
@@ -109,7 +109,8 @@ def update_scripts():
         result = subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True, timeout=600)
     except subprocess.TimeoutExpired:
         logging.error("Error: pleb-vpn.install.sh update script timed out")
-    logging.info(result.stdout, result.stderr)
+    logging.info(result.stdout)
+    logging.error(result.stderr)
 
 @socketio.on('uninstall-plebvpn')
 @authenticated_only
@@ -120,7 +121,8 @@ def uninstall_plebvpn():
         result = subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True, timeout=600)
     except subprocess.TimeoutExpired:
         logging.error("Error: pleb-vpn.install.sh uninstall script timed out")
-    logging.info(result.stdout, result.stderr)
+    logging.info(result.stdout)
+    logging.error(result.stderr)
 
 # get pleb-vpn config file values
 def get_conf():
@@ -153,7 +155,7 @@ def pleb_VPN():
     message = request.args.get('message')
     category = request.args.get('category')
     if message is not None:
-        logging.debug('flashing message: ', message) # for debug purposes only
+        logging.debug('flashing message: ' + message) # for debug purposes only
         flash(message, category=category)
     # upload plebvpn.conf file
     if request.method == 'POST':
@@ -194,7 +196,7 @@ def set_plebVPN():
             socketio.emit('plebVPN_set', {'message': message, 'category': category})
             return
         # for debug purposes
-        logging.info(result.stdout, result.stderr)
+        logging.info(result.stdout + " " + result.stderr)
         get_plebVPN_status()
         if result.returncode == 0:
             message = 'Pleb-VPN disconnected.'
@@ -213,7 +215,8 @@ def set_plebVPN():
             category = 'error'
             return jsonify({})
         # for debug purposes
-        logging.info(result.stdout, result.stderr)
+        logging.info(result.stdout)
+        logging.error(result.stderr)
         get_plebVPN_status()
         if result.returncode == 0:
             message = 'Pleb-VPN connected!'
@@ -310,7 +313,7 @@ def hybrid():
     message = request.args.get('message')
     category = request.args.get('category')
     if message is not None:
-        logging.debug('flashing message: ', message) # for debug purposes only
+        logging.debug('flashing message: ' + message) # for debug purposes only
         flash(message, category=category)
     # get new LND or CLN port
     if request.method == 'POST':
@@ -355,7 +358,8 @@ def set_lndHybrid():
             socketio.emit('lndHybrid_set', {'message': message, 'category': category})
             return
         # for debug purposes
-        logging.info(result.stdout, result.stderr)
+        logging.info(result.stdout)
+        logging.error(result.stderr)
         get_plebVPN_status()
         if result.returncode == 0:
             message = 'LND Hybrid mode disabled.'
@@ -375,7 +379,8 @@ def set_lndHybrid():
             socketio.emit('lndHybrid_set', {'message': message, 'category': category})
             return
         # for debug purposes
-        logging.info(result.stdout, result.stderr)
+        logging.info(result.stdout)
+        logging.error(result.stderr)
         get_plebVPN_status()
         if result.returncode == 0:
             message = 'LND Hybred mode enabled!'
@@ -402,7 +407,8 @@ def set_clnHybrid():
             socketio.emit('clnHybrid_set', {'message': message, 'category': category})
             return
         # for debug purposes
-        logging.info(result.stdout, result.stderr)
+        logging.info(result.stdout)
+        logging.error(result.stderr)
         get_plebVPN_status()
         if result.returncode == 0:
             message = 'Core Lightning Hybrid mode disabled.'
@@ -422,7 +428,8 @@ def set_clnHybrid():
             socketio.emit('clnHybrid_set', {'message': message, 'category': category})
             return
         # for debug purposes
-        logging.info(result.stdout, result.stderr)
+        logging.info(result.stdout)
+        logging.error(result.stderr)
         get_plebVPN_status()
         if result.returncode == 0:
             message = 'Core Lightning Hybrid mode enabled!'
@@ -499,7 +506,7 @@ def payments():
             else:
                 payment_string = frequency + " " + node + " " + pubkey + " " + amount + " " + denomination
             cmd_str = [os.path.join(EXEC_DIR, "payments/managepayments.sh") + " newpayment " + payment_string]
-            logging.debug("newpayment command string sent: ", cmd_str) # for debug purposes only
+            logging.debug("newpayment command string sent: " + cmd_str) # for debug purposes only
             try:
                 result = subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True, timeout=60)
             except subprocess.TimeoutExpired:
@@ -507,7 +514,8 @@ def payments():
                 flash('Error: managepayments.sh newpayment script timed out', category='error')
                 return render_template('payments.html', user=current_user, current_payments=get_payments(), lnd=lnd, cln=cln)
             # for debug purposes
-            logging.info(result.stdout, result.stderr)
+            logging.info(result.stdout)
+            logging.error(result.stderr)
             if result.returncode == 0:
                 flash('Payment saved and scheduled!', category='success')
             else:
@@ -531,7 +539,8 @@ def delete_payment():
         flash('Error: managepayments.sh deletepayment script timed out', category='error')
         return jsonify({})
     # for debug purposes
-    logging.info(result.stdout, result.stderr)
+    logging.info(result.stdout)
+    logging.error(result.stderr)
     if result.returncode == 0:
         flash('Payment deleted!', category='success')
     else:
@@ -551,7 +560,8 @@ def delete_all_payments():
         flash('Error: managepayments.sh deleteall script timed out', category='error')
         return jsonify({})
     # for debug purposes
-    logging.info(result.stdout, result.stderr)
+    logging.info(result.stdout)
+    logging.error(result.stderr)
     if result.returncode == 0:
         flash('All payments deleted!', category='success')
     else:
@@ -573,7 +583,8 @@ def send_payment():
         flash('Error: keysend payment script timed out', category='error')
         return jsonify({})
     # for debug purposes
-    logging.info(result.stdout, result.stderr)
+    logging.info(result.stdout)
+    logging.error(result.stderr)
     if result.returncode == 0:
         flash('Payment sent!', category='success')
     else:
@@ -587,7 +598,8 @@ def send_payment():
         flash('Error: enable payment timer command timed out', category='error')
         return jsonify({})
     # for debug purposes
-    logging.info(result.stdout, result.stderr)
+    logging.info(result.stdout)
+    logging.error(result.stderr)
     cmd_str = ["systemctl start payments-" + parts[1] + "-" + parts[2] + ".timer"]
     try:
         result = subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True, timeout=60)
@@ -596,7 +608,8 @@ def send_payment():
         flash('Error: start payment timer command timed out', category='error')
         return jsonify({})
     # for debug purposes
-    logging.info(result.stdout, result.stderr)
+    logging.info(result.stdout)
+    logging.error(result.stderr)
 
     return jsonify({})
 
@@ -642,7 +655,7 @@ def wireguard():
     message = request.args.get('message')
     category = request.args.get('category')
     if message is not None:
-        logging.debug('flashing message: ', message) # for debug purposes only
+        logging.debug('flashing message: ' + message) # for debug purposes only
         flash(message, category=category)
     # get port
     if request.method == 'POST':
@@ -723,7 +736,8 @@ def set_wireguard():
             message = 'An unknown error occured!'
             category = 'error'
         # for debug purposes
-        logging.info(result.stdout, result.stderr)
+        logging.info(result.stdout)
+        logging.error(result.stderr)
         get_wireguard_status()
         socketio.emit('wireguard_set', {'message': message, 'category': category})
     else:
@@ -732,7 +746,7 @@ def set_wireguard():
             conf_file = config.PlebConfig(conf_file_location)
             while True:
                 new_wgIP = '10.' + str(random.randint(0, 255)) + '.' + str(random.randint(0, 255)) + '.' + str(random.randint(0, 252))
-                logging.debug(new_wgIP) # for debug purposes only
+                logging.debug('new wireguard ip set: ' + new_wgIP) # for debug purposes only
                 if is_valid_ip(new_wgIP):
                     break
             conf_file.set_option('wgip', new_wgIP)
@@ -761,7 +775,8 @@ def set_wireguard():
             message = 'An unknown error occured!'
             category = 'error'
                 # for debug purposes
-        logging.info(result.stdout, result.stderr)
+        logging.info(result.stdout)
+        logging.error(result.stderr)
         get_wireguard_status()
         socketio.emit('wireguard_set', {'message': message, 'category': category})
 
@@ -856,7 +871,8 @@ def set_torsplittunnel():
             socketio.emit('torsplittunnel_set', {'message': message, 'category': category})
             return
         # for debug purposes
-        logging.info(result.stdout, result.stderr)
+        logging.info(result.stdout)
+        logging.error(result.stderr)
         get_torsplittunnel_status()
         if result.returncode == 0:
             message = 'tor split-tunneling disabled.'
@@ -876,7 +892,8 @@ def set_torsplittunnel():
             socketio.emit('torsplittunnel_set', {'message': message, 'category': category})
             return
         # for debug purposes
-        logging.info(result.stdout, result.stderr)
+        logging.info(result.stdout)
+        logging.error(result.stderr)
         get_torsplittunnel_status()
         if result.returncode == 0:
             message = 'tor split-tunneling enabled!'
@@ -949,7 +966,7 @@ def letsencrypt():
     message = request.args.get('message')
     category = request.args.get('category')
     if message is not None:
-        logging.debug('flashing message: ', message) # for debug purposes only
+        logging.debug('flashing message: ' + message) # for debug purposes only
         flash(message, category=category)
 
     return render_template('letsencrypt.html', user=current_user, setting=setting, btcpay_on=btcpay_on, lnbits_on=lnbits_on)
@@ -1039,7 +1056,8 @@ def set_letsencrypt_off():
         socketio.emit('letsencrypt_set_off', {'message': message, 'category': category})
         return
     # for debug purposes
-    logging.info(result.stdout, result.stderr)
+    logging.info(result.stdout)
+    logging.error(result.stderr)
     if result.returncode == 0:
         message = 'LetsEncrypt certificates deleted, origninal config restored.'
         category = 'success'
@@ -1067,9 +1085,9 @@ def get_certs(cmd_str, suppress_output = True, suppress_input = True):
         child.expect(['\r\n', pexpect.EOF, pexpect.TIMEOUT], timeout=0.1)
         output = child.before.decode('utf-8')
         cmd_line = output.strip()
-        logging.debug('cmd_line from pexpect: ', cmd_line) # for debug purposes only
+        logging.debug('cmd_line from pexpect: ' + cmd_line) # for debug purposes only
         if output: # for debug purposes only
-            logging.debug('pexpect first output: ', output.strip()) # for debug purposes only
+            logging.debug('pexpect first output: ' + output.strip()) # for debug purposes only
     except pexpect.TIMEOUT:
         pass
     child.sendline(cmd_str)
@@ -1145,12 +1163,12 @@ def get_certs(cmd_str, suppress_output = True, suppress_input = True):
         pass
     output = child.before.decode('utf-8')
     # Parse the output to extract the $? value
-    logging.debug('Exit code command result: ', output.strip().replace(cmd_line, '')) # for debug purposes only
+    logging.debug('Exit code command result: ' + output.strip().replace(cmd_line, '')) # for debug purposes only
     if output.strip().replace(cmd_line, '').startswith("exit_code="):
         exit_code = int(output.strip().replace(cmd_line, '').split("=")[-1])
     else:
         exit_code = int(42069)
-    logging.debug('Exit code = ', exit_code) # for debug purposes only
+    logging.debug('Exit code = ' + exit_code) # for debug purposes only
     child.close()
     signal.alarm(0)
     
@@ -1180,7 +1198,7 @@ def check_domain(domain):
 def set_enter_input():
     global enter_input
     enter_input = True
-    logging.debug("set_enter_input for pexpect commands:", str(enter_input)) # debug purposes only
+    logging.debug("set_enter_input for pexpect commands: " + str(enter_input)) # debug purposes only
 
 # timeout handler for running commands using pexpect
 def timeout_handler(signum, frame):
@@ -1282,7 +1300,7 @@ def get_payments():
                     current_payments[category] = []
                 current_payments[category].append((id, node, pubkey, amount, denomination, message))
             except IndexError:
-                logging.error("Error: When looking up current_payments.tmp, not enough elements in line_parts for line: ", line)
+                logging.error("Error: When looking up current_payments.tmp, not enough elements in line_parts for line: " + line)
 
     os.remove(os.path.join(EXEC_DIR, 'payments/current_payments.tmp'))
     return current_payments
