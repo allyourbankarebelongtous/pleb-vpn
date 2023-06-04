@@ -196,7 +196,8 @@ def set_plebVPN():
             socketio.emit('plebVPN_set', {'message': message, 'category': category})
             return
         # for debug purposes
-        logging.info(result.stdout + " " + result.stderr)
+        logging.info(result.stdout)
+        logging.error(result.stderr)
         get_plebVPN_status()
         if result.returncode == 0:
             message = 'Pleb-VPN disconnected.'
@@ -224,6 +225,7 @@ def set_plebVPN():
         else:
             message = 'An unknown error occured!'
             category = 'error'
+        logging.debug('exit code received = ' str(result.returncode))
         socketio.emit('plebVPN_set', {'message': message, 'category': category})
 
 # delete pleb-vpn conf file
@@ -367,6 +369,7 @@ def set_lndHybrid():
         else:
             message = 'An unknown error occured!'
             category = 'error'
+        logging.debug('exit code received = ' str(result.returncode))
         socketio.emit('lndHybrid_set', {'message': message, 'category': category})
     else:
         cmd_str = [os.path.join(EXEC_DIR, "lnd-hybrid.sh") + " on 1 1"]
@@ -388,6 +391,7 @@ def set_lndHybrid():
         else:
             message = 'An unknown error occured!'
             category = 'error'
+        logging.debug('exit code received = ' str(result.returncode))
         socketio.emit('lndHybrid_set', {'message': message, 'category': category})
 
 # turn cln hybrid mode on or off
@@ -416,6 +420,7 @@ def set_clnHybrid():
         else:
             message = 'An unknown error occured!'
             category = 'error'
+        logging.debug('exit code received = ' str(result.returncode))
         socketio.emit('clnHybrid_set', {'message': message, 'category': category})
     else:
         cmd_str = [os.path.join(EXEC_DIR, "cln-hybrid.sh") + " on 1 1"]
@@ -437,6 +442,7 @@ def set_clnHybrid():
         else:
             message = 'An unknown error occured!'
             category = 'error'
+        logging.debug('exit code received = ' str(result.returncode))
         socketio.emit('clnHybrid_set', {'message': message, 'category': category})
 
 # refresh hybrid data
@@ -506,7 +512,7 @@ def payments():
             else:
                 payment_string = frequency + " " + node + " " + pubkey + " " + amount + " " + denomination
             cmd_str = [os.path.join(EXEC_DIR, "payments/managepayments.sh") + " newpayment " + payment_string]
-            logging.debug("newpayment command string sent: " + cmd_str) # for debug purposes only
+            logging.debug("newpayment command string sent: " + cmd_str[0]) # for debug purposes only
             try:
                 result = subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True, timeout=60)
             except subprocess.TimeoutExpired:
@@ -713,72 +719,78 @@ def download_file():
         return "File not found", 404
     return send_file(path, as_attachment=True)
 
-# set wireguard on or off
-@socketio.on('set_wireguard')
+# set wireguard on
+@socketio.on('set_wireguard_on')
 @authenticated_only
 def set_wireguard():
-    # turns wireguard on or off
+    # turns wireguard on
     setting = get_conf()
-    if setting['wireguard'] == 'on':
-        cmd_str = [os.path.join(EXEC_DIR, "wg-install.sh") + " off"]
-        try:
-            result = subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True, timeout=600)
-        except subprocess.TimeoutExpired:
-            logging.error("Error: wg-install.sh off script timed out")
-            message = 'Error: wg-install.sh off script timed out'
-            category = 'error'
-            socketio.emit('wireguard_set', {'message': message, 'category': category})
-            return
-        if result.returncode == 0:
-            message = 'Wireguard disabled.'
-            category = 'success'
-        else:
-            message = 'An unknown error occured!'
-            category = 'error'
-        # for debug purposes
-        logging.info(result.stdout)
-        logging.error(result.stderr)
-        get_wireguard_status()
-        socketio.emit('wireguard_set', {'message': message, 'category': category})
+    # check if no wireguard IP in pleb-vpn.conf, and if not, generate one
+    if not is_valid_ip(setting['wgip']):
+        conf_file = config.PlebConfig(conf_file_location)
+        while True:
+            new_wgIP = '10.' + str(random.randint(0, 255)) + '.' + str(random.randint(0, 255)) + '.' + str(random.randint(0, 252))
+            logging.debug('new wireguard ip set: ' + new_wgIP) # for debug purposes only
+            if is_valid_ip(new_wgIP):
+                break
+        conf_file.set_option('wgip', new_wgIP)
+        conf_file.write()
+        cmd_str = [os.path.join(EXEC_DIR, "wg-install.sh") + " on 0 1 1"]
     else:
-        # check if no wireguard IP in pleb-vpn.conf, and if not, generate one
-        if not is_valid_ip(setting['wgip']):
-            conf_file = config.PlebConfig(conf_file_location)
-            while True:
-                new_wgIP = '10.' + str(random.randint(0, 255)) + '.' + str(random.randint(0, 255)) + '.' + str(random.randint(0, 252))
-                logging.debug('new wireguard ip set: ' + new_wgIP) # for debug purposes only
-                if is_valid_ip(new_wgIP):
-                    break
-            conf_file.set_option('wgip', new_wgIP)
-            conf_file.write()
+        if os.path.isfile(os.path.join(HOME_DIR, 'wireguard/wg0.conf')):
+            cmd_str = [os.path.join(EXEC_DIR, "wg-install.sh") + " on 1 0 1"]
+        else:
             cmd_str = [os.path.join(EXEC_DIR, "wg-install.sh") + " on 0 1 1"]
-        else:
-            if os.path.isfile(os.path.join(HOME_DIR, 'wireguard/wg0.conf')):
-                cmd_str = [os.path.join(EXEC_DIR, "wg-install.sh") + " on 1 0 1"]
-            else:
-                cmd_str = [os.path.join(EXEC_DIR, "wg-install.sh") + " on 0 1 1"]
-        try:
-            result = subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True, timeout=600)
-        except subprocess.TimeoutExpired:
-            logging.error("Error: wg-install.sh on script timed out")
-            message = 'Error: wg-install.sh on script timed out'
-            category = 'error'
-            socketio.emit('wireguard_set', {'message': message, 'category': category})
-            return
-        if result.returncode == 0:
-            message = 'Wireguard private LAN enabled!'
-            category = 'success'
-        elif result.returncode == 10:
-            message = 'Error: unable to find conf files. Create new conf files and re-enable wireguard.'
-            category = 'error'
-        else:
-            message = 'An unknown error occured!'
-            category = 'error'
-                # for debug purposes
-        logging.info(result.stdout)
-        logging.error(result.stderr)
-        get_wireguard_status()
+    try:
+        result = subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True, timeout=600)
+    except subprocess.TimeoutExpired:
+        logging.error("Error: wg-install.sh on script timed out")
+        message = 'Error: wg-install.sh on script timed out'
+        category = 'error'
         socketio.emit('wireguard_set', {'message': message, 'category': category})
+        return
+    if result.returncode == 0:
+        message = 'Wireguard private LAN enabled!'
+        category = 'success'
+    elif result.returncode == 10:
+        message = 'Error: unable to find conf files. Create new conf files and re-enable wireguard.'
+        category = 'error'
+    else:
+        message = 'An unknown error occured!'
+        category = 'error'
+            # for debug purposes
+    logging.info(result.stdout)
+    logging.error(result.stderr)
+    logging.debug('exit code received = ' str(result.returncode))
+    get_wireguard_status()
+    socketio.emit('wireguard_set_on', {'message': message, 'category': category})
+
+# set wireguard off
+@socketio.on('set_wireguard_off')
+@authenticated_only
+def set_wireguard():
+    # turns wireguard off
+    cmd_str = [os.path.join(EXEC_DIR, "wg-install.sh") + " off"]
+    try:
+        result = subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True, timeout=600)
+    except subprocess.TimeoutExpired:
+        logging.error("Error: wg-install.sh off script timed out")
+        message = 'Error: wg-install.sh off script timed out'
+        category = 'error'
+        socketio.emit('wireguard_set', {'message': message, 'category': category})
+        return
+    if result.returncode == 0:
+        message = 'Wireguard disabled.'
+        category = 'success'
+    else:
+        message = 'An unknown error occured!'
+        category = 'error'
+    # for debug purposes
+    logging.info(result.stdout)
+    logging.error(result.stderr)
+    logging.debug('exit code received = ' str(result.returncode))
+    get_wireguard_status()
+    socketio.emit('wireguard_set_off', {'message': message, 'category': category})
 
 # delete wireguard conf files
 @views.route('/delete_wireguard_conf', methods=['POST'])
@@ -880,6 +892,7 @@ def set_torsplittunnel():
         else:
             message = 'An unknown error occured!'
             category = 'error'
+        logging.debug('exit code received = ' str(result.returncode))
         socketio.emit('torsplittunnel_set', {'message': message, 'category': category})
     else:
         cmd_str = [os.path.join(EXEC_DIR, "tor.split-tunnel.sh") + " on 1"]
@@ -901,6 +914,7 @@ def set_torsplittunnel():
         else:
             message = 'An unknown error occured!'
             category = 'error'
+        logging.debug('exit code received = ' str(result.returncode))
         socketio.emit('torsplittunnel_set', {'message': message, 'category': category})
 
 # tor split-tunnel data refresh
@@ -1040,6 +1054,7 @@ def set_letsencrypt_on(formData):
     else:
         message = 'LetsEncrypt certificate install unsuccessful. Please check your domain name(s) and try again, ensuring you enter the CNAME record correctly.'
         category = 'error'
+    logging.debug('exit code received = ' str(result.returncode))
     socketio.emit('letsencrypt_set_on', {'message': message, 'category': category})
 
 # turn letsencrypt off and delete certs
@@ -1085,9 +1100,9 @@ def get_certs(cmd_str, suppress_output = True, suppress_input = True):
         child.expect(['\r\n', pexpect.EOF, pexpect.TIMEOUT], timeout=0.1)
         output = child.before.decode('utf-8')
         cmd_line = output.strip()
-        logging.debug('cmd_line from pexpect: ' + cmd_line) # for debug purposes only
+        logging.debug('cmd_line from pexpect: ' + str(cmd_line)) # for debug purposes only
         if output: # for debug purposes only
-            logging.debug('pexpect first output: ' + output.strip()) # for debug purposes only
+            logging.debug('pexpect first output: ' + str(output.strip())) # for debug purposes only
     except pexpect.TIMEOUT:
         pass
     child.sendline(cmd_str)
@@ -1097,7 +1112,7 @@ def get_certs(cmd_str, suppress_output = True, suppress_input = True):
         output1 = output1.replace(cmd_line, '')
         if output1 != output: 
             output = output1
-            logging.info(output.strip()) # for debug purposes only
+            logging.info(str(output.strip())) # for debug purposes only
     except pexpect.TIMEOUT:
         pass
     while True:
@@ -1108,20 +1123,20 @@ def get_certs(cmd_str, suppress_output = True, suppress_input = True):
                 end_script = True
             if output1 != output:
                 output = output1
-                logging.info(output.strip()) # for debug purposes only
+                logging.info(str(output.strip())) # for debug purposes only
                 if capture_output_trigger in output:
-                    logging.debug("capture_output_trigger received: " + output) # for debug purposes only
+                    logging.debug("capture_output_trigger received: " + str(output)) # for debug purposes only
                     capture_output = True
                     logging.debug("capture_output set to: " + str(capture_output)) # for debug purposes only
                 if enter_yes_trigger in output:
                     if yes_count < 1:
                         enter_yes = True
-                    logging.debug("enter_yes_trigger received: " + output + "\n enter_yes=" + str(enter_yes)) # for debug purposes only
+                    logging.debug("enter_yes_trigger received: " + str(output) + "\n enter_yes=" + str(enter_yes)) # for debug purposes only
                 if not suppress_output: 
                     if capture_output:
                         socketio.emit('CNAMEoutput', output.strip().replace(cmd_line, ''))
                         if capture_output_trigger_off in output:
-                            logging.debug("capture_output_off received: " + output) # for debug purposes only
+                            logging.debug("capture_output_off received: " + str(output)) # for debug purposes only
                             capture_output = False
                             logging.debug("capture_output sent to child: " + str(capture_output)) # for debug purposes only
                             socketio.emit('CNAMEoutput', str('First update the CNAME record(s) of your domain(s) as shown above. After the CNAME records are updated, press "Enter" below.'))
@@ -1163,12 +1178,12 @@ def get_certs(cmd_str, suppress_output = True, suppress_input = True):
         pass
     output = child.before.decode('utf-8')
     # Parse the output to extract the $? value
-    logging.debug('Exit code command result: ' + output.strip().replace(cmd_line, '')) # for debug purposes only
+    logging.debug('Exit code command result: ' + str(output.strip().replace(cmd_line, ''))) # for debug purposes only
     if output.strip().replace(cmd_line, '').startswith("exit_code="):
         exit_code = int(output.strip().replace(cmd_line, '').split("=")[-1])
     else:
         exit_code = int(42069)
-    logging.debug('Exit code = ' + exit_code) # for debug purposes only
+    logging.debug('Exit code = ' + str(exit_code)) # for debug purposes only
     child.close()
     signal.alarm(0)
     

@@ -196,8 +196,8 @@ on() {
   if [ "${new_config}" = "1" ]; then
     keepconfig="0"
   else
-    isconfig=$(ls ${homedir}/pleb-vpn/wireguard/ | grep -c wg0.conf)
-    if ! [ ${isconfig} -eq 0 ]; then 
+    isconfig=$(ls ${homedir}/wireguard/ | grep -c wg0.conf)
+    if ! [ ${isconfig} -eq 0 ]; then
       if [ -z "${keepconfig}" ]; then
         whiptail --title "Use Existing Configuration?" \
         --yes-button "Use Existing Config" \
@@ -468,8 +468,10 @@ off() {
   # disable service
   systemctl disable wg-quick@wg0
   systemctl stop wg-quick@wg0
-  # uninstall wireguard
-  apt purge -y wireguard
+  # uninstall wireguard if on raspiblitz (stays installed on mynode)
+  if [ ! "${nodetype}" = "mynode" ]; then
+    apt purge -y wireguard
+  fi
   # close firewall ports
   ufw delete allow ${wgport}/udp
   ufw delete allow out on wg0 from any to any

@@ -362,7 +362,7 @@ content %}
       if (wgonLoading !== null) {
         wgonLoading.classList.remove("d-none");
       }
-      socket.emit("set_wireguard");
+      socket.emit("set_wireguard_on");
     }
   });
   $("#wireguard_off").click(function (event) {
@@ -380,7 +380,7 @@ content %}
       if (wgoffLoading !== null) {
         wgoffLoading.classList.remove("d-none");
       }
-      socket.emit("set_wireguard");
+      socket.emit("set_wireguard_off");
     }
   });
   socket.on("wireguard_set", function (data) {
