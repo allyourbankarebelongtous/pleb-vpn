@@ -433,9 +433,7 @@ server {
 
     location /static/ {
         alias /home/admin/pleb-vpn/webui/static/;
-        # for debug purposes, never expire
-        expires off;
-        # expires 30d;
+        expires 30d;
     }
 
     location /socket.io {
@@ -470,9 +468,7 @@ server {
 
     location /static/ {
         alias /home/admin/pleb-vpn/webui/static/;
-        # for debug purposes, never expire
-        expires off;
-        # expires 30d;
+        expires 30d;
     }
 
     location /socket.io {
@@ -510,9 +506,7 @@ server {
 
     location /static/ {
         alias /home/admin/pleb-vpn/webui/static/;
-        # for debug purposes, never expire
-        expires off;
-        # expires 30d;
+        expires 30d;
     }
 
     location /socket.io {
@@ -570,9 +564,7 @@ server {
 
     location /static/ {
         alias /opt/mynode/pleb-vpn/webui/static/;
-        # for debug purposes, always expire
-        expires off;
-        # expires 30d;
+        expires 30d;
     }
 
     location /socket.io {
@@ -854,9 +846,7 @@ server {
 
     location /static/ {
         alias /home/admin/pleb-vpn/webui/static/;
-        # for debug purposes, never expire
-        expires off;
-        # expires 30d;
+        expires 30d;
     }
 
     location /socket.io {
@@ -891,9 +881,7 @@ server {
 
     location /static/ {
         alias /home/admin/pleb-vpn/webui/static/;
-        # for debug purposes, never expire
-        expires off;
-        # expires 30d;
+        expires 30d;
     }
 
     location /socket.io {
@@ -931,9 +919,7 @@ server {
 
     location /static/ {
         alias /home/admin/pleb-vpn/webui/static/;
-        # for debug purposes, never expire
-        expires off;
-        # expires 30d;
+        expires 30d;
     }
 
     location /socket.io {
@@ -991,9 +977,7 @@ server {
 
     location /static/ {
         alias /opt/mynode/pleb-vpn/webui/static/;
-        # for debug purposes, never expire
-        expires off;
-        # expires 30d;
+        expires 30d;
     }
 
     location /socket.io {
