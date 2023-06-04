@@ -3,7 +3,7 @@
 
 # Pleb-VPN  
 
-_Easy VPS sharing for cheaper hybrid solution for Plebs..._  
+_Easy VPN node configuration toolset encouraging VPS sharing for cheaper hybrid solutions for Plebs..._  
 
 **Available for**  
 ![Pleb-VPN](pictures/raspilogo_tile_400px.png)  
