@@ -722,7 +722,7 @@ def download_file():
 # set wireguard on
 @socketio.on('set_wireguard_on')
 @authenticated_only
-def set_wireguard():
+def set_wireguard_on():
     # turns wireguard on
     setting = get_conf()
     # check if no wireguard IP in pleb-vpn.conf, and if not, generate one
@@ -768,7 +768,7 @@ def set_wireguard():
 # set wireguard off
 @socketio.on('set_wireguard_off')
 @authenticated_only
-def set_wireguard():
+def set_wireguard_off():
     # turns wireguard off
     cmd_str = [os.path.join(EXEC_DIR, "wg-install.sh") + " off"]
     try:

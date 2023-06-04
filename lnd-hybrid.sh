@@ -304,14 +304,18 @@ on() {
   fi
   # restart lnd (skip this step on restore but not if webui)
   if ! [ "${isRestore}" = "1" ]; then
-    systemctl restart lnd 
+    systemctl restart lnd
+    sleep 5
     # restart nginx
     systemctl restart nginx
+    sleep 5
   fi
   if [ "${webui}" = "1" ]; then
-    systemctl restart lnd 
+    systemctl restart lnd
+    sleep 5
     # restart nginx
     systemctl restart nginx
+    sleep 5
   fi
 
   # set lnd-hybrid on in pleb-vpn.conf
@@ -387,8 +391,10 @@ off() {
   
   # restart lnd
   systemctl restart lnd
+  sleep 5
   # restart nginx
   systemctl restart nginx
+  sleep 5
   # set lnd-hybrid off in pleb-vpn.conf
   setting ${plebVPNConf} "2" "lndhybrid" "off"
   exit 0

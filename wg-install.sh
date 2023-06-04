@@ -425,6 +425,7 @@ ${appstoreLink}\n
         fi
         # restart nginx
         systemctl restart nginx
+        sleep 5
       fi
     fi
   elif [ "${nodetype}" = "mynode" ]; then
@@ -453,6 +454,7 @@ ${appstoreLink}\n
         sleep 5
         # restart nginx
         systemctl restart nginx
+        sleep 5
       fi
     fi
   fi
@@ -511,8 +513,10 @@ off() {
       rm /mnt/hdd/lnd/tls*
       # restart lnd
       systemctl restart lnd
+      sleep 5
       # restart nginx
       systemctl restart nginx
+      sleep 5
     fi
   elif [ "${nodetype}" = "mynode" ]; then
     if [ "${lndhybrid}" = "on" ]; then
@@ -521,8 +525,10 @@ off() {
       rm /mnt/hdd/mynode/lnd/tls*
       # restart lnd
       systemctl restart lnd
+      sleep 5
       # restart nginx
       systemctl restart nginx
+      sleep 5
     fi
   fi
 
