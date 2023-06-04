@@ -549,8 +549,8 @@ server {
     fi
 
   elif [ "${nodetype}" = "mynode" ]; then
-    # only used if not installed via the appstore
-    if [ $(ls /usr/share/mynode_apps | grep -c pleb-vpn) -eq 0 ]; then
+    # only put nginx script in if it doesn't exist
+    if [ ! -f /etc/nginx/sites-enabled/https_pleb-vpn.conf ]; then
       echo "server {
     listen 2421 ssl;
     server_name pleb-vpn;
