@@ -1,8 +1,6 @@
 <!-- omit in toc -->
 # ![Pleb-VPN](pictures/full-logo-cutout-orange.png)  
 
-# Pleb-VPN  
-
 _Easy VPN node configuration toolset encouraging VPS sharing for cheaper hybrid solutions for Plebs..._  
 
 **Available for**  
