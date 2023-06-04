@@ -365,6 +365,24 @@ content %}
       socket.emit("set_wireguard_on");
     }
   });
+  socket.on("wireguard_set_on", function (data) {
+    var wgonBtn = document.getElementById("wireguard_on");
+    if (wgonBtn !== null) {
+      wgonBtn.classList.remove("d-none");
+    }
+    var wgonLoading = document.getElementById("wireguard_on_loading");
+    if (wgonLoading !== null) {
+      wgonLoading.classList.add("d-none");
+    }
+    var message = data.message;
+    var category = data.category;
+    var url =
+      "/wireguard?message=" +
+      encodeURIComponent(message) +
+      "&category=" +
+      encodeURIComponent(category);
+    window.location.href = url;
+  });
   $("#wireguard_off").click(function (event) {
     event.preventDefault();
     if (
@@ -383,15 +401,7 @@ content %}
       socket.emit("set_wireguard_off");
     }
   });
-  socket.on("wireguard_set", function (data) {
-    var wgonBtn = document.getElementById("wireguard_on");
-    if (wgonBtn !== null) {
-      wgonBtn.classList.remove("d-none");
-    }
-    var wgonLoading = document.getElementById("wireguard_on_loading");
-    if (wgonLoading !== null) {
-      wgonLoading.classList.add("d-none");
-    }
+  socket.on("wireguard_set_off", function (data) {
     var wgoffBtn = document.getElementById("wireguard_off");
     if (wgoffBtn !== null) {
       wgoffBtn.classList.remove("d-none");
