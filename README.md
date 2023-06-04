@@ -227,8 +227,11 @@ Access Pleb-VPN from the WebUI and try it out!
 
 ## Getting Started  
 After install you can access the WebUI by opening your computer browser and going to ip.ip.ip.ip:2420 (use port 2421 for https),
-where ip.ip.ip.ip is your node's home LAN ip address. Raspiblitz users can also use the menu with unchanged functionality like in v1.0,
-see the FAQ for details. After you do that you will see the login page:  
+where ip.ip.ip.ip is your node's home LAN ip address. Raspiblitz users will also have a tor address to access the WebUI at, you can
+get your tor address by looking in the Menu -> Pleb-VPN -> WebUI, and can also use the menu with unchanged functionality like in v1.0,
+see the FAQ for details. 
+
+After you do that you will see the login page:  
 ![Login](pictures/webui_login.png)
 
 Your username is "admin" and your initial password depends on your node implementation:  
