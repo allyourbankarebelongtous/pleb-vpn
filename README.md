@@ -318,12 +318,12 @@ handy. This configures LetsEncrypt on your node for either BTCPay, LNBits, or bo
 CNAME authentication over your domain, so it works with any domain you have that allows you to enter 
 a CNAME record. If you're not sure you can enter a CNAME record, contact your DNS provider to ask. 
 
-Step 1: Have a domain name for each service you intend to secure (one for BTCPayServer and another for LNBits).  
-Step 2: Have forwarded port 443 from your VPS (or contact your VPS provider to get them to forward the port).  
-  _Note: If you want to enable both services from the same VPS, you'll need a reverse proxy on the 
+- Step 1: Have a domain name for each service you intend to secure (one for BTCPayServer and another for LNBits).  
+- Step 2: Have forwarded port 443 from your VPS (or contact your VPS provider to get them to forward the port).  
+_Note: If you want to enable both services from the same VPS, you'll need a reverse proxy on the
 VPS to decide which service receives traffic._  
-Step 3: Have updated the A record of each domain to point to your VPS IP.  
-Step 4: Ensure that you know how to and are ready to update the CNAME record of your domain.   
+- Step 3: Have updated the A record of each domain to point to your VPS IP.  
+- Step 4: Ensure that you know how to and are ready to update the CNAME record of your domain.   
 
 Once all of these are accomplished, head to the LetsEncrypt BTCPay/LNBits page under the Services dropdown menu to get your cert:  
 ![letsencryptinstructions](pictures/webui_letsencrypt_start.png)
@@ -471,41 +471,43 @@ receiver will have no way of knowing who sent the payment or why because it's a 
 
 _Note: This will only schedule the payment, it will NOT send it now._  
 
-Let's schedule another payment to show some additional functionality. Here's a daily payment as well 
+Let's schedule another payment to show some additional functionality. Here's a daily payment as well
 as the monthly payment scheduled:  
 ![viewPayments](pictures/webui_payments_multiple_payments.png)  
 
 Notice how each payment has an "Options" dropdown menu that contains three options:  
 **Send Now** - Sends the payment now. Useful for if your node was offline when the payment should have been sent 
 and missed the payment.  
-**Edit** - Allows you to change any details of the payment and re-save it.
-**Delete** - Delete the payment.
+**Edit** - Allows you to change any details of the payment and re-save it.  
+**Delete** - Delete the payment.  
 
 There is also a "Delete All" button for deleting all payments.
 
-_Note: The payments are enabled using systemd timers that activate the service that sends the payments. 
-If your node is down during a payment send time, the node will attempt to send the payment up to 
-10 times, and if it doesn't get a successful return after that, that payment **will NOT 
+_Note: The payments are enabled using systemd timers that activate the service that sends the payments.
+If your node is down during a payment send time, the node will attempt to send the payment up to
+10 times, and if it doesn't get a successful return after that, that payment **will NOT
 send again** until you manually send the payment using the Payments page._
 
 ### Updates or Uninstalling
 
 #### Pleb-VPN Updates  
 On the home page, if you scroll down to the bottom you will see your current installed version of Pleb-vpn.
-Pleb-VPN automatically checks Github for updated versions and if an updated version is present it will
-display it along with an Update button. You can update without losing any settings or changes, but you will
-have to reload the page after about a minute. 
+When you refresh your data with "Refresh Data" at the top of the page, Pleb-VPN automatically checks Github
+for updated versions and if an updated version is present it will display it along with an Update button.
+You can update without losing any settings or changes, but you will have to reload the page after about a minute.
 
 #### Node Updates  
 **Raspiblitz** - Just update by reflashing your sd card. Pleb-VPN should re-install along with all of your other apps.
-**MyNode** - Until Pleb-VPN is added to the mynode app store, you'll have to SSH into the node and run this command after you update or reflash your sd card:  
+
+**MyNode** - Until Pleb-VPN is added to the mynode app store, you'll have to SSH into the node and run this command
+after you update or reflash your sd card:  
 `sudo chmod +x /mnt/hdd/mynode/pleb-vpn/pleb-vpn.install.sh && sudo /mnt/hdd/mynode/pleb-vpn/pleb-vpn.install.sh update`
 
 #### Uninstall Pleb-VPN  
 To Uninstall, there is an "Uninstall" button at the very bottom of the home page. This will uninstall
 and de-configure everything from your node so that your node is back to its original configuration.
 
-Feel free to contact me on Telegram @allyourbankarebelongtous or via email at:  
+Feel free to contact me on Telegram @allyourbankarebelongtous or via email at
 allyourbankarebelongtous@protonmail.com with any questions. PRs welcome!
 
 **Happy Routing!**
