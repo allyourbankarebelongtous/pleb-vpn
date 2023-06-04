@@ -12,34 +12,34 @@ _Easy VPS sharing for cheaper hybrid solution for Plebs..._
 `Version 1.1.0 with a Web User Interface and mynode integration`
 
 **Pleb-VPN is a lightning node networking tool set that allows you to easily take your node
-from a tor-only node to a hybrid solution with a public Virtual Private Server, _either yours 
-or someone elses!_ It also includes a number of tools to facilitate this, including an 
-easy-to-install implementation of WireGuard for private, secure VPN access to your node 
-anywhere, anytime, the ability to take BTCPayServer and/or LNBits public, and the ability to 
-automatically send recurring payments over lightning via keysend and include a message in the 
-payment. Pleb-VPN works with both LND and Core Lightning node implementations and currently 
+from a tor-only node to a hybrid solution with a public Virtual Private Server, _either yours
+or someone elses!_ It also includes a number of tools to facilitate this, including an
+easy-to-install implementation of WireGuard for private, secure VPN access to your node
+anywhere, anytime, the ability to take BTCPayServer and/or LNBits public, and the ability to
+automatically send recurring payments over lightning via keysend and include a message in the
+payment. Pleb-VPN works with both LND and Core Lightning node implementations and currently
 works for both Raspiblitz and MyNode node implementations.**
 
 Pleb-VPN was born out of the realization that tor was always going to be
 insufficient for routing nodes, and that most plebs either won't afford
 or can't set up (or both) a VPS with a VPN and enable hybrid mode on their
 node. Enter Pleb-VPN! This enables easy VPS sharing and lowers the cost of
-going clearnet for Plebs as well as making networking configuration changes as 
+going clearnet for Plebs as well as making networking configuration changes as
 easy as clicking a button.
 
-Pleb-VPN is a free open-source node networking management toolset which uses OpenVPN to connect to a VPS, 
-and includes scripts to configure either LND or Core Lightning (or both!) for 
-hybrid mode. It also includes the abiliy to take BTCPayServer and/or LNBits public using 
-LetsEncrypt for any DNS provider that allows a CNAME record. You may use this in conjunction 
-with your own VPS set up as an OpenVPN server, or you may subscribe to @allyourbankarebelongtous 
+Pleb-VPN is a free open-source node networking management toolset which uses OpenVPN to connect to a VPS,
+and includes scripts to configure either LND or Core Lightning (or both!) for
+hybrid mode. It also includes the abiliy to take BTCPayServer and/or LNBits public using
+LetsEncrypt for any DNS provider that allows a CNAME record. You may use this in conjunction
+with your own VPS set up as an OpenVPN server, or you may subscribe to @allyourbankarebelongtous
 and use our VPS setups for the cheapest price, easiest setup, and great service! Details below.
 
-If there are any other Plebs who want to share their VPS for a small fee, feel free 
-to advertise and direct interested parties here for the easy-to-implement 
-hybrid option! This will work with any public VPN (in the sense that the IP of the VPS 
+If there are any other Plebs who want to share their VPS for a small fee, feel free
+to advertise and direct interested parties here for the easy-to-implement
+hybrid option! This will work with any public VPN (in the sense that the IP of the VPS
 is for public access) that uses OpenVPN for its connection and allows port forwarding.
 
-**You can also set up your VPS to share with others as a VPN if you'd like to help 
+**You can also set up your VPS to share with others as a VPN if you'd like to help
 increase the availability of clearnet/hybrid nodes on the lightning network!**
 
 ---
@@ -61,45 +61,48 @@ increase the availability of clearnet/hybrid nodes on the lightning network!**
     - [Split-Tunneling tor](#split-tunneling-tor)
     - [Recurring Payments](#recurring-payments)
     - [Updates or Uninstalling](#updates-or-uninstalling)
+      - [Pleb-VPN Updates](#pleb-vpn-updates)
+      - [Node Updates](#node-updates)
+      - [Uninstall Pleb-VPN](#uninstall-pleb-vpn)
 
 ---
 
 ## How it Works  
-Pleb-VPN uses OpenVPN to connect to a Virtual Private Server (VPS) and configures 
-your node to only use that connection to go to the outside world (your home LAN 
-remains unaffected and can access the node still). At this point, your public 
-facing IP address becomes the IP address of the VPS. The connection between the VPS 
-and the node is encrypted by the OpenVPN protocol. From there, going to a 
-hybrid or clearnet solution for LND or Core Lightning is more private as you 
-will not release your home IP to the outside world. It also makes it easy to get 
-a secure, fast public domain with https ssl certificates to your BtcPayServer or LNBits 
+Pleb-VPN uses OpenVPN to connect to a Virtual Private Server (VPS) and configures
+your node to only use that connection to go to the outside world (your home LAN
+remains unaffected and can access the node still). At this point, your public
+facing IP address becomes the IP address of the VPS. The connection between the VPS
+and the node is encrypted by the OpenVPN protocol. From there, going to a
+hybrid or clearnet solution for LND or Core Lightning is more private as you
+will not release your home IP to the outside world. It also makes it easy to get
+a secure, fast public domain with https ssl certificates to your BtcPayServer or LNBits
 instance.
 
-Pleb-VPN provides an easy-to-use WebUI to install and configure OpenVPN, 
-and then configure hybrid mode on or off for either LND or Core Lightning (or 
-both). Pleb-VPN configures the node such that if the VPS goes offline you will 
-not accidentally release your home IP (called a killswitch). Pleb-VPN also allows 
-as of version 0.9.1 for you to optionally split-tunnel tor off of the VPN. See FAQ 
+Pleb-VPN provides an easy-to-use WebUI to install and configure OpenVPN,
+and then configure hybrid mode on or off for either LND or Core Lightning (or
+both). Pleb-VPN configures the node such that if the VPS goes offline you will
+not accidentally release your home IP (called a killswitch). Pleb-VPN also allows
+as of version 0.9.1 for you to optionally split-tunnel tor off of the VPN. See FAQ
 and Split-Tunneling Tor below for more details.
 
-Pleb-VPN's WebUI also provides access to install and configure WireGuard, 
-a private VPN service that will run through the VPS, encrypted end-to-end from the 
-node to any client connected to the node that you configure, giving you 
-a secure, simulated LAN that allows you to securely access all features of your 
-node as if you were home from anywhere in the world. This feature is entirely 
-set up locally on the node, so **even if you are sharing a VPS with someone you 
+Pleb-VPN's WebUI also provides access to install and configure WireGuard,
+a private VPN service that will run through the VPS, encrypted end-to-end from the
+node to any client connected to the node that you configure, giving you
+a secure, simulated LAN that allows you to securely access all features of your
+node as if you were home from anywhere in the world. This feature is entirely
+set up locally on the node, so **even if you are sharing a VPS with someone you
 don't know, they'll never get access to your node.**
 
-Additionally, Pleb-VPN's WebUI allows you to easily enable LetsEncrypt for BTCPayServer and/or 
-LNBits using your VPS and any domain name that allows CNAME record entry (most DNS providers). 
-Your LetsEncrypt certs are generated locally and the key will never leave your node, ensuring 
-your traffic through the VPS is encrypted. 
+Additionally, Pleb-VPN's WebUI allows you to easily enable LetsEncrypt for BTCPayServer and/or
+LNBits using your VPS and any domain name that allows CNAME record entry (most DNS providers).
+Your LetsEncrypt certs are generated locally and the key will never leave your node, ensuring
+your traffic through the VPS is encrypted.
 
-Finally, Pleb-VPN comes with the ability to automatically send recurring payments 
-over lightning via keysend. _(credit to m00ninite's excellent scripts, found here: 
+Finally, Pleb-VPN comes with the ability to automatically send recurring payments
+over lightning via keysend. _(credit to m00ninite's excellent scripts, found here:
 https://github.com/rootzoll/raspiblitz/pull/2404)._
 
-**Pleb-VPN also ensures that all configurations will remain when you reflash the SD 
+**Pleb-VPN also ensures that all configurations will remain when you reflash the SD
 card for updates.**
 
 ## FAQ  
@@ -379,30 +382,25 @@ To install your Wireguard private LAN and gain private node access from anywhere
 just click the "Activate" button!    
 ![WireguardPortInstalled](pictures/webui_wireguard_port_installed.png)
 
-After that's done, the page will present you with your wireguard status and client connection 
-information:
+This will install wireguard and configure three clients that can connect to your node, which can be 
+used by anything that can run wireguard (phones, tablets, laptops, etc). It will also refresh tls.crt 
+with the wireguard ip if you run LND. After it's done, the page will present you with your wireguard 
+status and client connection information:  
 ![WireGuardStatus](pictures/webui_wireguard_installed.png)
 
-You can also obtain the WireGuard client conf files from the WIREGUARD-CONNECT menu
-within the main Pleb-VPN menu. You will get three files, one (mobile.conf) is also
-displayed as a QR code, but the other two (laptop.conf and desktop.conf) are only
-available via scp download through the WIREGUARD-CONNECT menu. To configure more than
-three clients will require you to manually edit the WireGuard configuration. There
-are several tutorials out there on how to do this.
+The page now shows your wireguard status and can display the qr codes for the client conf files 
+or provide them to you via the "Download" button, as shown here:  
+![WireGuardClientFiles](pictures/webui_wireguard_clients.png)
 
 Once you have WireGuard configured, you can turn it on on your phone and/or laptop/desktop, 
 and connect to any service on your node securely by using the WireGuard IP you selected. For 
-example, to connect to ThunderHub, have the WireGuard client activated on your phone and 
-enter ip.ip.ip.ip:3010 on your phone's browser, where ip.ip.ip.ip is the WireGuard IP that
-you selected. To access the blitz api, enter ip.ip.ip.ip. To configure Zeus to connect over 
+example, to connect to your node's main page, have the WireGuard client activated on your phone and 
+enter ip.ip.ip.ip on your phone's browser, where ip.ip.ip.ip is the WireGuard IP Address that
+is displayed in the Wireguard LAN Status page. To configure Zeus or electrs to connect over 
 WireGuard, uncheck tor and enter your WireGuard ip in place of the tor address.  
 
 _Note: Because the connection is secured by WireGuard there is no need to enable ssl encryption, 
 but you can anyways if you download the cert and install it on your phone._   
-
-Here's a screenshot of me accessing the blitz api via WireGuard on my
-phone using the 10.0.0.0 IP shown above:  
-![BlitzAPIWireGuardAccess](pictures/blitzapiwireguardaccess.png)
 
 ### Split-Tunneling Tor
 Split-tunneling is a feature that configures traffic from tor to bypass the VPN while still
@@ -415,16 +413,15 @@ The other advantages to split-tunneling tor away from the VPN are that if there 
 tor users coming from the same server then tor will probably be slower from that server, so it 
 reduces congestion at the VPS. 
 
-To enable split-tunneling for tor, just activate it from the SERVICES menu. This will configure 
-tor traffic to skip the VPN by creating a special group called novpn, marking traffic generated by 
-that group, creating separate routing rules for marked traffic, and finally by adding tor to that 
-group. 
+To enable split-tunneling for tor, head to the Tor Split-Tunneling page under the Services dropdown menu. 
+You will see this page:  
+![SplitTunnelActivate](pictures/webui_torsplittunnel_activate.png)  
 
-After the script runs, it will run through a series of tests to determine if it was successful. These 
-tests take some time (up to 12 minutes) depending on how long it takes tor to re-establish a circuit 
-using the new routing. After this is complete, you should get a status screen that looks like this:
-![SplitTunnelTorStatus](pictures/splittunneltorstatus.png)
+After you activate tor split-tunneling, the status screen shows up:  
+![SplitTunnelStatus](pictures/webui_torsplittunnel_status.png)  
 
+Beyond the usual "Refresh Data" button and the "Deactivate" button at the bottom, there is also a 
+"Test" button. This will activate a test that can take up to 10 minutes to complete. 
 The way it checks the split-tunneling is as follows:  
 - check current IP (should be VPN IP) by running `curl https://api.ipify.org`  
 - disable the VPN `sudo systemctl stop openvpn@plebvpn`  
@@ -432,107 +429,81 @@ The way it checks the split-tunneling is as follows:
 - check if tor is accessible (should be) `torify curl http://api.ipify.org`  
 - restart Pleb-VPN `sudo systemctl start openvpn@plebvpn`  
 - check clearnet IP (should be VPN IP) `curl https://api.ipify.org`  
-_Note: if you run a status check of tor-split-tunneling immediately after boot or after restarting
+_Note: If you run a status check of tor-split-tunneling immediately after boot or after restarting
 tor it will likely fail to connect over tor. It takes about a minute for the controller to identify 
 that tor is running and add it to the novpn cgroup, and then tor has to re-establish a circuit. If this 
 check fails, as long as it doesn't fail such that clearnet is accessible with the VPN off, wait a 
-few minutes and try again._
+few minutes and try again._  
 
-### Recurring Payments
+Here's what the test output looks like:  
+![SplitTunnelTest](pictures/webui_torsplittunnel_test_passed.png)  
+
+_Note: It is important to understand that if this test fails that doesn't necessarily mean that 
+tor split-tunneling is not working, all it means is that your node couldn't establish a connection 
+over tor at that moment. It's possible that tor is just not functioning well at the time. That being 
+said, this test usually completes in about 2 minutes with no errors if all is well._
+
+### Recurring Payments  
 Lastly, let's check out payments. Payments were included in this to encourage VPS 
 operators to open their servers to other clients, and to make paying for VPS 
-services easier for Plebs. Here is the PAYMENTS menu:  
-![PaymentMenu](pictures/paymentmenu.png)
-
+services easier for Plebs. Here is what the Payments page looks like:  
+![PaymentMenu](pictures/webui_payments_new.png)  
 
 Here you can schedule recurring keysends using either LND or Core Lightning as your 
 node. The service lets you decide which node implementation to use if you have both installed. 
 It also lets you schedule the payment in sats or USD, and does the USD-sat conversion in 
-real-time each time it sends. The PAYMENTS menu has four sections:  
-NEW - lets you create a new recurring payment  
-VIEW - displays all current active payments and their schedule  
-DELETE - allows you to select a payment from among all of them and delete it  
-DELTE-ALL - deletes all payments  
+real-time each time it sends. 
 
-The process of scheduling a new payment is self-explanatory, but for fun here's what 
-it looks like on a Raspiblitz that has both LND and Core Lightning running on it.
+The payments are sent at the following times:  
+**Daily** - Every day at time 00:00
+**Weekly** - Every Sunday at time 00:00
+**Monthly** - Every 1st day of the month at time 00:00
+**Yearly** - Every 1st day of the year at time 00:00
 
-After selecting NEW, the script asks what denomination to use:  
-![ChooseDenomination](pictures/choosedenomination.png)
+Let's go ahead and schedule a test payment. Here's a $2.00 USD payment monthly from my test node running 
+on mynode to my main node:  
+![newPayment](pictures/webui_payments_create_new_payment.png)  
 
-Then the script asks how much you want each payment to be. Here's a USD example:  
-![EnterAmount](pictures/enteramount.png)
+After you've entered in the required info (message is optional but without including a message the 
+receiver will have no way of knowing who sent the payment or why because it's a keysend) click on 
+"Schedule New Payment" and the payment will show as scheduled:  
+![newPaymentScheduled](pictures/webui_payments_new_payment_scheduled.png)  
 
-Then which node you want to use (only asks if you have both LND and Core Lightning installed and enabled):  
-![WhichNodeToUse](pictures/whichnodetouse.png)
+_Note: This will only schedule the payment, it will NOT send it now._  
 
-Then asks for the pubkey of the receiver:  
-![ReceiverPubkey](pictures/receiverpubkey.png)
+Let's schedule another payment to show some additional functionality. Here's a daily payment as well 
+as the monthly payment scheduled:  
+![viewPayments](pictures/webui_payments_multiple_payments.png)  
 
-Then how often to send:  
-![HowOften](pictures/howoften.png)
+Notice how each payment has an "Options" dropdown menu that contains three options:  
+**Send Now** - Sends the payment now. Useful for if your node was offline when the payment should have been sent 
+and missed the payment.  
+**Edit** - Allows you to change any details of the payment and re-save it.
+**Delete** - Delete the payment.
 
-Then you are asked if you want to include a message. Keysends are anonymous, in that the receiver 
-has no way of knowing who the sender is. You can include a message (required for @allyourbankarebelongtous 
-subscriptions) that tells the sender who is sending and why. This will work with both LND and Core Lightning 
-node implementations. If you wish to include a message, select "yes": 
-![keysendmessage](pictures/keysendmessage.png)
+There is also a "Delete All" button for deleting all payments.
 
-Here, enter your message (for @allyourbankarebelongtous subscriptions, include your email address or telegram 
-handle):
-![enterkeysendmessage](pictures/enterkeysendmessage.png)
-
-That's it. The payment is scheduled! The script will NOT send the payment right away,
-it will wait until 00:00:00 UTC, and only send on the following schedule:  
-DAILY - Every day at 00:00:00 UTC  
-WEEKLY - Every Sunday at 00:00:00 UTC  
-MONTHLY - Every 1st day of the month at 00:00:00 UTC  
-YEARLY - Every 1st day of the year at 00:00:00 UTC  
-
-Use VIEW to view your currently scheduled payments. Here's an example of me paying myself
-a bunch of times for testing purposes from both LND and Core Lightning with test messages:  
-![ViewPayments](pictures/veiwpayments.png)
-
-Use DELETE to get rid of a payment. Here's what that looks like:  
-![DeletePayment](pictures/deletepayment.png)
-
-Use DELETE-ALL to delete all payments.  
-
-Payments that are scheduled will remain through Raspiblitz updates. The payments are
-enabled using systemd timers that activate the service that sends the payments. If your
-node is down during a payment send time, the node will attempt to send the payment up to
-10 times, and if it doesn't get a successful return after that, that payment _will NOT
-send again_ until you manually re-enable the payment. To re-enable payments you can
-reboot the Raspiblitz (easiest), or manually start them using systemd commands to 
-restart the timer, like so:  
-`sudo systemctl restart payments-daily-lnd.timer`  
-`daily` can be substituded for any timeframe from `daily`, `weekly`, `monthly`, or `yearly`,
-and `lnd` can be `lnd` or `cln` depending on your node implementation. 
-This will restart a failed daily payment from an LND node, but will _not_ resend the failed payment.
-You can change daily or lnd to your specific timing and node implementation.
-
-To manually send an individual missed payment you can run the keysend 
-script that is saved in /home/admin/pleb-vpn/payments/keysends, for example:  
-`sudo -u bitcoin /home/admin/pleb-vpn/payments/keysends/_035fed4_monthly_cln_keysend.sh`  
-sends the monthly payment of 0.50 USD from my Core Lightning node each time I run that command. 
-(Command needs to be run as user bitcoin or it will fail for Core Lightning nodes). 
-
-For payments that were scheduled at a certain time you can manually run that service with the following:  
-`sudo systemctl start payments-<frequency>-<lnd or cln>.service`  where `<frequency>` is either
-`daily`, `weekly`, `monthly`, or `yearly`, and  `<lnd or cln>` is either `lnd` if you're using
-LND or `cln` if you're using Core Lightning. This will send all `<frequency>` payments from 
-any `<lnd or cln>` node.
-
-For example, to manually at any time send the payments that were scheduled on the 1st of the
-month to come from my Core Lightning node I would run on the command line:  
-`sudo systemctl start payments-monthly-cln.service`
+_Note: The payments are enabled using systemd timers that activate the service that sends the payments. 
+If your node is down during a payment send time, the node will attempt to send the payment up to 
+10 times, and if it doesn't get a successful return after that, that payment **will NOT 
+send again** until you manually send the payment using the Payments page._
 
 ### Updates or Uninstalling
-The last menu, PLEB-VPN, is for updates or uninstalls. Update just pulls the latest changes
-to the scripts from github (for bug fixes or new features). Uninstall will uninstall EVERYTHING
-you have and restore your node to its original configuration. It will NOT delete your
-plebvpn.conf file and your WireGuard config files, they will be left on the hard drive.
-To remove them, you can delete /mnt/hdd/app-data/pleb-vpn and all of its contents.
+
+#### Pleb-VPN Updates  
+On the home page, if you scroll down to the bottom you will see your current installed version of Pleb-vpn.
+Pleb-VPN automatically checks Github for updated versions and if an updated version is present it will
+display it along with an Update button. You can update without losing any settings or changes, but you will
+have to reload the page after about a minute. 
+
+#### Node Updates  
+**Raspiblitz** - Just update by reflashing your sd card. Pleb-VPN should re-install along with all of your other apps.
+**MyNode** - Until Pleb-VPN is added to the mynode app store, you'll have to SSH into the node and run this command after you update or reflash your sd card:  
+`sudo chmod +x /mnt/hdd/mynode/pleb-vpn/pleb-vpn.install.sh && sudo /mnt/hdd/mynode/pleb-vpn/pleb-vpn.install.sh update`
+
+#### Uninstall Pleb-VPN  
+To Uninstall, there is an "Uninstall" button at the very bottom of the home page. This will uninstall
+and de-configure everything from your node so that your node is back to its original configuration.
 
 Feel free to contact me on Telegram @allyourbankarebelongtous or via email at:  
 allyourbankarebelongtous@protonmail.com with any questions. PRs welcome!

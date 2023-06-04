@@ -470,10 +470,7 @@ off() {
   # disable service
   systemctl disable wg-quick@wg0
   systemctl stop wg-quick@wg0
-  # uninstall wireguard if on raspiblitz (stays installed on mynode)
-  if [ ! "${nodetype}" = "mynode" ]; then
-    apt purge -y wireguard
-  fi
+  apt purge -y wireguard
   # close firewall ports
   ufw delete allow ${wgport}/udp
   ufw delete allow out on wg0 from any to any

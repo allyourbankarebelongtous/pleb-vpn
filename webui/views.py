@@ -115,7 +115,7 @@ def update_scripts():
 @socketio.on('uninstall-plebvpn')
 @authenticated_only
 def uninstall_plebvpn():
-    # update pleb-vpn
+    # uninstall pleb-vpn
     cmd_str = [os.path.join(EXEC_DIR, "pleb-vpn.install.sh") + " uninstall"]
     try:
         result = subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True, timeout=600)
@@ -1054,7 +1054,7 @@ def set_letsencrypt_on(formData):
     else:
         message = 'LetsEncrypt certificate install unsuccessful. Please check your domain name(s) and try again, ensuring you enter the CNAME record correctly.'
         category = 'error'
-    logging.debug('exit code received = ' + str(result.returncode))
+    logging.debug('exit code received = ' + str(exit_code))
     socketio.emit('letsencrypt_set_on', {'message': message, 'category': category})
 
 # turn letsencrypt off and delete certs
