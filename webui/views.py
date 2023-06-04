@@ -225,7 +225,7 @@ def set_plebVPN():
         else:
             message = 'An unknown error occured!'
             category = 'error'
-        logging.debug('exit code received = ' str(result.returncode))
+        logging.debug('exit code received = ' + str(result.returncode))
         socketio.emit('plebVPN_set', {'message': message, 'category': category})
 
 # delete pleb-vpn conf file
@@ -369,7 +369,7 @@ def set_lndHybrid():
         else:
             message = 'An unknown error occured!'
             category = 'error'
-        logging.debug('exit code received = ' str(result.returncode))
+        logging.debug('exit code received = ' + str(result.returncode))
         socketio.emit('lndHybrid_set', {'message': message, 'category': category})
     else:
         cmd_str = [os.path.join(EXEC_DIR, "lnd-hybrid.sh") + " on 1 1"]
@@ -391,7 +391,7 @@ def set_lndHybrid():
         else:
             message = 'An unknown error occured!'
             category = 'error'
-        logging.debug('exit code received = ' str(result.returncode))
+        logging.debug('exit code received = ' + str(result.returncode))
         socketio.emit('lndHybrid_set', {'message': message, 'category': category})
 
 # turn cln hybrid mode on or off
@@ -420,7 +420,7 @@ def set_clnHybrid():
         else:
             message = 'An unknown error occured!'
             category = 'error'
-        logging.debug('exit code received = ' str(result.returncode))
+        logging.debug('exit code received = ' + str(result.returncode))
         socketio.emit('clnHybrid_set', {'message': message, 'category': category})
     else:
         cmd_str = [os.path.join(EXEC_DIR, "cln-hybrid.sh") + " on 1 1"]
@@ -442,7 +442,7 @@ def set_clnHybrid():
         else:
             message = 'An unknown error occured!'
             category = 'error'
-        logging.debug('exit code received = ' str(result.returncode))
+        logging.debug('exit code received = ' + str(result.returncode))
         socketio.emit('clnHybrid_set', {'message': message, 'category': category})
 
 # refresh hybrid data
@@ -761,7 +761,7 @@ def set_wireguard():
             # for debug purposes
     logging.info(result.stdout)
     logging.error(result.stderr)
-    logging.debug('exit code received = ' str(result.returncode))
+    logging.debug('exit code received = ' + str(result.returncode))
     get_wireguard_status()
     socketio.emit('wireguard_set_on', {'message': message, 'category': category})
 
@@ -788,7 +788,7 @@ def set_wireguard():
     # for debug purposes
     logging.info(result.stdout)
     logging.error(result.stderr)
-    logging.debug('exit code received = ' str(result.returncode))
+    logging.debug('exit code received = ' + str(result.returncode))
     get_wireguard_status()
     socketio.emit('wireguard_set_off', {'message': message, 'category': category})
 
@@ -892,7 +892,7 @@ def set_torsplittunnel():
         else:
             message = 'An unknown error occured!'
             category = 'error'
-        logging.debug('exit code received = ' str(result.returncode))
+        logging.debug('exit code received = ' + str(result.returncode))
         socketio.emit('torsplittunnel_set', {'message': message, 'category': category})
     else:
         cmd_str = [os.path.join(EXEC_DIR, "tor.split-tunnel.sh") + " on 1"]
@@ -914,7 +914,7 @@ def set_torsplittunnel():
         else:
             message = 'An unknown error occured!'
             category = 'error'
-        logging.debug('exit code received = ' str(result.returncode))
+        logging.debug('exit code received = ' + str(result.returncode))
         socketio.emit('torsplittunnel_set', {'message': message, 'category': category})
 
 # tor split-tunnel data refresh
@@ -1054,7 +1054,7 @@ def set_letsencrypt_on(formData):
     else:
         message = 'LetsEncrypt certificate install unsuccessful. Please check your domain name(s) and try again, ensuring you enter the CNAME record correctly.'
         category = 'error'
-    logging.debug('exit code received = ' str(result.returncode))
+    logging.debug('exit code received = ' + str(result.returncode))
     socketio.emit('letsencrypt_set_on', {'message': message, 'category': category})
 
 # turn letsencrypt off and delete certs
