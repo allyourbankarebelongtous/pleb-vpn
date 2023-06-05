@@ -505,6 +505,7 @@ off() {
   if [ "${nodetype}" = "raspiblitz" ]; then
     source /mnt/hdd/raspiblitz.conf
     if [ "${lnd}" = "on" ]; then
+      source <(/home/admin/config.scripts/network.aliases.sh getvars lnd)
       sed -i "/^tlsextraip=${wgip}/d" ${lndConfFile}
       # remove tls.cert and tls.key if wireguard is installed to pick up new tls.cert that doesn't include wireguard ip
       rm /mnt/hdd/lnd/tls*
