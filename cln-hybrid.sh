@@ -52,14 +52,14 @@ status() {
     if [ "${webui}" = "1" ]; then
       echo "Alias='${nodeName}'
 Node_ID='${nodeID}'
-address0='${address0}'
-address1='${address1}'
+address0='${address0}:${address0Port}'
+address1='${address1}:${address1Port}'
 address0Type='${address0Type}'
 address1Type='${address1Type}'" | tee ${execdir}/cln_hybrid_status.tmp
     else
       whiptail --title "Core Lightning hybrid status" --msgbox "
 Alias = ${nodeName}
-Hybrid Mode = ${clnHybrid}
+Hybrid Mode = ${clnhybrid}
 Node ID = ${nodeID}
 ${address0Type} address: ${address0}:${address0Port}
 ${address1Type} address: ${address1}:${address1Port}
@@ -70,12 +70,12 @@ ${address1Type} address: ${address1}:${address1Port}
     if [ "${webui}" = "1" ]; then
       echo "Alias='${nodeName}'
 Node_ID='${nodeID}'
-address0='${address0}'
+address0='${address0}:${address0Port}'
 address0Type='${address0Type}'" | tee ${execdir}/cln_hybrid_status.tmp
     else
       whiptail --title "Core Lightning status" --msgbox "
 Alias = ${nodeName}
-Hybrid Mode = ${clnHybrid}
+Hybrid Mode = ${clnhybrid}
 Node ID = ${nodeID}
 ${address0Type} address: ${address0}:${address0Port}
 " 12 100
@@ -207,7 +207,7 @@ on() {
     systemctl restart lightningd.service
   fi
   # set cln-hybrid on in pleb-vpn.conf
-  setting ${plebVPNConf} "2" "clnHybrid" "on"
+  setting ${plebVPNConf} "2" "clnhybrid" "on"
   exit 0
 }
 
@@ -243,7 +243,7 @@ off() {
   # restart CLN
   systemctl restart lightningd.service
   # set cln-hybrid off in pleb-vpn.conf
-  setting ${plebVPNConf} "2" "clnHybrid" "off"
+  setting ${plebVPNConf} "2" "clnhybrid" "off"
   exit 0
 }
 
