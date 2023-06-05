@@ -257,7 +257,7 @@ lndconffile=
     cd /home/admin
     # allow through firewall
     ufw allow 2420 comment 'allow Pleb-VPN HTTP'
-    ufw allow 2421 commment 'allow Pleb-VPN HTTPS'
+    ufw allow 2421 comment 'allow Pleb-VPN HTTPS'
     # create pleb-vpn.service
     if [ ! -f /etc/systemd/system/pleb-vpn.service ]; then
       echo "
