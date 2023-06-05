@@ -234,15 +234,13 @@ lndconffile=
   if [ "${nodetype}" = "raspiblitz" ]; then 
 
     # make persistant with custom-installs.sh
-    isPersistant=$(cat /mnt/hdd/app-data/custom-installs.sh | grep -c /mnt/hdd/app-data/pleb-vpn/pleb-vpn.install.sh)
-    if [ ${isPersistant} -eq 0 ]; then
-      echo "
+    sed -i '/pleb-vpn/d' /mnt/hdd/app-data/custom-installs.sh
+    echo "
 # pleb-vpn restore
 /mnt/hdd/app-data/pleb-vpn/pleb-vpn.install.sh restore
 # get latest pleb-vpn update
 /mnt/hdd/app-data/pleb-vpn/pleb-vpn.install.sh update 1
 " | tee -a /mnt/hdd/app-data/custom-installs.sh
-    fi
 
     # add pleb-vpn to 00mainMenu.sh
     mainMenu="/home/admin/00mainMenu.sh"
@@ -1019,7 +1017,7 @@ server {
     ${execdir}/wg-install.sh on 1
   fi
   if [ "${torsplittunnel}" = "on" ]; then
-    ${execdir}/tor.split-tunnel.sh on
+    ${execdir}/tor.split-tunnel.sh on 1
   fi
   if [ "${letsencrypt_ssl}" = "on" ]; then
     ${execdir}/letsencrypt.install.sh on 1 1
@@ -1110,16 +1108,7 @@ uninstall()
   ${execdir}/payments/managepayments.sh deleteall 1
   # remove extra line from custom-installs if required
   if [ "${nodetype}" = "raspiblitz" ]; then
-    extraLine="# pleb-vpn restore"
-    lineExists=$(cat /mnt/hdd/app-data/custom-installs.sh | grep -c "${extraLine}")
-    if ! [ ${lineExists} -eq 0 ]; then
-      sed -i "s:^${extraLine}.*::g" /mnt/hdd/app-data/custom-installs.sh
-    fi
-    extraLine="/mnt/hdd/app-data/pleb-vpn/pleb-vpn.install.sh"
-    lineExists=$(cat /mnt/hdd/app-data/custom-installs.sh | grep -c "${extraLine}")
-    if ! [ ${lineExists} -eq 0 ]; then
-      sed -i "s:^${extraLine}.*::g" /mnt/hdd/app-data/custom-installs.sh
-    fi
+    sed -i '/pleb-vpn/d' /mnt/hdd/app-data/custom-installs.sh
 
     # remove extra lines from 00mainMenu.sh if required
     extraLine='OPTIONS+=(PLEB-VPN "Install and manage PLEB-VPN services")'

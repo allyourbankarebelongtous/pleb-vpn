@@ -59,12 +59,13 @@ if [ "${nodetype}" = "raspiblitz" ]; then
   fi
 
   # add updates to pleb-vpn on new installs
-  custominstallUpdate=$(cat /mnt/hdd/app-data/custom-installs.sh | grep -c "/mnt/hdd/app-data/pleb-vpn/pleb-vpn.install.sh update")
-  if [ ${custominstallUpdate} -eq 0 ]; then
-    echo "# get latest pleb-vpn update
-  /mnt/hdd/app-data/pleb-vpn/pleb-vpn.install.sh update
-  " | tee -a /mnt/hdd/app-data/custom-installs.sh
-  fi
+  sed -i '/pleb-vpn/d' /mnt/hdd/app-data/custom-installs.sh
+  echo "
+# pleb-vpn restore
+/mnt/hdd/app-data/pleb-vpn/pleb-vpn.install.sh restore
+# get latest pleb-vpn update
+/mnt/hdd/app-data/pleb-vpn/pleb-vpn.install.sh update 1
+" | tee -a /mnt/hdd/app-data/custom-installs.sh
 
   # change names of wireguard clients for webui
   if [ -f /mnt/hdd/app-data/pleb-vpn/wireguard/clients/desktop.conf ]; then
