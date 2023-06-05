@@ -46,7 +46,7 @@ function setting() # FILE LINENUMBER NAME VALUE
 # only run this part for raspiblitz updates.
 if [ "${nodetype}" = "raspiblitz" ]; then
   # get values for raspiblitz
-  source /mnt/admin/raspiblitz.info
+  source /home/admin/raspiblitz.info
   source /mnt/hdd/raspiblitz.conf
 
 
