@@ -197,7 +197,7 @@ on() {
   else
     sed -i "s/bind-addr=0\.0\.0\.0:.*/bind-addr=0\.0\.0\.0:${clnport}/" ${clnconffile}
   fi
-  setting ${clnconffile} ${insertLine} "announce-addr" "${vpnIP}:${clnport}"
+  setting ${clnconffile} ${insertLine} "announce-addr" "${vpnip}:${clnport}"
 
   # restart CLN (skip this step on restore but not if webui)
   if ! [ "${isRestore}" = "1" ]; then
