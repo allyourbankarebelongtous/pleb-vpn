@@ -148,16 +148,26 @@ that the rest of the world doesn't have is your home IP address. _This is true w
 your own VPS, use TunnelSats, or use Pleb-VPN with @allyourbankarebelongtous or share with 
 another pleb!_
 
-**Can I use this on an Umbrel/Citadel/Raspibolt/etc implementation?**  
-Sort of. The actual software here on GitHub only works for Raspiblitz and MyNode (for now), but if you
-can find a guide to install OpenVPN and take your node clearnet on your own nothing
-is stopping you from contacting @allyourbankarebelongtous or anyone else willing to
+**I want to run my own server, how can I do that?**
+Flyer₿ear (https://t.me/flyerbear) wrote an excellent guide for setting up your own Pleb-VPN
+server and manually configuring everything that this software implements automatically for
+Raspibolt. If you follow the first part of his guide, you can set up your own server and then
+install Pleb-VPN on your node and use the resulting plebvpn.conf file you download from your
+own server to connect! You can find the guide here:  
+https://github.com/flyerbear/pleb-vpn/blob/main/Raspibolt%20Install%20Guide.md
+
+**Can I use this on an Umbrel/Citadel/etc implementation?**  
+Sort of. The actual software here on GitHub only works for Raspiblitz and MyNode (for now, more
+coming soon!), but if you can find a guide to install OpenVPN and take your node clearnet on
+your own nothing is stopping you from contacting @allyourbankarebelongtous or anyone else willing to
 share a VPS and paying them a small monthly fee to gain a clearnet IP and a couple of forwarded
 ports. You will have to figure out how to:  
 1) Install and configure openvpn.  
 2) Change the port LND or Core Lightning uses and how to implement hybrid mode.  
 3) Manually configure any other service that you want (wireguard, LetsEncrypt, etc).  
 There are numerous guides on how to do this.
+Flyer₿ear (https://t.me/flyerbear) wrote an excellent guide for RaspiBolt which can be found here:  
+https://github.com/flyerbear/pleb-vpn/blob/main/Raspibolt%20Install%20Guide.md
 
 **I want to update my node. What do I need to do?**  
 For Raspiblitz, update like normal according to your node implementation's instructions. 
