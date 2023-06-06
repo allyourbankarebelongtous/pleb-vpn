@@ -151,7 +151,7 @@ another pleb!_
 **I want to run my own server, how can I do that?**
 Flyer₿ear (https://t.me/flyerbear) wrote an excellent guide for setting up your own Pleb-VPN
 server and manually configuring everything that this software implements automatically for
-Raspibolt. If you follow the first part of his guide, you can set up your own server and then
+RaspiBolt. If you follow the first part of his guide, you can set up your own server and then
 install Pleb-VPN on your node and use the resulting plebvpn.conf file you download from your
 own server to connect! You can find the guide here:  
 https://github.com/flyerbear/pleb-vpn/blob/main/Raspibolt%20Install%20Guide.md
