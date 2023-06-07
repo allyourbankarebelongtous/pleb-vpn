@@ -43,10 +43,12 @@ on() {
   local keepExisting="${1}"
   local isRestore="${2}"
   local webui="${3}"
-  local letsencryptbtcpay="${4}"
-  local letsencryptlnbits="${5}"
-  local letsencryptdomain1="${6}"
-  local letsencryptdomain2="${7}"
+  if [ "${webui}" = "1" ]; then
+    local letsencryptbtcpay="${4}"
+    local letsencryptlnbits="${5}"
+    local letsencryptdomain1="${6}"
+    local letsencryptdomain2="${7}"
+  fi
   apt install -y certbot
   if [ ! "${webui}" = "1" ]; then
     if [ ! "${keepExisting}" = "1" ]; then
