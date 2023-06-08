@@ -361,7 +361,12 @@ fi
 mount -t cgroup -o net_cls novpn /sys/fs/cgroup/net_cls
 cgcreate -t debian-tor:novpn -a debian-tor:novpn -d 775 -f 664 -s 664 -g net_cls:novpn
 echo 0x00110011 > /sys/fs/cgroup/net_cls/novpn/net_cls.classid
-
+# check cgroup status
+cgroup_id=$(cat /sys/fs/cgroup/net_cls/novpn/net_cls.classid)
+if ! [ "${cgroup_id}" = "1114129" ]; then
+  echo "Error: bad cgroup config"
+  exit 1
+fi
 ' | tee ${execdir}/split-tunnel/create-cgroup.sh
     chmod 755 -R ${execdir}/split-tunnel
     # run create-cgroup.sh
@@ -378,6 +383,8 @@ StartLimitBurst=5
 Type=oneshot
 RemainAfterExit=yes
 ExecStart=/bin/bash /home/admin/pleb-vpn/split-tunnel/create-cgroup.sh
+Restart=on-failure
+RestartSec=30s
 [Install]
 WantedBy=multi-user.target
 " | tee /etc/systemd/system/pleb-vpn-create-cgroup.service
@@ -484,6 +491,28 @@ nft add rule ip filter ufw-user-input meta cgroup 1114129 counter accept
 nft add rule ip filter ufw-user-output meta cgroup 1114129 counter accept
 ip route add default via ${GATEWAY} table novpn
 ip rule add fwmark 11 table novpn
+
+# check to see if rules exist
+if ! [ $(nft list chain ip filter ufw-user-input | grep -c "meta cgroup 1114129") -eq 1 ]; then
+  echo "Error: missing nft rules"
+  exit 1
+fi
+if ! [ $(nft list chain ip filter ufw-user-output | grep -c "meta cgroup 1114129") -eq 1 ]; then
+  echo "Error: missing nft rules"
+  exit 1
+fi
+if ! [ $(nft list chain ip nat POSTROUTING | grep -c "meta cgroup 1114129") -eq 1 ]; then
+  echo "Error: missing nft rules"
+  exit 1
+fi
+if ! [ $(nft list chain ip mangle markit | grep -c "meta cgroup 1114129") -eq 1 ]; then
+  echo "Error: missing nft rules"
+  exit 1
+fi
+if ! [ $(ip rou show table novpn | grep -c "default via ${GATEWAY} dev ${OIFNAME}") -eq 1 ]; then
+  echo "Error: missing ip route"
+  exit 1
+fi
 ' | tee ${execdir}/split-tunnel/nftables-config.sh
     chmod 755 -R ${execdir}/split-tunnel
     # run it once
@@ -494,10 +523,12 @@ ip rule add fwmark 11 table novpn
     echo "[Unit]
 Description=Configure nftables for split-tunnel process
 Requires=pleb-vpn-tor-split-tunnel.service
-After=pleb-vpn-tor-split-tunnel.service
+After=pleb-vpn-tor-split-tunnel.service network.target
 [Service]
 Type=oneshot
 ExecStart=/bin/bash /home/admin/pleb-vpn/split-tunnel/nftables-config.sh
+Restart=on-failure
+RestartSec=30s
 [Install]
 WantedBy=multi-user.target
 " | tee /etc/systemd/system/pleb-vpn-nftables-config.service
@@ -566,7 +597,12 @@ fi
 mount -t cgroup -o net_cls novpn /sys/fs/cgroup/net_cls
 cgcreate -t debian-tor:novpn -a debian-tor:novpn -d 775 -f 664 -s 664 -g net_cls:novpn
 echo 0x00110011 > /sys/fs/cgroup/net_cls/novpn/net_cls.classid
-
+# check cgroup status
+cgroup_id=$(cat /sys/fs/cgroup/net_cls/novpn/net_cls.classid)
+if ! [ "${cgroup_id}" = "1114129" ]; then
+  echo "Error: bad cgroup config"
+  exit 1
+fi
 ' | tee ${execdir}/split-tunnel/create-cgroup.sh
     chmod 755 -R ${execdir}/split-tunnel
     # run create-cgroup.sh
@@ -585,6 +621,8 @@ RemainAfterExit=yes
 ExecStart=/bin/bash /opt/mynode/pleb-vpn/split-tunnel/create-cgroup.sh
 User=root
 Group=root
+Restart=on-failure
+RestartSec=30s
 [Install]
 WantedBy=multi-user.target
 " | tee /etc/systemd/system/pleb-vpn-create-cgroup.service
@@ -703,6 +741,40 @@ iptables -A OUTPUT -m mark --mark 0xb -j ACCEPT
 iptables -A FORWARD -m mark --mark 0xb -j ACCEPT
 ip route add default via ${GATEWAY} table novpn
 ip rule add fwmark 11 table novpn
+
+# check to see if rules exist
+if ! [ $(nft list chain inet filter input | grep -c "meta cgroup 1114129") -eq 1 ]; then
+  echo "Error: missing nft rules"
+  exit 1
+fi
+if ! [ $(nft list chain inet filter output | grep -c "meta cgroup 1114129") -eq 1 ]; then
+  echo "Error: missing nft rules"
+  exit 1
+fi
+if ! [ $(nft list chain ip nat POSTROUTING | grep -c "meta cgroup 1114129") -eq 1 ]; then
+  echo "Error: missing nft rules"
+  exit 1
+fi
+if ! [ $(nft list chain ip mangle markit | grep -c "meta cgroup 1114129") -eq 1 ]; then
+  echo "Error: missing nft rules"
+  exit 1
+fi
+if ! [ $(iptables -L INPUT | grep -c "0xb") -eq 1 ]; then
+  echo "Error: missing iptable rules"
+  exit 1
+fi
+if ! [ $(iptables -L FORWARD | grep -c "0xb") -eq 1 ]; then
+  echo "Error: missing iptable rules"
+  exit 1
+fi
+if ! [ $(iptables -L OUTPUT | grep -c "0xb") -eq 1 ]; then
+  echo "Error: missing iptable rules"
+  exit 1
+fi
+if ! [ $(ip rou show table novpn | grep -c "default via ${GATEWAY} dev ${OIFNAME}") -eq 1 ]; then
+  echo "Error: missing ip route"
+  exit 1
+fi
 ' | tee ${execdir}/split-tunnel/nftables-config.sh
     chmod 755 -R ${execdir}/split-tunnel
     # run it once
@@ -719,7 +791,7 @@ ExecStart=/bin/bash /opt/mynode/pleb-vpn/split-tunnel/nftables-config.sh
 User=root
 Group=root
 Restart=on-failure
-RestartSec=5s
+RestartSec=30s
 [Install]
 WantedBy=multi-user.target
 " | tee /etc/systemd/system/pleb-vpn-nftables-config.service
