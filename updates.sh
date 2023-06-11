@@ -5,7 +5,7 @@
 # make sure updates can be re-run multiple times
 # keep updates present until most users have had the chance to update
 
-ver="v1.1.0-beta.0"
+ver="v1.1.0-beta.1"
 
 # get node info# find home directory based on node implementation
 if [ -d "/mnt/hdd/mynode/pleb-vpn/" ]; then

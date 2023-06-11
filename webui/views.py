@@ -494,7 +494,7 @@ def payments():
             elif len(amount_parts[1]) == 1:
                 amount = amount + "0"
         # check payment validity
-        is_valid = valid_payment(frequency, node, pubkey, amount, denomination)
+        is_valid = valid_payment(frequency, node, pubkey, amount, denomination, message)
         if is_valid == "0":
             if old_payment_id is not None:
                 cmd_str = [os.path.join(EXEC_DIR, "payments/managepayments.sh") + " deletepayment " + old_payment_id + " 1"]
@@ -505,9 +505,6 @@ def payments():
                     flash('Error: managepayments.sh deletepayment script timed out', category='error')
                     return render_template('payments.html', user=current_user, current_payments=get_payments(), lnd=lnd, cln=cln)
             if message is not None:
-                # fix message so dollar signs are sent as literall $ and not values
-                if '$' in message:
-                    message = message.replace('$', r'\$')
                 payment_string = frequency + " " + node + " " + pubkey + " " + amount + " " + denomination + " \"" + message + "\""
             else:
                 payment_string = frequency + " " + node + " " + pubkey + " " + amount + " " + denomination
@@ -620,19 +617,19 @@ def send_payment():
     return jsonify({})
 
 # checks to see if new payment is valid
-def valid_payment(frequency, node, pubkey, amount, denomination):
+def valid_payment(frequency, node, pubkey, amount, denomination, message=None):
     is_valid = str(0)
     if frequency != "daily":
         if frequency != "weekly":
             if frequency != "monthly":
                 if frequency != "yearly":
-                    is_valid = "Error: the frequency must be either 'daily', 'weekly', 'monthly', or 'yearly'"
+                    is_valid = "Error: the frequency must be either 'daily', 'weekly', 'monthly', or 'yearly'."
     if node != "lnd" and node != "cln":
         is_valid = "Error: node type must be either 'lnd' or 'cln'"
     pattern = r'^[a-zA-Z0-9]{66}$'
     match = re.match(pattern, pubkey)
     if not match:
-        is_valid = "Error: you did not submit a valid pubkey"
+        is_valid = "Error: you did not submit a valid pubkey."
     if denomination == "USD":
         pattern = r'^\d+\.\d{2}$'
         match = re.match(pattern, amount)
@@ -640,9 +637,12 @@ def valid_payment(frequency, node, pubkey, amount, denomination):
             is_valid = "Error: you did not input a valid amount. Amount must be a positive integer and contain from zero to two decimal places only."
     elif denomination == "sats":
         if not amount.isdigit():
-            is_valid = "Error: you did not input a valid amount. Amount for sats must only contain digits"
+            is_valid = "Error: you did not input a valid amount. Amount for sats must only contain digits."
     else:
-        is_valid = "Error: you did not input a valid denomination. Denomination must either be 'sats' or 'USD'"
+        is_valid = "Error: you did not input a valid denomination. Denomination must either be 'sats' or 'USD'."
+    if message is not None:
+        if '$' in message:
+            is_valid = "Error: sending a '$' not permitted at this time. Please edit your message." 
 
     return is_valid
 
