@@ -647,8 +647,13 @@ update()
     cd /home/admin
     rm -rf /home/admin/pleb-vpn-tmp
     # fix permissions
-    chown -R admin:admin ${homedir}
-    chown -R admin:admin ${execdir}
+    if [ "${nodetype}" = "raspiblitz" ]; then
+      chown -R admin:admin ${homedir}
+      chown -R admin:admin ${execdir}
+    elif [ "${nodetype}" = "mynode" ]; then
+      chown -R bitcoin:bitcoin ${homedir}
+      chown -R bitcoin:bitcoin ${execdir}
+    fi
     chmod -R 755 ${homedir}
     chmod -R 755 ${execdir}
     # check for updates.sh and if exists, run it, then delete it
@@ -684,7 +689,11 @@ restore()
   plebVPNConf="${homedir}/pleb-vpn.conf"
   source <(cat ${plebVPNConf} | sed '1d')
   # fix permissions
-  chown -R admin:admin ${homedir}
+  if [ "${nodetype}" = "raspiblitz" ]; then
+    chown -R admin:admin ${homedir}
+  elif [ "${nodetype}" = "mynode" ]; then
+    chown -R bitcoin:bitcoin ${homedir}
+  fi
   chmod -R 755 ${homedir}
   if [ "${nodetype}" = "raspiblitz" ]; then
     rm -rf ${homedir}/.backups
@@ -698,7 +707,11 @@ restore()
   rm ${execdir}/pleb-vpn.conf
   ln -s ${homedir}/pleb-vpn.conf ${execdir}/pleb-vpn.conf
   # fix permissions
-  chown -R admin:admin ${execdir}
+  if [ "${nodetype}" = "raspiblitz" ]; then
+    chown -R admin:admin ${execdir}
+  elif [ "${nodetype}" = "mynode" ]; then
+    chown -R bitcoin:bitcoin ${execdir}
+  fi
   chmod -R 755 ${execdir}
 
   # install webui
