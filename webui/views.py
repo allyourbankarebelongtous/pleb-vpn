@@ -484,6 +484,8 @@ def payments():
             old_payment_id = None
         if request.form['message'] is not None:
             message = request.form['message']
+            if '$' in message:
+                message = message.replace('$', r'\$')
         else:
             message = None
         if denomination == "USD":
@@ -494,7 +496,7 @@ def payments():
             elif len(amount_parts[1]) == 1:
                 amount = amount + "0"
         # check payment validity
-        is_valid = valid_payment(frequency, node, pubkey, amount, denomination, message)
+        is_valid = valid_payment(frequency, node, pubkey, amount, denomination)
         if is_valid == "0":
             if old_payment_id is not None:
                 cmd_str = [os.path.join(EXEC_DIR, "payments/managepayments.sh") + " deletepayment " + old_payment_id + " 1"]
@@ -617,7 +619,7 @@ def send_payment():
     return jsonify({})
 
 # checks to see if new payment is valid
-def valid_payment(frequency, node, pubkey, amount, denomination, message=None):
+def valid_payment(frequency, node, pubkey, amount, denomination):
     is_valid = str(0)
     if frequency != "daily":
         if frequency != "weekly":
@@ -640,9 +642,6 @@ def valid_payment(frequency, node, pubkey, amount, denomination, message=None):
             is_valid = "Error: you did not input a valid amount. Amount for sats must only contain digits."
     else:
         is_valid = "Error: you did not input a valid denomination. Denomination must either be 'sats' or 'USD'."
-    if message is not None:
-        if '$' in message:
-            is_valid = "Error: sending a '$' not permitted at this time. Please edit your message." 
 
     return is_valid
 
@@ -1308,7 +1307,7 @@ def get_payments():
                 if denomination == "usd":
                     denomination = "USD"
                 if len(line_parts) >= 7:
-                    message = line_parts[6].strip('"')
+                    message = line_parts[6].strip('"\'')
                 else:
                     message = ""
                 if category not in current_payments:

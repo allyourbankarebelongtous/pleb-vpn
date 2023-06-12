@@ -275,6 +275,22 @@ on() {
     sed -i "${insertLine}iufw allow out on tun0 from any to any" ${firewallConf}
     sed -i "${insertLine}iufw allow in on tun0 from any to any" ${firewallConf}
     sed -i "s/ufw default allow outgoing/ufw default deny outgoing/g" ${firewallConf}
+    # allow local mDNS traffic for mynode.local
+    sectionLine=$(cat /etc/ufw/before.rules | grep -n "^\# End required lines" | cut -d ":" -f1 | head -n 1)
+    insertLine=$(expr $sectionLine + 1)
+    sed -i "${insertLine}i-A ufw-before-output -p udp --dport 5353 -j ACCEPT" /etc/ufw/before.rules
+    sed -i "${insertLine}i# Allow outgoing mDNS traffic" /etc/ufw/before.rules
+    # fix get_local_ip() to still return lan ip instead of virtual ip from openvpn
+    mv /usr/bin/get_local_ip.py /usr/bin/get_local_ip.py.bak
+    echo "#!/usr/local/bin/python3
+
+import subprocess
+
+output = subprocess.run("hostname -I | awk '{print $1}'", stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True)
+local_ip = output.stdout.strip('')
+
+print(local_ip)
+" | tee /usr/bin/get_local_ip.py
   fi
   # check firewall
   # skip test if restore or webui
@@ -366,6 +382,12 @@ off() {
       sed -i "/ufw allow in on tun0 from any to any/d" ${firewallConf}
     done
     sed -i "s/ufw default deny outgoing/ufw default allow outgoing/g" ${firewallConf}
+    # remove allow local mDNS traffic for mynode.local
+    sed -i  '/^# Allow outgoing mDNS traffic/d' /etc/ufw/before.rules
+    sed -i '/^-A ufw-before-output -p udp --dport 5353 -j ACCEPT/d' /etc/ufw/before.rules
+    # return get_local_ip() to default
+    rm /usr/bin/get_local_ip.py
+    mv /usr/bin/get_local_ip.py.bak /usr/bin/get_local_ip.py
   fi
   setting ${plebVPNConf} "2" "vpnport" "''"
   setting ${plebVPNConf} "2" "vpnip" "''"
