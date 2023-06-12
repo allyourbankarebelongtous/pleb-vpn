@@ -18,10 +18,19 @@ elif [ -f "/mnt/hdd/raspiblitz.conf" ]; then
   execdir="/home/admin/pleb-vpn"
 fi
 
-# check if sudo
-if [ "$EUID" -ne 0 ]; then
-  echo "Please run as root (with sudo)"
-  exit 1
+# check if sudo for raspiblitz install or mynode manual install
+if [ "${nodetype}" = "raspiblitz" ]; then
+  if [ "$EUID" -ne 0 ]; then
+    echo "Please run as root (with sudo)"
+    exit 1
+  fi
+elif [ "${nodetype}" = "mynode" ]; then
+  if [ $(ls /usr/share/mynode_apps | grep -c pleb-vpn) -eq 0 ]; then
+    if [ "$EUID" -ne 0 ]; then
+      echo "Please run as root (with sudo)"
+      exit 1
+    fi
+  fi
 fi
 
 function setting() # FILE LINENUMBER NAME VALUE
@@ -73,6 +82,8 @@ on()
       cp -p -r . ${execdir}
       rm -rf /home/admin/pleb-vpn-tmp
     fi
+    chown -R admin:admin ${execdir}
+    chmod -R 755 ${execdir}
   elif [ "${nodetype}" = "mynode" ]; then
     if [ ! -d ${execdir}/plebvpn_common ]; then
       if [ -d ${execdir}/pleb-vpn/plebvpn_common ]; then
@@ -98,9 +109,8 @@ on()
         fi
       fi
     fi
+    chmod -R 755 ${execdir}
   fi
-  chown -R admin:admin ${execdir}
-  chmod -R 755 ${execdir}
 
   # check for, and if present, remove updates.sh and update_requirements.txt
   isUpdateScript=$(ls ${execdir} | grep -c updates.sh)
@@ -126,7 +136,7 @@ on()
     # copy the files to /mnt/hdd/mynode/pleb-vpn
     cp -p -r ${execdir} /mnt/hdd/mynode/
     # fix permissions
-    chown -R admin:admin ${homedir}
+    chown -R bitcoin:bitcoin ${homedir}
     chmod -R 755 ${homedir}
   fi
   # create and symlink pleb-vpn.conf
@@ -204,10 +214,14 @@ lndconffile=
   cp -p ${execdir}/payments/*lndpayments.sh ${homedir}/payments/
   cp -p ${execdir}/payments/*clnpayments.sh ${homedir}/payments/
   # fix permissions
-  chown -R admin:admin ${homedir}
+  if [ "${nodetype}" = "raspiblitz" ]; then
+    chown -R admin:admin ${homedir}
+    chown -R admin:admin ${execdir}
+  elif [ "${nodetype}" = "mynode" ]; then
+    chown -R bitcoin:bitcoin ${homedir}
+    chown -R bitcoin:bitcoin ${execdir}
+  fi
   chmod -R 755 ${homedir}
-  # fix permissions
-  chown -R admin:admin ${execdir}
   chmod -R 755 ${execdir}
   # initialize pleb-vpn.conf
   plebVPNConf="${homedir}/pleb-vpn.conf"
@@ -297,8 +311,10 @@ lndconffile=
 
   # install webui
   cd ${execdir}
-  echo "installing virtualenv..."
-  apt install -y virtualenv
+  if [ "${nodetype}" = "raspiblitz" ]; then
+    echo "installing virtualenv..."
+    apt install -y virtualenv
+  fi
   virtualenv -p python3 .venv
   # install requirements
   echo "installing requirements..."
@@ -312,13 +328,15 @@ lndconffile=
   if [ "${nodetype}" = "mynode" ]; then
     # if installed from install script and not from mynode app store, allow through firewall to persist on restarts
     if [ $(ls /usr/share/mynode_apps | grep -c pleb-vpn) -eq 0 ]; then
-      ufw allow 2420 comment 'allow Pleb-VPN HTTP'
-      ufw allow 2421 commment 'allow Pleb-VPN HTTPS'
-      # add new rules to firewallConf
-      sectionLine=$(cat ${firewallConf} | grep -n "^\# Add firewall rules" | cut -d ":" -f1 | head -n 1)
-      insertLine=$(expr $sectionLine + 1)
-      sed -i "${insertLine}iufw allow 2420 comment 'allow Pleb-VPN HTTP'" ${firewallConf}
-      sed -i "${insertLine}iufw allow 2421 comment 'allow Pleb-VPN HTTPS'" ${firewallConf}
+      if [ "$EUID" -eq 0 ]; then
+        ufw allow 2420 comment 'allow Pleb-VPN HTTP'
+        ufw allow 2421 commment 'allow Pleb-VPN HTTPS'
+        # add new rules to firewallConf
+        sectionLine=$(cat ${firewallConf} | grep -n "^\# Add firewall rules" | cut -d ":" -f1 | head -n 1)
+        insertLine=$(expr $sectionLine + 1)
+        sed -i "${insertLine}iufw allow 2420 comment 'allow Pleb-VPN HTTP'" ${firewallConf}
+        sed -i "${insertLine}iufw allow 2421 comment 'allow Pleb-VPN HTTPS'" ${firewallConf}
+      fi
     fi
   fi
 
@@ -402,8 +420,10 @@ fi
 " | tee /usr/bin/service_scripts/pre_pleb-vpn.sh
     fi
   fi
-  systemctl enable pleb-vpn.service
-  systemctl start pleb-vpn.service
+  if [ "$EUID" -eq 0 ]; then
+    systemctl enable pleb-vpn.service
+    systemctl start pleb-vpn.service
+  fi
 
   # create nginx files
   if [ "${nodetype}" = "raspiblitz" ]; then
@@ -578,14 +598,16 @@ server {
 " | tee /etc/nginx/sites-enabled/https_pleb-vpn.conf
     fi
 
-    # test and reload nginx
-    nginx -t
-    if [ $? -eq 0 ]; then
-      echo "nginx config good"
-      systemctl reload nginx
-    else
-      echo "Error: nginx test config fail"
-      exit 1
+    # test and reload nginx if root User
+    if [ "$EUID" -eq 0 ]; then
+      nginx -t
+      if [ $? -eq 0 ]; then
+        echo "nginx config good"
+        systemctl reload nginx
+      else
+        echo "Error: nginx test config fail"
+        exit 1
+      fi
     fi
   fi
 
