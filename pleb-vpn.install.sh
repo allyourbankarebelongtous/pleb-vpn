@@ -58,11 +58,6 @@ on()
 {
   # only for new install
 
-  # check if sudo
-  if [ "$EUID" -ne 0 ]; then
-    echo "Please run as root (with sudo)"
-    exit 1
-  fi
   # wget tar.gz from github and put in execdir
   if [ "${nodetype}" = "raspiblitz" ]; then
     cd /home/admin
