@@ -280,6 +280,7 @@ on() {
     insertLine=$(expr $sectionLine + 1)
     sed -i "${insertLine}i-A ufw-before-output -p udp --dport 5353 -j ACCEPT" /etc/ufw/before.rules
     sed -i "${insertLine}i# Allow outgoing mDNS traffic" /etc/ufw/before.rules
+    ufw reload
     # fix get_local_ip() to still return lan ip instead of virtual ip from openvpn
     mv /usr/bin/get_local_ip.py /usr/bin/get_local_ip.py.bak
     echo "#!/usr/local/bin/python3
@@ -385,6 +386,7 @@ off() {
     # remove allow local mDNS traffic for mynode.local
     sed -i  '/^# Allow outgoing mDNS traffic/d' /etc/ufw/before.rules
     sed -i '/^-A ufw-before-output -p udp --dport 5353 -j ACCEPT/d' /etc/ufw/before.rules
+    ufw reload
     # return get_local_ip() to default
     rm /usr/bin/get_local_ip.py
     mv /usr/bin/get_local_ip.py.bak /usr/bin/get_local_ip.py
