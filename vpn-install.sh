@@ -292,6 +292,7 @@ local_ip = output.stdout.strip('\\n')
 
 print(local_ip)
 " | tee /usr/bin/get_local_ip.py
+    chmod 755 /usr/bin/get_local_ip.py
   fi
   # check firewall
   # skip test if restore or webui
