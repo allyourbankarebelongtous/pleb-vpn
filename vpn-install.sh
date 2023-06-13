@@ -287,7 +287,7 @@ on() {
 
 import subprocess
 
-output = subprocess.run(\"hostname -I | awk '{print $1}'\", stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True)
+output = subprocess.run(\"hostname -I | awk '{print \$1}'\", stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True)
 local_ip = output.stdout.strip('')
 
 print(local_ip)
