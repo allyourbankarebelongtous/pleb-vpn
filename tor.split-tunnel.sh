@@ -380,9 +380,9 @@ Description=Creates cgroup for split-tunneling tor from vpn
 StartLimitInterval=200
 StartLimitBurst=5
 [Service]
-Type=oneshot
-RemainAfterExit=yes
 ExecStart=/bin/bash /home/admin/pleb-vpn/split-tunnel/create-cgroup.sh
+User=root
+Group=root
 Restart=on-failure
 RestartSec=30s
 [Install]
@@ -422,6 +422,8 @@ After=tor@default.service
 [Service]
 Type=oneshot
 ExecStart=/bin/bash /home/admin/pleb-vpn/split-tunnel/tor-split-tunnel.sh
+User=root
+Group=root
 [Install]
 WantedBy=multi-user.target
 " | tee /etc/systemd/system/pleb-vpn-tor-split-tunnel.service
@@ -525,8 +527,9 @@ Description=Configure nftables for split-tunnel process
 Requires=pleb-vpn-tor-split-tunnel.service
 After=pleb-vpn-tor-split-tunnel.service network.target
 [Service]
-Type=oneshot
 ExecStart=/bin/bash /home/admin/pleb-vpn/split-tunnel/nftables-config.sh
+User=root
+Group=root
 Restart=on-failure
 RestartSec=30s
 [Install]
@@ -616,8 +619,6 @@ Description=Creates cgroup for split-tunneling tor from vpn
 StartLimitInterval=200
 StartLimitBurst=5
 [Service]
-Type=oneshot
-RemainAfterExit=yes
 ExecStart=/bin/bash /opt/mynode/pleb-vpn/split-tunnel/create-cgroup.sh
 User=root
 Group=root
