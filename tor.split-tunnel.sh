@@ -432,8 +432,8 @@ WantedBy=multi-user.target
     echo "[Unit]
 Description=1 min timer to add tor process to cgroup novpn
 [Timer]
-OnBootSec=10
-OnUnitActiveSec=10
+OnBootSec=60
+OnUnitActiveSec=60
 Persistent=true
 [Install]
 WantedBy=timers.target
@@ -671,8 +671,8 @@ WantedBy=multi-user.target
     echo "[Unit]
 Description=1 min timer to add tor process to cgroup novpn
 [Timer]
-OnBootSec=10
-OnUnitActiveSec=10
+OnBootSec=60
+OnUnitActiveSec=60
 Persistent=true
 [Install]
 WantedBy=timers.target
