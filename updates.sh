@@ -5,12 +5,13 @@
 # make sure updates can be re-run multiple times
 # keep updates present until most users have had the chance to update
 
-ver="v1.1.0-beta.3"
+ver="v1.1.0-beta.4"
 
 # get node info# find home directory based on node implementation
 if [ -d "/mnt/hdd/mynode/pleb-vpn/" ]; then
   homedir="/mnt/hdd/mynode/pleb-vpn"
   execdir="/opt/mynode/pleb-vpn"
+  firewallConf="/usr/bin/mynode_firewall.sh"
   nodetype="mynode"
 elif [ -f "/mnt/hdd/raspiblitz.conf" ]; then
   homedir="/mnt/hdd/app-data/pleb-vpn"
@@ -432,6 +433,23 @@ server {
   fi
 
 fi
+
+# mynode updates
+if [ "${nodetype}" = "mynode" ]; then
+  # fix firewall to ensure that docker containers can get out if pleb-vpn is on
+  if [ "${plebvpn}" = "on" ]; then
+    # allow docker containers out if not done
+    if [ $(ufw status | grep 172.16.0.0/12 | grep -c "ALLOW OUT") -eq 0 ]; then
+      ufw allow out to 172.16.0.0/12
+    fi
+    # add to firewall conf for persistence
+    if [ $(cat ${firewallConf} | grep -c "ufw allow out to 172.16.0.0/12") -eq 0 ]; then
+      sectionLine=$(cat ${firewallConf} | grep -n "^\# Add firewall rules" | cut -d ":" -f1 | head -n 1)
+      insertLine=$(expr $sectionLine + 1)
+      sed -i "${insertLine}iufw allow out to 172.16.0.0/12" ${firewallConf}
+    fi
+  fi
+fi    
 
 # update version
 setting ${plebVPNConf} "2" "version" "'${ver}'"

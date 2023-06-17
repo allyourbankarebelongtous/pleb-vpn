@@ -266,6 +266,8 @@ on() {
   # enable firewall
   ufw --force enable
   if [ "${nodetype}" = "mynode" ]; then
+    # allow docker containers out
+    ufw allow out to 172.16.0.0/12
     # add new rules to firewallConf
     sectionLine=$(cat ${firewallConf} | grep -n "^\# Add firewall rules" | cut -d ":" -f1 | head -n 1)
     insertLine=$(expr $sectionLine + 1)
@@ -274,6 +276,7 @@ on() {
     sed -i "${insertLine}iufw allow out to ${vpnip} port ${vpnport} proto udp" ${firewallConf}
     sed -i "${insertLine}iufw allow out on tun0 from any to any" ${firewallConf}
     sed -i "${insertLine}iufw allow in on tun0 from any to any" ${firewallConf}
+    sed -i "${insertLine}iufw allow out to 172.16.0.0/12" ${firewallConf}
     sed -i "s/ufw default allow outgoing/ufw default deny outgoing/g" ${firewallConf}
     # allow local mDNS traffic for mynode.local
     sectionLine=$(cat /etc/ufw/before.rules | grep -n "^\# End required lines" | cut -d ":" -f1 | head -n 1)
@@ -361,6 +364,8 @@ off() {
   # enable firewall
   ufw --force enable
   if [ "${nodetype}" = "mynode" ]; then
+    # remove allow out for docker containers as default is now allow outgoing
+    ufw delete allow out to 172.16.0.0/12
     # delete rules from firewallConf
     LAN=$(ip rou | grep default | cut -d " " -f3 | sed 's/^\(.*\)\.\(.*\)\.\(.*\)\.\(.*\)$/\1\.\2\.\3/g')
     while [ $(cat ${firewallConf} | grep -c "ufw allow in to ${LAN}") -gt 0 ];
@@ -378,6 +383,10 @@ off() {
     while [ $(cat ${firewallConf} | grep -c "ufw allow out on tun0 from any to any") -gt 0 ];
     do
       sed -i "/ufw allow out on tun0 from any to any/d" ${firewallConf}
+    done
+    while [ $(cat ${firewallConf} | grep -c "ufw allow out to 172.16.0.0/12") -gt 0 ];
+    do
+      sed -i "/ufw allow out to 172\.16\.0\.0\/12/d" ${firewallConf}
     done
     while [ $(cat ${firewallConf} | grep -c "ufw allow in on tun0 from any to any") -gt 0 ];
     do
