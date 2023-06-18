@@ -5,7 +5,7 @@
 # make sure updates can be re-run multiple times
 # keep updates present until most users have had the chance to update
 
-ver="v1.1.0-beta.4"
+ver="v1.1.0-beta.5"
 
 # get node info# find home directory based on node implementation
 if [ -d "/mnt/hdd/mynode/pleb-vpn/" ]; then
@@ -430,6 +430,25 @@ server {
   if [ -d /home/admin/pleb-vpn/.git ]; then
     rm -rf /home/admin/pleb-vpn/.git
     rm -rf /mnt/hdd/app-data/pleb-vpn/.git
+  fi
+
+  # add pleb-vpn-custom-dns.service if not present
+  if [ "${plebvpn}" = "on" ]; then
+    if [ ! -f /etc/systemd/system/pleb-vpn-custom-dns.service ]; then
+      # create systemd service to replace resolv.conf with custom dns lookup in case of dns issues caused by restrictive firewall
+      echo "[Unit]
+Description=Custom DNS Configuration
+
+[Service]
+Type=oneshot
+ExecStart=/bin/bash -c \"echo -e 'nameserver 8.8.8.8\nnameserver 8.8.4.4\nnameserver 1.1.1.1' | sudo tee /etc/resolv.conf\"
+
+[Install]
+WantedBy=multi-user.target
+" | tee /etc/systemd/system/pleb-vpn-custom-dns.service
+      systemctl enable pleb-vpn-custom-dns.service
+      systemctl start pleb-vpn-custom-dns.service
+    fi
   fi
 
 fi

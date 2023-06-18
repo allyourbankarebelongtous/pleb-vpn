@@ -265,6 +265,22 @@ on() {
   ufw allow in on tun0 from any to any
   # enable firewall
   ufw --force enable
+  if [ "${nodetype}" = "raspiblitz" ]; then
+    # create systemd service to replace resolv.conf with custom dns lookup in case of dns issues caused by restrictive firewall
+    echo "[Unit]
+Description=Custom DNS Configuration
+
+[Service]
+Type=oneshot
+ExecStart=/bin/bash -c \"echo -e 'nameserver 8.8.8.8\nnameserver 8.8.4.4\nnameserver 1.1.1.1' | sudo tee /etc/resolv.conf\"
+
+[Install]
+WantedBy=multi-user.target
+" | tee /etc/systemd/system/pleb-vpn-custom-dns.service
+    systemctl enable pleb-vpn-custom-dns.service
+    systemctl start pleb-vpn-custom-dns.service
+  fi
+  fi
   if [ "${nodetype}" = "mynode" ]; then
     # allow docker containers out
     ufw allow out to 172.16.0.0/12
@@ -363,6 +379,11 @@ off() {
   ufw delete allow in on tun0 from any to any
   # enable firewall
   ufw --force enable
+  if [ "${nodetype}" = "raspiblitz" ]; then
+    # remove custom dns service
+    systemctl disable pleb-vpn-custom-dns.service
+    rm /etc/systemd/system/pleb-vpn-custom-dns.service
+  fi
   if [ "${nodetype}" = "mynode" ]; then
     # remove allow out for docker containers as default is now allow outgoing
     ufw delete allow out to 172.16.0.0/12
