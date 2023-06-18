@@ -318,14 +318,14 @@ lndconffile=
   # allow through firewall
   if [ "${nodetype}" = "raspiblitz" ]; then
     ufw allow 2420 comment 'allow Pleb-VPN HTTP'
-    ufw allow 2421 commment 'allow Pleb-VPN HTTPS'
+    ufw allow 2421 comment 'allow Pleb-VPN HTTPS'
   fi
   if [ "${nodetype}" = "mynode" ]; then
     # if installed from install script and not from mynode app store, allow through firewall to persist on restarts
     if [ $(ls /usr/share/mynode_apps | grep -c pleb-vpn) -eq 0 ]; then
       if [ "$EUID" -eq 0 ]; then
         ufw allow 2420 comment 'allow Pleb-VPN HTTP'
-        ufw allow 2421 commment 'allow Pleb-VPN HTTPS'
+        ufw allow 2421 comment 'allow Pleb-VPN HTTPS'
         # add new rules to firewallConf
         sectionLine=$(cat ${firewallConf} | grep -n "^\# Add firewall rules" | cut -d ":" -f1 | head -n 1)
         insertLine=$(expr $sectionLine + 1)
@@ -725,7 +725,7 @@ restore()
 
   # allow through firewall
   ufw allow 2420 comment 'allow Pleb-VPN HTTP'
-  ufw allow 2421 commment 'allow Pleb-VPN HTTPS'
+  ufw allow 2421 comment 'allow Pleb-VPN HTTPS'
   if [ "${nodetype}" = "mynode" ]; then
     # if installed from install script and not from mynode app store, allow through firewall to persist on restarts
     if [ $(ls /usr/share/mynode_apps | grep -c pleb-vpn) -eq 0 ]; then
