@@ -453,6 +453,11 @@ WantedBy=multi-user.target
     fi
   fi
 
+  # fix firewall to allow HTTPS
+  if [ $(ufw status | grep -c 2421) -eq 0 ]; then
+    ufw allow 2421 comment 'allow Pleb-VPN HTTPS'
+  fi
+
 fi
 
 # mynode updates
