@@ -280,7 +280,6 @@ WantedBy=multi-user.target
     systemctl enable pleb-vpn-custom-dns.service
     systemctl start pleb-vpn-custom-dns.service
   fi
-  fi
   if [ "${nodetype}" = "mynode" ]; then
     # allow docker containers out
     ufw allow out to 172.16.0.0/12
