@@ -437,7 +437,9 @@ server {
     if [ ! -f /etc/systemd/system/pleb-vpn-custom-dns.service ]; then
       # create systemd service to replace resolv.conf with custom dns lookup in case of dns issues caused by restrictive firewall
       echo "[Unit]
-Description=Custom DNS Configuration
+Description=Pleb-VPN Custom DNS Configuration
+Wants=network-online.target
+After=network-online.target
 
 [Service]
 Type=oneshot
