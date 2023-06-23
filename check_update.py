@@ -15,7 +15,8 @@ def get_latest_version():
         # Retrieve changelog if a latest version is found
         if latest_version:
             changelog = get_changelog(latest_version)
-            return latest_version, changelog
+            html_changelog = convert_markdown_to_html(changelog)
+            return latest_version, html_changelog
         else:
             return None
     else:
