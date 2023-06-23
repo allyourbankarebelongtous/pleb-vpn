@@ -612,70 +612,94 @@ server {
 update() 
 {
   local skip_key="${1}"
+  local reckless="${2}"
   plebVPNConf="${homedir}/pleb-vpn.conf"
   source <(cat ${plebVPNConf} | sed '1d')
 
-  # check for new version and update new version if it doesn't exists
-  if [ "${latestversion}" = "${version}" ]; then
-    # see if there's a newer version
-    latestversion=$(${execdir}/.venv/bin/python ${execdir}/check_update.py)
-    if [ "${latestversion}" = "${version}" ]; then
-      echo "already up to date with the latest version"
-      exit 0
+  if [ "${reckless}" = "reckless" ]; then
+    # make temp directory
+    mkdir /home/admin/pleb-vpn-tmp
+    cd /home/admin/pleb-vpn-tmp
+    # git pull main (or branch) to tmp directory
+    git clone https://github.com/allyourbankarebelongtous/pleb-vpn.git
+    # these commands are for checking out a specific branch for testing
+    #cd /home/admin/pleb-vpn-tmp/pleb-vpn
+    #git checkout -b check-for-port-duplicates
+    #git pull origin check-for-port-duplicates
+    # check if successful
+    isSuccess=$(ls /home/admin/pleb-vpn-tmp/pleb-vpn | grep -c plebvpn_common)
+    if [ ${isSuccess} -eq 0 ]; then
+      echo "error: git clone failed. Check internet connection and try again."
+      rm -rf /home/admin/pleb-vpn-tmp
+      exit 1
+    else
+      # remove git attributes from pleb-vpn folder
+      rm /home/admin/pleb-vpn-tmp/pleb-vpn/.git
+      cd /home/admin/pleb-vpn-tmp/pleb-vpn
     fi
-  fi
-
-  # download zip file into temp directory
-  mkdir /home/admin/pleb-vpn-tmp
-  cd /home/admin/pleb-vpn-tmp
-  wget https://github.com/allyourbankarebelongtous/pleb-vpn/archive/refs/tags/${latestversion}.tar.gz
-  tar -xzf ${latestversion}.tar.gz
-  cd pleb-vpn-*
-  isSuccess=$(ls | grep -c plebvpn_common)
-  if [ ${isSuccess} -eq 0 ]; then
-    echo "error: download and unzip failed. Check internet connection and version number and try again."
-    if [ ! "${skip_key}" = "1" ]; then
-      echo "Press ENTER to continue"
-      read key </dev/tty
-    fi
-    rm -rf /home/admin/pleb-vpn-tmp
-    exit 1
   else
-    cp -p -r . ${execdir}
-    cp -p -r . ${homedir}
+    # check for new version and update new version if it doesn't exists
+    if [ "${latestversion}" = "${version}" ]; then
+      # see if there's a newer version
+      latestversion=$(${execdir}/.venv/bin/python ${execdir}/check_update.py)
+      if [ "${latestversion}" = "${version}" ]; then
+        echo "already up to date with the latest version"
+        exit 0
+      fi
+    fi
 
-    cd /home/admin
-    rm -rf /home/admin/pleb-vpn-tmp
-    # fix permissions
-    if [ "${nodetype}" = "raspiblitz" ]; then
-      chown -R admin:admin ${homedir}
-      chown -R admin:admin ${execdir}
-    elif [ "${nodetype}" = "mynode" ]; then
-      chown -R bitcoin:bitcoin ${homedir}
-      chown -R bitcoin:bitcoin ${execdir}
+    # download zip file into temp directory
+    mkdir /home/admin/pleb-vpn-tmp
+    cd /home/admin/pleb-vpn-tmp
+    wget https://github.com/allyourbankarebelongtous/pleb-vpn/archive/refs/tags/${latestversion}.tar.gz
+    tar -xzf ${latestversion}.tar.gz
+    cd pleb-vpn-*
+    isSuccess=$(ls | grep -c plebvpn_common)
+    if [ ${isSuccess} -eq 0 ]; then
+      echo "error: download and unzip failed. Check internet connection and version number and try again."
+      if [ ! "${skip_key}" = "1" ]; then
+        echo "Press ENTER to continue"
+        read key </dev/tty
+      fi
+      rm -rf /home/admin/pleb-vpn-tmp
+      exit 1
     fi
-    chmod -R 755 ${homedir}
-    chmod -R 755 ${execdir}
-    # check for updates.sh and if exists, run it, then delete it
-    isUpdateScript=$(ls ${execdir} | grep -c updates.sh)
-    if [ ${isUpdateScript} -eq 1 ]; then
-      ${execdir}/updates.sh
-      rm ${execdir}/updates.sh
-      rm ${homedir}/updates.sh
-    fi
-    # check for update_requirements.txt and if it exists, run it, then delete it
-    isUpdateReqs=$(ls ${execdir} | grep -c update_requirements.txt)
-    if [ ${isUpdateReqs} -eq 1 ]; then
-      ${execdir}/.venv/bin/pip install -r ${execdir}/update_requirements.txt
-      rm ${execdir}/update_requirements.txt
-      rm ${homedir}/update_requirements.txt
-    fi
-    # update version in pleb-vpn.conf
-    setting "${plebVPNConf}" "2" "version" "'${latestversion}'"
-    setting "${plebVPNConf}" "2" "latestversion" "'${latestversion}'"
-    echo "Update success!" 
-    systemctl restart pleb-vpn.service
   fi
+  # copy files to execdir and homedir
+  cp -p -r . ${execdir}
+  cp -p -r . ${homedir}
+  # remove tmp dir
+  cd /home/admin
+  rm -rf /home/admin/pleb-vpn-tmp
+  # fix permissions
+  if [ "${nodetype}" = "raspiblitz" ]; then
+    chown -R admin:admin ${homedir}
+    chown -R admin:admin ${execdir}
+  elif [ "${nodetype}" = "mynode" ]; then
+    chown -R bitcoin:bitcoin ${homedir}
+    chown -R bitcoin:bitcoin ${execdir}
+  fi
+  chmod -R 755 ${homedir}
+  chmod -R 755 ${execdir}
+  # check for updates.sh and if exists, run it, then delete it
+  isUpdateScript=$(ls ${execdir} | grep -c updates.sh)
+  if [ ${isUpdateScript} -eq 1 ]; then
+    ${execdir}/updates.sh
+    rm ${execdir}/updates.sh
+    rm ${homedir}/updates.sh
+  fi
+  # check for update_requirements.txt and if it exists, run it, then delete it
+  isUpdateReqs=$(ls ${execdir} | grep -c update_requirements.txt)
+  if [ ${isUpdateReqs} -eq 1 ]; then
+    ${execdir}/.venv/bin/pip install -r ${execdir}/update_requirements.txt
+    rm ${execdir}/update_requirements.txt
+    rm ${homedir}/update_requirements.txt
+  fi
+  # update version in pleb-vpn.conf
+  setting "${plebVPNConf}" "2" "version" "'${latestversion}'"
+  setting "${plebVPNConf}" "2" "latestversion" "'${latestversion}'"
+  echo "Update success!" 
+  systemctl restart pleb-vpn.service
   if [ ! "${skip_key}" = "1" ]; then
     echo "Press ENTER to continue"
     read key </dev/tty
@@ -1213,7 +1237,7 @@ uninstall()
 
 case "${1}" in
   on) on ;;
-  update) update "${2}" ;;
+  update) update "${2}" "${3}" ;;
   restore) restore ;;
   uninstall) uninstall "${2}" ;;
   *) echo "install script for installing, updating, restoring after blitz update, or uninstalling pleb-vpn"; echo "pleb-vpn.install.sh [on|update|uninstall]"; exit 1 ;;
