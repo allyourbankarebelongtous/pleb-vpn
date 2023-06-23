@@ -11,3 +11,4 @@ pillow
 requests
 pydantic
 flask-cors
+markdown
