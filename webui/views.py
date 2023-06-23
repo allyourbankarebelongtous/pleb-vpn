@@ -21,6 +21,7 @@ if os.path.exists('/mnt/hdd/raspiblitz.conf'):
     EXEC_DIR = str('/home/admin/pleb-vpn')
 PLEBVPN_CONF_UPLOAD_FOLDER = os.path.join(HOME_DIR, 'openvpn')
 conf_file_location = os.path.join(HOME_DIR, 'pleb-vpn.conf')
+changelog = ""
 plebVPN_status = {}
 lnd_hybrid_status = {}
 cln_hybrid_status = {}
@@ -264,6 +265,7 @@ def get_plebVPN_status():
     # get status of pleb-vpn connection to vps
     global plebVPN_status
     global update_available
+    global changelog
     plebVPN_status = {}
     conf_file = config.PlebConfig(conf_file_location)
     cmd_str = [os.path.join(EXEC_DIR, "vpn-install.sh") + " status 1"]
@@ -282,7 +284,7 @@ def get_plebVPN_status():
     os.remove(os.path.join(EXEC_DIR, 'pleb-vpn_status.tmp'))
     setting=get_conf()
     # check for new version of pleb-vpn
-    latest_version = str(get_latest_version())
+    latest_version, changelog = str(get_latest_version())
     update_available = False
     if latest_version is not None:
         if setting['version'] != latest_version:
