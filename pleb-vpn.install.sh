@@ -634,7 +634,7 @@ update()
       exit 1
     else
       # remove git attributes from pleb-vpn folder
-      rm /home/admin/pleb-vpn-tmp/pleb-vpn/.git
+      rm -rf /home/admin/pleb-vpn-tmp/pleb-vpn/.git
       cd /home/admin/pleb-vpn-tmp/pleb-vpn
     fi
   else
