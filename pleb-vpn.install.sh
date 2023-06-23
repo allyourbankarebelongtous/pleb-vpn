@@ -641,7 +641,7 @@ update()
     # check for new version and update new version if it doesn't exists
     if [ "${latestversion}" = "${version}" ]; then
       # see if there's a newer version
-      latestversion=$(${execdir}/.venv/bin/python ${execdir}/check_update.py)
+      latestversion=$(${execdir}/.venv/bin/python ${execdir}/check_update.py | grep "Latest Version" | awk '{print $3}')
       if [ "${latestversion}" = "${version}" ]; then
         echo "already up to date with the latest version"
         exit 0
@@ -696,8 +696,12 @@ update()
     rm ${homedir}/update_requirements.txt
   fi
   # update version in pleb-vpn.conf
-  setting "${plebVPNConf}" "2" "version" "'${latestversion}'"
-  setting "${plebVPNConf}" "2" "latestversion" "'${latestversion}'"
+  if [ "${reckless}" = "reckless" ]; then
+    setting "${plebVPNConf}" "2" "version" "'${ver}'"
+  else
+    setting "${plebVPNConf}" "2" "version" "'${latestversion}'"
+    setting "${plebVPNConf}" "2" "latestversion" "'${latestversion}'"
+  fi
   echo "Update success!" 
   systemctl restart pleb-vpn.service
   if [ ! "${skip_key}" = "1" ]; then
