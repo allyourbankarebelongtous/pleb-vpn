@@ -114,6 +114,7 @@ lndconffile=
     # update new conf file with values from old conf file
     newConf="${homedir}/pleb-vpn.conf.new"
     setting ${newConf} "2" "nodetype" "'${nodetype}'"
+    setting ${newConf} "2" "version" "'${ver}'"
     setting ${newConf} "2" "latestversion" "'${ver}'"
     source ${homedir}/pleb-vpn.conf
     if [ -z "${LAN}" ]; then
@@ -476,6 +477,3 @@ if [ "${nodetype}" = "mynode" ]; then
     fi
   fi
 fi    
-
-# update version
-setting ${plebVPNConf} "2" "version" "'${ver}'"
