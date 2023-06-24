@@ -481,6 +481,7 @@ def payments():
         pubkey = request.form['pubkey']
         amount = request.form['amount']
         denomination = request.form['denomination']
+        fee_limit = request.form['fee_limit']
         if 'old_payment_id' in request.form:
             old_payment_id = request.form['old_payment_id']
         else:
@@ -510,9 +511,9 @@ def payments():
                     flash('Error: managepayments.sh deletepayment script timed out', category='error')
                     return render_template('payments.html', user=current_user, current_payments=get_payments(), lnd=lnd, cln=cln)
             if message is not None:
-                payment_string = frequency + " " + node + " " + pubkey + " " + amount + " " + denomination + " \"" + message + "\""
+                payment_string = frequency + " " + node + " " + pubkey + " " + amount + " " + denomination + " " + fee_limit + " \"" + message + "\""
             else:
-                payment_string = frequency + " " + node + " " + pubkey + " " + amount + " " + denomination
+                payment_string = frequency + " " + node + " " + pubkey + " " + amount + " " + denomination + " " + fee_limit
             cmd_str = [os.path.join(EXEC_DIR, "payments/managepayments.sh") + " newpayment " + payment_string]
             logging.debug("newpayment command string sent: " + cmd_str[0]) # for debug purposes only
             try:
@@ -599,7 +600,7 @@ def send_payment():
     if result.returncode == 0:
         flash('Payment sent!', category='success')
     else:
-        flash('An unknown error occured!', category='error')
+        flash('Error: ' + result.stdout + result.stderr, category='error')
     parts = payment_id.split("_")
     cmd_str = ["systemctl enable payments-" + parts[1] + "-" + parts[2] + ".timer"]
     try:

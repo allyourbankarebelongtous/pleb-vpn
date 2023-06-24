@@ -44,7 +44,7 @@ function getpaymentinfo()
     touch ${execdir}/payments/selectpayments.tmp
     chmod 777 ${execdir}/payments/selectpayments.tmp
     echo "PAYMENTS=()" >${execdir}/payments/selectpayments.tmp
-    echo -e "PAYMENT_ID \t\tDESTINATION \t\tAMOUNT--DENOMINATION \t\tMESSSAGE" >>${execdir}/payments/displaypayments.tmp
+    echo -e "PAYMENT_ID \t\tDESTINATION \tAMOUNT--DENOMINATION \tMAX FEE \tMESSSAGE" >>${execdir}/payments/displaypayments.tmp
   else
     touch ${execdir}/payments/current_payments.tmp
     chmod 777 ${execdir}/payments/current_payments.tmp
@@ -86,9 +86,17 @@ ${FREQ} PAYMENTS" >>${execdir}/payments/displaypayments.tmp
       fi
       while [ $inc1 -le $currentNumPayments ]
       do
-        short_node_id=$(cat $(echo "${currentPayments}" | sed -n "${inc1}p") | awk '{print $6}' | cut -c 1-7)
-        node_id=$(cat $(echo "${currentPayments}" | sed -n "${inc1}p") | awk '{print $6}' | cut -c 1-20)
-        pubkey=$(cat $(echo "${currentPayments}" | sed -n "${inc1}p") | awk '{print $6}')
+        if [ $(cat $(echo "${currentPayments}" | sed -n "${inc1}p") | grep fee_limit) -eq 0 ]; then
+          short_node_id=$(cat $(echo "${currentPayments}" | sed -n "${inc1}p") | awk '{print $6}' | cut -c 1-7)
+          node_id=$(cat $(echo "${currentPayments}" | sed -n "${inc1}p") | awk '{print $6}' | cut -c 1-20)
+          pubkey=$(cat $(echo "${currentPayments}" | sed -n "${inc1}p") | awk '{print $6}')
+          fee_limit="10"
+        else
+          short_node_id=$(cat $(echo "${currentPayments}" | sed -n "${inc1}p") | awk '{print $8}' | cut -c 1-7)
+          node_id=$(cat $(echo "${currentPayments}" | sed -n "${inc1}p") | awk '{print $8}' | cut -c 1-20)
+          pubkey=$(cat $(echo "${currentPayments}" | sed -n "${inc1}p") | awk '{print $8}')
+          fee_limit=$(cat $(echo "${currentPayments}" | sed -n "${inc1}p") | awk '{print $6}')
+        fi
         value=$(cat $(echo "${currentPayments}" | sed -n "${inc1}p") | awk '{print $4 $3}')
         amount=$(echo "${value}" | awk -F"--" '{print $1}')
         denomination=$(echo "${value}" | awk -F"--" '{print $2}')
@@ -98,11 +106,11 @@ ${FREQ} PAYMENTS" >>${execdir}/payments/displaypayments.tmp
           message=""
         fi
         if [ ! "${webui}" = "1" ]; then
-          echo -e "${short_node_id}_${freq}_${node} \t$node_id \t${value} \t${message}" >>${execdir}/payments/displaypayments.tmp
+          echo -e "${short_node_id}_${freq}_${node} \t$node_id \t${value} \t${fee_limit} \t${message}" >>${execdir}/payments/displaypayments.tmp
           echo "PAYMENTS+=(${short_node_id}_${freq}_${node}" >>${execdir}/payments/selectpayments.tmp
           sed -i "s/${short_node_id}_${freq}_${node}.*/${short_node_id}_${freq}_${node} \"send to ${short_node_id} ${value} ${freq} from ${node}\"\)/g" ${execdir}/payments/selectpayments.tmp
         else
-          echo -e "${freq} ${short_node_id}_${freq}_${node} ${node} ${pubkey} ${amount} ${denomination} \"${message}\"" >>${execdir}/payments/current_payments.tmp
+          echo -e "${freq} ${short_node_id}_${freq}_${node} ${node} ${pubkey} ${amount} ${denomination} ${fee_limit} \"${message}\"" >>${execdir}/payments/current_payments.tmp
         fi
         ((inc1++))
       done
@@ -134,9 +142,17 @@ ${FREQ} PAYMENTS" >>${execdir}/payments/displaypayments.tmp
       inc1=1
       while [ $inc1 -le $currentNumPayments ]
       do
-        short_node_id=$(cat $(echo "${currentPayments}" | sed -n "${inc1}p") | awk '{print $6}' | cut -c 1-7)
-        node_id=$(cat $(echo "${currentPayments}" | sed -n "${inc1}p") | awk '{print $6}' | cut -c 1-20)
-        pubkey=$(cat $(echo "${currentPayments}" | sed -n "${inc1}p") | awk '{print $6}')
+        if [ $(cat $(echo "${currentPayments}" | sed -n "${inc1}p") | grep fee_limit) -eq 0 ]; then
+          short_node_id=$(cat $(echo "${currentPayments}" | sed -n "${inc1}p") | awk '{print $6}' | cut -c 1-7)
+          node_id=$(cat $(echo "${currentPayments}" | sed -n "${inc1}p") | awk '{print $6}' | cut -c 1-20)
+          pubkey=$(cat $(echo "${currentPayments}" | sed -n "${inc1}p") | awk '{print $6}')
+          fee_limit="10"
+        else
+          short_node_id=$(cat $(echo "${currentPayments}" | sed -n "${inc1}p") | awk '{print $8}' | cut -c 1-7)
+          node_id=$(cat $(echo "${currentPayments}" | sed -n "${inc1}p") | awk '{print $8}' | cut -c 1-20)
+          pubkey=$(cat $(echo "${currentPayments}" | sed -n "${inc1}p") | awk '{print $8}')
+          fee_limit=$(cat $(echo "${currentPayments}" | sed -n "${inc1}p") | awk '{print $6}')
+        fi
         value=$(cat $(echo "${currentPayments}" | sed -n "${inc1}p") | awk '{print $4 $3}')
         amount=$(echo "${value}" | awk -F"--" '{print $1}')
         denomination=$(echo "${value}" | awk -F"--" '{print $2}')
@@ -145,7 +161,7 @@ ${FREQ} PAYMENTS" >>${execdir}/payments/displaypayments.tmp
         else
           message=""
         fi
-        echo -e "${freq} ${short_node_id}_${freq}_${node} ${node} ${pubkey} ${amount} ${denomination} \"${message}\"" >>${execdir}/payments/current_payments.tmp
+        echo -e "${freq} ${short_node_id}_${freq}_${node} ${node} ${pubkey} ${amount} ${denomination} ${fee_limit} \"${message}\"" >>${execdir}/payments/current_payments.tmp
         ((inc1++))
       done
       ((inc++))
@@ -178,7 +194,10 @@ newpayment() {
     local NODE_ID="${3}"
     local AMOUNT="${4}"
     local DENOMINATION="${5}"
-    local message="${6}"
+    local FEE_LIMIT="${6}"
+    if [ ! -z "${7}" ]; then
+      local message="${7}"
+    fi
     if [ "${freq}" = "daily" ]; then
       calendarCode="*-*-*"
     elif [ "${freq}" = "weekly" ]; then
@@ -197,6 +216,7 @@ newpayment() {
     denomination=$(echo $DENOMINATION | tr '[:upper:]' '[:lower:]')
     echo -n "${execdir}/.venv/bin/python ${execdir}/payments/_recurringpayment_${node}.py " \
           "--$denomination $AMOUNT " \
+          "--fee_limit $FEE_LIMIT " \
           "--node_id $NODE_ID " \
           > $script_name
     # add message if present
@@ -380,7 +400,7 @@ Are you sure you want to delete all payments? This cannot be undone.
 
 case "${1}" in
   status) status "${2}" ;;
-  newpayment) newpayment "${2}" "${3}" "${4}" "${5}" "${6}" "${7}" ;;
+  newpayment) newpayment "${2}" "${3}" "${4}" "${5}" "${6}" "${7}" "${8}"  ;;
   deletepayment) deletepayment "${2}" "${3}" ;;
   deleteall) deleteall "${2}" ;;
   *) echo "config script to view, add, or delete payments"; echo "managepayments.sh [status|newpayment|deletepayment|deleteall]"; exit 1 ;;

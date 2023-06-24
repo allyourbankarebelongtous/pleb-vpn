@@ -167,6 +167,15 @@ esac
 
 cancel_check $freq
 
+# Ask user what fee limit they want to set (default 10 sats)
+FEE_LIMIT=$(whiptail --backtitle "Recurring Payments" \
+            --title "Max Fee" \
+            --inputbox "Enter the maximum fee in sats you are willing to pay to send this payment
+            \n(default 10 sats)" \
+            10 60 2>&1 >/dev/tty)
+
+cancel_check $FEE_LIMIT
+
 # Ask if user wants to include a message, and if so, what message.
 message=""
 whiptail --title "Include Message?" \
@@ -192,6 +201,7 @@ script_backup_name="${homedir}/payments/keysends/_${short_node_id}_${freq}_${nod
 denomination=$(echo $DENOMINATION | tr '[:upper:]' '[:lower:]')
 echo -n "${execdir}/.venv/bin/python ${execdir}/payments/_recurringpayment_${node}.py " \
       "--$denomination $AMOUNT " \
+      "--fee_limit $FEE_LIMIT " \
       "--node_id $NODE_ID " \
       > $script_name
 # add message if present

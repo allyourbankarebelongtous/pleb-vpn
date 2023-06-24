@@ -95,8 +95,12 @@ content %}
             <td>{{ line[3] }} {{ line[4] }}</td>
           </tr>
           <tr>
-            <th scope="row">Message</th>
+            <th scope="row">Max Fee in Sats</th>
             <td>{{ line[5] }}</td>
+          </tr>
+          <tr>
+            <th scope="row">Message</th>
+            <td>{{ line[6] }}</td>
           </tr>
         </tbody>
       </table>
@@ -215,6 +219,18 @@ content %}
               </td>
             </tr>
             <tr>
+              <th scope="row">Max Fee in sats (default 10)</th>
+              <td>
+                <input
+                  class="form-control"
+                  type="text"
+                  id="fee_limit"
+                  name="fee_limit"
+                  value="{{ line[5] }}"
+                />
+              </td>
+            </tr>
+            <tr>
               <th scope="row">Message (optional)</th>
               <td>
                 <input
@@ -222,7 +238,7 @@ content %}
                   type="text"
                   id="message"
                   name="message"
-                  value="{{ line[5] }}"
+                  value="{{ line[6] }}"
                 />
               </td>
             </tr>
@@ -324,8 +340,12 @@ content %}
             <td>{{ line[3] }} {{ line[4] }}</td>
           </tr>
           <tr>
-            <th scope="row">Message</th>
+            <th scope="row">Max Fee in Sats</th>
             <td>{{ line[5] }}</td>
+          </tr>
+          <tr>
+            <th scope="row">Message</th>
+            <td>{{ line[6] }}</td>
           </tr>
         </tbody>
       </table>
@@ -444,6 +464,18 @@ content %}
               </td>
             </tr>
             <tr>
+              <th scope="row">Max Fee in sats (default 10)</th>
+              <td>
+                <input
+                  class="form-control"
+                  type="text"
+                  id="fee_limit"
+                  name="fee_limit"
+                  value="{{ line[5] }}"
+                />
+              </td>
+            </tr>
+            <tr>
               <th scope="row">Message (optional)</th>
               <td>
                 <input
@@ -451,7 +483,7 @@ content %}
                   type="text"
                   id="message"
                   name="message"
-                  value="{{ line[5] }}"
+                  value="{{ line[6] }}"
                 />
               </td>
             </tr>
@@ -553,8 +585,12 @@ content %}
             <td>{{ line[3] }} {{ line[4] }}</td>
           </tr>
           <tr>
-            <th scope="row">Message</th>
+            <th scope="row">Max Fee in Sats</th>
             <td>{{ line[5] }}</td>
+          </tr>
+          <tr>
+            <th scope="row">Message</th>
+            <td>{{ line[6] }}</td>
           </tr>
         </tbody>
       </table>
@@ -673,6 +709,18 @@ content %}
               </td>
             </tr>
             <tr>
+              <th scope="row">Max Fee in sats (default 10)</th>
+              <td>
+                <input
+                  class="form-control"
+                  type="text"
+                  id="fee_limit"
+                  name="fee_limit"
+                  value="{{ line[5] }}"
+                />
+              </td>
+            </tr>
+            <tr>
               <th scope="row">Message (optional)</th>
               <td>
                 <input
@@ -680,7 +728,7 @@ content %}
                   type="text"
                   id="message"
                   name="message"
-                  value="{{ line[5] }}"
+                  value="{{ line[6] }}"
                 />
               </td>
             </tr>
@@ -782,8 +830,12 @@ content %}
             <td>{{ line[3] }} {{ line[4] }}</td>
           </tr>
           <tr>
-            <th scope="row">Message</th>
+            <th scope="row">Max Fee in Sats</th>
             <td>{{ line[5] }}</td>
+          </tr>
+          <tr>
+            <th scope="row">Message</th>
+            <td>{{ line[6] }}</td>
           </tr>
         </tbody>
       </table>
@@ -902,6 +954,18 @@ content %}
               </td>
             </tr>
             <tr>
+              <th scope="row">Max Fee in sats (default 10)</th>
+              <td>
+                <input
+                  class="form-control"
+                  type="text"
+                  id="fee_limit"
+                  name="fee_limit"
+                  value="{{ line[5] }}"
+                />
+              </td>
+            </tr>
+            <tr>
               <th scope="row">Message (optional)</th>
               <td>
                 <input
@@ -909,7 +973,7 @@ content %}
                   type="text"
                   id="message"
                   name="message"
-                  value="{{ line[5] }}"
+                  value="{{ line[6] }}"
                 />
               </td>
             </tr>
@@ -1028,6 +1092,18 @@ content %}
                 <option value="sats" selected>sats</option>
                 <option value="USD">USD</option>
               </select>
+            </td>
+          </tr>
+          <tr>
+            <th scope="row">Max Fee in sats (default 10)</th>
+            <td>
+              <input
+                class="form-control"
+                type="text"
+                id="fee_limit"
+                name="fee_limit"
+                value="10"
+              />
             </td>
           </tr>
           <tr>
