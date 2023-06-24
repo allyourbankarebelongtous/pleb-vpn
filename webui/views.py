@@ -583,7 +583,10 @@ def delete_all_payments():
 def send_payment():
     payment_id = json.loads(request.data)
     payment_id = payment_id['payment_id']
-    cmd_str = ["sudo -u bitcoin " + os.path.join(EXEC_DIR, "payments/keysends/_") + payment_id + "_keysend.sh"]
+    payment_script = os.path.join(EXEC_DIR, "payments/keysends/_") + payment_id + "_keysend.sh"
+    with open(payment_script, 'r') as file:
+        script_content = file.read().strip()
+    cmd_str = ["sudo -u bitcoin " + script_content + " --send_now True"]
     try:
         result = subprocess.run(cmd_str, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, universal_newlines=True, timeout=300)
     except subprocess.TimeoutExpired:
