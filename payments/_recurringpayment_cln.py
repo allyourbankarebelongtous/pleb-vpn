@@ -76,12 +76,15 @@ if __name__ == "__main__":
                 args.sats = args.usd * 100000000 / float(price)  # Convert to sats
             # Set default fee of 10 sats if none present
             if args.fee_limit is None:
+                print("no max fee set, setting default max fee of 10 sats")
                 # convert to max percent of payment
                 args.fee_percent = round((10 / args.sats) * 100, 1) # CLN uses maxfeepercent
+                print("converting max fee to percent for CLN, max percent set:", args.fee_percent)
             else:
                 # convert max fee to max percent of payment
+                print("max fee set to", args.fee_limit)
                 args.fee_percent = round((args.fee_limit / args.sats) * 100, 1) # CLN uses maxfeepercent
-
+                print("converting max fee to percent for CLN, max percent set:", args.fee_percent)
             success, stdout_msg, stderr_msg = send_to_node(args.node_id, args.sats, args.fee_percent, args.message)
 
             # Check result
@@ -91,10 +94,12 @@ if __name__ == "__main__":
                 print("Error occurred. Check the stdout and stderr messages:")
                 print("stdout:", stdout_msg)
                 print("stderr:", stderr_msg)
+                sys.exit(1)
 
         except Exception as e:
             print(e)
             print("Failed to hit bitstamp api")
+            sys.exit(1)
     else:
         for send_attempt in range(0, 10):
             logging.info("Attempting to send.. attempt {0}/{1}".format(send_attempt+1, 10))

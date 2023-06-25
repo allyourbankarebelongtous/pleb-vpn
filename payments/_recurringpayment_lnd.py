@@ -76,6 +76,7 @@ if __name__ == "__main__":
 
             # Set default fee of 10 sats if none is present
             if args.fee_limit is None:
+                print("no max fee set, setting default 10 sat max fee")
                 args.fee_limit = 10
 
             success, stdout_msg, stderr_msg = send_to_node(args.node_id, args.fee_limit, args.sats, args.message)
@@ -87,10 +88,12 @@ if __name__ == "__main__":
                 print("Error occurred. Check the stdout and stderr messages:")
                 print("stdout:", stdout_msg)
                 print("stderr:", stderr_msg)
+                sys.exit(1)
 
         except Exception as e:
             print(e)
             print("Failed to hit bitstamp api")
+            sys.exit(1)
  
     else:
         for send_attempt in range(0, 10):
