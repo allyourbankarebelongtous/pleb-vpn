@@ -1313,13 +1313,14 @@ def get_payments():
                 denomination = line_parts[5]
                 if denomination == "usd":
                     denomination = "USD"
-                if len(line_parts) >= 7:
-                    message = line_parts[6].strip('"\'')
+                fee_limit = line_parts[6]
+                if len(line_parts) >= 8:
+                    message = line_parts[7].strip('"\'')
                 else:
                     message = ""
                 if category not in current_payments:
                     current_payments[category] = []
-                current_payments[category].append((id, node, pubkey, amount, denomination, message))
+                current_payments[category].append((id, node, pubkey, amount, denomination, fee_limit, message))
             except IndexError:
                 logging.error("Error: When looking up current_payments.tmp, not enough elements in line_parts for line: " + line)
 

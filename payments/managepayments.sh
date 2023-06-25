@@ -86,7 +86,7 @@ ${FREQ} PAYMENTS" >>${execdir}/payments/displaypayments.tmp
       fi
       while [ $inc1 -le $currentNumPayments ]
       do
-        if [ $(cat $(echo "${currentPayments}" | sed -n "${inc1}p") | grep fee_limit) -eq 0 ]; then
+        if [ $(cat $(echo "${currentPayments}" | sed -n "${inc1}p") | grep -c fee_limit) -eq 0 ]; then
           short_node_id=$(cat $(echo "${currentPayments}" | sed -n "${inc1}p") | awk '{print $6}' | cut -c 1-7)
           node_id=$(cat $(echo "${currentPayments}" | sed -n "${inc1}p") | awk '{print $6}' | cut -c 1-20)
           pubkey=$(cat $(echo "${currentPayments}" | sed -n "${inc1}p") | awk '{print $6}')
@@ -142,7 +142,7 @@ ${FREQ} PAYMENTS" >>${execdir}/payments/displaypayments.tmp
       inc1=1
       while [ $inc1 -le $currentNumPayments ]
       do
-        if [ $(cat $(echo "${currentPayments}" | sed -n "${inc1}p") | grep fee_limit) -eq 0 ]; then
+        if [ $(cat $(echo "${currentPayments}" | sed -n "${inc1}p") | grep -c fee_limit) -eq 0 ]; then
           short_node_id=$(cat $(echo "${currentPayments}" | sed -n "${inc1}p") | awk '{print $6}' | cut -c 1-7)
           node_id=$(cat $(echo "${currentPayments}" | sed -n "${inc1}p") | awk '{print $6}' | cut -c 1-20)
           pubkey=$(cat $(echo "${currentPayments}" | sed -n "${inc1}p") | awk '{print $6}')
