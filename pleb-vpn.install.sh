@@ -691,7 +691,7 @@ update()
   # check for update_requirements.txt and if it exists, run it, then delete it
   isUpdateReqs=$(ls ${execdir} | grep -c update_requirements.txt)
   if [ ${isUpdateReqs} -eq 1 ]; then
-    ${execdir}/.venv/bin/pip install -r ${execdir}/update_requirements.txt
+    ${execdir}/.venv/bin/pip install --upgrade -r ${execdir}/update_requirements.txt
     rm ${execdir}/update_requirements.txt
     rm ${homedir}/update_requirements.txt
   fi
