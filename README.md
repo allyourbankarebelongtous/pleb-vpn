@@ -224,14 +224,18 @@ of the month, your access to the VPS will be regretfully shut off.
 1. ssh into the node.  
 2. Exit to command line from the menu.  
 3. Get the install script from gitub and run it by copying and pasting the following command:  
-   `sudo wget https://raw.githubusercontent.com/allyourbankarebelongtous/pleb-vpn/main/pleb-vpn.install.sh && sudo bash pleb-vpn.install.sh on`  
+   ```
+   sudo wget https://raw.githubusercontent.com/allyourbankarebelongtous/pleb-vpn/main/pleb-vpn.install.sh && sudo bash pleb-vpn.install.sh on
+   ```  
 You can access all of Pleb-VPN's functionality from the ssh menu, and you can also use the WebUI.
 
 ### MyNode  
 Until the application gets added to the app store, you'll have to do a manual install by following the instructions below.   
 1. ssh into the node.  
 2. Get the install script from gitub and run it by copying and pasting the following command:  
-   `sudo wget https://raw.githubusercontent.com/allyourbankarebelongtous/pleb-vpn/main/pleb-vpn.install.sh && sudo bash pleb-vpn.install.sh on`  
+   ```
+   sudo wget https://raw.githubusercontent.com/allyourbankarebelongtous/pleb-vpn/main/pleb-vpn.install.sh && sudo bash pleb-vpn.install.sh on
+   ```  
 
 Access Pleb-VPN from the WebUI and try it out!
 
