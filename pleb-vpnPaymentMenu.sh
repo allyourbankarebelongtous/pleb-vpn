@@ -2,9 +2,20 @@
 
 # pleb-VPN payments menu
 
-source /home/admin/raspiblitz.info
-source /mnt/hdd/raspiblitz.conf
-source /home/admin/pleb-vpn/pleb-vpn.conf
+# find home directory based on node implementation
+if [ -d "/mnt/hdd/mynode/pleb-vpn/" ]; then
+  homedir="/mnt/hdd/mynode/pleb-vpn"
+  execdir="/opt/mynode/pleb-vpn"
+elif [ -f "/mnt/hdd/raspiblitz.conf" ]; then
+  homedir="/mnt/hdd/app-data/pleb-vpn"
+  execdir="/home/admin/pleb-vpn"
+fi
+plebVPNConf="${homedir}/pleb-vpn.conf"
+source <(cat ${plebVPNConf} | sed '1d')
+if [ "${nodetype}" = "raspiblitz" ]; then
+  source /home/admin/raspiblitz.info
+  source /mnt/hdd/raspiblitz.conf
+fi
 
 # BASIC MENU INFO
 WIDTH=66
@@ -31,15 +42,15 @@ CHOICE=$(dialog --clear \
 
 case $CHOICE in
   NEW)
-    /home/admin/pleb-vpn/payments/managepayments.sh newpayment
+    sudo /home/admin/pleb-vpn/payments/managepayments.sh newpayment
     ;;
   VIEW)
-    /home/admin/pleb-vpn/payments/managepayments.sh status
+    sudo /home/admin/pleb-vpn/payments/managepayments.sh status
     ;;
   DELETE)
-    /home/admin/pleb-vpn/payments/managepayments.sh deletepayment
+    sudo /home/admin/pleb-vpn/payments/managepayments.sh deletepayment
     ;;
   DELETE-ALL)
-    /home/admin/pleb-vpn/payments/managepayments.sh deleteall
+    sudo /home/admin/pleb-vpn/payments/managepayments.sh deleteall
     ;;
 esac

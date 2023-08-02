@@ -1,0 +1,427 @@
+{% extends "base.html" %} {% block title %}Home{% endblock %} {% block content
+%}
+<div class="container">
+  <div class="row">
+    <div class="col text-center">
+      <img
+        src="{{ url_for('static', filename='full-logo cutout-orange.png') }}"
+        style="height: 80px"
+        alt="PlebNet logo"
+        loading="lazy"
+      />
+    </div>
+  </div>
+  <div class="row">
+    <div class="col text-center">
+      <button id="refresh_data" type="button" class="btn btn-success">
+        Refesh Data
+      </button>
+      <button
+        id="refresh_data_loading"
+        class="btn btn-success d-none"
+        type="button"
+        disabled
+      >
+        <span
+          class="spinner-grow spinner-grow-sm"
+          role="status"
+          aria-hidden="true"
+        ></span>
+        Loading...
+      </button>
+    </div>
+  </div>
+</div>
+<br />
+
+<div class="container container-fluid">
+  <div class="row">
+    <div class="col">
+      <div class="row">
+        <div class="col text-center">
+          <h2>Pleb-VPN Settings</h2>
+        </div>
+      </div>
+
+      {% if plebVPN_status['message'] != null %}
+      <div class="row">
+        <div class="col text-center" style="border-top: 1px solid lightgrey">
+          <h7>{{ plebVPN_status['message'] }}</h7>
+        </div>
+      </div>
+      {% endif %}
+
+      <div class="row">
+        <div class="col" style="border-top: 1px solid lightgrey">
+          <table class="table align-middle">
+            <thead>
+              <tr>
+                <th scope="col">Setting</th>
+                <th scope="col">Value</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <th scope="row">VPN Connection</th>
+                <td>{{ setting['plebvpn'] }}</td>
+              </tr>
+              {% if setting['plebvpn'] == "on" %}
+              <tr>
+                <td>VPN IP</td>
+                <td>{{ setting['vpnip'] }}</td>
+              </tr>
+              {% endif %} {% if lnd %}
+              <tr>
+                <th scope="row">LND Hybrid Status</th>
+                <td>{{ setting['lndhybrid'] }}</td>
+              </tr>
+              {% if setting['lndhybrid'] == "on" %}
+              <tr>
+                {% if lnd_hybrid_status['address0Type'] == 'torv3' %}
+                <td>LND tor address</td>
+                {% else %}
+                <td>LND IPV4 address</td>
+                {% endif %}
+                <td style="word-break: break-word">
+                  {{ lnd_hybrid_status['Node_ID'] }}<br />@{{
+                  lnd_hybrid_status['address0'] }}
+                </td>
+              </tr>
+              <tr>
+                {% if lnd_hybrid_status['address1Type'] == 'torv3' %}
+                <td>LND tor address</td>
+                {% else %}
+                <td>LND IPV4 address</td>
+                {% endif %}
+                <td style="word-break: break-word">
+                  {{ lnd_hybrid_status['Node_ID'] }}<br />@{{
+                  lnd_hybrid_status['address1'] }}
+                </td>
+              </tr>
+              {% endif %} {% endif %} {% if cln %}
+              <tr>
+                <th scope="row">CLN Hybrid Status</th>
+                <td>{{ setting['clnhybrid'] }}</td>
+              </tr>
+              {% if setting['clnhybrid'] == "on" %}
+              <tr>
+                {% if cln_hybrid_status['address0Type'] == 'torv3' %}
+                <td>CLN tor address</td>
+                {% else %}
+                <td>CLN IPV4 address</td>
+                {% endif %}
+                <td style="word-break: break-word">
+                  {{ cln_hybrid_status['Node_ID'] }}<br />@{{
+                  cln_hybrid_status['address0'] }}
+                </td>
+              </tr>
+              <tr>
+                {% if cln_hybrid_status['address1Type'] == 'torv3' %}
+                <td>CLN tor address</td>
+                {% else %}
+                <td>CLN IPV4 address</td>
+                {% endif %}
+                <td style="word-break: break-word">
+                  {{ cln_hybrid_status['Node_ID'] }}<br />@{{
+                  cln_hybrid_status['address1'] }}
+                </td>
+              </tr>
+              {% endif %} {% endif %}
+              <tr>
+                <th scope="row">Wireguard LAN Status</th>
+                <td>{{ setting['wireguard'] }}</td>
+              </tr>
+              {% if setting['wireguard'] == "on" %}
+              <tr>
+                <td>Wireguard IP address</td>
+                <td>{{ wireguard_status['server_IP'] }}</td>
+              </tr>
+              {% endif %}
+              <tr>
+                <th scope="row">Tor Split-Tunnel Status</th>
+                <td>{{ setting['torsplittunnel'] }}</td>
+              </tr>
+              <tr>
+                <th scope="row">LetsEncrypt Status</th>
+                <td>{{ setting['letsencrypt_ssl'] }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      {% if setting['wireguard'] == "on" %}
+      <div class="row">
+        <div class="col text-center">
+          <p>
+            Use the Wireguard page to download client config files or qr codes.
+          </p>
+        </div>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+  <div class="row">
+    <div class="col text-center">
+      <h2>Pleb-VPN Status</h2>
+    </div>
+  </div>
+  {% if update_available == True %}
+  <div class="row">
+    <div class="col text-center" style="border-top: 1px solid lightgrey">
+      <h7>A new version is available</h7>
+    </div>
+  </div>
+  {% else %}
+  <div class="row">
+    <div class="col text-center" style="border-top: 1px solid lightgrey">
+      <h7>Pleb-VPN is up to date.</h7>
+    </div>
+  </div>
+  {% endif %}
+  <div class="row">
+    <div class="col" style="border-top: 1px solid lightgrey">
+      <table class="table">
+        <tbody>
+          <tr>
+            <th scope="row">Current Version</th>
+            <td>{{ setting['version'] }}</td>
+          </tr>
+          {% if update_available == True %}
+          <tr>
+            <th scope="row">New Version</th>
+            <td>{{ setting['latestversion'] }}</td>
+          </tr>
+          {% endif %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  {% if update_available == True %} {% if "alpha" in setting['latestversion'] %}
+  <div class="row">
+    <div class="col text-center">
+      <p>
+        An <strong>UNSTABLE ALPHA RELEASE</strong> Pleb-VPN update is available
+        for testing. To update, click "Update Pleb-VPN". Pleb-VPN will update
+        and restart. Your settings <strong>SHOULD</strong> be unaffected. You
+        will have to refresh the page once the update is complete (usually about
+        a minute).
+      </p>
+      <p>
+        <strong
+          >WARNING: undoing the update is not possible using the webui at this
+          time and requires ssh access. Contact @allyourbankarebelongtous on
+          telegram for support if needed.</strong
+        >
+      </p>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col text-center">
+      <h2>ChangeLog</h2>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col">
+      <p>{{ changelog|safe }}</p>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col text-center">
+      <button id="update-scripts" type="button" class="btn btn-danger">
+        Update Pleb-VPN
+      </button>
+      <button
+        id="update-scripts_loading"
+        class="btn btn-danger d-none"
+        type="button"
+        disabled
+      >
+        <span
+          class="spinner-grow spinner-grow-sm"
+          role="status"
+          aria-hidden="true"
+        ></span>
+        Loading...
+      </button>
+    </div>
+  </div>
+  {% elif "beta" in setting['latestversion'] %}
+  <div class="row">
+    <div class="col text-center">
+      <p>
+        A Pleb-VPN <strong>beta</strong> release update is available. To update,
+        click "Update Pleb-VPN". Pleb-VPN will update and restart. Your settings
+        will be unaffected. You will have to refresh the page once the update is
+        complete (usually about a minute).
+      </p>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col text-center">
+      <h2>ChangeLog</h2>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col">
+      <p>{{ changelog|safe }}</p>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col text-center">
+      <button id="update-scripts" type="button" class="btn btn-primary">
+        Update Pleb-VPN
+      </button>
+      <button
+        id="update-scripts_loading"
+        class="btn btn-primary d-none"
+        type="button"
+        disabled
+      >
+        <span
+          class="spinner-grow spinner-grow-sm"
+          role="status"
+          aria-hidden="true"
+        ></span>
+        Loading...
+      </button>
+    </div>
+  </div>
+
+  {% else %}
+  <div class="row">
+    <div class="col text-center">
+      <p>
+        A Pleb-VPN stable release update is available. To update, click "Update
+        Pleb-VPN". Pleb-VPN will update and restart. Your settings will be
+        unaffected. You will have to refresh the page once the update is
+        complete (usually about a minute).
+      </p>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col text-center">
+      <h2>ChangeLog</h2>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col">
+      <p>{{ changelog|safe }}</p>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col text-center">
+      <button id="update-scripts" type="button" class="btn btn-primary">
+        Update Pleb-VPN
+      </button>
+      <button
+        id="update-scripts_loading"
+        class="btn btn-primary d-none"
+        type="button"
+        disabled
+      >
+        <span
+          class="spinner-grow spinner-grow-sm"
+          role="status"
+          aria-hidden="true"
+        ></span>
+        Loading...
+      </button>
+    </div>
+  </div>
+  {% endif %} {% endif %}
+  <div class="row">
+    <div class="col text-center">
+      <h5>Uninstall Pleb-VPN</h5>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col text-center">
+      <button id="uninstall-plebvpn" type="button" class="btn btn-danger">
+        Uninstall Pleb-VPN
+      </button>
+      <button
+        id="uninstall-plebvpn_loading"
+        class="btn btn-danger d-none"
+        type="button"
+        disabled
+      >
+        <span
+          class="spinner-grow spinner-grow-sm"
+          role="status"
+          aria-hidden="true"
+        ></span>
+        Loading...
+      </button>
+    </div>
+  </div>
+</div>
+<script>
+  var socket = io.connect(
+    location.protocol + "//" + document.domain + ":" + location.port
+  );
+  $("#update-scripts").click(function (event) {
+    event.preventDefault();
+    if (
+      confirm_dialog(
+        (message =
+          "Pleb-VPN will restart. Your settings will be unchanged. Are you sure you want to update Pleb-VPN?")
+      ) == true
+    ) {
+      var updateBtn = document.getElementById("update-scripts");
+      if (updateBtn !== null) {
+        updateBtn.classList.add("d-none");
+      }
+      var updateLoading = document.getElementById("update-scripts_loading");
+      if (updateLoading !== null) {
+        updateLoading.classList.remove("d-none");
+      }
+      socket.emit("update_scripts");
+    }
+  });
+  $("#uninstall-plebvpn").click(function (event) {
+    event.preventDefault();
+    if (
+      confirm_dialog(
+        (message =
+          "This will completely remove Pleb-VPN and all services from your node, restoring it to its original configuration. Are you sure you want to uninstall Pleb-VPN?")
+      ) == true
+    ) {
+      var uninstallBtn = document.getElementById("uninstall-plebvpn");
+      if (uninstallBtn !== null) {
+        uninstallBtn.classList.add("d-none");
+      }
+      var uninstallLoading = document.getElementById(
+        "uninstall-plebvpn_loading"
+      );
+      if (uninstallLoading !== null) {
+        uninstallLoading.classList.remove("d-none");
+      }
+      socket.emit("uninstall-plebvpn");
+    }
+  });
+  $("#refresh_data").click(function (event) {
+    event.preventDefault();
+    var refreshBtn = document.getElementById("refresh_data");
+    if (refreshBtn !== null) {
+      refreshBtn.classList.add("d-none");
+    }
+    var refreshLoading = document.getElementById("refresh_data_loading");
+    if (refreshLoading !== null) {
+      refreshLoading.classList.remove("d-none");
+    }
+    socket.emit("refresh_plebVPN_data");
+  });
+  socket.on("plebVPN_data_refreshed", function () {
+    var refreshBtn = document.getElementById("refresh_data");
+    if (refreshBtn !== null) {
+      refreshBtn.classList.remove("d-none");
+    }
+    var refreshLoading = document.getElementById("refresh_data_loading");
+    if (refreshLoading !== null) {
+      refreshLoading.classList.add("d-none");
+    }
+    var url = "/";
+    window.location.href = url;
+  });
+</script>
+{% endblock %}

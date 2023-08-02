@@ -1,0 +1,1157 @@
+{% extends "base.html" %} {% block title %}Payments{% endblock %} {% block
+content %}
+<div class="container text-center">
+  <div class="row">
+    <div class="col">
+      <h3>Manage Payments</h3>
+    </div>
+  </div>
+</div>
+<br />
+<div class="container">
+  {% if current_payments is not none %}
+  <div class="row">
+    <div class="col text-center">
+      <h4>Current Payments</h4>
+    </div>
+  </div>
+  {% if current_payments['daily']|length == 0 and
+  current_payments['weekly']|length == 0 and current_payments['monthly']|length
+  == 0 and current_payments['yearly']|length == 0 %}
+  <div class="row">
+    <div class="col text-center">
+      <p>You have no scheduled payments.</p>
+    </div>
+  </div>
+  {% endif %} {% if current_payments['daily']|length > 0 %} {% for line in
+  current_payments['daily'] %}
+  <div
+    class="row"
+    id="payment_info{{ line[0] }}"
+    style="border-top: 1px solid lightgrey"
+  >
+    <div class="col-3">
+      <div class="row" style="margin-top: 0.5em">
+        <div class="col">
+          {% if line[1] == "lnd" %}
+          <h5>Daily Payment from LND node</h5>
+          {% elif line[1] == "cln" %}
+          <h5>Daily Payment from Core Lightning node</h5>
+          {% endif %}
+          <p><small>every day at time 0000</small></p>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col">
+          <div class="btn-group">
+            <button
+              class="btn btn-sm dropdown-toggle"
+              type="button"
+              data-bs-toggle="dropdown"
+              aria-expanded="false"
+            >
+              Options
+            </button>
+            <ul class="dropdown-menu">
+              <li>
+                <a
+                  class="dropdown-item"
+                  href="#"
+                  onClick="send_payment('{{ line[0] }}')"
+                  >Send Now</a
+                >
+              </li>
+              <li>
+                <a
+                  class="dropdown-item"
+                  href="#"
+                  onClick="edit_payment('{{ line[0] }}')"
+                  >Edit</a
+                >
+              </li>
+              <li>
+                <a
+                  class="dropdown-item"
+                  href="#"
+                  onClick="delete_payment('{{ line[0] }}')"
+                >
+                  Delete
+                </a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-9">
+      <table class="table">
+        <tbody>
+          <tr>
+            <th scope="row">Destination Pubkey</th>
+            <td>{{ line[2] }}</td>
+          </tr>
+          <tr>
+            <th scope="row">Amount</th>
+            <td>{{ line[3] }} {{ line[4] }}</td>
+          </tr>
+          <tr>
+            <th scope="row">Max Fee in Sats</th>
+            <td>{{ line[5] }}</td>
+          </tr>
+          <tr>
+            <th scope="row">Message</th>
+            <td>{{ line[6] }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div
+    class="row d-none"
+    id="payment_edit{{ line[0] }}"
+    style="border-top: 1px solid lightgrey"
+  >
+    <form method="POST" id="payment_edit_form{{ line[0] }}">
+      <input
+        class="form-control"
+        type="hidden"
+        name="old_payment_id"
+        id="old_payment_id"
+        value="{{ line[0] }}"
+      />
+      <div class="row">
+        <table class="table">
+          <tbody>
+            {% if lnd and cln %}
+            <tr>
+              <th scope="row">
+                Which node do you want to send this payment from?
+              </th>
+              <td>
+                {% if line[1] == "lnd" %}
+                <select class="form-control" id="node" name="node">
+                  <option value="lnd" selected>LND</option>
+                  <option value="cln">Core Lightning</option>
+                </select>
+                {% elif line[1] == "cln" %}
+                <select class="form-control" id="node" name="node">
+                  <option value="lnd">LND</option>
+                  <option value="cln" selected>Core Lightning</option>
+                </select>
+                {% endif %}
+              </td>
+            </tr>
+            {% else %} {% if lnd %}
+            <input
+              class="form-control"
+              type="hidden"
+              name="node"
+              id="node"
+              value="lnd"
+            />
+            {% endif %} {% if cln %}
+            <input
+              class="form-control"
+              type="hidden"
+              name="node"
+              id="node"
+              value="cln"
+            />
+            {% endif %} {% endif %}
+            <tr>
+              <th scope="row">How often do you want to send this payment?</th>
+              <td>
+                <select class="form-control" id="frequency" name="frequency">
+                  <option value="daily" selected>Daily</option>
+                  <option value="weekly">Weekly</option>
+                  <option value="monthly">Monthly</option>
+                  <option value="yearly">Yearly</option>
+                </select>
+              </td>
+            </tr>
+            <tr>
+              <th scope="row">Destination Pubkey</th>
+              <td>
+                <input
+                  class="form-control"
+                  type="text"
+                  id="pubkey"
+                  name="pubkey"
+                  value="{{ line[2] }}"
+                />
+              </td>
+            </tr>
+            <tr>
+              <th scope="row">Amount in sats or USD</th>
+              <td>
+                <input
+                  class="form-control"
+                  type="text"
+                  id="amount"
+                  name="amount"
+                  value="{{ line[3] }}"
+                />
+              </td>
+            </tr>
+            <tr>
+              <th scope="row">Denomination</th>
+              <td>
+                {% if line[4] == "sats" %}
+                <select
+                  class="form-control"
+                  id="denomination"
+                  name="denomination"
+                >
+                  <option value="sats" selected>sats</option>
+                  <option value="USD">USD</option>
+                </select>
+                {% else %}
+                <select
+                  class="form-control"
+                  id="denomination"
+                  name="denomination"
+                >
+                  <option value="sats">sats</option>
+                  <option value="USD" selected>USD</option>
+                </select>
+                {% endif %}
+              </td>
+            </tr>
+            <tr>
+              <th scope="row">Max Fee in sats (default 10)</th>
+              <td>
+                <input
+                  class="form-control"
+                  type="text"
+                  id="fee_limit"
+                  name="fee_limit"
+                  value="{{ line[5] }}"
+                />
+              </td>
+            </tr>
+            <tr>
+              <th scope="row">Message (optional)</th>
+              <td>
+                <input
+                  class="form-control"
+                  type="text"
+                  id="message"
+                  name="message"
+                  value="{{ line[6] }}"
+                />
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="row" style="margin-bottom: 0.5em">
+        <div class="col text-center">
+          <button
+            type="button"
+            class="btn btn-success"
+            onClick="save_edited_payment('{{ line[0] }}')"
+          >
+            Save
+          </button>
+        </div>
+        <div class="col text-center">
+          <button
+            type="button"
+            class="btn btn-danger"
+            onClick="cancel_edited_payment('{{ line[0] }}')"
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  {% endfor %} {% endif %} {% if current_payments['weekly']|length > 0 %} {% for
+  line in current_payments['weekly'] %}
+  <div
+    class="row"
+    id="payment_info{{ line[0] }}"
+    style="border-top: 1px solid lightgrey"
+  >
+    <div class="col-3">
+      <div class="row" style="margin-top: 0.5em">
+        <div class="col">
+          {% if line[1] == "lnd" %}
+          <h5>Weekly Payment from LND node</h5>
+          {% elif line[1] == "cln" %}
+          <h5>Weekly Payment from Core Lightning node</h5>
+          {% endif %}
+          <p><small>every Sunday morning at time 0000</small></p>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col">
+          <div class="btn-group">
+            <button
+              class="btn btn-sm dropdown-toggle"
+              type="button"
+              data-bs-toggle="dropdown"
+              aria-expanded="false"
+            >
+              Options
+            </button>
+            <ul class="dropdown-menu">
+              <li>
+                <a
+                  class="dropdown-item"
+                  href="#"
+                  onClick="send_payment('{{ line[0] }}')"
+                  >Send Now</a
+                >
+              </li>
+              <li>
+                <a
+                  class="dropdown-item"
+                  href="#"
+                  onClick="edit_payment('{{ line[0] }}')"
+                  >Edit</a
+                >
+              </li>
+              <li>
+                <a
+                  class="dropdown-item"
+                  href="#"
+                  onClick="delete_payment('{{ line[0] }}')"
+                >
+                  Delete
+                </a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-9">
+      <table class="table">
+        <tbody>
+          <tr>
+            <th scope="row">Destination Pubkey</th>
+            <td>{{ line[2] }}</td>
+          </tr>
+          <tr>
+            <th scope="row">Amount</th>
+            <td>{{ line[3] }} {{ line[4] }}</td>
+          </tr>
+          <tr>
+            <th scope="row">Max Fee in Sats</th>
+            <td>{{ line[5] }}</td>
+          </tr>
+          <tr>
+            <th scope="row">Message</th>
+            <td>{{ line[6] }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div
+    class="row d-none"
+    id="payment_edit{{ line[0] }}"
+    style="border-top: 1px solid lightgrey"
+  >
+    <form method="POST" id="payment_edit_form{{ line[0] }}">
+      <input
+        class="form-control"
+        type="hidden"
+        name="old_payment_id"
+        id="old_payment_id"
+        value="{{ line[0] }}"
+      />
+      <div class="row">
+        <table class="table">
+          <tbody>
+            {% if lnd and cln %}
+            <tr>
+              <th scope="row">
+                Which node do you want to send this payment from?
+              </th>
+              <td>
+                {% if line[1] == "lnd" %}
+                <select class="form-control" id="node" name="node">
+                  <option value="lnd" selected>LND</option>
+                  <option value="cln">Core Lightning</option>
+                </select>
+                {% elif line[1] == "cln" %}
+                <select class="form-control" id="node" name="node">
+                  <option value="lnd">LND</option>
+                  <option value="cln" selected>Core Lightning</option>
+                </select>
+                {% endif %}
+              </td>
+            </tr>
+            {% else %} {% if lnd %}
+            <input
+              class="form-control"
+              type="hidden"
+              name="node"
+              id="node"
+              value="lnd"
+            />
+            {% endif %} {% if cln %}
+            <input
+              class="form-control"
+              type="hidden"
+              name="node"
+              id="node"
+              value="cln"
+            />
+            {% endif %} {% endif %}
+            <tr>
+              <th scope="row">How often do you want to send this payment?</th>
+              <td>
+                <select class="form-control" id="frequency" name="frequency">
+                  <option value="daily">Daily</option>
+                  <option value="weekly" selected>Weekly</option>
+                  <option value="monthly">Monthly</option>
+                  <option value="yearly">Yearly</option>
+                </select>
+              </td>
+            </tr>
+            <tr>
+              <th scope="row">Destination Pubkey</th>
+              <td>
+                <input
+                  class="form-control"
+                  type="text"
+                  id="pubkey"
+                  name="pubkey"
+                  value="{{ line[2] }}"
+                />
+              </td>
+            </tr>
+            <tr>
+              <th scope="row">Amount in sats or USD</th>
+              <td>
+                <input
+                  class="form-control"
+                  type="text"
+                  id="amount"
+                  name="amount"
+                  value="{{ line[3] }}"
+                />
+              </td>
+            </tr>
+            <tr>
+              <th scope="row">Denomination</th>
+              <td>
+                {% if line[4] == "sats" %}
+                <select
+                  class="form-control"
+                  id="denomination"
+                  name="denomination"
+                >
+                  <option value="sats" selected>sats</option>
+                  <option value="USD">USD</option>
+                </select>
+                {% else %}
+                <select
+                  class="form-control"
+                  id="denomination"
+                  name="denomination"
+                >
+                  <option value="sats">sats</option>
+                  <option value="USD" selected>USD</option>
+                </select>
+                {% endif %}
+              </td>
+            </tr>
+            <tr>
+              <th scope="row">Max Fee in sats (default 10)</th>
+              <td>
+                <input
+                  class="form-control"
+                  type="text"
+                  id="fee_limit"
+                  name="fee_limit"
+                  value="{{ line[5] }}"
+                />
+              </td>
+            </tr>
+            <tr>
+              <th scope="row">Message (optional)</th>
+              <td>
+                <input
+                  class="form-control"
+                  type="text"
+                  id="message"
+                  name="message"
+                  value="{{ line[6] }}"
+                />
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="row" style="margin-bottom: 0.5em">
+        <div class="col text-center">
+          <button
+            type="button"
+            class="btn btn-success"
+            onClick="save_edited_payment('{{ line[0] }}')"
+          >
+            Save
+          </button>
+        </div>
+        <div class="col text-center">
+          <button
+            type="button"
+            class="btn btn-danger"
+            onClick="cancel_edited_payment('{{ line[0] }}')"
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  {% endfor %} {% endif %} {% if current_payments['monthly']|length > 0 %} {%
+  for line in current_payments['monthly'] %}
+  <div
+    class="row"
+    id="payment_info{{ line[0] }}"
+    style="border-top: 1px solid lightgrey"
+  >
+    <div class="col-3">
+      <div class="row" style="margin-top: 0.5em">
+        <div class="col">
+          {% if line[1] == "lnd" %}
+          <h5>Monthly Payment from LND node</h5>
+          {% elif line[1] == "cln" %}
+          <h5>Monthly Payment from Core Lightning node</h5>
+          {% endif %}
+          <p><small>every 1st of the month at time 0000</small></p>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col">
+          <div class="btn-group">
+            <button
+              class="btn btn-sm dropdown-toggle"
+              type="button"
+              data-bs-toggle="dropdown"
+              aria-expanded="false"
+            >
+              Options
+            </button>
+            <ul class="dropdown-menu">
+              <li>
+                <a
+                  class="dropdown-item"
+                  href="#"
+                  onClick="send_payment('{{ line[0] }}')"
+                  >Send Now</a
+                >
+              </li>
+              <li>
+                <a
+                  class="dropdown-item"
+                  href="#"
+                  onClick="edit_payment('{{ line[0] }}')"
+                  >Edit</a
+                >
+              </li>
+              <li>
+                <a
+                  class="dropdown-item"
+                  href="#"
+                  onClick="delete_payment('{{ line[0] }}')"
+                >
+                  Delete
+                </a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-9">
+      <table class="table">
+        <tbody>
+          <tr>
+            <th scope="row">Destination Pubkey</th>
+            <td>{{ line[2] }}</td>
+          </tr>
+          <tr>
+            <th scope="row">Amount</th>
+            <td>{{ line[3] }} {{ line[4] }}</td>
+          </tr>
+          <tr>
+            <th scope="row">Max Fee in Sats</th>
+            <td>{{ line[5] }}</td>
+          </tr>
+          <tr>
+            <th scope="row">Message</th>
+            <td>{{ line[6] }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div
+    class="row d-none"
+    id="payment_edit{{ line[0] }}"
+    style="border-top: 1px solid lightgrey"
+  >
+    <form method="POST" id="payment_edit_form{{ line[0] }}">
+      <input
+        class="form-control"
+        type="hidden"
+        name="old_payment_id"
+        id="old_payment_id"
+        value="{{ line[0] }}"
+      />
+      <div class="row">
+        <table class="table">
+          <tbody>
+            {% if lnd and cln %}
+            <tr>
+              <th scope="row">
+                Which node do you want to send this payment from?
+              </th>
+              <td>
+                {% if line[1] == "lnd" %}
+                <select class="form-control" id="node" name="node">
+                  <option value="lnd" selected>LND</option>
+                  <option value="cln">Core Lightning</option>
+                </select>
+                {% elif line[1] == "cln" %}
+                <select class="form-control" id="node" name="node">
+                  <option value="lnd">LND</option>
+                  <option value="cln" selected>Core Lightning</option>
+                </select>
+                {% endif %}
+              </td>
+            </tr>
+            {% else %} {% if lnd %}
+            <input
+              class="form-control"
+              type="hidden"
+              name="node"
+              id="node"
+              value="lnd"
+            />
+            {% endif %} {% if cln %}
+            <input
+              class="form-control"
+              type="hidden"
+              name="node"
+              id="node"
+              value="cln"
+            />
+            {% endif %} {% endif %}
+            <tr>
+              <th scope="row">How often do you want to send this payment?</th>
+              <td>
+                <select class="form-control" id="frequency" name="frequency">
+                  <option value="daily">Daily</option>
+                  <option value="weekly">Weekly</option>
+                  <option value="monthly" selected>Monthly</option>
+                  <option value="yearly">Yearly</option>
+                </select>
+              </td>
+            </tr>
+            <tr>
+              <th scope="row">Destination Pubkey</th>
+              <td>
+                <input
+                  class="form-control"
+                  type="text"
+                  id="pubkey"
+                  name="pubkey"
+                  value="{{ line[2] }}"
+                />
+              </td>
+            </tr>
+            <tr>
+              <th scope="row">Amount in sats or USD</th>
+              <td>
+                <input
+                  class="form-control"
+                  type="text"
+                  id="amount"
+                  name="amount"
+                  value="{{ line[3] }}"
+                />
+              </td>
+            </tr>
+            <tr>
+              <th scope="row">Denomination</th>
+              <td>
+                {% if line[4] == "sats" %}
+                <select
+                  class="form-control"
+                  id="denomination"
+                  name="denomination"
+                >
+                  <option value="sats" selected>sats</option>
+                  <option value="USD">USD</option>
+                </select>
+                {% else %}
+                <select
+                  class="form-control"
+                  id="denomination"
+                  name="denomination"
+                >
+                  <option value="sats">sats</option>
+                  <option value="USD" selected>USD</option>
+                </select>
+                {% endif %}
+              </td>
+            </tr>
+            <tr>
+              <th scope="row">Max Fee in sats (default 10)</th>
+              <td>
+                <input
+                  class="form-control"
+                  type="text"
+                  id="fee_limit"
+                  name="fee_limit"
+                  value="{{ line[5] }}"
+                />
+              </td>
+            </tr>
+            <tr>
+              <th scope="row">Message (optional)</th>
+              <td>
+                <input
+                  class="form-control"
+                  type="text"
+                  id="message"
+                  name="message"
+                  value="{{ line[6] }}"
+                />
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="row" style="margin-bottom: 0.5em">
+        <div class="col text-center">
+          <button
+            type="button"
+            class="btn btn-success"
+            onClick="save_edited_payment('{{ line[0] }}')"
+          >
+            Save
+          </button>
+        </div>
+        <div class="col text-center">
+          <button
+            type="button"
+            class="btn btn-danger"
+            onClick="cancel_edited_payment('{{ line[0] }}')"
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  {% endfor %} {% endif %} {% if current_payments['yearly']|length > 0 %} {% for
+  line in current_payments['yearly'] %}
+  <div
+    class="row"
+    id="payment_info{{ line[0] }}"
+    style="border-top: 1px solid lightgrey"
+  >
+    <div class="col-3">
+      <div class="row" style="margin-top: 0.5em">
+        <div class="col">
+          {% if line[1] == "lnd" %}
+          <h5>Yearly Payment from LND node</h5>
+          {% elif line[1] == "cln" %}
+          <h5>Yearly Payment from Core Lightning node</h5>
+          {% endif %}
+          <p><small>every Jan 1st at time 0000</small></p>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col">
+          <div class="btn-group">
+            <button
+              class="btn btn-sm dropdown-toggle"
+              type="button"
+              data-bs-toggle="dropdown"
+              aria-expanded="false"
+            >
+              Options
+            </button>
+            <ul class="dropdown-menu">
+              <li>
+                <a
+                  class="dropdown-item"
+                  href="#"
+                  onClick="send_payment('{{ line[0] }}')"
+                  >Send Now</a
+                >
+              </li>
+              <li>
+                <a
+                  class="dropdown-item"
+                  href="#"
+                  onClick="edit_payment('{{ line[0] }}')"
+                  >Edit</a
+                >
+              </li>
+              <li>
+                <a
+                  class="dropdown-item"
+                  href="#"
+                  onClick="delete_payment('{{ line[0] }}')"
+                >
+                  Delete
+                </a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-9">
+      <table class="table">
+        <tbody>
+          <tr>
+            <th scope="row">Destination Pubkey</th>
+            <td>{{ line[2] }}</td>
+          </tr>
+          <tr>
+            <th scope="row">Amount</th>
+            <td>{{ line[3] }} {{ line[4] }}</td>
+          </tr>
+          <tr>
+            <th scope="row">Max Fee in Sats</th>
+            <td>{{ line[5] }}</td>
+          </tr>
+          <tr>
+            <th scope="row">Message</th>
+            <td>{{ line[6] }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div
+    class="row d-none"
+    id="payment_edit{{ line[0] }}"
+    style="border-top: 1px solid lightgrey"
+  >
+    <form method="POST" id="payment_edit_form{{ line[0] }}">
+      <input
+        class="form-control"
+        type="hidden"
+        name="old_payment_id"
+        id="old_payment_id"
+        value="{{ line[0] }}"
+      />
+      <div class="row">
+        <table class="table">
+          <tbody>
+            {% if lnd and cln %}
+            <tr>
+              <th scope="row">
+                Which node do you want to send this payment from?
+              </th>
+              <td>
+                {% if line[1] == "lnd" %}
+                <select class="form-control" id="node" name="node">
+                  <option value="lnd" selected>LND</option>
+                  <option value="cln">Core Lightning</option>
+                </select>
+                {% elif line[1] == "cln" %}
+                <select class="form-control" id="node" name="node">
+                  <option value="lnd">LND</option>
+                  <option value="cln" selected>Core Lightning</option>
+                </select>
+                {% endif %}
+              </td>
+            </tr>
+            {% else %} {% if lnd %}
+            <input
+              class="form-control"
+              type="hidden"
+              name="node"
+              id="node"
+              value="lnd"
+            />
+            {% endif %} {% if cln %}
+            <input
+              class="form-control"
+              type="hidden"
+              name="node"
+              id="node"
+              value="cln"
+            />
+            {% endif %} {% endif %}
+            <tr>
+              <th scope="row">How often do you want to send this payment?</th>
+              <td>
+                <select class="form-control" id="frequency" name="frequency">
+                  <option value="daily">Daily</option>
+                  <option value="weekly">Weekly</option>
+                  <option value="monthly">Monthly</option>
+                  <option value="yearly" selected>Yearly</option>
+                </select>
+              </td>
+            </tr>
+            <tr>
+              <th scope="row">Destination Pubkey</th>
+              <td>
+                <input
+                  class="form-control"
+                  type="text"
+                  id="pubkey"
+                  name="pubkey"
+                  value="{{ line[2] }}"
+                />
+              </td>
+            </tr>
+            <tr>
+              <th scope="row">Amount in sats or USD</th>
+              <td>
+                <input
+                  class="form-control"
+                  type="text"
+                  id="amount"
+                  name="amount"
+                  value="{{ line[3] }}"
+                />
+              </td>
+            </tr>
+            <tr>
+              <th scope="row">Denomination</th>
+              <td>
+                {% if line[4] == "sats" %}
+                <select
+                  class="form-control"
+                  id="denomination"
+                  name="denomination"
+                >
+                  <option value="sats" selected>sats</option>
+                  <option value="USD">USD</option>
+                </select>
+                {% else %}
+                <select
+                  class="form-control"
+                  id="denomination"
+                  name="denomination"
+                >
+                  <option value="sats">sats</option>
+                  <option value="USD" selected>USD</option>
+                </select>
+                {% endif %}
+              </td>
+            </tr>
+            <tr>
+              <th scope="row">Max Fee in sats (default 10)</th>
+              <td>
+                <input
+                  class="form-control"
+                  type="text"
+                  id="fee_limit"
+                  name="fee_limit"
+                  value="{{ line[5] }}"
+                />
+              </td>
+            </tr>
+            <tr>
+              <th scope="row">Message (optional)</th>
+              <td>
+                <input
+                  class="form-control"
+                  type="text"
+                  id="message"
+                  name="message"
+                  value="{{ line[6] }}"
+                />
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="row" style="margin-bottom: 0.5em">
+        <div class="col text-center">
+          <button
+            type="button"
+            class="btn btn-success"
+            onClick="save_edited_payment('{{ line[0] }}')"
+          >
+            Save
+          </button>
+        </div>
+        <div class="col text-center">
+          <button
+            type="button"
+            class="btn btn-danger"
+            onClick="cancel_edited_payment('{{ line[0] }}')"
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+  {% endfor %}
+</div>
+
+{% endif %} {% endif %}
+<br />
+<div class="container">
+  <div class="row">
+    <div class="col text-center">
+      <h4>Schedule New Payment</h4>
+    </div>
+  </div>
+  <form method="POST">
+    <div class="row" style="border-top: 1px solid lightgrey">
+      <table class="table">
+        <tbody>
+          {% if lnd and cln %}
+          <tr>
+            <th scope="row">
+              Which node do you want to send this payment from?
+            </th>
+            <td>
+              <select class="form-control" id="node" name="node">
+                <option value="lnd" selected>LND</option>
+                <option value="cln">Core Lightning</option>
+              </select>
+            </td>
+          </tr>
+          {% else %} {% if lnd %}
+          <input
+            class="form-control"
+            type="hidden"
+            name="node"
+            id="node"
+            value="lnd"
+          />
+          {% endif %} {% if cln %}
+          <input
+            class="form-control"
+            type="hidden"
+            name="node"
+            id="node"
+            value="cln"
+          />
+          {% endif %} {% endif %}
+          <tr>
+            <th scope="row">How often do you want to send this payment?</th>
+            <td>
+              <select class="form-control" id="frequency" name="frequency">
+                <option value="daily">Daily</option>
+                <option value="weekly">Weekly</option>
+                <option value="monthly" selected>Monthly</option>
+                <option value="yearly">Yearly</option>
+              </select>
+            </td>
+          </tr>
+          <tr>
+            <th scope="row">Destination Pubkey</th>
+            <td>
+              <input
+                class="form-control"
+                type="text"
+                id="pubkey"
+                name="pubkey"
+                placeholder="Enter destination pubkey"
+              />
+            </td>
+          </tr>
+          <tr>
+            <th scope="row">Amount in sats or USD</th>
+            <td>
+              <input
+                class="form-control"
+                type="text"
+                id="amount"
+                name="amount"
+                placeholder="Enter amount"
+              />
+            </td>
+          </tr>
+          <tr>
+            <th scope="row">Denomination</th>
+            <td>
+              <select
+                class="form-control"
+                id="denomination"
+                name="denomination"
+              >
+                <option value="sats" selected>sats</option>
+                <option value="USD">USD</option>
+              </select>
+            </td>
+          </tr>
+          <tr>
+            <th scope="row">Max Fee in sats (default 10)</th>
+            <td>
+              <input
+                class="form-control"
+                type="text"
+                id="fee_limit"
+                name="fee_limit"
+                value="10"
+              />
+            </td>
+          </tr>
+          <tr>
+            <th scope="row">Message (optional)</th>
+            <td>
+              <input
+                class="form-control"
+                type="text"
+                id="message"
+                name="message"
+                placeholder="Enter message for receiver"
+              />
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="row" style="margin-bottom: 0.5em">
+      <div class="col text-center">
+        <button
+          type="button"
+          class="btn btn-success"
+          onClick="this.form.submit()"
+        >
+          Schedule New Payment
+        </button>
+      </div>
+    </div>
+  </form>
+  <br />
+  <div class="row">
+    <div class="col text-center">
+      <div class="row text-center">
+        <h4>Delete All Payments</h4>
+      </div>
+      <div class="row">
+        <div class="col text-center">
+          <button
+            id="delete_all_payments"
+            type="button"
+            class="btn btn-danger"
+            onClick="delete_all_payments({{ current_user.id }})"
+          >
+            Delete All
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

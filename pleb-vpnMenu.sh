@@ -2,9 +2,19 @@
 
 # pleb-VPN main menu
 
-plebVPNConf="/home/admin/pleb-vpn/pleb-vpn.conf"
-source ${plebVPNConf}
-source /mnt/hdd/raspiblitz.conf
+# find home directory based on node implementation
+if [ -d "/mnt/hdd/mynode/pleb-vpn/" ]; then
+  homedir="/mnt/hdd/mynode/pleb-vpn"
+  execdir="/opt/mynode/pleb-vpn"
+elif [ -f "/mnt/hdd/raspiblitz.conf" ]; then
+  homedir="/mnt/hdd/app-data/pleb-vpn"
+  execdir="/home/admin/pleb-vpn"
+fi
+plebVPNConf="${homedir}/pleb-vpn.conf"
+source <(cat ${plebVPNConf} | sed '1d')
+if [ "${nodetype}" = "raspiblitz" ]; then
+  source /mnt/hdd/raspiblitz.conf
+fi
 
 # BASIC MENU INFO
 WIDTH=66
@@ -20,6 +30,7 @@ OPTIONS+=(PAYMENTS "Manage, add, or remove recurring payments")
 if [ "${wireguard}" = "on" ]; then
   OPTIONS+=(WIREGUARD-CONNECT "Get WireGuard config files for clients")
 fi
+OPTIONS+=(WEBUI "Get URLs and info for the WebUI for Pleb-VPN")
 OPTIONS+=(PLEB-VPN "Uninstall or update Pleb-VPN")
 
 # display menu
@@ -37,18 +48,21 @@ CHOICE=$(dialog --clear \
 
 case $CHOICE in
   STATUS)
-    /home/admin/pleb-vpn/pleb-vpnStatusMenu.sh
+    sudo /home/admin/pleb-vpn/pleb-vpnStatusMenu.sh
     ;;
   SERVICES)
-    /home/admin/pleb-vpn/pleb-vpnServicesMenu.sh
+    sudo /home/admin/pleb-vpn/pleb-vpnServicesMenu.sh
     ;;
   PAYMENTS)
-    /home/admin/pleb-vpn/pleb-vpnPaymentMenu.sh
+    sudo /home/admin/pleb-vpn/pleb-vpnPaymentMenu.sh
     ;;
   WIREGUARD-CONNECT)
-    /home/admin/pleb-vpn/wg-install.sh connect
+    sudo /home/admin/pleb-vpn/wg-install.sh connect
+    ;;
+  WEBUI)
+    sudo /home/admin/pleb-vpn/pleb-vpnWebUI.sh
     ;;
   PLEB-VPN)
-    /home/admin/pleb-vpn/pleb-vpnUpdateMenu.sh
+    sudo /home/admin/pleb-vpn/pleb-vpnUpdateMenu.sh
     ;;
 esac

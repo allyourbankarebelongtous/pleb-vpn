@@ -2,8 +2,16 @@
 
 # pleb-VPN update menu
 
-plebVPNConf="/home/admin/pleb-vpn/pleb-vpn.conf"
-source ${plebVPNConf}
+# find home directory based on node implementation
+if [ -d "/mnt/hdd/mynode/pleb-vpn/" ]; then
+  homedir="/mnt/hdd/mynode/pleb-vpn"
+  execdir="/opt/mynode/pleb-vpn"
+elif [ -f "/mnt/hdd/raspiblitz.conf" ]; then
+  homedir="/mnt/hdd/app-data/pleb-vpn"
+  execdir="/home/admin/pleb-vpn"
+fi
+plebVPNConf="${homedir}/pleb-vpn.conf"
+source <(cat ${plebVPNConf} | sed '1d')
 
 # BASIC MENU INFO
 WIDTH=66
@@ -28,7 +36,7 @@ CHOICE=$(dialog --clear \
 
 case $CHOICE in
   UPDATE)
-    /home/admin/pleb-vpn/pleb-vpn.install.sh update
+    sudo /home/admin/pleb-vpn/pleb-vpn.install.sh update
     ;;
   UNINSTALL)
     whiptail --title "Completely Uninstall Pleb-VPN" --yes-button "Cancel" --no-button "Uninstall" --yesno "
@@ -42,7 +50,7 @@ and you will be asked if you wish to reuse them or use different
 ones should you re-install.
       " 16 75
     if [ $? -eq 1 ]; then
-      /home/admin/pleb-vpn/pleb-vpn.install.sh uninstall
+      sudo /home/admin/pleb-vpn/pleb-vpn.install.sh uninstall
       exit 0
     fi
     ;;

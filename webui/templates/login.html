@@ -1,0 +1,29 @@
+{% extends "base.html" %} {% block title %}Login{% endblock %} {% block content
+    %}
+    <form method="POST">
+      <h3 align="center">Login</h3>
+      <dif class="form-group">
+        <label for="user_name">User Name</label>
+        <input
+          type="user_name"
+          class="form-control"
+          id="user_name"
+          name="user_name"
+          placeholder="Enter username"
+        />
+      </dif>
+      <dif class="form-group">
+        <label for="password">Password</label>
+        <input
+          type="password"
+          class="form-control"
+          id="password"
+          name="password"
+          placeholder="Enter password"
+        />
+      </dif>
+      <br />
+      <button type="submit" class="btn btn-primary">Login</buttom>
+    </form>
+    {% endblock %}
+    

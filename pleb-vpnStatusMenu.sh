@@ -2,9 +2,19 @@
 
 # pleb-VPN status menu
 
-plebVPNConf="/home/admin/pleb-vpn/pleb-vpn.conf"
-source ${plebVPNConf}
-source /mnt/hdd/raspiblitz.conf
+# find home directory based on node implementation
+if [ -d "/mnt/hdd/mynode/pleb-vpn/" ]; then
+  homedir="/mnt/hdd/mynode/pleb-vpn"
+  execdir="/opt/mynode/pleb-vpn"
+elif [ -f "/mnt/hdd/raspiblitz.conf" ]; then
+  homedir="/mnt/hdd/app-data/pleb-vpn"
+  execdir="/home/admin/pleb-vpn"
+fi
+plebVPNConf="${homedir}/pleb-vpn.conf"
+source <(cat ${plebVPNConf} | sed '1d')
+if [ "${nodetype}" = "raspiblitz" ]; then
+  source /mnt/hdd/raspiblitz.conf
+fi
 
 # BASIC MENU INFO
 WIDTH=66
@@ -40,16 +50,16 @@ CHOICE=$(dialog --clear \
 
 case $CHOICE in
   PLEB-VPN)
-    /home/admin/pleb-vpn/vpn-install.sh status
+    sudo /home/admin/pleb-vpn/vpn-install.sh status
     ;;
   WIREGUARD)
-    /home/admin/pleb-vpn/wg-install.sh status
+    sudo /home/admin/pleb-vpn/wg-install.sh status
     ;;
   CLN-HYBRID)
-    /home/admin/pleb-vpn/cln-hybrid.sh status
+    sudo /home/admin/pleb-vpn/cln-hybrid.sh status
     ;;
   LND-HYBRID)
-    /home/admin/pleb-vpn/lnd-hybrid.sh status
+    sudo /home/admin/pleb-vpn/lnd-hybrid.sh status
     ;;
   TOR-SPLIT-TUNNEL)
     sudo /home/admin/pleb-vpn/tor.split-tunnel.sh status
