@@ -1,3 +1,6 @@
 [submodule "plebvpn_common"]
 	path = plebvpn_common
 	url = https://github.com/m00ninite/plebvpn_common.git
+[submodule "plebvpn_client"]
+	path = plebvpn_client
+	url = https://github.com/m00ninite/plebvpn_client.git
