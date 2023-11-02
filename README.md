@@ -515,9 +515,11 @@ You can update without losing any settings or changes, but you will have to relo
 #### Node Updates  
 **Raspiblitz** - Just update by reflashing your sd card. Pleb-VPN should re-install along with all of your other apps.
 
-**MyNode** - Until Pleb-VPN is added to the mynode app store, you'll have to SSH into the node and run this command
+**MyNode** - Until Pleb-VPN is added to the mynode app store, you'll have to SSH into the node and run these commands
 after you update or reflash your sd card:  
-`sudo chmod +x /mnt/hdd/mynode/pleb-vpn/pleb-vpn.install.sh && sudo /mnt/hdd/mynode/pleb-vpn/pleb-vpn.install.sh update`
+`sudo chmod +x /mnt/hdd/mynode/pleb-vpn/pleb-vpn.install.sh`
+`sudo /mnt/hdd/mynode/pleb-vpn/pleb-vpn.install.sh update`
+`sudo /opt/mynode/pleb-vpn/pleb-vpn.install.sh restore`
 
 #### Uninstall Pleb-VPN  
 To Uninstall, there is an "Uninstall" button at the very bottom of the home page. This will uninstall
