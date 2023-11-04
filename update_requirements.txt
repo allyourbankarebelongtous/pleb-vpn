@@ -1,1 +1,2 @@
 markdown
+werkzeug==2.3.4

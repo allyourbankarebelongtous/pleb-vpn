@@ -5,7 +5,7 @@
 # establishes system configuration backups using pleb-vpn.backup.sh and restores on uninstall
 # sets initial values in pleb-vpn.conf, including LAN, lndConfFile, CLNConfFile
 
-ver="v1.1.0-beta.8" 
+ver="v1.1.0-beta.9" 
 
 if [ -d "/mnt/hdd/mynode" ]; then
   nodetype="mynode"
@@ -688,13 +688,8 @@ update()
     rm ${execdir}/updates.sh
     rm ${homedir}/updates.sh
   fi
-  # check for update_requirements.txt and if it exists, run it, then delete it
-  isUpdateReqs=$(ls ${execdir} | grep -c update_requirements.txt)
-  if [ ${isUpdateReqs} -eq 1 ]; then
-    ${execdir}/.venv/bin/pip install --upgrade -r ${execdir}/update_requirements.txt
-    rm ${execdir}/update_requirements.txt
-    rm ${homedir}/update_requirements.txt
-  fi
+  # update requirements.txt
+  ${execdir}/.venv/bin/pip install -r ${execdir}/requirements.txt
   # update version in pleb-vpn.conf
   if [ "${reckless}" = "reckless" ]; then
     setting "${plebVPNConf}" "2" "version" "'${ver}'"

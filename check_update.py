@@ -18,9 +18,9 @@ def get_latest_version():
             html_changelog = convert_markdown_to_html(changelog)
             return latest_version, html_changelog
         else:
-            return None
+            return None, None
     else:
-        return None
+        return None, None
 
 def version_key(version):
     match = re.search(r'v(\d+)\.(\d+)', version)
