@@ -175,7 +175,7 @@ Pleb-VPN will automatically reinstall and reconfigure to match
 what you had before, including any recurring payments scheduled or LetsEncrypt 
 certs for BTCPay or LNBits. 
 
-For MyNode, if you did a manual install you will have to run one command to restore your 
+For MyNode, if you did a manual install you will have to run some commands to restore your 
 settings. See the **Updating my Node** instructions below for more details.
 
 **Can I still use the SSH menu for Raspiblitz, or do I have to use the WebUI?**  
