@@ -400,7 +400,6 @@ off() {
     done
     sysctl -p
   fi
-  fi
   if [ "${nodetype}" = "mynode" ]; then
     # remove allow out for docker containers as default is now allow outgoing
     ufw delete allow out to 172.16.0.0/12
