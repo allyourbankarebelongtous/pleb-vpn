@@ -281,6 +281,12 @@ WantedBy=multi-user.target
 " | tee /etc/systemd/system/pleb-vpn-custom-dns.service
     systemctl enable pleb-vpn-custom-dns.service
     systemctl start pleb-vpn-custom-dns.service
+    # disable ipv6 if on raspiblitz
+    echo "# Disable IPv6
+net.ipv6.conf.all.disable_ipv6 = 1
+net.ipv6.conf.default.disable_ipv6 = 1
+net.ipv6.conf.lo.disable_ipv6 = 1" | tee -a /etc/sysctl.conf
+    sysctl -p
   fi
   if [ "${nodetype}" = "mynode" ]; then
     # allow docker containers out
@@ -384,6 +390,16 @@ off() {
     # remove custom dns service
     systemctl disable pleb-vpn-custom-dns.service
     rm /etc/systemd/system/pleb-vpn-custom-dns.service
+    # enable ipv6 if on raspiblitz
+    while [ $(cat /etc/sysctl.conf | grep -c "# Disable IPv6") -eq 0 ];
+    do 
+      sed -i "/# Disable IPv6/d" /etc/sysctl.conf
+      sed -i "/net.ipv6.conf.all.disable_ipv6 = 1/d" /etc/sysctl.conf
+      sed -i "/net.ipv6.conf.default.disable_ipv6 = 1/d" /etc/sysctl.conf
+      sed -i "/net.ipv6.conf.lo.disable_ipv6 = 1/d" /etc/sysctl.conf
+    done
+    sysctl -p
+  fi
   fi
   if [ "${nodetype}" = "mynode" ]; then
     # remove allow out for docker containers as default is now allow outgoing
