@@ -213,6 +213,7 @@ newpayment() {
       # Generate a keysend script
     short_node_id=$(echo $NODE_ID | cut -c 1-7)
     script_name="${execdir}/payments/keysends/_${short_node_id}_${freq}_${node}_keysend.sh"
+    script_backup_name="${homedir}/payments/keysends/_${short_node_id}_${freq}_${node}_keysend.sh"
     denomination=$(echo $DENOMINATION | tr '[:upper:]' '[:lower:]')
     echo -n "${execdir}/.venv/bin/python ${execdir}/payments/_recurringpayment_${node}.py " \
           "--$denomination $AMOUNT " \
@@ -225,6 +226,7 @@ newpayment() {
       echo "--message '${message//\'/\\\'}'" | tee -a $script_name
     fi
     chmod 755 $script_name
+    cp -p $script_name $script_backup_name
 
     # add payment to execution list
     subscriptionlist="${execdir}/payments/${freq}${node}payments.sh"
@@ -232,6 +234,8 @@ newpayment() {
     scriptexists=$(cat ${subscriptionlist} | grep -c ${script_name})
     if [ ${scriptexists} -eq 0 ]; then
       echo "${script_name}" >>${subscriptionlist}
+      subscriptionbackuplist="${homedir}/payments/${freq}${node}payments.sh"
+      cp -p $subscriptionlist $subscriptionbackuplist
     fi
 
     # check if systemd unit for frequency and node exists, and if not, create it

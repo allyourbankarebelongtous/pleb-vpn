@@ -170,8 +170,7 @@ cancel_check $freq
 # Ask user what fee limit they want to set (default 10 sats)
 FEE_LIMIT=$(whiptail --backtitle "Recurring Payments" \
             --title "Max Fee" \
-            --inputbox "Enter the maximum fee in sats you are willing to pay to send this payment
-            \n(default 10 sats)" \
+            --inputbox "Enter the maximum fee in sats you are willing to pay to send this payment" \
             10 60 2>&1 >/dev/tty)
 
 cancel_check $FEE_LIMIT
@@ -210,6 +209,7 @@ if [ ! "${message}" = "" ]; then
 " | tee -a $script_name
 fi
 chmod 755 $script_name
+cp -p $script_name $script_backup_name
 
 # add payment to execution list
 subscriptionlist="${execdir}/payments/${freq}${node}payments.sh"
@@ -218,7 +218,7 @@ scriptexists=$(cat ${subscriptionlist} | grep -c ${script_name})
 if [ ${scriptexists} -eq 0 ]; then
   echo "${script_name}" >>${subscriptionlist}
   subscriptionbackuplist="${homedir}/payments/${freq}${node}payments.sh"
-  sudo cp -p $subscriptionlist $subscriptionbackuplist
+  cp -p $subscriptionlist $subscriptionbackuplist
 fi
 
 # check if systemd unit for frequency and node exists, and if not, create it

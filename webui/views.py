@@ -1204,7 +1204,7 @@ def check_domain(domain):
         return False
     # Check if each part of the domain is valid
     for part in parts:
-        if not part.isalnum():
+        if not all(char.isalnum() or char == '-' for char in part):
             return False
     try:
         # Retrieve the IP address associated with the domain
