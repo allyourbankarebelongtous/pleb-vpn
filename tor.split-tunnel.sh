@@ -195,15 +195,15 @@ ${message}
         message="Tor Split-Tunnel service is working normally"
         echo "Checking ip tables"
         nftableStatus="ok"
-        if ! [ $(nft list chain ip filter ufw-user-input | grep -c "meta cgroup 1114129") -eq 1 ]; then
+        if ! [ $(nft list chain inet filter input_tor | grep -c "meta cgroup 1114129") -eq 1 ]; then
           nftableStatus="missing nft rules"
           message="Tor Split-Tunnel service is incorrectly configured"
         fi
-        if ! [ $(nft list chain ip filter ufw-user-output | grep -c "meta cgroup 1114129") -eq 1 ]; then
+        if ! [ $(nft list chain inet filter output_tor | grep -c "meta cgroup 1114129") -eq 1 ]; then
           nftableStatus="missing nft rules"
           message="Tor Split-Tunnel service is incorrectly configured"
         fi
-        if ! [ $(nft list chain ip nat POSTROUTING | grep -c "meta cgroup 1114129") -eq 1 ]; then
+        if ! [ $(nft list chain ip nat POSTROUTING_TOR | grep -c "meta cgroup 1114129") -eq 1 ]; then
           nftableStatus="missing nft rules"
           message="Tor Split-Tunnel service is incorrectly configured"
         fi
@@ -212,6 +212,18 @@ ${message}
           message="Tor Split-Tunnel service is incorrectly configured"
         fi
         iptableStatus="ok"
+        if ! [ $(iptables -L INPUT | grep -c "0xb") -eq 1 ]; then
+          iptableStatus="missing iptable rules"
+          message="Tor Split-Tunnel service is incorrectly configured"
+        fi
+        if ! [ $(iptables -L FORWARD | grep -c "0xb") -eq 1 ]; then
+          iptableStatus="missing iptable rules"
+          message="Tor Split-Tunnel service is incorrectly configured"
+        fi
+        if ! [ $(iptables -L OUTPUT | grep -c "0xb") -eq 1 ]; then
+          iptableStatus="missing iptable rules"
+          message="Tor Split-Tunnel service is incorrectly configured"
+        fi
         echo "Checking ip route"
         OIFNAME=$(ip r | grep default | cut -d " " -f5)
         GATEWAY=$(ip r | grep default | cut -d " " -f3)
