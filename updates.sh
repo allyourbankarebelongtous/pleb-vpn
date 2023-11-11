@@ -5,7 +5,7 @@
 # make sure updates can be re-run multiple times
 # keep updates present until most users have had the chance to update
 
-ver="v1.1.0-beta.9"
+ver="v1.1.0-beta.10"
 
 # get node info# find home directory based on node implementation
 if [ -d "/mnt/hdd/mynode/pleb-vpn/" ]; then
@@ -457,6 +457,15 @@ WantedBy=multi-user.target
   # fix firewall to allow HTTPS
   if [ $(ufw status | grep -c 2421) -eq 0 ]; then
     ufw allow 2421 comment 'allow Pleb-VPN HTTPS'
+  fi
+
+  # fix raspiblitz to run only ipv4
+  if [ $(cat /etc/sysctl.conf | grep -c "# Disable IPv6") -eq 0 ];
+    echo "# Disable IPv6
+net.ipv6.conf.all.disable_ipv6 = 1
+net.ipv6.conf.default.disable_ipv6 = 1
+net.ipv6.conf.lo.disable_ipv6 = 1" | tee -a /etc/sysctl.conf
+    sysctl -p
   fi
 
 fi

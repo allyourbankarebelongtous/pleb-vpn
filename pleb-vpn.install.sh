@@ -5,7 +5,7 @@
 # establishes system configuration backups using pleb-vpn.backup.sh and restores on uninstall
 # sets initial values in pleb-vpn.conf, including LAN, lndConfFile, CLNConfFile
 
-ver="v1.1.0-beta.9" 
+ver="v1.1.0-beta.10" 
 
 if [ -d "/mnt/hdd/mynode" ]; then
   nodetype="mynode"
