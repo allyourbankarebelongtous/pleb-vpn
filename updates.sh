@@ -460,7 +460,7 @@ WantedBy=multi-user.target
   fi
 
   # fix raspiblitz to run only ipv4
-  if [ $(cat /etc/sysctl.conf | grep -c "# Disable IPv6") -eq 0 ];
+  if [ $(cat /etc/sysctl.conf | grep -c "# Disable IPv6") -eq 0 ]; then
     echo "# Disable IPv6
 net.ipv6.conf.all.disable_ipv6 = 1
 net.ipv6.conf.default.disable_ipv6 = 1
