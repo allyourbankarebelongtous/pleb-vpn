@@ -303,30 +303,33 @@ on() {
 
   # raspiblitz config
   if [ "${nodetype}" = "raspiblitz" ]; then
-    ip_nat_handles=$(nft -a list table ip nat | grep "meta cgroup 1114129 counter" | sed "s/.*handle //")
-    while [ $(nft list table ip nat | grep -c "meta cgroup 1114129 counter") -gt 0 ]
+    while [ $(nft list table ip nat | grep -c POSTROUTING_TOR) -gt 0 ]
     do
-      ruleNumber=$(nft list table ip nat | grep -c "meta cgroup 1114129 counter")
-      ip_nat_handle=$(echo "${ip_nat_handles}" | sed -n ${ruleNumber}p)
-      nft delete rule ip nat POSTROUTING handle ${ip_nat_handle}
+      nft delete chain ip nat POSTROUTING_TOR
     done
     while [ $(nft list tables | grep -c mangle) -gt 0 ]
     do
       nft delete table ip mangle
     done
-    ip_filter_input_handles=$(nft -a list chain ip filter ufw-user-input | grep "meta cgroup 1114129 counter" | sed "s/.*handle //")
-    while [ $(nft list chain ip filter ufw-user-input | grep -c "meta cgroup 1114129 counter") -gt 0 ]
+    while [ $(nft list table inet filter | grep -c input_tor) -gt 0 ]
     do
-      ruleNumber=$(nft list chain ip filter ufw-user-input | grep -c "meta cgroup 1114129 counter")
-      ip_filter_input_handle=$(echo "${ip_filter_input_handles}" | sed -n ${ruleNumber}p)
-      nft delete rule ip filter ufw-user-input handle ${ip_filter_input_handle}
+      nft delete chain inet filter input_tor
     done
-    ip_filter_output_handles=$(nft -a list chain ip filter ufw-user-output | grep "meta cgroup 1114129 counter" | sed "s/.*handle //")
-    while [ $(nft list chain ip filter ufw-user-output | grep -c "meta cgroup 1114129 counter") -gt 0 ]
+    while [ $(nft list table inet filter | grep -c output_tor) -gt 0 ]
     do
-      ruleNumber=$(nft list chain ip filter ufw-user-output | grep -c "meta cgroup 1114129 counter")
-      ip_filter_output_handle=$(echo "${ip_filter_output_handles}" | sed -n ${ruleNumber}p)
-      nft delete rule ip filter ufw-user-output handle ${ip_filter_output_handle}
+      nft delete chain inet filter output_tor
+    done
+    while [ $(iptables -L INPUT | grep -c "0xb") -gt 0 ]
+    do
+      iptables -D INPUT -m mark --mark 0xb -j ACCEPT
+    done
+    while [ $(iptables -L FORWARD | grep -c "0xb") -gt 0 ]
+    do
+      iptables -D FORWARD -m mark --mark 0xb -j ACCEPT
+    done
+    while [ $(iptables -L OUTPUT | grep -c "0xb") -gt 0 ]
+    do
+      iptables -D OUTPUT -m mark --mark 0xb -j ACCEPT
     done
     while [ $(ip rule | grep -c "fwmark 0xb lookup novpn") -gt 0 ]
     do
@@ -450,30 +453,33 @@ OIFNAME=$(ip r | grep default | cut -d " " -f5)
 GATEWAY=$(ip r | grep default | cut -d " " -f3)
 
 # first check for and remove old names from prior starts
-ip_nat_handles=$(nft -a list table ip nat | grep "meta cgroup 1114129 counter" | sed "s/.*handle //")
-while [ $(nft list table ip nat | grep -c "meta cgroup 1114129 counter") -gt 0 ]
+while [ $(nft list table ip nat | grep -c POSTROUTING_TOR) -gt 0 ]
 do
-  ruleNumber=$(nft list table ip nat | grep -c "meta cgroup 1114129 counter")
-  ip_nat_handle=$(echo "${ip_nat_handles}" | sed -n ${ruleNumber}p)
-  nft delete rule ip nat POSTROUTING handle ${ip_nat_handle}
+  nft delete chain ip nat POSTROUTING_TOR
 done
 while [ $(nft list tables | grep -c mangle) -gt 0 ]
 do
   nft delete table ip mangle
 done
-ip_filter_input_handles=$(nft -a list chain ip filter ufw-user-input | grep "meta cgroup 1114129 counter" | sed "s/.*handle //")
-while [ $(nft list chain ip filter ufw-user-input | grep -c "meta cgroup 1114129 counter") -gt 0 ]
+while [ $(nft list table inet filter | grep -c input_tor) -gt 0 ]
 do
-  ruleNumber=$(nft list chain ip filter ufw-user-input | grep -c "meta cgroup 1114129 counter")
-  ip_filter_input_handle=$(echo "${ip_filter_input_handles}" | sed -n ${ruleNumber}p)
-  nft delete rule ip filter ufw-user-input handle ${ip_filter_input_handle}
+  nft delete chain inet filter input_tor
 done
-ip_filter_output_handles=$(nft -a list chain ip filter ufw-user-output | grep "meta cgroup 1114129 counter" | sed "s/.*handle //")
-while [ $(nft list chain ip filter ufw-user-output | grep -c "meta cgroup 1114129 counter") -gt 0 ]
+while [ $(nft list table inet filter | grep -c output_tor) -gt 0 ]
 do
-  ruleNumber=$(nft list chain ip filter ufw-user-output | grep -c "meta cgroup 1114129 counter")
-  ip_filter_output_handle=$(echo "${ip_filter_output_handles}" | sed -n ${ruleNumber}p)
-  nft delete rule ip filter ufw-user-output handle ${ip_filter_output_handle}
+  nft delete chain inet filter output_tor
+done
+while [ $(iptables -L INPUT | grep -c "0xb") -gt 0 ]
+do
+  iptables -D INPUT -m mark --mark 0xb -j ACCEPT
+done
+while [ $(iptables -L FORWARD | grep -c "0xb") -gt 0 ]
+do
+  iptables -D FORWARD -m mark --mark 0xb -j ACCEPT
+done
+while [ $(iptables -L OUTPUT | grep -c "0xb") -gt 0 ]
+do
+  iptables -D OUTPUT -m mark --mark 0xb -j ACCEPT
 done
 while [ $(ip rule | grep -c "fwmark 0xb lookup novpn") -gt 0 ]
 do
@@ -483,32 +489,51 @@ while [ $(ip rule | grep -c novpn) -gt 0 ]
 do
   ip rou del from all table novpn default via ${GATEWAY}
 done
-
 # add/refresh rules
-nft add rule ip nat POSTROUTING oifname ${OIFNAME} meta cgroup 1114129 counter masquerade
+
+nft add table ip nat
+nft add chain ip nat POSTROUTING_TOR "{type nat hook postrouting priority 99; policy accept;}"
+nft add rule ip nat POSTROUTING_TOR oifname ${OIFNAME} meta cgroup 1114129 counter masquerade
 nft add table ip mangle
-nft add chain ip mangle markit "{type route hook output priority filter; policy accept;}"
+nft add chain ip mangle markit "{type route hook output priority -151; policy accept;}"
 nft add rule ip mangle markit meta cgroup 1114129 counter meta mark set 0xb
-nft add rule ip filter ufw-user-input meta cgroup 1114129 counter accept
-nft add rule ip filter ufw-user-output meta cgroup 1114129 counter accept
+nft add chain inet filter input_tor "{type filter hook input priority -1; policy accept;}"
+nft add chain inet filter output_tor "{type filter hook output priority -1; policy accept;}"
+nft add rule inet filter input_tor meta cgroup 1114129 counter accept
+nft add rule inet filter output_tor meta cgroup 1114129 counter accept
+iptables -A INPUT -m mark --mark 0xb -j ACCEPT
+iptables -A OUTPUT -m mark --mark 0xb -j ACCEPT
+iptables -A FORWARD -m mark --mark 0xb -j ACCEPT
 ip route add default via ${GATEWAY} table novpn
 ip rule add fwmark 11 table novpn
 
 # check to see if rules exist
-if ! [ $(nft list chain ip filter ufw-user-input | grep -c "meta cgroup 1114129") -eq 1 ]; then
+if ! [ $(nft list chain inet filter input_tor | grep -c "meta cgroup 1114129") -eq 1 ]; then
   echo "Error: missing nft rules"
   exit 1
 fi
-if ! [ $(nft list chain ip filter ufw-user-output | grep -c "meta cgroup 1114129") -eq 1 ]; then
+if ! [ $(nft list chain inet filter output_tor | grep -c "meta cgroup 1114129") -eq 1 ]; then
   echo "Error: missing nft rules"
   exit 1
 fi
-if ! [ $(nft list chain ip nat POSTROUTING | grep -c "meta cgroup 1114129") -eq 1 ]; then
+if ! [ $(nft list chain ip nat POSTROUTING_TOR | grep -c "meta cgroup 1114129") -eq 1 ]; then
   echo "Error: missing nft rules"
   exit 1
 fi
 if ! [ $(nft list chain ip mangle markit | grep -c "meta cgroup 1114129") -eq 1 ]; then
   echo "Error: missing nft rules"
+  exit 1
+fi
+if ! [ $(iptables -L INPUT | grep -c "0xb") -eq 1 ]; then
+  echo "Error: missing iptable rules"
+  exit 1
+fi
+if ! [ $(iptables -L FORWARD | grep -c "0xb") -eq 1 ]; then
+  echo "Error: missing iptable rules"
+  exit 1
+fi
+if ! [ $(iptables -L OUTPUT | grep -c "0xb") -eq 1 ]; then
+  echo "Error: missing iptable rules"
   exit 1
 fi
 if ! [ $(ip rou show table novpn | grep -c "default via ${GATEWAY} dev ${OIFNAME}") -eq 1 ]; then
