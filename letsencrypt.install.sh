@@ -173,7 +173,7 @@ Re-Enter the first domain name that you wish to secure (example: btcpay.mydomain
           exit 1
         fi
       fi
-      domain1host=$(host ${letsencryptdomain1} | grep -v IPv6 | cut -d " " -f4)
+      domain1host=$(host ${letsencryptdomain1} | grep -v IPv6 | cut -d " " -f4 | head -n 1)
       if [ ! "${domain1host}" = "${vpnip}" ]; then
         whiptail --title "Invalid Domain" \
         --yes-button "Check Again" \
@@ -187,7 +187,7 @@ the host of ${letsencryptdomain1} again, chose <Check Again> below.
         if [ $? -eq 0 ]; then
           whiptail --title "Enter Domain" --inputbox "Enter the first domain name that you wish to secure (example: btcpay.mydomain.com)" 11 80 2>${execdir}/.tmp
           letsencryptdomain1=$(cat ${execdir}/.tmp)
-          domain1host=$(host ${letsencryptdomain1} | grep -v IPv6 | cut -d " " -f4)
+          domain1host=$(host ${letsencryptdomain1} | grep -v IPv6 | cut -d " " -f4 | head -n 1)
         else
           echo "LetsEncrypt install canceled"
           exit 1
@@ -207,7 +207,7 @@ the host of ${letsencryptdomain1} again, chose <Check Again> below.
       fi
       # check second domain name
       if [ ! "${letsencryptdomain2}" = "" ]; then
-        domain2host=$(host ${letsencryptdomain2} | grep -v IPv6 | cut -d " " -f4)
+        domain2host=$(host ${letsencryptdomain2} | grep -v IPv6 | cut -d " " -f4 | head -n 1)
         if [ ! "${domain2host}" = "${vpnip}" ]; then
           whiptail --title "Invalid Domain" \
           --yes-button "Check Again" \
@@ -220,8 +220,8 @@ the host of ${letsencryptdomain1} again, chose <Check Again> below.
 " 20 120
           if [ $? -eq 0 ]; then
             whiptail --title "Enter Domain" --inputbox "Enter the second domain name that you wish to secure (example: btcpay.mydomain.com)" 11 80 2>${execdir}/.tmp
-            letsencryptdomain1=$(cat ${execdir}/.tmp)
-            domain1host=$(host ${letsencryptdomain1} | grep -v IPv6 | cut -d " " -f4)
+            letsencryptdomain2=$(cat ${execdir}/.tmp)
+            domain2host=$(host ${letsencryptdomain1} | grep -v IPv6 | cut -d " " -f4 | head -n 1)
           else
             echo "LetsEncrypt install canceled"
             exit 1
