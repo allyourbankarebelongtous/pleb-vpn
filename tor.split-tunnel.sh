@@ -176,8 +176,8 @@ ${message}
           message="Tor Split-Tunnel service is incorrectly configured"
         fi
         echo "Checking ip route"
-        OIFNAME=$(ip r | grep default | cut -d " " -f5)
-        GATEWAY=$(ip r | grep default | cut -d " " -f3)
+        OIFNAME=$(ip r | grep default | cut -d " " -f5 | head -n 1)
+        GATEWAY=$(ip r | grep default | cut -d " " -f3 | head -n 1)
         iprouteStatus="ok"
         if ! [ $(ip rou show table novpn | grep -c "default via ${GATEWAY} dev ${OIFNAME}") -eq 1 ]; then
           iprouteStatus="missing ip route"
@@ -225,8 +225,8 @@ ${message}
           message="Tor Split-Tunnel service is incorrectly configured"
         fi
         echo "Checking ip route"
-        OIFNAME=$(ip r | grep default | cut -d " " -f5)
-        GATEWAY=$(ip r | grep default | cut -d " " -f3)
+        OIFNAME=$(ip r | grep default | cut -d " " -f5 | head -n 1)
+        GATEWAY=$(ip r | grep default | cut -d " " -f3 | head -n 1)
         iprouteStatus="ok"
         if ! [ $(ip rou show table novpn | grep -c "default via ${GATEWAY} dev ${OIFNAME}") -eq 1 ]; then
           iprouteStatus="missing ip route"
@@ -308,8 +308,8 @@ on() {
 
   # clean rules from failed install attempts
   echo "cleaning ip rules to prevent duplicate rules"
-  OIFNAME=$(ip r | grep default | cut -d " " -f5)
-  GATEWAY=$(ip r | grep default | cut -d " " -f3)
+  OIFNAME=$(ip r | grep default | cut -d " " -f5 | head -n 1)
+  GATEWAY=$(ip r | grep default | cut -d " " -f3 | head -n 1)
 
   # first check for and remove old names from prior starts
 
@@ -461,8 +461,8 @@ WantedBy=timers.target
 # adds route and rules to allow novpn cgroup past firewall
 
 # first clean tables from existing duplicate rules
-OIFNAME=$(ip r | grep default | cut -d " " -f5)
-GATEWAY=$(ip r | grep default | cut -d " " -f3)
+OIFNAME=$(ip r | grep default | cut -d " " -f5 | head -n 1)
+GATEWAY=$(ip r | grep default | cut -d " " -f3 | head -n 1)
 
 # first check for and remove old names from prior starts
 while [ $(nft list table ip nat | grep -c POSTROUTING_TOR) -gt 0 ]
@@ -722,8 +722,8 @@ WantedBy=timers.target
 # adds route and rules to allow novpn cgroup past firewall
 
 # first clean tables from existing duplicate rules
-OIFNAME=$(ip r | grep default | cut -d " " -f5)
-GATEWAY=$(ip r | grep default | cut -d " " -f3)
+OIFNAME=$(ip r | grep default | cut -d " " -f5 | head -n 1)
+GATEWAY=$(ip r | grep default | cut -d " " -f3 | head -n 1)
 
 # first check for and remove old names from prior starts
 while [ $(nft list tables | grep -c nat) -gt 0 ]
@@ -939,35 +939,38 @@ off() {
 
   # clean ip rules
   echo "cleaning ip rules"
-  OIFNAME=$(ip r | grep default | cut -d " " -f5)
-  GATEWAY=$(ip r | grep default | cut -d " " -f3)
+  OIFNAME=$(ip r | grep default | cut -d " " -f5 | head -n 1)
+  GATEWAY=$(ip r | grep default | cut -d " " -f3 | head -n 1)
 
   # raspiblitz config
   if [ "${nodetype}" = "raspiblitz" ]; then
-    ip_nat_handles=$(nft -a list table ip nat | grep "meta cgroup 1114129 counter" | sed "s/.*handle //")
-    while [ $(nft list table ip nat | grep -c "meta cgroup 1114129 counter") -gt 0 ]
+    while [ $(nft list table ip nat | grep -c POSTROUTING_TOR) -gt 0 ]
     do
-      ruleNumber=$(nft list table ip nat | grep -c "meta cgroup 1114129 counter")
-      ip_nat_handle=$(echo "${ip_nat_handles}" | sed -n ${ruleNumber}p)
-      nft delete rule ip nat POSTROUTING handle ${ip_nat_handle}
+      nft delete chain ip nat POSTROUTING_TOR
     done
     while [ $(nft list tables | grep -c mangle) -gt 0 ]
     do
       nft delete table ip mangle
     done
-    ip_filter_input_handles=$(nft -a list chain ip filter ufw-user-input | grep "meta cgroup 1114129 counter" | sed "s/.*handle //")
-    while [ $(nft list chain ip filter ufw-user-input | grep -c "meta cgroup 1114129 counter") -gt 0 ]
+    while [ $(nft list table inet filter | grep -c input_tor) -gt 0 ]
     do
-      ruleNumber=$(nft list chain ip filter ufw-user-input | grep -c "meta cgroup 1114129 counter")
-      ip_filter_input_handle=$(echo "${ip_filter_input_handles}" | sed -n ${ruleNumber}p)
-      nft delete rule ip filter ufw-user-input handle ${ip_filter_input_handle}
+      nft delete chain inet filter input_tor
     done
-    ip_filter_output_handles=$(nft -a list chain ip filter ufw-user-output | grep "meta cgroup 1114129 counter" | sed "s/.*handle //")
-    while [ $(nft list chain ip filter ufw-user-output | grep -c "meta cgroup 1114129 counter") -gt 0 ]
+    while [ $(nft list table inet filter | grep -c output_tor) -gt 0 ]
     do
-      ruleNumber=$(nft list chain ip filter ufw-user-output | grep -c "meta cgroup 1114129 counter")
-      ip_filter_output_handle=$(echo "${ip_filter_output_handles}" | sed -n ${ruleNumber}p)
-      nft delete rule ip filter ufw-user-output handle ${ip_filter_output_handle}
+      nft delete chain inet filter output_tor
+    done
+    while [ $(iptables -L INPUT | grep -c "0xb") -gt 0 ]
+    do
+      iptables -D INPUT -m mark --mark 0xb -j ACCEPT
+    done
+    while [ $(iptables -L FORWARD | grep -c "0xb") -gt 0 ]
+    do
+      iptables -D FORWARD -m mark --mark 0xb -j ACCEPT
+    done
+    while [ $(iptables -L OUTPUT | grep -c "0xb") -gt 0 ]
+    do
+      iptables -D OUTPUT -m mark --mark 0xb -j ACCEPT
     done
     while [ $(ip rule | grep -c "fwmark 0xb lookup novpn") -gt 0 ]
     do

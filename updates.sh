@@ -5,7 +5,7 @@
 # make sure updates can be re-run multiple times
 # keep updates present until most users have had the chance to update
 
-ver="v1.1.1-beta.2"
+ver="v1.1.1-beta.3"
 
 # get node info# find home directory based on node implementation
 if [ -d "/mnt/hdd/mynode/pleb-vpn/" ]; then
@@ -25,7 +25,7 @@ source <(cat ${plebVPNConf} | sed '1d')
 if [ "$EUID" -ne 0 ]; then
   echo "Please run as root (with sudo)"
   exit 1
-fi
+fi 
 
 function setting() # FILE LINENUMBER NAME VALUE
 {
@@ -466,6 +466,97 @@ net.ipv6.conf.all.disable_ipv6 = 1
 net.ipv6.conf.default.disable_ipv6 = 1
 net.ipv6.conf.lo.disable_ipv6 = 1" | tee -a /etc/sysctl.conf
     sysctl -p
+  fi
+
+  # fix raspiblitz tor split-tunnel
+  if [ "${torsplittunnel}" = "on" ]; then
+    if [ $(nft list chain ip filter ufw-user-output | grep -c "meta cgroup 1114129 counter") -gt 0 ]; then
+      # turn off and re-do tor split-tunnel config
+      # remove services
+      echo "stop and remove systemd services"
+      echo "stopping tor..."
+      systemctl stop tor@default.service
+      echo "stopping split-tunnel services..."
+      systemctl stop pleb-vpn-create-cgroup.service
+      systemctl stop pleb-vpn-tor-split-tunnel.service
+      systemctl stop pleb-vpn-nftables-config.service
+      systemctl stop pleb-vpn-tor-split-tunnel.timer
+      systemctl disable pleb-vpn-create-cgroup.service
+      systemctl disable pleb-vpn-tor-split-tunnel.service
+      systemctl disable pleb-vpn-nftables-config.service
+      systemctl disable pleb-vpn-tor-split-tunnel.timer
+      rm /etc/systemd/system/pleb-vpn-create-cgroup.service
+      rm /etc/systemd/system/pleb-vpn-tor-split-tunnel.service
+      rm /etc/systemd/system/pleb-vpn-nftables-config.service
+      rm /etc/systemd/system/pleb-vpn-tor-split-tunnel.timer
+
+      # fix tor dependency
+      echo "remove tor dependency"
+      rm /etc/systemd/system/tor@default.service.d/tor-cgroup.conf
+
+      # uninstall cgroup-tools
+      echo "uninstall cgroup-tools"
+      apt purge -y cgroup-tools
+
+      # clean ip rules
+      echo "cleaning ip rules"
+      OIFNAME=$(ip r | grep default | cut -d " " -f5)
+      GATEWAY=$(ip r | grep default | cut -d " " -f3)
+      ip_nat_handles=$(nft -a list table ip nat | grep "meta cgroup 1114129 counter" | sed "s/.*handle //")
+      while [ $(nft list table ip nat | grep -c "meta cgroup 1114129 counter") -gt 0 ]
+      do
+        ruleNumber=$(nft list table ip nat | grep -c "meta cgroup 1114129 counter")
+        ip_nat_handle=$(echo "${ip_nat_handles}" | sed -n ${ruleNumber}p)
+        nft delete rule ip nat POSTROUTING handle ${ip_nat_handle}
+      done
+      while [ $(nft list tables | grep -c mangle) -gt 0 ]
+      do
+        nft delete table ip mangle
+      done
+      ip_filter_input_handles=$(nft -a list chain ip filter ufw-user-input | grep "meta cgroup 1114129 counter" | sed "s/.*handle //")
+      while [ $(nft list chain ip filter ufw-user-input | grep -c "meta cgroup 1114129 counter") -gt 0 ]
+      do
+        ruleNumber=$(nft list chain ip filter ufw-user-input | grep -c "meta cgroup 1114129 counter")
+        ip_filter_input_handle=$(echo "${ip_filter_input_handles}" | sed -n ${ruleNumber}p)
+        nft delete rule ip filter ufw-user-input handle ${ip_filter_input_handle}
+      done
+      ip_filter_output_handles=$(nft -a list chain ip filter ufw-user-output | grep "meta cgroup 1114129 counter" | sed "s/.*handle //")
+      while [ $(nft list chain ip filter ufw-user-output | grep -c "meta cgroup 1114129 counter") -gt 0 ]
+      do
+        ruleNumber=$(nft list chain ip filter ufw-user-output | grep -c "meta cgroup 1114129 counter")
+        ip_filter_output_handle=$(echo "${ip_filter_output_handles}" | sed -n ${ruleNumber}p)
+        nft delete rule ip filter ufw-user-output handle ${ip_filter_output_handle}
+      done
+      while [ $(ip rule | grep -c "fwmark 0xb lookup novpn") -gt 0 ]
+      do
+        ip rule del from all table novpn fwmark 11
+      done
+      while [ $(ip rule | grep -c novpn) -gt 0 ]
+      do
+        ip rou del from all table novpn default via ${GATEWAY}
+      done
+
+      # remove routing table
+      rm /etc/iproute2/rt_tables.d/novpn-route.conf
+
+      # remove split-tunnel scripts
+      echo "removing split-tunnel scripts"
+      rm -rf ${execdir}/split-tunnel
+      rm -rf ${homedir}/split-tunnel
+
+      # remove group novpn
+      groupdel novpn
+
+      # restart tor
+      echo "starting tor..."
+      systemctl daemon-reload >/dev/null
+      systemctl start tor@default.service
+
+      setting ${plebVPNConf} "2" "torsplittunnel" "off"
+
+      # redo tor split-tunneling with new params
+      /home/admin/pleb-vpn/tor.split-tunnel.sh on 1
+    fi
   fi
 
 fi
