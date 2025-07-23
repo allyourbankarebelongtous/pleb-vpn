@@ -46,6 +46,10 @@ def create_app():
                 cmd_str = "cat /mnt/hdd/bitcoin/bitcoin.conf | grep rpcpassword | cut -c 13-"
                 new_password = subprocess.check_output(cmd_str, shell=True)
                 new_password = new_password.decode().strip()
+            elif os.path.exists('/mnt/hdd/app-data/raspiblitz.conf'): # new raspiblitz file structure
+                cmd_str = "cat /mnt/hdd/app-data/bitcoin/bitcoin.conf | grep rpcpassword | cut -c 13-"
+                new_password = subprocess.check_output(cmd_str, shell=True)
+                new_password = new_password.decode().strip()
             else: # otherwise default password is plebvpn
                 new_password = 'plebvpn'
             new_user = User(user_name = 'admin', password = generate_password_hash(new_password, method='sha256'))
