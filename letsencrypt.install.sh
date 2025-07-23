@@ -41,7 +41,7 @@ on() {
     if [ -f "/mnt/hdd/raspiblitz.conf" ]; then
       source /mnt/hdd/raspiblitz.conf
     elif [ -f "/mnt/hdd/app-data/raspiblitz.conf" ]; then
-      source /mnt/hdd/app-data/raspiblitz.CONF
+      source /mnt/hdd/app-data/raspiblitz.conf
     fi
   fi
   local keepExisting="${1}"
@@ -529,7 +529,7 @@ off() {
     if [ -f "/mnt/hdd/raspiblitz.conf" ]; then
       source /mnt/hdd/raspiblitz.conf
     elif [ -f "/mnt/hdd/app-data/raspiblitz.conf" ]; then
-      source /mnt/hdd/app-data/raspiblitz.CONF
+      source /mnt/hdd/app-data/raspiblitz.conf
     fi
   fi
   rm -rf /etc/letsencrypt/live

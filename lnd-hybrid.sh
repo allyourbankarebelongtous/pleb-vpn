@@ -118,7 +118,7 @@ on() {
     if [ -f "/mnt/hdd/raspiblitz.conf" ]; then
     source /mnt/hdd/raspiblitz.conf
   elif [ -f "/mnt/hdd/app-data/raspiblitz.conf" ]; then
-    source /mnt/hdd/app-data/raspiblitz.CONF
+    source /mnt/hdd/app-data/raspiblitz.conf
   fi
   fi
   local isRestore="${1}"
@@ -252,7 +252,7 @@ on() {
     if [ -f "/mnt/hdd/raspiblitz.conf" ]; then
       source /mnt/hdd/raspiblitz.conf
     elif [ -f "/mnt/hdd/app-data/raspiblitz.conf" ]; then
-      source /mnt/hdd/app-data/raspiblitz.CONF
+      source /mnt/hdd/app-data/raspiblitz.conf
     fi
     source <(/home/admin/config.scripts/network.aliases.sh getvars lnd)
     # Application Options 
@@ -373,7 +373,7 @@ off() {
     if [ -f "/mnt/hdd/raspiblitz.conf" ]; then
       source /mnt/hdd/raspiblitz.conf
     elif [ -f "/mnt/hdd/app-data/raspiblitz.conf" ]; then
-      source /mnt/hdd/app-data/raspiblitz.CONF
+      source /mnt/hdd/app-data/raspiblitz.conf
     fi
     source <(/home/admin/config.scripts/network.aliases.sh getvars lnd)
     # Application Options 

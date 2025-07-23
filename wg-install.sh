@@ -394,7 +394,7 @@ ${appstoreLink}\n
       if [ -f "/mnt/hdd/raspiblitz.conf" ]; then
         source /mnt/hdd/raspiblitz.conf
       elif [ -f "/mnt/hdd/app-data/raspiblitz.conf" ]; then
-        source /mnt/hdd/app-data/raspiblitz.CONF
+        source /mnt/hdd/app-data/raspiblitz.conf
       fi
       if [ "${lnd}" = "on" ]; then
         source <(/home/admin/config.scripts/network.aliases.sh getvars lnd)
@@ -510,7 +510,7 @@ off() {
     if [ -f "/mnt/hdd/raspiblitz.conf" ]; then
       source /mnt/hdd/raspiblitz.conf
     elif [ -f "/mnt/hdd/app-data/raspiblitz.conf" ]; then
-      source /mnt/hdd/app-data/raspiblitz.CONF
+      source /mnt/hdd/app-data/raspiblitz.conf
     fi
     if [ "${lnd}" = "on" ]; then
       source <(/home/admin/config.scripts/network.aliases.sh getvars lnd)
