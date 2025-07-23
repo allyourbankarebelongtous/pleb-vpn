@@ -11,7 +11,7 @@ if [ -d "/mnt/hdd/mynode/pleb-vpn/" ]; then
   homedir="/mnt/hdd/mynode/pleb-vpn"
   execdir="/opt/mynode/pleb-vpn"
   firewallConf="/usr/bin/mynode_firewall.sh"
-elif [ -f "/mnt/hdd/raspiblitz.conf" ]; then
+elif [ -f "/mnt/hdd/raspiblitz.conf" ] || [ -f "/mnt/hdd/app-data/raspiblitz.conf" ]; then
   homedir="/mnt/hdd/app-data/pleb-vpn"
   execdir="/home/admin/pleb-vpn"
 fi
