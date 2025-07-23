@@ -25,7 +25,11 @@ if [ "$EUID" -ne 0 ]; then
 fi
 
 if [ "${nodetype}" = "raspiblitz" ]; then
-  source /mnt/hdd/raspiblitz.conf
+  if [ -f "/mnt/hdd/raspiblitz.conf" ]; then
+    source /mnt/hdd/raspiblitz.conf
+  elif [ -f "/mnt/hdd/app-data/raspiblitz.conf" ]; then
+    source /mnt/hdd/app-data/raspiblitz.CONF
+  fi
 fi
 
 function setting() # FILE LINENUMBER NAME VALUE

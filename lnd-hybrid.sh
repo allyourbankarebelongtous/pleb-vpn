@@ -115,7 +115,11 @@ ${address0Type} address: ${address0}
 on() {
   # enable hybrid mode
   if [ "${nodetype}" = "raspiblitz" ]; then
+    if [ -f "/mnt/hdd/raspiblitz.conf" ]; then
     source /mnt/hdd/raspiblitz.conf
+  elif [ -f "/mnt/hdd/app-data/raspiblitz.conf" ]; then
+    source /mnt/hdd/app-data/raspiblitz.CONF
+  fi
   fi
   local isRestore="${1}"
   local webui="${2}"
@@ -245,7 +249,11 @@ on() {
     setting ${lndCustomConf} ${insertLine} "tor.streamisolation" "false"
     setting ${lndCustomConf} ${insertLine} "tor.skip-proxy-for-clearnet-targets" "true"
   elif [ "${nodetype}" = "raspiblitz" ]; then
-    source /mnt/hdd/raspiblitz.conf
+    if [ -f "/mnt/hdd/raspiblitz.conf" ]; then
+      source /mnt/hdd/raspiblitz.conf
+    elif [ -f "/mnt/hdd/app-data/raspiblitz.conf" ]; then
+      source /mnt/hdd/app-data/raspiblitz.CONF
+    fi
     source <(/home/admin/config.scripts/network.aliases.sh getvars lnd)
     # Application Options 
     sectionName="Application Options"
@@ -362,7 +370,11 @@ off() {
       ((inc++))
     done
     # edit lnd.conf
-    source /mnt/hdd/raspiblitz.conf
+    if [ -f "/mnt/hdd/raspiblitz.conf" ]; then
+      source /mnt/hdd/raspiblitz.conf
+    elif [ -f "/mnt/hdd/app-data/raspiblitz.conf" ]; then
+      source /mnt/hdd/app-data/raspiblitz.CONF
+    fi
     source <(/home/admin/config.scripts/network.aliases.sh getvars lnd)
     # Application Options 
     sed -i '/^externalip=*/d' ${lndConfFile}

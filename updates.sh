@@ -48,7 +48,11 @@ function setting() # FILE LINENUMBER NAME VALUE
 if [ "${nodetype}" = "raspiblitz" ]; then
   # get values for raspiblitz
   source /home/admin/raspiblitz.info
-  source /mnt/hdd/raspiblitz.conf
+  if [ -f "/mnt/hdd/raspiblitz.conf" ]; then
+    source /mnt/hdd/raspiblitz.conf
+  elif [ -f "/mnt/hdd/app-data/raspiblitz.conf" ]; then
+    source /mnt/hdd/app-data/raspiblitz.CONF
+  fi
 
 
   # fix nginx assets to reflect status of letsencrypt

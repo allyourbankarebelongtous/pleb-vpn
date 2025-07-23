@@ -23,7 +23,11 @@ source ${plebVPNTempConf}
 sudo rm ${plebVPNTempConf}
 
 if [ "${nodetype}" = "raspiblitz" ]; then
-  source /mnt/hdd/raspiblitz.conf
+  if [ -f "/mnt/hdd/raspiblitz.conf" ]; then
+    source /mnt/hdd/raspiblitz.conf
+  elif [ -f "/mnt/hdd/app-data/raspiblitz.conf" ]; then
+    source /mnt/hdd/app-data/raspiblitz.CONF
+  fi
 fi
 
 # Node menu options (if necessary)

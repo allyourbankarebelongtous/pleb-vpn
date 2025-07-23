@@ -38,7 +38,11 @@ fi
 
 on() {
   if [ "${nodetype}" = "raspiblitz" ]; then
-    source /mnt/hdd/raspiblitz.conf
+    if [ -f "/mnt/hdd/raspiblitz.conf" ]; then
+      source /mnt/hdd/raspiblitz.conf
+    elif [ -f "/mnt/hdd/app-data/raspiblitz.conf" ]; then
+      source /mnt/hdd/app-data/raspiblitz.CONF
+    fi
   fi
   local keepExisting="${1}"
   local isRestore="${2}"
@@ -522,7 +526,11 @@ WantedBy=multi-user.target
 
 off() {
   if [ "${nodetype}" = "raspiblitz" ]; then
-    source /mnt/hdd/raspiblitz.conf
+    if [ -f "/mnt/hdd/raspiblitz.conf" ]; then
+      source /mnt/hdd/raspiblitz.conf
+    elif [ -f "/mnt/hdd/app-data/raspiblitz.conf" ]; then
+      source /mnt/hdd/app-data/raspiblitz.CONF
+    fi
   fi
   rm -rf /etc/letsencrypt/live
   apt purge -y certbot

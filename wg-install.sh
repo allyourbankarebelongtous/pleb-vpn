@@ -391,7 +391,11 @@ ${appstoreLink}\n
   # add wgip to lnd.conf for tls.cert and pick up new tls.cert
   if [ "${nodetype}" = "raspiblitz" ]; then
     if [ "${keepconfig}" = "0" ]; then
-      source /mnt/hdd/raspiblitz.conf
+      if [ -f "/mnt/hdd/raspiblitz.conf" ]; then
+        source /mnt/hdd/raspiblitz.conf
+      elif [ -f "/mnt/hdd/app-data/raspiblitz.conf" ]; then
+        source /mnt/hdd/app-data/raspiblitz.CONF
+      fi
       if [ "${lnd}" = "on" ]; then
         source <(/home/admin/config.scripts/network.aliases.sh getvars lnd)
         sectionName="Application Options"
@@ -503,7 +507,11 @@ off() {
 
   # remove tlsextraip from lnd.conf
   if [ "${nodetype}" = "raspiblitz" ]; then
-    source /mnt/hdd/raspiblitz.conf
+    if [ -f "/mnt/hdd/raspiblitz.conf" ]; then
+      source /mnt/hdd/raspiblitz.conf
+    elif [ -f "/mnt/hdd/app-data/raspiblitz.conf" ]; then
+      source /mnt/hdd/app-data/raspiblitz.CONF
+    fi
     if [ "${lnd}" = "on" ]; then
       source <(/home/admin/config.scripts/network.aliases.sh getvars lnd)
       sed -i "/^tlsextraip=${wgip}/d" ${lndConfFile}

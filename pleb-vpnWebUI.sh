@@ -24,7 +24,11 @@ if [ "${nodetype}" = "raspiblitz" ]; then
   # check and load raspiblitz config
   # to know which network is running
   source /home/admin/raspiblitz.info
-  source /mnt/hdd/raspiblitz.conf
+  if [ -f "/mnt/hdd/raspiblitz.conf" ]; then
+    source /mnt/hdd/raspiblitz.conf
+  elif [ -f "/mnt/hdd/app-data/raspiblitz.conf" ]; then
+    source /mnt/hdd/app-data/raspiblitz.CONF
+  fi
 
   # get network info
   isInstalled=$(sudo ls /etc/systemd/system/pleb-vpn.service 2>/dev/null | grep -c 'jobs-lndg.service')
