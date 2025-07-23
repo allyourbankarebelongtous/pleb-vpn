@@ -16,7 +16,7 @@ ALLOWED_EXTENSIONS = {'conf'}
 if os.path.exists('/mnt/hdd/mynode/'):
     HOME_DIR = str('/mnt/hdd/mynode/pleb-vpn')
     EXEC_DIR = str('/opt/mynode/pleb-vpn')
-if os.path.exists('/mnt/hdd/raspiblitz.conf'):
+if os.path.exists('/mnt/hdd/raspiblitz.conf') or os.path.exists('/mnt/hdd/app-data/raspiblitz.conf'):
     HOME_DIR = str('/mnt/hdd/app-data/pleb-vpn')
     EXEC_DIR = str('/home/admin/pleb-vpn')
 PLEBVPN_CONF_UPLOAD_FOLDER = os.path.join(HOME_DIR, 'openvpn')
