@@ -50,9 +50,15 @@ function setting() # FILE LINENUMBER NAME VALUE
 
 status() {
   local webui="${1}"
-  nodeName=$(sudo -u bitcoin lncli getinfo | jq .alias | sed 's/\"//g')
-  nodeID=$(sudo -u bitcoin lncli getinfo | jq .identity_pubkey | sed 's/\"//g')
-  address0=$(sudo -u bitcoin lncli getinfo | jq .uris[0] | sed 's/\"//g' | cut -d "@" -f2)
+  if [ "${nodetype}" = "mynode" ]; then
+    nodeName=$(sudo -u bitcoin lncli getinfo | jq .alias | sed 's/\"//g')
+    nodeID=$(sudo -u bitcoin lncli getinfo | jq .identity_pubkey | sed 's/\"//g')
+    address0=$(sudo -u bitcoin lncli getinfo | jq .uris[0] | sed 's/\"//g' | cut -d "@" -f2)
+  elif [ "${nodetype}" = "raspiblitz" ]; then
+    nodeName=$(sudo -u admin lncli getinfo | jq .alias | sed 's/\"//g')
+    nodeID=$(sudo -u admin lncli getinfo | jq .identity_pubkey | sed 's/\"//g')
+    address0=$(sudo -u admin lncli getinfo | jq .uris[0] | sed 's/\"//g' | cut -d "@" -f2)
+  fi
   istor=$(echo "${address0}" | grep -c onion)
   isv6=$(echo "${address0}" | grep -c :)
   if [ $istor -eq 0 ]; then
@@ -65,7 +71,11 @@ status() {
     address0Type="torv3"
   fi
   if [ "${lndhybrid}" = "on" ]; then
-    address1=$(sudo -u bitcoin lncli getinfo | jq .uris[1] | sed 's/\"//g' | cut -d "@" -f2)
+    if [ "${nodetype}" = "mynode" ]; then
+      address1=$(sudo -u bitcoin lncli getinfo | jq .uris[1] | sed 's/\"//g' | cut -d "@" -f2)
+    elif [ "${nodetype}" = "raspiblitz" ]; then
+      address1=$(sudo -u admin lncli getinfo | jq .uris[1] | sed 's/\"//g' | cut -d "@" -f2)
+    fi
     istor=$(echo "${address1}" | grep -c onion)
     isv6=$(echo "${address1}" | grep -c :)
     if [ $istor -eq 0 ]; then
@@ -116,10 +126,10 @@ on() {
   # enable hybrid mode
   if [ "${nodetype}" = "raspiblitz" ]; then
     if [ -f "/mnt/hdd/raspiblitz.conf" ]; then
-    source /mnt/hdd/raspiblitz.conf
-  elif [ -f "/mnt/hdd/app-data/raspiblitz.conf" ]; then
-    source /mnt/hdd/app-data/raspiblitz.conf
-  fi
+      source /mnt/hdd/raspiblitz.conf
+    elif [ -f "/mnt/hdd/app-data/raspiblitz.conf" ]; then
+      source /mnt/hdd/app-data/raspiblitz.conf
+    fi
   fi
   local isRestore="${1}"
   local webui="${2}"
